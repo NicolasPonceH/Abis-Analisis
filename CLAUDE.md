@@ -167,6 +167,11 @@ Six catalog (master) tables plus one transactional table:
 - `GET /reporte-diario` in `src/server.js` exposes it: `?fecha=YYYY-MM-DD` for a specific date
   (400 if malformed), no param defaults to the most recent date with data, a valid date with no
   rows returns `200` with empty breakdowns and `total: 0` (not an error).
+- **PowerShell gotcha when checking this endpoint**: `curl` in PowerShell is an alias for
+  `Invoke-WebRequest`, whose default console output truncates the `Content` field — the JSON
+  looks cut off even though the actual response is complete. Use
+  `(Invoke-WebRequest "...").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10` (or the real
+  `curl.exe`, not the alias) to see the full body when verifying this endpoint.
 - `scripts/generar-datos-reporte-prueba.js` (`npm run datos-reporte-prueba`) inserts a **fixed,
   non-random** 10-row dataset on `2026-09-15` with round percentages (70/20/10, 80/20, 90/10,
   40/30/20/10, 40/30/30) — deliberately deterministic, unlike Sprint 4's synthetic generator, so

@@ -108,8 +108,14 @@ npm start
 En otra terminal:
 
 ```powershell
-curl "http://localhost:3000/reporte-diario?fecha=2026-09-15"
+(Invoke-WebRequest "http://localhost:3000/reporte-diario?fecha=2026-09-15").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ```
+
+**Ojo**: en PowerShell, `curl` es un alias de `Invoke-WebRequest` cuya salida por defecto trunca
+el campo `Content` (se ve como `...`) — no muestra el JSON completo, aunque la respuesta sí lo
+tenga entero (`Content-Length` en la respuesta cruda lo confirma). El comando de arriba extrae
+`.Content` y lo formatea completo. Alternativa más simple si tenés el `curl.exe` real instalado
+(no el alias): `curl.exe "http://localhost:3000/reporte-diario?fecha=2026-09-15"`.
 
 Salida esperada (resumida):
 

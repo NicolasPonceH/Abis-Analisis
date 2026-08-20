@@ -60,11 +60,18 @@ curl http://localhost:3000/health
 ```
 
 `GET /reporte-diario` devuelve la data del reporte diario (conteos y porcentajes por estado,
-nacionalidades principales, cuarteles activos) — sin `?fecha=YYYY-MM-DD`, usa la fecha más
+nacionalidad, cuartel, unidad, género y edad) — sin `?fecha=YYYY-MM-DD`, usa la fecha más
 reciente con datos:
 
 ```bash
 curl "http://localhost:3000/reporte-diario?fecha=2026-09-15"
+```
+
+En PowerShell, `curl` es un alias de `Invoke-WebRequest` que trunca el JSON en pantalla. Para
+verlo completo:
+
+```powershell
+(Invoke-WebRequest "http://localhost:3000/reporte-diario?fecha=2026-09-15").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ```
 
 ## Variables de entorno
