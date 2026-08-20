@@ -3,13 +3,17 @@
 Sistema de Gestion Automatizada de Identificacion Biometrica. Procesa un Excel diario de
 enrolamiento biometrico, lo normaliza en PostgreSQL y notifica un resumen estadistico por Telegram.
 
-Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 (ver documento de planificacion).
+Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
+[`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
 
-## Estado actual — Sprint 1 (18-24 ago): Modelado y configuracion inicial
+## Estado actual
 
-- [x] Estructura del proyecto Node.js/Express.
-- [x] Script DDL del esquema normalizado (`db/schema.sql`).
-- [x] Poblamiento de tablas maestras con datos de ejemplo (`db/seed_catalogos.sql`).
+- [x] **Sprint 1** (18-24 ago, `v0.1.0`): estructura del proyecto Node.js/Express, esquema
+      normalizado (`db/schema.sql`), poblamiento de catálogos (`db/seed_catalogos.sql`).
+- [x] **Sprint 2** (25-31 ago, `v0.2.0`): módulo de lectura de Excel, validación de cabeceras y
+      mapeo en memoria a IDs de catálogo (`src/ingest/`).
+- [ ] **Sprint 3** (1-7 sep): ETL — transformación/limpieza e inserción transaccional en
+      `registro_enrolamiento`.
 
 ## Requisitos
 
@@ -67,17 +71,31 @@ npm start
 
 `GET /health` confirma que el servidor esta arriba y que la conexion a PostgreSQL funciona.
 
+Para probar el modulo de lectura de Excel (Sprint 2) con el archivo de ejemplo incluido:
+
+```bash
+npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx
+```
+
 ## Estructura
 
 ```
 db/
   schema.sql          DDL del esquema normalizado (3NF)
   seed_catalogos.sql  Datos de ejemplo para las tablas maestras
+docs/
+  informe-requerimientos.md  Informe de requerimientos original
+  diagramas/                 ER, arquitectura y roadmap (Mermaid)
+  sprints/                   Informe de avance por sprint cerrado
+fixtures/
+  enrolamiento_ejemplo.xlsx  Excel de prueba para el modulo de ingesta
 scripts/
   run-sql.js           Ejecuta un archivo .sql contra DATABASE_URL
+  ingest-excel.js       Corre el modulo de ingesta contra un Excel (npm run ingest)
 src/
   db.js                Pool de conexion a PostgreSQL
-  server.js             Servidor Express
+  server.js            Servidor Express
+  ingest/              Lectura de Excel, validacion de cabeceras y mapeo a catalogos
 ```
 
 ## Notas
