@@ -11,10 +11,10 @@ gantt
 
     section Fase 1 - Arquitectura y BD
     Sprint 1: Modelado y config inicial (v0.1.0) :done, s1, 2026-08-18, 2026-08-24
-    Sprint 2: Conexion y lectura de Excel (v0.2.0) :active, s2, 2026-08-25, 2026-08-31
+    Sprint 2: Conexion y lectura de Excel (v0.2.0) :done, s2, 2026-08-25, 2026-08-31
 
     section Fase 2 - ETL y logica de negocio
-    Sprint 3: Proceso de ingesta ETL (v0.3.0) :s3, 2026-09-01, 2026-09-07
+    Sprint 3: Proceso de ingesta ETL (v0.3.0) :active, s3, 2026-09-01, 2026-09-07
     Sprint 4: Carga historica y pruebas de estres (v0.4.0) :s4, 2026-09-08, 2026-09-14
     Sprint 5: Calculo de metricas y agrupaciones (v0.5.0) :s5, 2026-09-15, 2026-09-21
 
