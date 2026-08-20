@@ -10,3 +10,14 @@ Archivos de ejemplo para probar el proyecto manualmente, sin depender de datos r
   ```bash
   npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx
   ```
+
+- `enrolamiento_etl_prueba.xlsx` — Excel de prueba para el ETL completo (`src/etl/`). Tres filas:
+  una válida, una con un error de tipeo corregible ("SINCRONIZDO" en vez de "SINCRONIZADO") y una
+  con un valor irrecuperable ("MARCIANO"). **Insertar este archivo escribe filas reales en
+  `registro_enrolamiento`** — si lo corrés más de una vez, limpiá la tabla antes
+  (`TRUNCATE registro_enrolamiento RESTART IDENTITY;`) para no acumular duplicados de prueba.
+  Probar con:
+
+  ```bash
+  npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx
+  ```

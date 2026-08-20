@@ -20,6 +20,7 @@ docs/
   hitos críticos y convención de versionado por tags.
 - [`sprints/AVANCE_SPRINT1.md`](sprints/AVANCE_SPRINT1.md) — Sprint 1, cerrado (`v0.1.0`).
 - [`sprints/AVANCE_SPRINT2.md`](sprints/AVANCE_SPRINT2.md) — Sprint 2, cerrado (`v0.2.0`).
+- [`sprints/AVANCE_SPRINT3.md`](sprints/AVANCE_SPRINT3.md) — Sprint 3, cerrado (`v0.3.0`).
 
 ## Convenciones para nuevos sprints
 

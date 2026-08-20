@@ -89,13 +89,35 @@ Six catalog (master) tables plus one transactional table:
   version is stuck at 0.18.5 with an unfixed high-severity advisory. Don't `npm install xlsx`
   plain; it'll silently reintroduce the vulnerable version.
 
+### ETL module (`src/etl/`, Sprint 3)
+
+- `fuzzyMatch.js` / `catalogResolver.js`: Levenshtein-based typo tolerance (max edit distance 2,
+  only auto-corrects when the closest candidate is unique). `catalogMapper.js` (Sprint 2) uses
+  this for `Nacionalidad`, `Equipo`, and the three `Estado` fields via `resolveField()`.
+  `Region`/`Unidad`/`Cuartel` deliberately stay exact-match-only — fuzzy-correcting a 3-level
+  hierarchy is ambiguous in a way a flat catalog isn't. Each mapped row carries a `correcciones`
+  array documenting what got auto-corrected.
+- `bulkInsert.js`: single transactional multi-row `INSERT` into `registro_enrolamiento`. Capped
+  by Postgres's 65535-parameter limit (~6500 rows at 10 columns/row) — fine for a daily file, but
+  Sprint 4's historical load (95k+ rows) will need batching; don't call it with the full backlog
+  at once.
+- `index.js`'s `runEtl(filePath, pool)` chains `processExcelFile` (Sprint 2) with
+  `bulkInsertRegistros`. Rows with mapping errors don't block the rest of the batch — valid rows
+  still get inserted, invalid ones are reported separately.
+- `scripts/procesar-excel.js` (`npm run etl -- <file.xlsx>`) runs the full pipeline and inserts.
+  `npm run ingest` (Sprint 2) still exists as a dry-run/preview mode that never writes to the DB.
+- **Date handling gotcha**: `fecha_enrolamiento` must stay a plain `"YYYY-MM-DD"` string through
+  the mapping/insert path, never a JS `Date` object — constructing `new Date("YYYY-MM-DD")` parses
+  as UTC, and this machine's timezone (Chile, behind UTC) shifts it back a day on serialization.
+  This bit us once already; don't reintroduce a `Date` object in that field.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
-[`docs/informe-requerimientos.md`](docs/informe-requerimientos.md). Sprint 3 (1–7 Sep 2026) is
-next: ETL transformation/cleanup logic and transactional bulk-insert into
-`registro_enrolamiento`, consuming `src/ingest`'s mapped-rows output.
+[`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 4 (8–14 Sep 2026) is next: batched
+historical load (95k+ records), index optimization, and historical data integrity validation.
 
 ## Documentation & versioning
 

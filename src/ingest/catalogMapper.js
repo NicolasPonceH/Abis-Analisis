@@ -1,3 +1,5 @@
+const { resolve } = require("../etl/catalogResolver");
+
 const norm = (value) => String(value || "").trim().toUpperCase();
 
 // Carga los seis catalogos en mapas de texto normalizado -> ID, para mapear el Excel en
@@ -35,15 +37,42 @@ async function loadCatalogs(pool) {
 const GENEROS_VALIDOS = ["M", "F", "X"];
 const SI_NO = { SI: true, NO: false };
 
+// Resuelve un campo contra un catalogo, tolerando errores de tipeo menores (Sprint 3).
+// "matchKey" es lo que se busca en el mapa (ya normalizado, puede ser una clave compuesta
+// como "SINCRONIZACION|SINCRONIZADO"); "displayText" es lo que ve el usuario en errores y
+// correcciones (el valor tal cual venia en el Excel). Si hubo que corregir el texto, lo
+// registra en "correcciones" para dejar rastro de auditoria.
+// "unknownPhrase" es la frase completa a usar si no hay match (ej. "Nacionalidad desconocida"),
+// para no perder concordancia de genero componiendola genericamente.
+function resolveField(map, matchKey, displayText, label, unknownPhrase, errors, correcciones) {
+  const result = resolve(map, matchKey);
+  if (!result) {
+    errors.push(`${unknownPhrase}: "${displayText}"`);
+    return null;
+  }
+  if (result.corrected) {
+    const matchedDisplay = result.matched.includes("|")
+      ? result.matched.split("|")[1]
+      : result.matched;
+    correcciones.push(`${label}: "${displayText}" interpretado como "${matchedDisplay}"`);
+  }
+  return result.id;
+}
+
 // Mapea una fila cruda del Excel (ya con las cabeceras esperadas) a los campos de
-// registro_enrolamiento, resolviendo cada texto libre contra los catalogos cargados.
-// No inserta nada en la base de datos: eso corresponde al ETL de Sprint 3. Devuelve
-// { mapped, errors } — si errors no esta vacio, la fila no debe insertarse tal cual.
+// registro_enrolamiento, resolviendo cada texto libre contra los catalogos cargados
+// (con tolerancia a tipeos menores en nacionalidad, equipo y estados — Sprint 3).
+// Region/Unidad/Cuartel se resuelven por coincidencia exacta unicamente: al ser una jerarquia
+// de 3 niveles, una correccion automatica ambigua ahi es mas riesgosa que en un catalogo plano.
+// Devuelve { mapped, errors } — si errors no esta vacio, la fila no debe insertarse tal cual.
 function mapRow(row, catalogs) {
   const errors = [];
+  const correcciones = [];
 
-  const idNacionalidad = catalogs.nacionalidad.get(norm(row.nacionalidad));
-  if (!idNacionalidad) errors.push(`Nacionalidad desconocida: "${row.nacionalidad}"`);
+  const idNacionalidad = resolveField(
+    catalogs.nacionalidad, norm(row.nacionalidad), row.nacionalidad,
+    "Nacionalidad", "Nacionalidad desconocida", errors, correcciones
+  );
 
   const idUnidad = catalogs.unidad.get(`${norm(row.region)}|${norm(row.unidad)}`);
   if (!idUnidad) {
@@ -55,8 +84,10 @@ function mapRow(row, catalogs) {
     errors.push(`Cuartel "${row.cuartel}" no encontrado en unidad "${row.unidad}"`);
   }
 
-  const idEquipo = catalogs.equipo.get(norm(row.equipo));
-  if (!idEquipo) errors.push(`Equipo desconocido: "${row.equipo}"`);
+  const idEquipo = resolveField(
+    catalogs.equipo, norm(row.equipo), row.equipo,
+    "Equipo", "Equipo desconocido", errors, correcciones
+  );
 
   const genero = norm(row.genero);
   if (!GENEROS_VALIDOS.includes(genero)) errors.push(`Genero invalido: "${row.genero}"`);
@@ -71,21 +102,28 @@ function mapRow(row, catalogs) {
     if (!Number.isInteger(edadExacta)) errors.push(`Edad Exacta invalida: "${row.edadExacta}"`);
   }
 
-  const idEstadoSincronizacion = catalogs.estadoProceso.get(
-    `SINCRONIZACION|${norm(row.estadoSincronizacion)}`
+  const idEstadoSincronizacion = resolveField(
+    catalogs.estadoProceso, `SINCRONIZACION|${norm(row.estadoSincronizacion)}`, row.estadoSincronizacion,
+    "Estado de sincronizacion", "Estado de sincronizacion desconocido", errors, correcciones
   );
-  if (!idEstadoSincronizacion) {
-    errors.push(`Estado de sincronizacion desconocido: "${row.estadoSincronizacion}"`);
-  }
 
-  const idEstadoRegistro = catalogs.estadoProceso.get(`REGISTRO|${norm(row.estadoRegistro)}`);
-  if (!idEstadoRegistro) errors.push(`Estado de registro desconocido: "${row.estadoRegistro}"`);
+  const idEstadoRegistro = resolveField(
+    catalogs.estadoProceso, `REGISTRO|${norm(row.estadoRegistro)}`, row.estadoRegistro,
+    "Estado de registro", "Estado de registro desconocido", errors, correcciones
+  );
 
-  const idEstadoGeneral = catalogs.estadoProceso.get(`GENERAL|${norm(row.estadoGeneral)}`);
-  if (!idEstadoGeneral) errors.push(`Estado general desconocido: "${row.estadoGeneral}"`);
+  const idEstadoGeneral = resolveField(
+    catalogs.estadoProceso, `GENERAL|${norm(row.estadoGeneral)}`, row.estadoGeneral,
+    "Estado general", "Estado general desconocido", errors, correcciones
+  );
 
-  const fechaEnrolamiento = new Date(row.fechaEnrolamiento);
-  if (Number.isNaN(fechaEnrolamiento.getTime())) {
+  // Se guarda como string "YYYY-MM-DD", no como objeto Date: Postgres parsea el string
+  // directamente sin conversion de zona horaria. Pasarla por un Date de JS y volver a
+  // serializarla corre la fecha un dia para atras en zonas detras de UTC (como Chile).
+  const fechaEnrolamiento = String(row.fechaEnrolamiento || "").trim();
+  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fechaEnrolamiento)
+    && !Number.isNaN(new Date(fechaEnrolamiento).getTime());
+  if (!fechaValida) {
     errors.push(`Fecha de enrolamiento invalida: "${row.fechaEnrolamiento}"`);
   }
 
@@ -103,6 +141,7 @@ function mapRow(row, catalogs) {
       id_estado_sincronizacion: idEstadoSincronizacion,
       id_estado_registro: idEstadoRegistro,
       id_estado_general: idEstadoGeneral,
+      correcciones,
     },
     errors: [],
   };

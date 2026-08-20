@@ -13,9 +13,10 @@ funcional, no funcional y el flujo de integración con Telegram.
       normalizado (`db/schema.sql`), poblamiento de catálogos (`db/seed_catalogos.sql`).
 - [x] **Sprint 2** (25-31 ago, `v0.2.0`): módulo de lectura de Excel, validación de cabeceras y
       mapeo en memoria a IDs de catálogo (`src/ingest/`).
-- [ ] **Sprint 3** (1-7 sep): ETL — transformación/limpieza e inserción transaccional en
-      `registro_enrolamiento`.
-- [ ] Sprints 4-10: carga histórica, métricas, bot de Telegram, QA y despliegue.
+- [x] **Sprint 3** (1-7 sep, `v0.3.0`): corrección de errores de tipeo e inserción transaccional
+      (bulk insert) en `registro_enrolamiento` (`src/etl/`).
+- [ ] **Sprint 4** (8-14 sep): carga histórica por lotes (95k+ registros) y optimización de índices.
+- [ ] Sprints 5-10: métricas, bot de Telegram, QA y despliegue.
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
@@ -67,13 +68,15 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 | `npm start` | Levanta el servidor Express (`src/server.js`) en `http://localhost:$PORT`. |
 | `npm run db:schema` | Aplica `db/schema.sql` contra `DATABASE_URL` (crea/actualiza tablas, es idempotente). |
 | `npm run db:seed` | Carga `db/seed_catalogos.sql` (datos de ejemplo en las tablas maestras). |
-| `npm run ingest -- <archivo.xlsx>` | Corre el módulo de ingesta (`src/ingest/`) contra un Excel: lee, valida cabeceras y mapea filas a IDs de catálogo. No inserta en la base todavía (Sprint 3). |
+| `npm run ingest -- <archivo.xlsx>` | Modo de solo lectura: lee el Excel, valida cabeceras y mapea filas a IDs de catálogo. No inserta nada en la base — útil para previsualizar. |
+| `npm run etl -- <archivo.xlsx>` | Flujo completo (`src/etl/`): igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente las filas válidas en `registro_enrolamiento`. |
 | `node scripts/run-sql.js <archivo.sql>` | Mecanismo genérico para aplicar cualquier `.sql` suelto contra `DATABASE_URL` — no solo schema/seed. |
 
-Ejemplo de ingesta con el archivo de prueba incluido en el repo:
+Ejemplos con los archivos de prueba incluidos en el repo:
 
 ```bash
-npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx
+npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx        # solo previsualiza, no inserta
+npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx         # inserta (incluye un tipeo corregible)
 ```
 
 **Nota sobre `xlsx`**: la versión publicada en el registro de npm tiene una vulnerabilidad de
@@ -138,14 +141,17 @@ docs/
   diagramas/                 ER, arquitectura y roadmap (Mermaid)
   sprints/                   Informe de avance por sprint cerrado
 fixtures/
-  enrolamiento_ejemplo.xlsx  Excel de prueba para el modulo de ingesta
+  enrolamiento_ejemplo.xlsx     Excel de prueba para npm run ingest (solo lectura)
+  enrolamiento_etl_prueba.xlsx  Excel de prueba para npm run etl (incluye un tipeo corregible)
 scripts/
   run-sql.js                 Ejecuta un archivo .sql contra DATABASE_URL
   ingest-excel.js            Corre el modulo de ingesta contra un Excel (npm run ingest)
+  procesar-excel.js          Corre el ETL completo, inserta en la base (npm run etl)
 src/
   db.js                      Pool de conexion a PostgreSQL
   server.js                  Servidor Express
   ingest/                    Lectura de Excel, validacion de cabeceras y mapeo a catalogos
+  etl/                       Correccion de tipeos e insercion transaccional (bulk insert)
 ```
 
 ## Modelo de datos y arquitectura
