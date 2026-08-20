@@ -79,6 +79,85 @@ irrecuperable ("MARCIANO" como nacionalidad). Con `npm run etl`:
 Se confirmó además que `npm run ingest` (Sprint 2) sigue funcionando igual que antes — no inserta
 nada, mismo comportamiento de mapeo y errores.
 
+#### Cómo reproducir esta verificación
+
+Con la base de datos arriba (ver [Solución de problemas comunes](../../README.md#solución-de-problemas-comunes)
+en el README si no lo está), desde la raíz del proyecto:
+
+**1. Correr el ETL completo contra el Excel de prueba:**
+
+```powershell
+npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx
+```
+
+Salida esperada:
+
+```
+Filas insertadas: 2
+Correcciones automaticas aplicadas (1):
+  - Estado de sincronizacion: "SINCRONIZDO" interpretado como "SINCRONIZADO"
+Filas rechazadas (1):
+[
+  {
+    "excelRow": 4,
+    "errors": [
+      "Nacionalidad desconocida: \"MARCIANO\""
+    ]
+  }
+]
+```
+
+*Por qué*: el fixture tiene 3 filas armadas a propósito para ejercitar los 3 comportamientos del
+ETL. La fila 1 (Venezuela, bien escrita) se mapea sin problema. La fila 2 (Chile, con
+"SINCRONIZDO") no tiene coincidencia exacta en el catálogo de estados, pero `catalogResolver.js`
+calcula la distancia de edición contra todos los valores posibles y encuentra que "SINCRONIZADO"
+está a distancia 1 (falta una letra) — dentro del umbral de 2, así que la corrige sola y queda
+anotada en `correcciones`. La fila 3 ("MARCIANO") está a una distancia enorme de cualquier
+nacionalidad real, muy por encima del umbral, así que no se corrige y se reporta como error
+irrecuperable. Resultado: 2 filas insertadas de verdad por `bulkInsert.js`, 1 afuera.
+
+**2. Confirmar que la inserción fue real, no solo un mensaje en consola:**
+
+```powershell
+$env:PGPASSWORD = "abis_dev_pw"
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "SELECT id_registro, fecha_enrolamiento, id_nacionalidad, genero FROM registro_enrolamiento ORDER BY id_registro;"
+```
+
+Salida esperada:
+
+```
+ id_registro | fecha_enrolamiento | id_nacionalidad | genero
+-------------+--------------------+-----------------+--------
+           1 | 2026-09-01         |               2 | M
+           2 | 2026-09-01         |               1 | F
+(2 rows)
+```
+
+*Por qué*: confirma dos cosas — que los datos están realmente en la tabla (no solo en el log del
+script), y que `fecha_enrolamiento` quedó en `2026-09-01`, el valor correcto. Antes del fix
+descrito en 2.4, esta misma prueba mostraba `2026-08-31` (un día antes) por la conversión de zona
+horaria.
+
+**3. Limpiar antes de repetir la prueba** (el fixture no es idempotente — correrlo de nuevo sin
+limpiar sumaría otras 2 filas duplicadas):
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
+```
+
+**4. Confirmar que el modo de solo lectura de Sprint 2 sigue sin tocar la base:**
+
+```powershell
+npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "SELECT count(*) FROM registro_enrolamiento;"
+```
+
+Salida esperada: el mismo resultado de mapeo (`Filas mapeadas correctamente: 2`, `Filas con
+errores: 1`) pero el conteo final da `0`. *Por qué*: `npm run ingest` corre la misma lectura →
+validación → mapeo que el ETL, pero nunca llama a `bulkInsert.js` — se queda en la etapa de
+previsualización. Esto confirma que la separación entre "solo previsualizar" (`ingest`) e
+"insertar de verdad" (`etl`) funciona como está documentada, sin efectos secundarios ocultos.
+
 ## 3. Estado del entregable
 
 **Completo.** Los tres puntos comprometidos están implementados y verificados, con las
