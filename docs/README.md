@@ -22,6 +22,7 @@ docs/
 - [`sprints/AVANCE_SPRINT2.md`](sprints/AVANCE_SPRINT2.md) — Sprint 2, cerrado (`v0.2.0`).
 - [`sprints/AVANCE_SPRINT3.md`](sprints/AVANCE_SPRINT3.md) — Sprint 3, cerrado (`v0.3.0`).
 - [`sprints/AVANCE_SPRINT4.md`](sprints/AVANCE_SPRINT4.md) — Sprint 4, cerrado (`v0.4.0`).
+- [`sprints/AVANCE_SPRINT5.md`](sprints/AVANCE_SPRINT5.md) — Sprint 5, cerrado (`v0.5.0`).
 
 ## Convenciones para nuevos sprints
 

@@ -70,6 +70,10 @@ erDiagram
   `id_estado_sincronizacion`, `id_estado_registro` e `id_estado_general` — pensados para las
   agrupaciones del reporte diario y el dashboard de estadísticas, verificados con `EXPLAIN
   ANALYZE` sobre 95k+ registros en [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
+- `db/views.sql` (Sprint 5) define 4 vistas de solo lectura sobre `registro_enrolamiento` para
+  facilitar reportes (resumen por estado, nacionalidad, cuartel y total diario) — no son parte del
+  modelo de datos en sí, no se muestran en el diagrama ER. Ver
+  [`AVANCE_SPRINT5.md`](../sprints/AVANCE_SPRINT5.md).
 
 ## Cómo mantenerlo actualizado
 

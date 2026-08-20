@@ -5,11 +5,13 @@ actualiza a medida que cada pieza planificada pasa a estar implementada.
 
 ```mermaid
 flowchart LR
-    subgraph impl["Implementado (Sprint 1-4)"]
+    subgraph impl["Implementado (Sprint 1-5)"]
         direction LR
-        API["Express server<br/>src/server.js<br/>(GET /health)"]
+        API["Express server<br/>src/server.js<br/>GET /health<br/>GET /reporte-diario"]
         POOL["Pool pg<br/>src/db.js"]
         DB[("PostgreSQL<br/>abis_db<br/>indices en fecha/cuartel/<br/>nacionalidad/3 estados")]
+        VIEWS[("Vistas de resumen<br/>db/views.sql")]
+        REPORTE["reporteDiario.js<br/>(consulta vistas, calcula %)"]
         RUNSQL["scripts/run-sql.js<br/>(aplica .sql sueltos)"]
         EXCEL[/"Excel diario de<br/>enrolamiento"/]
         READER["excelReader.js<br/>(lee xlsx a filas crudas)"]
@@ -22,6 +24,8 @@ flowchart LR
         INTEGRIDAD["scripts/validar-integridad-historica.js<br/>(npm run validar-integridad)"]
 
         API --> POOL --> DB
+        DB --- VIEWS
+        API --> REPORTE --> VIEWS
         RUNSQL --> DB
         EXCEL --> READER --> VALID --> MAP
         MAP --> BULKINSERT --> POOL
@@ -31,32 +35,35 @@ flowchart LR
         INTEGRIDAD --> POOL
     end
 
-    subgraph plan["Planificado (Sprint 5+)"]
+    subgraph plan["Planificado (Sprint 6+)"]
         direction LR
-        STATS["Modulo de estadisticas<br/>(vistas, consultas de resumen)"]
-        TG(["Bot de Telegram"])
+        TG(["Bot de Telegram<br/>(formatea la data de<br/>reporteDiario.js)"])
     end
 
-    DB -.-> STATS -.-> TG
+    REPORTE -.-> TG
 
     classDef planned stroke-dasharray: 4 3
-    class STATS,TG planned
+    class TG planned
 ```
 
 ## Lectura del diagrama
 
-- **Implementado**: el servidor Express expone `GET /health`, que usa el pool compartido de
-  `src/db.js` para verificar la conexión a PostgreSQL. `scripts/run-sql.js` es el mecanismo
-  genérico para aplicar cualquier `.sql` (schema o seed) contra la misma base. El módulo de
-  ingesta (`src/ingest/`) lee un Excel, valida sus cabeceras y mapea cada fila de texto libre a
-  los IDs de catálogo correspondientes, tolerando errores de tipeo menores (`src/etl/`). El módulo
-  ETL (`src/etl/index.js`) encadena ese mapeo con la inserción transaccional por lotes
+- **Implementado**: el servidor Express expone `GET /health` y `GET /reporte-diario`, que usa el
+  pool compartido de `src/db.js` para verificar la conexión a PostgreSQL y para consultar las
+  vistas de resumen, respectivamente. `scripts/run-sql.js` es el mecanismo genérico para aplicar
+  cualquier `.sql` (schema, seed o vistas) contra la misma base. El módulo de ingesta
+  (`src/ingest/`) lee un Excel, valida sus cabeceras y mapea cada fila de texto libre a los IDs de
+  catálogo correspondientes, tolerando errores de tipeo menores (`src/etl/`). El módulo ETL
+  (`src/etl/index.js`) encadena ese mapeo con la inserción transaccional por lotes
   (`bulkInsert.js`) en `registro_enrolamiento`. `npm run ingest` corre solo la lectura/mapeo (no
   inserta, útil para previsualizar); `npm run etl` corre el flujo completo e inserta.
   `scripts/carga-historica-sintetica.js` y `scripts/validar-integridad-historica.js` (Sprint 4)
   son herramientas de prueba de estrés e integridad, no parte del flujo diario de producción.
-- **Planificado** (líneas punteadas): el módulo de estadísticas y la notificación por Telegram
-  son los próximos pasos del roadmap (ver [roadmap.md](roadmap.md)).
+  `src/reportes/reporteDiario.js` (Sprint 5) consulta las vistas de `db/views.sql` y arma el JSON
+  del reporte diario con conteos y porcentajes ya calculados.
+- **Planificado** (líneas punteadas): Sprint 6-7 va a tomar la data que ya arma
+  `reporteDiario.js` y formatearla como el mensaje de Telegram (ver [roadmap.md](roadmap.md)) —
+  no va a reimplementar las consultas, solo el formateo y el envío.
 
 ## Notas sobre el módulo de ingesta y ETL
 
@@ -77,6 +84,12 @@ flowchart LR
   (límite de PostgreSQL: 65.535 parámetros por consulta), pero todos los lotes de una misma
   llamada comparten una única transacción — probado con 95.000 filas sintéticas insertadas en
   19 lotes en ~2.6s, ver [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
+- **Vistas y reporte diario (Sprint 5)**: `db/views.sql` tiene 4 vistas (`vw_resumen_estado_diario`,
+  `vw_resumen_nacionalidad_diario`, `vw_resumen_cuartel_diario`, `vw_total_diario`), todas
+  `CREATE OR REPLACE VIEW` (idempotentes, se aplican con `npm run db:views`).
+  `reporteDiario.js` las consulta y devuelve JSON con porcentajes ya calculados — no el mensaje de
+  Telegram formateado, eso queda para Sprint 6-7. `GET /reporte-diario?fecha=YYYY-MM-DD` lo expone
+  vía HTTP; sin `fecha`, usa la más reciente con datos.
 
 ## Cómo mantenerlo actualizado
 

@@ -5,27 +5,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project overview
 
 Sistema ABIS (Sistema de Gestión Automatizada de Identificación Biométrica): processes a daily
-biometric enrollment Excel file, normalizes it into PostgreSQL, and (eventually) notifies a
-statistical summary via Telegram. The project follows a 10-week sprint roadmap (18 Aug – 23 Oct
-2026); it is currently early-stage (Sprint 1: data modeling and initial setup only — no Excel
-ingestion or Telegram integration exists yet).
+biometric enrollment Excel file, normalizes it into PostgreSQL, computes daily summary metrics,
+and (eventually) notifies that summary via Telegram. The project follows a 10-week sprint roadmap
+(18 Aug – 23 Oct 2026); through Sprint 5 (of 10) is implemented — Excel ingestion, typo-tolerant
+catalog mapping, batched transactional inserts, and a daily-report endpoint all exist. Telegram
+integration (Sprint 6+) does not exist yet.
 
 ## Commands
 
 ```bash
 npm install
-npm start               # starts the Express server on http://localhost:3000
-npm run db:schema       # applies db/schema.sql against DATABASE_URL
-npm run db:seed         # loads db/seed_catalogos.sql against DATABASE_URL
+npm start                              # starts the Express server on http://localhost:3000
+npm run db:schema                      # applies db/schema.sql against DATABASE_URL
+npm run db:seed                        # loads db/seed_catalogos.sql against DATABASE_URL
+npm run db:views                       # applies db/views.sql (reporting views) against DATABASE_URL
+npm run ingest -- <file.xlsx>          # dry-run: read/validate/map an Excel, no DB writes
+npm run etl -- <file.xlsx>             # full pipeline: maps + transactionally inserts
+npm run carga-historica -- <N>         # stress test: N synthetic rows (default 95000), no Excel
+npm run validar-integridad             # integrity checks + EXPLAIN ANALYZE on report-style queries
+npm run datos-reporte-prueba           # fixed 10-row deterministic dataset for testing /reporte-diario
 ```
 
 There is no test suite, linter, or build step configured yet.
 
-`GET /health` confirms the server is up and the PostgreSQL connection works.
+`GET /health` confirms the server is up and the PostgreSQL connection works. `GET /reporte-diario
+?fecha=YYYY-MM-DD` returns the daily report data (see Sprint 5 section below); without `?fecha=`
+it uses the most recent date that has data.
 
 `node scripts/run-sql.js <path-to-file.sql>` runs any arbitrary `.sql` file against
-`DATABASE_URL` — this is the general mechanism for applying schema/data changes, not just the two
-npm scripts above.
+`DATABASE_URL` — this is the general mechanism for applying schema/data changes, not just the
+`db:schema`/`db:seed`/`db:views` npm scripts above.
 
 ## Local environment
 
@@ -46,7 +55,7 @@ npm scripts above.
 
 - `src/db.js` — single shared `pg` `Pool`, built from `DATABASE_URL`. Import this module rather
   than creating new pools.
-- `src/server.js` — Express app entrypoint; currently only wires up `/health`.
+- `src/server.js` — Express app entrypoint; wires up `/health` and `/reporte-diario`.
 - `db/schema.sql` — DDL for the full normalized (3NF) schema, idempotent (`CREATE TABLE IF NOT
   EXISTS`). This is the source of truth for the data model, not an ORM/migration tool — there is
   no migration framework, so schema changes are made directly here and re-applied with `npm run
@@ -68,7 +77,8 @@ Six catalog (master) tables plus one transactional table:
 - `registro_enrolamiento` — the transactional table, one row per biometric enrollment record.
   Holds three independent foreign keys into `estado_proceso` (one per status domain above) plus
   FKs into `nacionalidad`, `cuartel`, and `equipo`. Indexed on `fecha_enrolamiento`, `id_cuartel`,
-  and `id_nacionalidad` to support the planned statistics dashboard.
+  `id_nacionalidad`, and (since Sprint 4) all three `id_estado_*` columns, to support the
+  statistics/reporting queries in `db/views.sql`.
 
 ### Excel ingestion module (`src/ingest/`, Sprint 2)
 
@@ -133,14 +143,35 @@ Six catalog (master) tables plus one transactional table:
   just present) — verified with a 95k-row synthetic load: `Index Only Scan`/`Bitmap Index Scan`
   in the plans, 95000 rows inserted in 19 batches in ~2.6s.
 
+### Reporting views & daily report (Sprint 5)
+
+- `db/views.sql` (`npm run db:views`, `CREATE OR REPLACE VIEW` — idempotent) defines 4 views:
+  `vw_resumen_estado_diario` (a `UNION ALL` across all three `estado_proceso` FKs, one row per
+  date/domain/description — this is how the schema's "one generic catalog, three independent FK
+  columns" design gets flattened for reporting), `vw_resumen_nacionalidad_diario`,
+  `vw_resumen_cuartel_diario`, and `vw_total_diario`.
+- `src/reportes/reporteDiario.js`'s `obtenerReporteDiario(pool, fecha)` queries those views and
+  returns structured JSON with pre-computed percentages (rounded to 1 decimal) — sync/registro/
+  general breakdowns, top-5 nationalities, active cuarteles. It does **not** produce the
+  Telegram-formatted Markdown message described in the requirements doc section 5 — that's
+  Sprint 6-7's job, consuming this function rather than re-querying.
+- `GET /reporte-diario` in `src/server.js` exposes it: `?fecha=YYYY-MM-DD` for a specific date
+  (400 if malformed), no param defaults to the most recent date with data, a valid date with no
+  rows returns `200` with empty breakdowns and `total: 0` (not an error).
+- `scripts/generar-datos-reporte-prueba.js` (`npm run datos-reporte-prueba`) inserts a **fixed,
+  non-random** 10-row dataset on `2026-09-15` with round percentages (70/20/10, 80/20, 90/10,
+  40/30/20/10, 40/30/30) — deliberately deterministic, unlike Sprint 4's synthetic generator, so
+  the report output can be checked against exact expected numbers rather than "looks about
+  right." Not idempotent; truncate after use like the other test data scripts.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 5 (15–21 Sep 2026) is next: SQL
-summary queries, reporting views, and the internal functions/endpoints that will generate the
-daily report data.
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 6 (22–28 Sep 2026) is next: creating
+the Telegram bot via BotFather, an HTTP client for the Telegram API, and the Markdown message
+template — which should format `obtenerReporteDiario()`'s output, not reimplement its queries.
 
 ## Documentation & versioning
 

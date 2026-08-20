@@ -16,10 +16,10 @@ gantt
     section Fase 2 - ETL y logica de negocio
     Sprint 3: Proceso de ingesta ETL (v0.3.0) :done, s3, 2026-09-01, 2026-09-07
     Sprint 4: Carga historica y pruebas de estres (v0.4.0) :done, s4, 2026-09-08, 2026-09-14
-    Sprint 5: Calculo de metricas y agrupaciones (v0.5.0) :active, s5, 2026-09-15, 2026-09-21
+    Sprint 5: Calculo de metricas y agrupaciones (v0.5.0) :done, s5, 2026-09-15, 2026-09-21
 
     section Fase 3 - Integracion y notificaciones
-    Sprint 6: Bot de Telegram (v0.6.0) :s6, 2026-09-22, 2026-09-28
+    Sprint 6: Bot de Telegram (v0.6.0) :active, s6, 2026-09-22, 2026-09-28
     Sprint 7: Automatizacion del flujo completo (v0.7.0) :s7, 2026-09-29, 2026-10-05
 
     section Fase 4 - Pruebas finales y despliegue
