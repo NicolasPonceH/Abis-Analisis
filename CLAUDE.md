@@ -76,3 +76,16 @@ Sprint 2 (25–31 Aug 2026) is the next planned milestone: an Excel reading modu
 header/structure validation, and mapping of raw Excel text values to catalog IDs. When working on
 ingestion code, expect it to map free-text Excel columns (nationality, region/unit/cuartel names,
 equipment type) onto the catalog tables above rather than storing free text directly.
+
+## Documentation & versioning
+
+- `docs/` holds project documentation as Markdown: `docs/diagramas/` (ER diagram, architecture
+  diagram, sprint roadmap — all Mermaid, GitHub-rendered, manually kept in sync with the code —
+  see the "Cómo mantenerlo actualizado" note at the end of each file) and `docs/sprints/` (one
+  `AVANCE_SPRINT{N}.md` progress report per closed sprint, following the format of
+  `docs/sprints/AVANCE_SPRINT1.md`).
+- Each closed sprint is tagged in git as `v0.N.0` (Sprint 1 → `v0.1.0`, ..., Sprint 10 →
+  `v1.0.0`), pushed with `git push origin main --tags`. When a sprint's deliverable is complete,
+  update the relevant `docs/diagramas/*.md` files, write the sprint's `AVANCE_SPRINT{N}.md`, then
+  commit and tag — don't leave documentation for a closed sprint until a later session.
+- Repository: https://github.com/NicolasPonceH/Sistema_ABIS

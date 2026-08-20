@@ -86,3 +86,16 @@ src/
   Deben completarse con el listado real de unidades/cuarteles antes de cargar datos reales (Sprint 3+).
 - El token del bot de Telegram y las credenciales de BD se manejan por variables de entorno
   (`.env`, nunca comprometido al repositorio).
+
+## Documentación y versionado
+
+Documentación del proyecto (diagramas, informes de avance por sprint) en [`docs/`](docs/README.md).
+
+Cada sprint cerrado se marca con un tag de git `v0.N.0` (Sprint 1 → `v0.1.0`, ..., Sprint 10 →
+`v1.0.0`). Para obtener el estado del proyecto tal como estaba al cierre de un sprint:
+
+```bash
+git clone https://github.com/NicolasPonceH/Sistema_ABIS.git
+cd Sistema_ABIS
+git checkout v0.1.0   # o el tag del sprint que se necesite
+```
