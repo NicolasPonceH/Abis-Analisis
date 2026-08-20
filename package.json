@@ -1,0 +1,16 @@
+{
+  "name": "sistema-abis",
+  "version": "0.1.0",
+  "description": "Sistema de Gestion Automatizada de Identificacion Biometrica (ABIS)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "db:schema": "node scripts/run-sql.js db/schema.sql",
+    "db:seed": "node scripts/run-sql.js db/seed_catalogos.sql"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}
