@@ -145,16 +145,25 @@ Six catalog (master) tables plus one transactional table:
 
 ### Reporting views & daily report (Sprint 5)
 
-- `db/views.sql` (`npm run db:views`, `CREATE OR REPLACE VIEW` — idempotent) defines 4 views:
+- `db/views.sql` (`npm run db:views`, `CREATE OR REPLACE VIEW` — idempotent) defines 7 views:
   `vw_resumen_estado_diario` (a `UNION ALL` across all three `estado_proceso` FKs, one row per
   date/domain/description — this is how the schema's "one generic catalog, three independent FK
   columns" design gets flattened for reporting), `vw_resumen_nacionalidad_diario`,
-  `vw_resumen_cuartel_diario`, and `vw_total_diario`.
+  `vw_resumen_cuartel_diario`, `vw_resumen_unidad_diario`, `vw_resumen_genero_diario`,
+  `vw_resumen_edad_diario` (mayor/menor via `es_mayor_edad`, not exact age — the requirements doc
+  says `edad_exacta` is specifically for the 0-17 minor breakdown, not for exposing adults' exact
+  ages in a report), and `vw_total_diario`.
+- The unidad/genero/edad views were added **after** Sprint 5's initial close, discovered during a
+  full-project audit against the requirements doc: section 2 ("Generación de Reportes Diarios")
+  explicitly asks for summaries "por Unidad, Cuartel, Nacionalidad, Edad y Género" — the initial
+  close only covered Cuartel and Nacionalidad. This fix landed as a plain commit on `main`, not a
+  new tag — it's a correction to Sprint 5, not a new sprint. See the addendum in
+  `docs/sprints/AVANCE_SPRINT5.md`.
 - `src/reportes/reporteDiario.js`'s `obtenerReporteDiario(pool, fecha)` queries those views and
-  returns structured JSON with pre-computed percentages (rounded to 1 decimal) — sync/registro/
-  general breakdowns, top-5 nationalities, active cuarteles. It does **not** produce the
-  Telegram-formatted Markdown message described in the requirements doc section 5 — that's
-  Sprint 6-7's job, consuming this function rather than re-querying.
+  returns structured JSON with pre-computed percentages (rounded to 1 decimal): sync/registro/
+  general breakdowns, top-5 nationalities, active cuarteles, active unidades, genero, and edad.
+  It does **not** produce the Telegram-formatted Markdown message described in the requirements
+  doc section 5 — that's Sprint 6-7's job, consuming this function rather than re-querying.
 - `GET /reporte-diario` in `src/server.js` exposes it: `?fecha=YYYY-MM-DD` for a specific date
   (400 if malformed), no param defaults to the most recent date with data, a valid date with no
   rows returns `200` with empty breakdowns and `total: 0` (not an error).

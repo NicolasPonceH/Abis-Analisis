@@ -84,9 +84,14 @@ flowchart LR
   (límite de PostgreSQL: 65.535 parámetros por consulta), pero todos los lotes de una misma
   llamada comparten una única transacción — probado con 95.000 filas sintéticas insertadas en
   19 lotes en ~2.6s, ver [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
-- **Vistas y reporte diario (Sprint 5)**: `db/views.sql` tiene 4 vistas (`vw_resumen_estado_diario`,
-  `vw_resumen_nacionalidad_diario`, `vw_resumen_cuartel_diario`, `vw_total_diario`), todas
-  `CREATE OR REPLACE VIEW` (idempotentes, se aplican con `npm run db:views`).
+- **Vistas y reporte diario (Sprint 5)**: `db/views.sql` tiene 7 vistas (`vw_resumen_estado_diario`,
+  `vw_resumen_nacionalidad_diario`, `vw_resumen_cuartel_diario`, `vw_resumen_unidad_diario`,
+  `vw_resumen_genero_diario`, `vw_resumen_edad_diario`, `vw_total_diario`), todas
+  `CREATE OR REPLACE VIEW` (idempotentes, se aplican con `npm run db:views`). Las tres de
+  unidad/género/edad se sumaron después del cierre inicial, al auditar el proyecto contra la
+  sección 2 del informe de requerimientos ("resúmenes por Unidad, Cuartel, Nacionalidad, Edad y
+  Género") — ver el addendum en
+  [`AVANCE_SPRINT5.md`](../sprints/AVANCE_SPRINT5.md#5-addendum-resúmenes-por-unidad-edad-y-género).
   `reporteDiario.js` las consulta y devuelve JSON con porcentajes ya calculados — no el mensaje de
   Telegram formateado, eso queda para Sprint 6-7. `GET /reporte-diario?fecha=YYYY-MM-DD` lo expone
   vía HTTP; sin `fecha`, usa la más reciente con datos.

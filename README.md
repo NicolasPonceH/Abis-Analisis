@@ -18,7 +18,9 @@ funcional, no funcional y el flujo de integración con Telegram.
 - [x] **Sprint 4** (8-14 sep, `v0.4.0`): carga histórica por lotes (95k+ registros), índices de
       estado y validación de integridad.
 - [x] **Sprint 5** (15-21 sep, `v0.5.0`): vistas SQL de resumen y endpoint `GET /reporte-diario`
-      (`db/views.sql`, `src/reportes/`).
+      (`db/views.sql`, `src/reportes/`) — incluye resúmenes por Cuartel, Unidad, Nacionalidad,
+      Género y Edad (las tres últimas agregadas en un addendum post-cierre, ver
+      [`AVANCE_SPRINT5.md`](docs/sprints/AVANCE_SPRINT5.md)).
 - [ ] **Sprint 6** (22-28 sep): bot de Telegram, template del mensaje diario.
 - [ ] Sprints 7-10: automatización del flujo completo, QA y despliegue.
 

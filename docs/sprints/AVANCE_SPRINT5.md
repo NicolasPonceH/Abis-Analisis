@@ -33,10 +33,14 @@ Sprint 4 (`idx_registro_estado_*`), así que agrupan sin escanear toda la tabla 
 
 ### 2.2. Módulo de reporte diario (`src/reportes/reporteDiario.js`)
 
-`obtenerReporteDiario(pool, fecha)` consulta las cuatro vistas para una fecha dada y arma un
-objeto estructurado con conteos **y porcentajes ya calculados** (redondeados a 1 decimal), con el
-mismo desglose que describe la sección 5 del informe de requerimientos: estado de sincronización,
-estado de registro, estado general, nacionalidades principales (top 5) y cuarteles activos.
+`obtenerReporteDiario(pool, fecha)` consulta las vistas para una fecha dada y arma un objeto
+estructurado con conteos **y porcentajes ya calculados** (redondeados a 1 decimal): estado de
+sincronización, estado de registro, estado general, nacionalidades principales (top 5), cuarteles
+activos, unidades activas, género y edad (mayor/menor) — los cinco desgloses que pide la sección 2
+del informe de requerimientos ("resúmenes por Unidad, Cuartel, Nacionalidad, Edad y Género") más
+los tres dominios de estado de la sección 5. Ver el addendum al final de este informe: las vistas
+de Unidad/Género/Edad se agregaron después del cierre inicial del sprint, al auditar el proyecto
+completo contra el informe.
 
 **Decisión de alcance**: esta función devuelve JSON estructurado, no el mensaje de Telegram ya
 formateado en Markdown — eso es explícitamente Sprint 6-7 ("Diseño del template del mensaje"),
@@ -65,7 +69,8 @@ verificación más abajo.
 
 **Completo.** Los tres puntos comprometidos están implementados y verificados: las consultas
 existen como vistas reutilizables, y el endpoint devuelve exactamente los porcentajes esperados
-contra un dataset de control.
+contra un dataset de control. Ver el addendum (sección 5) sobre las tres vistas agregadas después
+del cierre inicial para cubrir Unidad/Edad/Género.
 
 ## 4. Cómo reproducir esta verificación
 
@@ -135,13 +140,29 @@ Salida esperada (resumida):
     { "cuartel": "COLCHANES", "total": 4, "porcentaje": 40 },
     { "cuartel": "ANGAMOS", "total": 3, "porcentaje": 30 },
     { "cuartel": "CHACALLUTA", "total": 3, "porcentaje": 30 }
+  ],
+  "unidadesActivas": [
+    { "unidad": "PREPOLIN ARICA", "total": 10, "porcentaje": 100 }
+  ],
+  "genero": [
+    { "genero": "F", "total": 5, "porcentaje": 50 },
+    { "genero": "M", "total": 5, "porcentaje": 50 }
+  ],
+  "edad": [
+    { "categoria": "MAYOR DE EDAD", "total": 9, "porcentaje": 90 },
+    { "categoria": "MENOR DE EDAD", "total": 1, "porcentaje": 10 }
   ]
 }
 ```
 
+*Nota sobre `unidadesActivas`*: da 100% para `PREPOLIN ARICA` porque el seed de catálogos
+(`db/seed_catalogos.sql`) solo tiene cuarteles bajo esa unidad — no es un error, simplemente no
+hay otra unidad con cuarteles cargados para comparar. El resultado sigue siendo exacto y
+verificable.
+
 *Por qué*: si estos números coinciden exactamente con el dataset insertado en el paso 2, confirma
-que las cuatro vistas y el cálculo de porcentajes funcionan bien — no hay margen para "más o
-menos correcto" con un dataset armado a mano.
+que las siete vistas y el cálculo de porcentajes funcionan bien — no hay margen para "más o menos
+correcto" con un dataset armado a mano.
 
 **4. Probar los casos límite:**
 
@@ -160,7 +181,25 @@ hay datos — ambos son casos reales una vez que este endpoint se use en producc
 & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
 ```
 
-## 5. Próximos pasos (Sprint 6, 22–28 sep)
+## 5. Addendum: resúmenes por Unidad, Edad y Género
+
+Al auditar el proyecto completo contra el informe de requerimientos (no solo contra la fila del
+roadmap de este sprint), se detectó que la sección 2 ("Generación de Reportes Diarios") pide
+explícitamente "resúmenes por **Unidad, Cuartel, Nacionalidad, Edad y Género**", y el cierre
+inicial de este sprint solo cubría Cuartel y Nacionalidad. El ejemplo de mensaje de Telegram de la
+sección 5 tampoco los muestra explícitamente, pero el requerimiento funcional sí los pide, así que
+se cerró el gap en vez de dejarlo pendiente para un sprint posterior.
+
+**Agregado**: tres vistas más en `db/views.sql` (`vw_resumen_unidad_diario`,
+`vw_resumen_genero_diario`, `vw_resumen_edad_diario`), sumadas a `obtenerReporteDiario()` como
+`unidadesActivas`, `genero` y `edad`. `vw_resumen_edad_diario` agrupa por mayor/menor de edad
+(`es_mayor_edad`), no por edad exacta — el informe aclara que `edad_exacta` es "opcional, para la
+distribución de N.N.A. (0 a 17)", no para exponer la edad puntual de adultos en un reporte.
+
+Este addendum no reabre el tag `v0.5.0` — el commit queda en el historial normal, no se creó un
+tag nuevo para esto (no es un sprint distinto, es una corrección al mismo sprint).
+
+## 6. Próximos pasos (Sprint 6, 22–28 sep)
 
 Según la hoja de ruta, el siguiente ciclo corresponde a la **configuración del bot de Telegram**:
 

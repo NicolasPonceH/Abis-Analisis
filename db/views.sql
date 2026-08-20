@@ -35,6 +35,32 @@ FROM registro_enrolamiento r
 JOIN cuartel c ON c.id_cuartel = r.id_cuartel
 GROUP BY r.fecha_enrolamiento, c.nombre_cuartel;
 
+-- Cantidad de enrolamientos por dia y unidad (subiendo un nivel en la jerarquia region -> unidad
+-- -> cuartel). La seccion 2 del informe de requerimientos pide resumenes por Unidad ademas de
+-- por Cuartel, aunque el ejemplo de mensaje de Telegram (seccion 5) solo muestra Cuartel.
+CREATE OR REPLACE VIEW vw_resumen_unidad_diario AS
+SELECT r.fecha_enrolamiento, u.nombre_unidad AS unidad, count(*) AS total
+FROM registro_enrolamiento r
+JOIN cuartel c ON c.id_cuartel = r.id_cuartel
+JOIN unidad u ON u.id_unidad = c.id_unidad
+GROUP BY r.fecha_enrolamiento, u.nombre_unidad;
+
+-- Cantidad de enrolamientos por dia y genero.
+CREATE OR REPLACE VIEW vw_resumen_genero_diario AS
+SELECT fecha_enrolamiento, genero, count(*) AS total
+FROM registro_enrolamiento
+GROUP BY fecha_enrolamiento, genero;
+
+-- Cantidad de enrolamientos por dia, separando mayores y menores de edad. edad_exacta (0-17)
+-- es especificamente para la distribucion de N.N.A. segun el informe; no se expone edad exacta
+-- de adultos en el resumen, solo el conteo mayor/menor.
+CREATE OR REPLACE VIEW vw_resumen_edad_diario AS
+SELECT fecha_enrolamiento,
+       CASE WHEN es_mayor_edad THEN 'MAYOR DE EDAD' ELSE 'MENOR DE EDAD' END AS categoria,
+       count(*) AS total
+FROM registro_enrolamiento
+GROUP BY fecha_enrolamiento, es_mayor_edad;
+
 -- Total de enrolamientos por dia, base para calcular porcentajes.
 CREATE OR REPLACE VIEW vw_total_diario AS
 SELECT fecha_enrolamiento, count(*) AS total
