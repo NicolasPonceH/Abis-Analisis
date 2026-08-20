@@ -8,7 +8,9 @@
     "db:schema": "node scripts/run-sql.js db/schema.sql",
     "db:seed": "node scripts/run-sql.js db/seed_catalogos.sql",
     "ingest": "node scripts/ingest-excel.js",
-    "etl": "node scripts/procesar-excel.js"
+    "etl": "node scripts/procesar-excel.js",
+    "carga-historica": "node scripts/carga-historica-sintetica.js",
+    "validar-integridad": "node scripts/validar-integridad-historica.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

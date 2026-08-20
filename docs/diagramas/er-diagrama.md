@@ -66,6 +66,10 @@ erDiagram
 - `registro_enrolamiento` tiene **tres** llaves foráneas independientes hacia `estado_proceso`
   (sincronización, registro, general), además de las llaves hacia `nacionalidad`, `cuartel` y
   `equipo`.
+- Índices (Sprint 1 y 4) sobre `fecha_enrolamiento`, `id_cuartel`, `id_nacionalidad`,
+  `id_estado_sincronizacion`, `id_estado_registro` e `id_estado_general` — pensados para las
+  agrupaciones del reporte diario y el dashboard de estadísticas, verificados con `EXPLAIN
+  ANALYZE` sobre 95k+ registros en [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
 
 ## Cómo mantenerlo actualizado
 

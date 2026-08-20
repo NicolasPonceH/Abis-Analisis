@@ -15,8 +15,10 @@ funcional, no funcional y el flujo de integración con Telegram.
       mapeo en memoria a IDs de catálogo (`src/ingest/`).
 - [x] **Sprint 3** (1-7 sep, `v0.3.0`): corrección de errores de tipeo e inserción transaccional
       (bulk insert) en `registro_enrolamiento` (`src/etl/`).
-- [ ] **Sprint 4** (8-14 sep): carga histórica por lotes (95k+ registros) y optimización de índices.
-- [ ] Sprints 5-10: métricas, bot de Telegram, QA y despliegue.
+- [x] **Sprint 4** (8-14 sep, `v0.4.0`): carga histórica por lotes (95k+ registros), índices de
+      estado y validación de integridad.
+- [ ] **Sprint 5** (15-21 sep): cálculo de métricas, vistas SQL para reportes.
+- [ ] Sprints 6-10: bot de Telegram, automatización, QA y despliegue.
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
@@ -69,7 +71,9 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 | `npm run db:schema` | Aplica `db/schema.sql` contra `DATABASE_URL` (crea/actualiza tablas, es idempotente). |
 | `npm run db:seed` | Carga `db/seed_catalogos.sql` (datos de ejemplo en las tablas maestras). |
 | `npm run ingest -- <archivo.xlsx>` | Modo de solo lectura: lee el Excel, valida cabeceras y mapea filas a IDs de catálogo. No inserta nada en la base — útil para previsualizar. |
-| `npm run etl -- <archivo.xlsx>` | Flujo completo (`src/etl/`): igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente las filas válidas en `registro_enrolamiento`. |
+| `npm run etl -- <archivo.xlsx>` | Flujo completo (`src/etl/`): igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente (por lotes) las filas válidas en `registro_enrolamiento`. |
+| `npm run carga-historica -- <N>` | Genera e inserta `N` filas **sintéticas** (por defecto 95000) directamente contra los catálogos ya sembrados, para pruebas de estrés — no lee ningún Excel. |
+| `npm run validar-integridad` | Chequea integridad de `registro_enrolamiento` (NULLs inesperados, inconsistencias de edad, distribución por nacionalidad) y corre `EXPLAIN ANALYZE` sobre consultas representativas del futuro dashboard. |
 | `node scripts/run-sql.js <archivo.sql>` | Mecanismo genérico para aplicar cualquier `.sql` suelto contra `DATABASE_URL` — no solo schema/seed. |
 
 Ejemplos con los archivos de prueba incluidos en el repo:
@@ -77,7 +81,13 @@ Ejemplos con los archivos de prueba incluidos en el repo:
 ```bash
 npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx        # solo previsualiza, no inserta
 npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx         # inserta (incluye un tipeo corregible)
+npm run carga-historica -- 95000                             # prueba de estrés con datos sinteticos
+npm run validar-integridad                                   # valida lo que se haya insertado
 ```
+
+**Nota**: `carga-historica` inserta datos de prueba reales en la tabla — no es idempotente.
+Limpiar con `TRUNCATE registro_enrolamiento RESTART IDENTITY;` después de probar, salvo que
+quieras dejarlos para seguir explorando.
 
 **Nota sobre `xlsx`**: la versión publicada en el registro de npm tiene una vulnerabilidad de
 severidad alta sin fix ahí (SheetJS dejó de publicar actualizaciones en npm). Si alguna vez hay
@@ -144,9 +154,11 @@ fixtures/
   enrolamiento_ejemplo.xlsx     Excel de prueba para npm run ingest (solo lectura)
   enrolamiento_etl_prueba.xlsx  Excel de prueba para npm run etl (incluye un tipeo corregible)
 scripts/
-  run-sql.js                 Ejecuta un archivo .sql contra DATABASE_URL
-  ingest-excel.js            Corre el modulo de ingesta contra un Excel (npm run ingest)
-  procesar-excel.js          Corre el ETL completo, inserta en la base (npm run etl)
+  run-sql.js                       Ejecuta un archivo .sql contra DATABASE_URL
+  ingest-excel.js                  Corre el modulo de ingesta contra un Excel (npm run ingest)
+  procesar-excel.js                Corre el ETL completo, inserta en la base (npm run etl)
+  carga-historica-sintetica.js     Prueba de estres: genera e inserta N filas sinteticas
+  validar-integridad-historica.js  Valida integridad y uso de indices (EXPLAIN ANALYZE)
 src/
   db.js                      Pool de conexion a PostgreSQL
   server.js                  Servidor Express

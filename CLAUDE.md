@@ -111,13 +111,36 @@ Six catalog (master) tables plus one transactional table:
   as UTC, and this machine's timezone (Chile, behind UTC) shifts it back a day on serialization.
   This bit us once already; don't reintroduce a `Date` object in that field.
 
+### Historical load & indexing (Sprint 4)
+
+- `bulkInsertRegistros(pool, rows)` in `src/etl/bulkInsert.js` now batches internally
+  (`BATCH_SIZE = 5000`, staying under Postgres's 65535-param limit) but keeps a single
+  transaction across all batches — a failure partway through still rolls back everything, not
+  just the failed batch. Signature is unchanged from Sprint 3, so `src/etl/index.js`'s daily ETL
+  flow required no changes.
+- `db/schema.sql` gained indexes on `id_estado_sincronizacion`, `id_estado_registro`, and
+  `id_estado_general` (joining the Sprint 1 indexes on `fecha_enrolamiento`, `id_cuartel`,
+  `id_nacionalidad`) — these back the status-breakdown groupings the daily Telegram report needs.
+- `scripts/carga-historica-sintetica.js` (`npm run carga-historica -- <N>`, default 95000)
+  generates synthetic rows directly against the already-seeded catalogs — bypasses Excel entirely,
+  since Sprint 4 is testing bulk-insert/index performance, not re-exercising Sprint 2/3's parsing.
+  **Not idempotent** — running it writes real rows; `TRUNCATE registro_enrolamiento RESTART
+  IDENTITY;` afterward to keep the dev DB clean, same convention as the other test fixtures.
+- `scripts/validar-integridad-historica.js` (`npm run validar-integridad`) checks for unexpected
+  NULLs, `es_mayor_edad`/`edad_exacta` logical inconsistencies (nothing in the schema itself
+  prevents that combination — it's a business rule, not a constraint), and runs `EXPLAIN ANALYZE`
+  on representative dashboard-style queries to confirm the new indexes are actually used (not
+  just present) — verified with a 95k-row synthetic load: `Index Only Scan`/`Bitmap Index Scan`
+  in the plans, 95000 rows inserted in 19 batches in ~2.6s.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 4 (8–14 Sep 2026) is next: batched
-historical load (95k+ records), index optimization, and historical data integrity validation.
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 5 (15–21 Sep 2026) is next: SQL
+summary queries, reporting views, and the internal functions/endpoints that will generate the
+daily report data.
 
 ## Documentation & versioning
 

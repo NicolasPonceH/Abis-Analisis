@@ -57,3 +57,9 @@ CREATE TABLE IF NOT EXISTS registro_enrolamiento (
 CREATE INDEX IF NOT EXISTS idx_registro_fecha_enrolamiento ON registro_enrolamiento (fecha_enrolamiento);
 CREATE INDEX IF NOT EXISTS idx_registro_cuartel ON registro_enrolamiento (id_cuartel);
 CREATE INDEX IF NOT EXISTS idx_registro_nacionalidad ON registro_enrolamiento (id_nacionalidad);
+
+-- Sprint 4: soportan las agrupaciones por estado del reporte diario (sincronizados/pendientes/
+-- error, registrados/pendientes, general OK/con error) sin escanear toda la tabla historica.
+CREATE INDEX IF NOT EXISTS idx_registro_estado_sincronizacion ON registro_enrolamiento (id_estado_sincronizacion);
+CREATE INDEX IF NOT EXISTS idx_registro_estado_registro ON registro_enrolamiento (id_estado_registro);
+CREATE INDEX IF NOT EXISTS idx_registro_estado_general ON registro_enrolamiento (id_estado_general);
