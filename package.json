@@ -6,11 +6,13 @@
   "scripts": {
     "start": "node src/server.js",
     "db:schema": "node scripts/run-sql.js db/schema.sql",
-    "db:seed": "node scripts/run-sql.js db/seed_catalogos.sql"
+    "db:seed": "node scripts/run-sql.js db/seed_catalogos.sql",
+    "ingest": "node scripts/ingest-excel.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "pg": "^8.12.0"
+    "pg": "^8.12.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

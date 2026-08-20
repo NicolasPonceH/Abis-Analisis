@@ -70,12 +70,32 @@ Six catalog (master) tables plus one transactional table:
   FKs into `nacionalidad`, `cuartel`, and `equipo`. Indexed on `fecha_enrolamiento`, `id_cuartel`,
   and `id_nacionalidad` to support the planned statistics dashboard.
 
+### Excel ingestion module (`src/ingest/`, Sprint 2)
+
+- `headerSchema.js` is the single source of truth for expected Excel column headers and their
+  mapping to internal field names — **inferred** from the requirements doc, not yet validated
+  against a real production Excel file. Edit only this file if real headers differ.
+- `excelReader.js` reads the first sheet into raw header+row data (no validation/transformation).
+- `headerValidator.js` checks read headers against `headerSchema.js`.
+- `catalogMapper.js` loads all 6 catalog tables into normalized text→ID lookup maps and maps each
+  row. Because `cuartel.nombre_cuartel` is only unique per `(nombre_cuartel, id_unidad)` (not
+  globally), it resolves `unidad` within `region` first, then `cuartel` within that `unidad`.
+- `index.js`'s `processExcelFile(filePath, pool)` orchestrates read → validate → map. It does
+  **not** insert into the database — that's Sprint 3's ETL/bulk-insert step, which will consume
+  the mapped rows this module already produces.
+- `scripts/ingest-excel.js` (`npm run ingest -- <file.xlsx>`) runs the module manually.
+- The `xlsx` dependency is installed from SheetJS's own CDN
+  (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`), not the npm registry — the npm-published
+  version is stuck at 0.18.5 with an unfixed high-severity advisory. Don't `npm install xlsx`
+  plain; it'll silently reintroduce the vulnerable version.
+
 ## Roadmap context
 
-Sprint 2 (25–31 Aug 2026) is the next planned milestone: an Excel reading module (`xlsx` library),
-header/structure validation, and mapping of raw Excel text values to catalog IDs. When working on
-ingestion code, expect it to map free-text Excel columns (nationality, region/unit/cuartel names,
-equipment type) onto the catalog tables above rather than storing free text directly.
+Full 10-sprint plan (dates, deliverables, critical milestones) is in
+[`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
+[`docs/informe-requerimientos.md`](docs/informe-requerimientos.md). Sprint 3 (1–7 Sep 2026) is
+next: ETL transformation/cleanup logic and transactional bulk-insert into
+`registro_enrolamiento`, consuming `src/ingest`'s mapped-rows output.
 
 ## Documentation & versioning
 

@@ -11,13 +11,15 @@ docs/
   diagramas/    Diagramas del sistema, mantenidos a mano junto con el código
 ```
 
+- [`informe-requerimientos.md`](informe-requerimientos.md) — informe de requerimientos original
+  (funcionales, no funcionales, integración con Telegram), transcrito al repo.
 - [`diagramas/er-diagrama.md`](diagramas/er-diagrama.md) — modelo de datos (`db/schema.sql`).
 - [`diagramas/arquitectura.md`](diagramas/arquitectura.md) — componentes implementados vs.
   planificados.
-- [`diagramas/roadmap.md`](diagramas/roadmap.md) — línea de tiempo de los 10 sprints y convención
-  de versionado por tags.
-- [`sprints/AVANCE_SPRINT1.md`](sprints/AVANCE_SPRINT1.md) — primer informe de avance (Sprint 1,
-  cerrado).
+- [`diagramas/roadmap.md`](diagramas/roadmap.md) — línea de tiempo completa de los 10 sprints,
+  hitos críticos y convención de versionado por tags.
+- [`sprints/AVANCE_SPRINT1.md`](sprints/AVANCE_SPRINT1.md) — Sprint 1, cerrado (`v0.1.0`).
+- [`sprints/AVANCE_SPRINT2.md`](sprints/AVANCE_SPRINT2.md) — Sprint 2, cerrado (`v0.2.0`).
 
 ## Convenciones para nuevos sprints
 
