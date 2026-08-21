@@ -11,6 +11,8 @@ todavía una máquina de servidor separada ni una fuente real del Excel diario);
 [`docs/PLAN_DESPLIEGUE.md`](docs/PLAN_DESPLIEGUE.md) para el checklist y procedimiento cuando esos
 prerrequisitos existan.
 
+👉 [`docs/GUIA_RAPIDA.md`](docs/GUIA_RAPIDA.md): comandos para levantar todo y probar cada sprint.
+
 ## Estado actual
 
 - [x] **Sprint 1** (18-24 ago, `v0.1.0`): estructura del proyecto Node.js/Express, esquema

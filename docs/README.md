@@ -11,6 +11,8 @@ docs/
   diagramas/    Diagramas del sistema, mantenidos a mano junto con el código
 ```
 
+- [`GUIA_RAPIDA.md`](GUIA_RAPIDA.md) — comandos para encender el entorno y probar cada sprint,
+  organizados por sprint (índice rápido; el detalle completo está en cada `AVANCE_SPRINT{N}.md`).
 - [`informe-requerimientos.md`](informe-requerimientos.md) — informe de requerimientos original
   (funcionales, no funcionales, integración con Telegram), transcrito al repo.
 - [`diagramas/er-diagrama.md`](diagramas/er-diagrama.md) — modelo de datos (`db/schema.sql`).
