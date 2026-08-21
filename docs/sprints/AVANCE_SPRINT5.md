@@ -1,8 +1,8 @@
+
 ---
 title: "Informe de Avance — Sprint 5"
 subtitle: "Sistema de Gestión Automatizada de Identificación Biométrica (ABIS)"
 ---
-
 **Proyecto:** Sistema ABIS
 **Periodo del ciclo:** 15 de septiembre de 2026 – 21 de septiembre de 2026
 **Fecha de presentación:** 20 de agosto de 2026
@@ -20,12 +20,12 @@ agrupaciones**, con el siguiente entregable comprometido:
 
 ### 2.1. Vistas SQL (`db/views.sql`)
 
-| Vista | Qué agrupa |
-|---|---|
-| `vw_resumen_estado_diario` | Por fecha + dominio de estado (`SINCRONIZACION`/`REGISTRO`/`GENERAL`) + descripción — un `UNION ALL` de las tres FK independientes de `registro_enrolamiento` hacia `estado_proceso` |
-| `vw_resumen_nacionalidad_diario` | Por fecha + nacionalidad |
-| `vw_resumen_cuartel_diario` | Por fecha + cuartel ("cuarteles activos" del mensaje de Telegram) |
-| `vw_total_diario` | Total de enrolamientos por fecha, base para calcular porcentajes |
+| Vista                              | Qué agrupa                                                                                                                                                                                        |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vw_resumen_estado_diario`       | Por fecha + dominio de estado (`SINCRONIZACION`/`REGISTRO`/`GENERAL`) + descripción — un `UNION ALL` de las tres FK independientes de `registro_enrolamiento` hacia `estado_proceso` |
+| `vw_resumen_nacionalidad_diario` | Por fecha + nacionalidad                                                                                                                                                                           |
+| `vw_resumen_cuartel_diario`      | Por fecha + cuartel ("cuarteles activos" del mensaje de Telegram)                                                                                                                                  |
+| `vw_total_diario`                | Total de enrolamientos por fecha, base para calcular porcentajes                                                                                                                                   |
 
 Todas usan `CREATE OR REPLACE VIEW` (idempotentes) y se aplican con `npm run db:views`, siguiendo
 el mismo patrón que `db:schema`/`db:seed`. Se apoyan directamente en los índices agregados en

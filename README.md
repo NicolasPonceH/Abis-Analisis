@@ -21,8 +21,11 @@ funcional, no funcional y el flujo de integración con Telegram.
       (`db/views.sql`, `src/reportes/`) — incluye resúmenes por Cuartel, Unidad, Nacionalidad,
       Género y Edad (las tres últimas agregadas en un addendum post-cierre, ver
       [`AVANCE_SPRINT5.md`](docs/sprints/AVANCE_SPRINT5.md)).
-- [ ] **Sprint 6** (22-28 sep): bot de Telegram, template del mensaje diario.
-- [ ] Sprints 7-10: automatización del flujo completo, QA y despliegue.
+- [x] **Sprint 6** (22-28 sep, `v0.6.0`): bot de Telegram, cliente HTTP y template del mensaje
+      diario (`src/telegram/`), verificado con un envío real.
+- [ ] **Sprint 7** (29 sep-05 oct): automatización del flujo completo (Excel → ETL → BD →
+      Telegram) y disparadores programados.
+- [ ] Sprints 8-10: QA, preparación para producción y despliegue.
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
@@ -82,6 +85,8 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 |---|---|---|
 | `DATABASE_URL` | Cadena de conexión completa a PostgreSQL | `postgresql://usuario:password@localhost:5432/abis_db` |
 | `PORT` | Puerto donde escucha el servidor Express | `3000` |
+| `TELEGRAM_BOT_TOKEN` | Token del bot, obtenido de [@BotFather](https://t.me/BotFather) (`/newbot`) | `123456789:ABCdef...` |
+| `TELEGRAM_CHAT_ID` | Chat/grupo destino del reporte — obtenerlo mandándole `/start` al bot y consultando `https://api.telegram.org/bot<TOKEN>/getUpdates` | `1466879122` |
 
 ## Comandos disponibles
 
@@ -96,6 +101,7 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 | `npm run carga-historica -- <N>` | Genera e inserta `N` filas **sintéticas** (por defecto 95000) directamente contra los catálogos ya sembrados, para pruebas de estrés — no lee ningún Excel. |
 | `npm run validar-integridad` | Chequea integridad de `registro_enrolamiento` (NULLs inesperados, inconsistencias de edad, distribución por nacionalidad) y corre `EXPLAIN ANALYZE` sobre consultas representativas del futuro dashboard. |
 | `npm run datos-reporte-prueba` | Inserta un dataset fijo de 10 filas (fecha `2026-09-15`) con porcentajes exactos y conocidos, para probar `GET /reporte-diario` sin depender de datos aleatorios. |
+| `npm run telegram:enviar -- <YYYY-MM-DD>` | Arma el reporte de esa fecha, lo imprime en consola, y lo manda por Telegram al chat configurado en `TELEGRAM_CHAT_ID`. |
 | `node scripts/run-sql.js <archivo.sql>` | Mecanismo genérico para aplicar cualquier `.sql` suelto contra `DATABASE_URL` — no solo schema/seed. |
 
 Ejemplos con los archivos de prueba incluidos en el repo:
@@ -193,12 +199,14 @@ scripts/
   carga-historica-sintetica.js     Prueba de estres: genera e inserta N filas sinteticas
   validar-integridad-historica.js  Valida integridad y uso de indices (EXPLAIN ANALYZE)
   generar-datos-reporte-prueba.js  Dataset fijo (10 filas) para probar /reporte-diario
+  enviar-reporte-telegram.js      Manda el reporte de una fecha por Telegram (npm run telegram:enviar)
 src/
   db.js                      Pool de conexion a PostgreSQL
   server.js                  Servidor Express (GET /health, GET /reporte-diario)
   ingest/                    Lectura de Excel, validacion de cabeceras y mapeo a catalogos
   etl/                       Correccion de tipeos e insercion transaccional (bulk insert)
   reportes/                  Consulta las vistas y arma el JSON del reporte diario
+  telegram/                  Cliente HTTP y formateo del mensaje Markdown
 ```
 
 ## Modelo de datos y arquitectura

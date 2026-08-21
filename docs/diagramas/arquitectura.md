@@ -5,13 +5,15 @@ actualiza a medida que cada pieza planificada pasa a estar implementada.
 
 ```mermaid
 flowchart LR
-    subgraph impl["Implementado (Sprint 1-5)"]
+    subgraph impl["Implementado (Sprint 1-6)"]
         direction LR
         API["Express server<br/>src/server.js<br/>GET /health<br/>GET /reporte-diario"]
         POOL["Pool pg<br/>src/db.js"]
         DB[("PostgreSQL<br/>abis_db<br/>indices en fecha/cuartel/<br/>nacionalidad/3 estados")]
         VIEWS[("Vistas de resumen<br/>db/views.sql")]
         REPORTE["reporteDiario.js<br/>(consulta vistas, calcula %)"]
+        FORMATO["formatearReporte.js<br/>(JSON -> Markdown)"]
+        TGCLIENT["telegramClient.js<br/>(sendMessage, fetch nativo)"]
         RUNSQL["scripts/run-sql.js<br/>(aplica .sql sueltos)"]
         EXCEL[/"Excel diario de<br/>enrolamiento"/]
         READER["excelReader.js<br/>(lee xlsx a filas crudas)"]
@@ -22,6 +24,8 @@ flowchart LR
         CLIETL["scripts/procesar-excel.js<br/>(npm run etl, inserta)"]
         SINTETICO["scripts/carga-historica-sintetica.js<br/>(npm run carga-historica)"]
         INTEGRIDAD["scripts/validar-integridad-historica.js<br/>(npm run validar-integridad)"]
+        CLITG["scripts/enviar-reporte-telegram.js<br/>(npm run telegram:enviar, manual)"]
+        TG(["Bot de Telegram<br/>@AbisSystemBot"])
 
         API --> POOL --> DB
         DB --- VIEWS
@@ -33,17 +37,19 @@ flowchart LR
         CLIETL --> READER
         SINTETICO --> BULKINSERT
         INTEGRIDAD --> POOL
+        CLITG --> REPORTE
+        CLITG --> FORMATO --> TGCLIENT --> TG
     end
 
-    subgraph plan["Planificado (Sprint 6+)"]
+    subgraph plan["Planificado (Sprint 7+)"]
         direction LR
-        TG(["Bot de Telegram<br/>(formatea la data de<br/>reporteDiario.js)"])
+        CRON(["Disparador automatico<br/>(tarea programada / cron)"])
     end
 
-    REPORTE -.-> TG
+    CLITG -.-> CRON
 
     classDef planned stroke-dasharray: 4 3
-    class TG planned
+    class CRON planned
 ```
 
 ## Lectura del diagrama
@@ -60,10 +66,12 @@ flowchart LR
   `scripts/carga-historica-sintetica.js` y `scripts/validar-integridad-historica.js` (Sprint 4)
   son herramientas de prueba de estrés e integridad, no parte del flujo diario de producción.
   `src/reportes/reporteDiario.js` (Sprint 5) consulta las vistas de `db/views.sql` y arma el JSON
-  del reporte diario con conteos y porcentajes ya calculados.
-- **Planificado** (líneas punteadas): Sprint 6-7 va a tomar la data que ya arma
-  `reporteDiario.js` y formatearla como el mensaje de Telegram (ver [roadmap.md](roadmap.md)) —
-  no va a reimplementar las consultas, solo el formateo y el envío.
+  del reporte diario con conteos y porcentajes ya calculados. `src/telegram/` (Sprint 6) toma esa
+  data (`formatearReporte.js`), la convierte al mensaje Markdown, y `telegramClient.js` la manda
+  vía la API de Telegram. `npm run telegram:enviar -- <fecha>` corre ese flujo manualmente.
+- **Planificado** (líneas punteadas): Sprint 7 va a agregar un disparador automático (tarea
+  programada) que corra `enviar-reporte-telegram.js` — o su equivalente ya integrado con el
+  ETL diario — sin intervención manual (ver [roadmap.md](roadmap.md)).
 
 ## Notas sobre el módulo de ingesta y ETL
 
@@ -95,6 +103,14 @@ flowchart LR
   `reporteDiario.js` las consulta y devuelve JSON con porcentajes ya calculados — no el mensaje de
   Telegram formateado, eso queda para Sprint 6-7. `GET /reporte-diario?fecha=YYYY-MM-DD` lo expone
   vía HTTP; sin `fecha`, usa la más reciente con datos.
+- **Bot de Telegram (Sprint 6)**: `formatearReporte.js` no hardcodea las etiquetas de estado del
+  mensaje de ejemplo del informe ("Sincronizados", "Registrados") — usa las descripciones reales
+  del catálogo `estado_proceso`, con un emoji asignado por patrón (`ERROR`→❌, `PENDIENTE`→⏳,
+  `MENOR`→⚠️, resto→✅), porque ese catálogo es configurable y todavía tiene datos de ejemplo. Todo
+  texto que viene de datos (no literales nuestros) pasa por `escaparMarkdown()` antes de
+  insertarse en el mensaje — sin esto, una descripción con `_` (como `CON_ERROR`, ya en el seed de
+  ejemplo) rompe el parseo de Markdown de Telegram. Confirmado con un envío real, ver
+  [`AVANCE_SPRINT6.md`](../sprints/AVANCE_SPRINT6.md).
 
 ## Cómo mantenerlo actualizado
 

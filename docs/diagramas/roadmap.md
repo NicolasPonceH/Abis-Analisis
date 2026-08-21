@@ -19,8 +19,8 @@ gantt
     Sprint 5: Calculo de metricas y agrupaciones (v0.5.0) :done, s5, 2026-09-15, 2026-09-21
 
     section Fase 3 - Integracion y notificaciones
-    Sprint 6: Bot de Telegram (v0.6.0) :active, s6, 2026-09-22, 2026-09-28
-    Sprint 7: Automatizacion del flujo completo (v0.7.0) :s7, 2026-09-29, 2026-10-05
+    Sprint 6: Bot de Telegram (v0.6.0) :done, s6, 2026-09-22, 2026-09-28
+    Sprint 7: Automatizacion del flujo completo (v0.7.0) :active, s7, 2026-09-29, 2026-10-05
 
     section Fase 4 - Pruebas finales y despliegue
     Sprint 8: Testing integrado y QA (v0.8.0) :s8, 2026-10-06, 2026-10-12

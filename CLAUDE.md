@@ -185,14 +185,36 @@ Six catalog (master) tables plus one transactional table:
   the report output can be checked against exact expected numbers rather than "looks about
   right." Not idempotent; truncate after use like the other test data scripts.
 
+### Telegram bot (`src/telegram/`, Sprint 6)
+
+- Bot `@AbisSystemBot` created via BotFather; `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` live in
+  `.env` (never committed). To get a chat ID for a new bot/chat: message the bot `/start`, then
+  `GET https://api.telegram.org/bot<TOKEN>/getUpdates` and read `result[].message.chat.id`.
+- `telegramClient.js`'s `enviarMensaje({ token, chatId, texto })` wraps Telegram's `sendMessage`
+  using Node 18's native `fetch` — no new dependency. Throws if Telegram responds `ok: false`.
+- `formatearReporte.js` turns `obtenerReporteDiario()`'s JSON (Sprint 5) into the Markdown message
+  from the requirements doc section 5. It does **not** hardcode status labels like "Sincronizados"
+  from that example — `estado_proceso` descriptions are catalog-driven and still placeholder data,
+  so each row is rendered with its actual `descripcion`, with an emoji picked by regex pattern
+  (`ERROR`→❌, `PENDIENTE`→⏳, `MENOR`→⚠️, else→✅).
+- **Markdown-escaping gotcha**: Telegram's classic `Markdown` parse mode uses `_` for italics: an
+  unescaped underscore in dynamic data (the seed catalog's `CON_ERROR` state, for instance) breaks
+  parsing of the *entire* message. Any value that comes from data (not a literal we wrote) must go
+  through `escaparMarkdown()` before being interpolated — confirmed necessary with a real send.
+- `scripts/enviar-reporte-telegram.js` (`npm run telegram:enviar -- <YYYY-MM-DD>`) is the manual
+  trigger: builds the report, prints the plain-text message to console first (so a formatting bug
+  is visible before spending a real Telegram send), then sends it. Sprint 7 will wire this into an
+  automatic scheduler rather than requiring a manual run.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 6 (22–28 Sep 2026) is next: creating
-the Telegram bot via BotFather, an HTTP client for the Telegram API, and the Markdown message
-template — which should format `obtenerReporteDiario()`'s output, not reimplement its queries.
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 7 (29 Sep–05 Oct 2026) is next: wiring
+Excel → ETL → BD → `reporteDiario` → Telegram into one automatic flow, plus a scheduled trigger
+(likely a user-level Scheduled Task on this machine, same constraint as PostgreSQL — no admin
+rights for a real Windows service) and handling an empty/corrupt daily Excel gracefully.
 
 ## Documentation & versioning
 
