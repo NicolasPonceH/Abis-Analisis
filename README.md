@@ -29,7 +29,10 @@ funcional, no funcional y el flujo de integración con Telegram.
       [`AVANCE_SPRINT7.md`](docs/sprints/AVANCE_SPRINT7.md)).
 - [x] **Sprint 8** (6-12 oct, `v0.8.0`): testing integrado — simulación de cargas diarias reales,
       3 bugs de QA encontrados y corregidos (ver [`AVANCE_SPRINT8.md`](docs/sprints/AVANCE_SPRINT8.md)).
-- [ ] **Sprint 9** (13-19 oct): preparación para producción.
+- [x] **Sprint 9** (13-19 oct, `v0.9.0`): manual de operación (`docs/MANUAL_OPERACION.md`),
+      hardening de la base (rol `abis_app` de privilegios mínimos, verificado con pruebas
+      positivas y negativas) y checklist de entorno de producción (ver
+      [`AVANCE_SPRINT9.md`](docs/sprints/AVANCE_SPRINT9.md)).
 - [ ] Sprint 10: despliegue y marcha blanca.
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
@@ -93,6 +96,11 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 | `TELEGRAM_BOT_TOKEN` | Token del bot, obtenido de [@BotFather](https://t.me/BotFather) (`/newbot`) | `123456789:ABCdef...` |
 | `TELEGRAM_CHAT_ID` | Chat/grupo destino del reporte — obtenerlo mandándole `/start` al bot y consultando `https://api.telegram.org/bot<TOKEN>/getUpdates` | `1466879122` |
 
+En desarrollo, `DATABASE_URL` usa el superusuario `postgres` por comodidad (necesita poder
+aplicar `schema.sql`/`views.sql`). En producción, la app debería conectarse con el rol
+`abis_app` (`npm run db:hardening` lo crea) — privilegios mínimos, sin DDL. Ver
+[`docs/MANUAL_OPERACION.md`](docs/MANUAL_OPERACION.md).
+
 ## Comandos disponibles
 
 | Comando | Qué hace |
@@ -101,6 +109,7 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 | `npm run db:schema` | Aplica `db/schema.sql` contra `DATABASE_URL` (crea/actualiza tablas, es idempotente). |
 | `npm run db:seed` | Carga `db/seed_catalogos.sql` (datos de ejemplo en las tablas maestras). |
 | `npm run db:views` | Aplica `db/views.sql` (vistas de resumen para reportes, idempotente). |
+| `npm run db:hardening` | Crea el rol `abis_app` con privilegios mínimos (sin DDL, sin UPDATE/DELETE) — pensado para que la app en producción no corra con el superusuario. |
 | `npm run ingest -- <archivo.xlsx>` | Modo de solo lectura: lee el Excel, valida cabeceras y mapea filas a IDs de catálogo. No inserta nada en la base — útil para previsualizar. |
 | `npm run etl -- <archivo.xlsx>` | Igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente (por lotes) las filas válidas en `registro_enrolamiento`. No manda nada por Telegram. |
 | `npm run carga-historica -- <N>` | Genera e inserta `N` filas **sintéticas** (por defecto 95000) directamente contra los catálogos ya sembrados, para pruebas de estrés — no lee ningún Excel. |
@@ -192,10 +201,14 @@ db/
   schema.sql                 DDL del esquema normalizado (3NF)
   seed_catalogos.sql         Datos de ejemplo para las tablas maestras
   views.sql                  Vistas de resumen para reportes (npm run db:views)
+  hardening.sql              Rol abis_app de privilegios minimos (npm run db:hardening)
 docs/
   informe-requerimientos.md  Informe de requerimientos original
+  MANUAL_OPERACION.md        Como operar el sistema dia a dia (Sprint 9)
   diagramas/                 ER, arquitectura y roadmap (Mermaid)
   sprints/                   Informe de avance por sprint cerrado
+logs/
+  flujo-diario.log           Log de la tarea programada (gitignored, no existe hasta la 1ra corrida)
 fixtures/
   enrolamiento_ejemplo.xlsx     Excel de prueba para npm run ingest (solo lectura)
   enrolamiento_etl_prueba.xlsx  Excel de prueba para npm run etl (incluye un tipeo corregible)

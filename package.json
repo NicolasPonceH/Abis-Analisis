@@ -8,6 +8,7 @@
     "db:schema": "node scripts/run-sql.js db/schema.sql",
     "db:seed": "node scripts/run-sql.js db/seed_catalogos.sql",
     "db:views": "node scripts/run-sql.js db/views.sql",
+    "db:hardening": "node scripts/run-sql.js db/hardening.sql",
     "ingest": "node scripts/ingest-excel.js",
     "etl": "node scripts/procesar-excel.js",
     "carga-historica": "node scripts/carga-historica-sintetica.js",

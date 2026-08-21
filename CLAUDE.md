@@ -246,14 +246,37 @@ Six catalog (master) tables plus one transactional table:
   underlying step succeeded but the Telegram send itself failed — `scripts/flujo-diario.js` exits
   non-zero in that case so a scheduled-task failure is visible even though the data load worked.
 
+### Production readiness (Sprint 9)
+
+- `db/hardening.sql` (`npm run db:hardening`, idempotent via `DO`/exception check) creates role
+  `abis_app` with least-privilege grants: `SELECT` only on catalogs and the reporting views,
+  `SELECT`+`INSERT` (no `UPDATE`/`DELETE`, no DDL) on `registro_enrolamiento`. Verified two ways:
+  the full `flujo-diario` pipeline works end-to-end connected as `abis_app`, and `DROP`/`UPDATE`/
+  `DELETE` as that role are all rejected by Postgres. **Dev's `.env` still uses the `postgres`
+  superuser** (needed for `db:schema`/`db:views`/`db:hardening` themselves) — only a genuine
+  production `DATABASE_URL` should switch to `abis_app`. The password in `db/hardening.sql` is a
+  placeholder (`CAMBIAR_ESTA_PASSWORD_EN_PRODUCCION`); change it before applying to a real prod DB.
+- `docs/MANUAL_OPERACION.md` is a separate, non-developer-facing runbook (this file, `CLAUDE.md`,
+  stays dev-focused) — health checks, what each Telegram alert means, how to re-run a failed day
+  manually, where logs/credentials live.
+- **Scheduled-task logging gap found and fixed**: the Sprint 7 `Register-ScheduledTask` command
+  never captured console output anywhere — a failure before the Telegram-alert step was
+  invisible. Fixed by wrapping the action in `cmd.exe /c "... >> logs\flujo-diario.log 2>&1"`
+  instead of calling `node.exe` directly; see the addendum in `docs/sprints/AVANCE_SPRINT7.md`.
+  `logs/` is gitignored (`logs/*.log`) but the directory itself is tracked via `logs/.gitkeep`.
+- No real production server/machine exists yet — Sprint 9's "production environment config"
+  deliverable is a checklist (in `docs/sprints/AVANCE_SPRINT9.md`) of what's still undecided
+  (target machine, real daily-Excel drop path, a separate production Telegram bot, the real
+  institutional catalogs replacing `seed_catalogos.sql`), not a completed deployment.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 9 (13–19 Oct 2026) is next:
-production-readiness — technical documentation, an operations manual, production environment
-config, and hardening the database/scripts.
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 10 (20–23 Oct 2026), the final
+sprint, is next: deployment and soft launch — contingent on the Sprint 9 production checklist
+actually being resolved (target machine, real Excel source, production bot/catalogs).
 
 ## Documentation & versioning
 

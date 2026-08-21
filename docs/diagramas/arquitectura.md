@@ -5,11 +5,11 @@ actualiza a medida que cada pieza planificada pasa a estar implementada.
 
 ```mermaid
 flowchart LR
-    subgraph impl["Implementado (Sprint 1-7)"]
+    subgraph impl["Implementado (Sprint 1-9)"]
         direction LR
         API["Express server<br/>src/server.js<br/>GET /health<br/>GET /reporte-diario"]
         POOL["Pool pg<br/>src/db.js"]
-        DB[("PostgreSQL<br/>abis_db<br/>indices en fecha/cuartel/<br/>nacionalidad/3 estados")]
+        DB[("PostgreSQL<br/>abis_db<br/>indices en fecha/cuartel/<br/>nacionalidad/3 estados<br/>rol abis_app (min. privilegio)")]
         VIEWS[("Vistas de resumen<br/>db/views.sql")]
         REPORTE["reporteDiario.js<br/>(consulta vistas, calcula %)"]
         FORMATO["formatearReporte.js<br/>(JSON -> Markdown,<br/>+ alertas de error)"]
@@ -131,6 +131,14 @@ flowchart LR
   silenciosamente el error original — ahora `notificarSinFallar()` deja el error real como lo que
   se propaga, y la falla de notificación queda solo como un log aparte. Ver
   [`AVANCE_SPRINT8.md`](../sprints/AVANCE_SPRINT8.md).
+- **Hardening (Sprint 9)**: `db/hardening.sql` crea el rol `abis_app`, con privilegios mínimos
+  (lectura de catálogos/vistas, lectura+inserción en `registro_enrolamiento`, sin DDL ni
+  UPDATE/DELETE) — verificado con pruebas positivas (el flujo completo funciona con ese rol) y
+  negativas (`DROP`/`UPDATE`/`DELETE` son rechazados). Producción debería usar `abis_app` para la
+  `DATABASE_URL` de la aplicación, reservando el superusuario solo para aplicar
+  `schema.sql`/`views.sql`/`hardening.sql`. Ver
+  [`AVANCE_SPRINT9.md`](../sprints/AVANCE_SPRINT9.md) y
+  [`MANUAL_OPERACION.md`](../MANUAL_OPERACION.md).
 
 ## Cómo mantenerlo actualizado
 

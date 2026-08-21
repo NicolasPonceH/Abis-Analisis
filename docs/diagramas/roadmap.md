@@ -24,8 +24,8 @@ gantt
 
     section Fase 4 - Pruebas finales y despliegue
     Sprint 8: Testing integrado y QA (v0.8.0) :done, s8, 2026-10-06, 2026-10-12
-    Sprint 9: Preparacion para produccion (v0.9.0) :active, s9, 2026-10-13, 2026-10-19
-    Sprint 10: Despliegue y marcha blanca (v1.0.0) :s10, 2026-10-20, 2026-10-23
+    Sprint 9: Preparacion para produccion (v0.9.0) :done, s9, 2026-10-13, 2026-10-19
+    Sprint 10: Despliegue y marcha blanca (v1.0.0) :active, s10, 2026-10-20, 2026-10-23
 ```
 
 ## Detalle por sprint

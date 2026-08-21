@@ -26,6 +26,8 @@ docs/
 - [`sprints/AVANCE_SPRINT6.md`](sprints/AVANCE_SPRINT6.md) — Sprint 6, cerrado (`v0.6.0`).
 - [`sprints/AVANCE_SPRINT7.md`](sprints/AVANCE_SPRINT7.md) — Sprint 7, cerrado (`v0.7.0`).
 - [`sprints/AVANCE_SPRINT8.md`](sprints/AVANCE_SPRINT8.md) — Sprint 8, cerrado (`v0.8.0`).
+- [`sprints/AVANCE_SPRINT9.md`](sprints/AVANCE_SPRINT9.md) — Sprint 9, cerrado (`v0.9.0`).
+- [`MANUAL_OPERACION.md`](MANUAL_OPERACION.md) — cómo operar el sistema día a día (Sprint 9).
 
 ## Convenciones para nuevos sprints
 

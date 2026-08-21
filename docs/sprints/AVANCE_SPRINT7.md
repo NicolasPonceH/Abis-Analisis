@@ -140,6 +140,29 @@ No requiere permisos de administrador (es una tarea a nivel de usuario, igual qu
 `ensure-running.ps1` de PostgreSQL). Para borrarla despues:
 `Unregister-ScheduledTask -TaskName "ABIS-FlujoDiario" -Confirm:$false`.
 
+## Addendum (Sprint 9): comando actualizado con log a archivo
+
+El comando de arriba no guardaba la salida de consola en ningún lado — si la tarea fallaba antes
+de siquiera intentar notificar por Telegram (ej. Node no arranca), no había forma de investigar
+qué pasó. Se corrigió agregando redirección a `logs/flujo-diario.log` (carpeta gitignored, no se
+versiona). El comando vigente es este, no el de arriba:
+
+```powershell
+$nodeExe = "C:\Program Files\nodejs\node.exe"
+$proyecto = "C:\Users\Nicolás\Desktop\sistema-abis"
+$excelDiario = "$proyecto\fixtures\enrolamiento_etl_prueba.xlsx"  # cambiar por la ruta real cuando exista
+$log = "$proyecto\logs\flujo-diario.log"
+
+$comando = "`"$nodeExe`" scripts\flujo-diario.js `"$excelDiario`" >> `"$log`" 2>&1"
+$action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$comando`"" -WorkingDirectory $proyecto
+$trigger = New-ScheduledTaskTrigger -Daily -At "07:00"
+Register-ScheduledTask -TaskName "ABIS-FlujoDiario" -Action $action -Trigger $trigger -Description "Corre Excel -> ETL -> BD -> Telegram todos los dias a las 07:00, log en logs\flujo-diario.log."
+```
+
+La redirección se verificó corriendo el mismo comando manualmente (no vía Task Scheduler) y
+confirmando que `logs/flujo-diario.log` recibe la salida esperada — ver
+[`AVANCE_SPRINT9.md`](AVANCE_SPRINT9.md).
+
 ## 5. Próximos pasos (Sprint 8, 6–12 oct)
 
 Según la hoja de ruta, el siguiente ciclo corresponde a **testing integrado y QA**:
