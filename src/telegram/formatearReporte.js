@@ -24,10 +24,17 @@ function formatearSeccion(titulo, filas) {
   return `*${titulo}:*\n${lineas.join("\n")}`;
 }
 
+// Tope de items por lista (Sprint 8, QA): con el catalogo de ejemplo hay como mucho 3
+// cuarteles, pero el catalogo institucional real puede tener decenas. Sin este limite, una
+// lista larga puede hacer que el mensaje entero supere el limite de caracteres de Telegram.
+const MAX_ITEMS_LISTA = 8;
+
 function formatearLista(titulo, filas, campo) {
   if (filas.length === 0) return `- ${titulo}: sin datos`;
-  const texto = filas.map((f) => `${escaparMarkdown(f[campo])} (${f.porcentaje}%)`).join(", ");
-  return `- ${titulo}: ${texto}`;
+  const visibles = filas.slice(0, MAX_ITEMS_LISTA);
+  const texto = visibles.map((f) => `${escaparMarkdown(f[campo])} (${f.porcentaje}%)`).join(", ");
+  const restantes = filas.length - visibles.length;
+  return `- ${titulo}: ${texto}${restantes > 0 ? ` y ${restantes} más` : ""}`;
 }
 
 function formatearFecha(fecha) {
@@ -47,7 +54,7 @@ function formatearReporte(reporte) {
 
   return [
     `📊 *Reporte Diario ABIS - ${fecha}* 📊`,
-    `Total de enrolamientos: ${reporte.total}`,
+    `Total de enrolamientos: ${reporte.total.toLocaleString("es-CL")}`,
     "",
     formatearSeccion("Sincronización", reporte.sincronizacion),
     "",

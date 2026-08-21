@@ -17,6 +17,20 @@ async function notificar(texto) {
   await enviarMensaje({ token, chatId, texto });
 }
 
+// Envuelve notificar() para que una falla de Telegram (token invalido, sin internet, API caida)
+// nunca tape el error original que se estaba intentando reportar (bug encontrado en QA, Sprint 8:
+// antes, si notificar() fallaba dentro de un catch, esa falla reemplazaba silenciosamente al
+// error real). Devuelve si la notificacion salio bien, y deja un log en consola si no.
+async function notificarSinFallar(texto) {
+  try {
+    await notificar(texto);
+    return true;
+  } catch (err) {
+    console.error("No se pudo notificar por Telegram:", err.message);
+    return false;
+  }
+}
+
 // Orquesta el flujo diario completo (Sprint 7): Excel -> ETL -> BD -> reporte -> Telegram, sin
 // intervencion manual. Si algo falla (Excel corrupto, vacio, o con cabeceras invalidas), no
 // falla en silencio: notifica el problema por el mismo canal de Telegram, para que alguien se
@@ -26,7 +40,7 @@ async function ejecutarFlujoDiario(filePath, pool) {
   try {
     resultadoEtl = await runEtl(filePath, pool);
   } catch (err) {
-    await notificar(formatearAlerta(`No se pudo leer el archivo "${filePath}": ${err.message}`));
+    await notificarSinFallar(formatearAlerta(`No se pudo leer el archivo "${filePath}": ${err.message}`));
     throw err;
   }
 
@@ -39,16 +53,16 @@ async function ejecutarFlujoDiario(filePath, pool) {
         ? `Columnas no reconocidas: ${resultadoEtl.headerValidation.unexpected.join(", ")}.`
         : null,
     ].filter(Boolean).join(" ");
-    await notificar(formatearAlerta(`Cabeceras del Excel invalidas. ${detalle}`));
-    return { ...resultadoEtl, reporte: null, notificado: "alerta_cabeceras" };
+    const notificado = await notificarSinFallar(formatearAlerta(`Cabeceras del Excel invalidas. ${detalle}`));
+    return { ...resultadoEtl, reporte: null, notificado: notificado ? "alerta_cabeceras" : "alerta_cabeceras_sin_notificar" };
   }
 
   if (resultadoEtl.insertResult.inserted === 0) {
     const razon = resultadoEtl.errors.length > 0
       ? `todas las filas (${resultadoEtl.errors.length}) tenian errores de datos`
       : "el archivo no tiene ninguna fila de datos";
-    await notificar(formatearAlerta(`El Excel "${filePath}" no cargo ningun registro: ${razon}.`));
-    return { ...resultadoEtl, reporte: null, notificado: "alerta_vacio" };
+    const notificado = await notificarSinFallar(formatearAlerta(`El Excel "${filePath}" no cargo ningun registro: ${razon}.`));
+    return { ...resultadoEtl, reporte: null, notificado: notificado ? "alerta_vacio" : "alerta_vacio_sin_notificar" };
   }
 
   // Un Excel diario deberia traer una sola fecha; si por algun motivo trae varias, reportamos
@@ -62,8 +76,11 @@ async function ejecutarFlujoDiario(filePath, pool) {
     texto += `\n\n⚠️ ${resultadoEtl.errors.length} fila(s) del Excel no se pudieron procesar (ver logs del ETL).`;
   }
 
-  await notificar(texto);
-  return { ...resultadoEtl, reporte, notificado: "reporte" };
+  // Si Telegram falla aca, la carga en si igual fue exitosa (los datos ya estan en la BD) —
+  // no tiene sentido tratarlo como una falla del flujo completo, pero si hay que dejarlo
+  // reflejado en el resultado para que quien llame (o los logs de la tarea programada) se entere.
+  const notificado = await notificarSinFallar(texto);
+  return { ...resultadoEtl, reporte, notificado: notificado ? "reporte" : "reporte_sin_notificar" };
 }
 
 module.exports = { ejecutarFlujoDiario };

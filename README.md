@@ -27,8 +27,10 @@ funcional, no funcional y el flujo de integración con Telegram.
       solo paso (`src/flujo/`), con notificación por Telegram si el Excel viene vacío o corrupto.
       Disparador programado documentado y probado, no activado (ver
       [`AVANCE_SPRINT7.md`](docs/sprints/AVANCE_SPRINT7.md)).
-- [ ] **Sprint 8** (6-12 oct): testing integrado y QA.
-- [ ] Sprints 9-10: preparación para producción y despliegue.
+- [x] **Sprint 8** (6-12 oct, `v0.8.0`): testing integrado — simulación de cargas diarias reales,
+      3 bugs de QA encontrados y corregidos (ver [`AVANCE_SPRINT8.md`](docs/sprints/AVANCE_SPRINT8.md)).
+- [ ] **Sprint 9** (13-19 oct): preparación para producción.
+- [ ] Sprint 10: despliegue y marcha blanca.
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).

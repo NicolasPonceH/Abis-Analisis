@@ -14,7 +14,13 @@ ejecutarFlujoDiario(filePath, pool)
     if (resultado.insertResult) {
       console.log(`Filas insertadas: ${resultado.insertResult.inserted}`);
     }
-    return pool.end();
+    // "..._sin_notificar" significa que el ETL funciono pero Telegram fallo al avisar — sale
+    // con codigo de error igual, para que una tarea programada lo marque como fallido y alguien
+    // se entere por otro medio (revisar logs), aunque los datos ya hayan quedado bien cargados.
+    const huboFallaDeNotificacion = resultado.notificado.endsWith("_sin_notificar");
+    return pool.end().then(() => {
+      if (huboFallaDeNotificacion) process.exit(1);
+    });
   })
   .catch((err) => {
     console.error("Error en el flujo diario:", err.message);

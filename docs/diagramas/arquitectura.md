@@ -123,6 +123,14 @@ flowchart LR
   insertarse en el mensaje — sin esto, una descripción con `_` (como `CON_ERROR`, ya en el seed de
   ejemplo) rompe el parseo de Markdown de Telegram. Confirmado con un envío real, ver
   [`AVANCE_SPRINT6.md`](../sprints/AVANCE_SPRINT6.md).
+- **QA (Sprint 8)**: `formatearLista()` corta las listas largas a 8 items ("y N más"), y
+  `telegramClient.js` trunca cualquier mensaje que supere el límite de 4096 caracteres de
+  Telegram — ninguno de los dos era un problema con el catálogo de ejemplo, pero sí lo sería con
+  un catálogo institucional real más grande. También se corrigió un bug de manejo de errores en
+  `flujoDiario.js`: si Telegram fallaba al mandar una *alerta* de error, esa falla tapaba
+  silenciosamente el error original — ahora `notificarSinFallar()` deja el error real como lo que
+  se propaga, y la falla de notificación queda solo como un log aparte. Ver
+  [`AVANCE_SPRINT8.md`](../sprints/AVANCE_SPRINT8.md).
 
 ## Cómo mantenerlo actualizado
 

@@ -220,21 +220,40 @@ Six catalog (master) tables plus one transactional table:
 - If the Excel has rows spanning more than one `fecha_enrolamiento` (shouldn't happen for a real
   daily file, but not validated against), the report is generated for the **most recent** date
   among the inserted rows, not all of them.
-- **The scheduled trigger is documented but not registered.** Same reasoning as the PostgreSQL
-  watchdog task: Claude Code's auto-mode classifier blocks `Register-ScheduledTask` calls by
-  default (it's also a common persistence technique), so it needs the user to run it explicitly.
-  The ready-to-run `Register-ScheduledTask` command is in `docs/sprints/AVANCE_SPRINT7.md` — it
-  points at a placeholder fixture path since there's no real daily-drop folder defined yet; that
-  has to be updated before actually registering it.
+- **The scheduled trigger is documented but not left registered.** Same reasoning as the
+  PostgreSQL watchdog task: Claude Code's auto-mode classifier blocks `Register-ScheduledTask`
+  calls by default (it's also a common persistence technique), so it needs the user to run it
+  explicitly. The ready-to-run `Register-ScheduledTask` command is in
+  `docs/sprints/AVANCE_SPRINT7.md` — it points at a placeholder fixture path since there's no real
+  daily-drop folder defined yet, so update that before registering it for real. (The user did
+  register + `Start-ScheduledTask` + unregister it once, live, as a smoke test — it ran the
+  fixture successfully. Don't assume a task named `ABIS-FlujoDiario` currently exists.)
+
+### QA fixes (Sprint 8)
+
+- `src/telegram/formatearReporte.js`'s `formatearLista()` now caps each list at `MAX_ITEMS_LISTA`
+  (8) items, appending "y N más" — the example seed catalog only has 3 cuarteles, so this never
+  triggered before, but a real institutional catalog with dozens of cuarteles/unidades could
+  otherwise blow past Telegram's 4096-character message limit.
+- `telegramClient.js`'s `enviarMensaje()` now truncates `texto` if it exceeds 4096 chars before
+  sending, as a last-resort safety net (belt-and-suspenders alongside the list cap above).
+- **Real bug fixed in `flujoDiario.js`**: the alert-sending calls (`notificar()`, inside the
+  `catch`/error branches) were unguarded — if Telegram itself failed while trying to report an
+  error (bad token, network down), that secondary failure replaced the original error, hiding the
+  real cause. Fixed with `notificarSinFallar()`, which logs a Telegram failure to console but
+  always lets the original error/result propagate. `ejecutarFlujoDiario`'s returned `notificado`
+  field now has `_sin_notificar`-suffixed variants (e.g. `"reporte_sin_notificar"`) when the
+  underlying step succeeded but the Telegram send itself failed — `scripts/flujo-diario.js` exits
+  non-zero in that case so a scheduled-task failure is visible even though the data load worked.
 
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 8 (6–12 Oct 2026) is next: integrated
-testing/QA — simulating real daily loads, validating Telegram metrics against a manual Excel
-check, and adjusting the Telegram report's formatting based on that.
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 9 (13–19 Oct 2026) is next:
+production-readiness — technical documentation, an operations manual, production environment
+config, and hardening the database/scripts.
 
 ## Documentation & versioning
 
