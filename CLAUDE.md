@@ -206,15 +206,35 @@ Six catalog (master) tables plus one transactional table:
   is visible before spending a real Telegram send), then sends it. Sprint 7 will wire this into an
   automatic scheduler rather than requiring a manual run.
 
+### Automated daily flow (`src/flujo/`, Sprint 7)
+
+- `flujoDiario.js`'s `ejecutarFlujoDiario(filePath, pool)` is the single entry point that chains
+  everything: `runEtl` (Sprint 3) → `obtenerReporteDiario` (Sprint 5) → `formatearReporte` +
+  `enviarMensaje` (Sprint 6). `scripts/flujo-diario.js` (`npm run flujo-diario -- <file.xlsx>`) is
+  the CLI wrapper — this is the command a scheduled trigger should call, not `npm run etl` +
+  `npm run telegram:enviar` chained separately.
+- **Never fails silently**: a corrupt/unreadable file, invalid headers, or zero successfully-
+  mapped rows each send a Telegram alert (`formatearAlerta()` in `src/telegram/formatearReporte.js`)
+  before returning/throwing, instead of just logging to a console nobody's watching. A partial
+  success (some rows rejected) still sends the normal report, with an appended warning line.
+- If the Excel has rows spanning more than one `fecha_enrolamiento` (shouldn't happen for a real
+  daily file, but not validated against), the report is generated for the **most recent** date
+  among the inserted rows, not all of them.
+- **The scheduled trigger is documented but not registered.** Same reasoning as the PostgreSQL
+  watchdog task: Claude Code's auto-mode classifier blocks `Register-ScheduledTask` calls by
+  default (it's also a common persistence technique), so it needs the user to run it explicitly.
+  The ready-to-run `Register-ScheduledTask` command is in `docs/sprints/AVANCE_SPRINT7.md` — it
+  points at a placeholder fixture path since there's no real daily-drop folder defined yet; that
+  has to be updated before actually registering it.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 7 (29 Sep–05 Oct 2026) is next: wiring
-Excel → ETL → BD → `reporteDiario` → Telegram into one automatic flow, plus a scheduled trigger
-(likely a user-level Scheduled Task on this machine, same constraint as PostgreSQL — no admin
-rights for a real Windows service) and handling an empty/corrupt daily Excel gracefully.
+`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 8 (6–12 Oct 2026) is next: integrated
+testing/QA — simulating real daily loads, validating Telegram metrics against a manual Excel
+check, and adjusting the Telegram report's formatting based on that.
 
 ## Documentation & versioning
 

@@ -5,14 +5,14 @@ actualiza a medida que cada pieza planificada pasa a estar implementada.
 
 ```mermaid
 flowchart LR
-    subgraph impl["Implementado (Sprint 1-6)"]
+    subgraph impl["Implementado (Sprint 1-7)"]
         direction LR
         API["Express server<br/>src/server.js<br/>GET /health<br/>GET /reporte-diario"]
         POOL["Pool pg<br/>src/db.js"]
         DB[("PostgreSQL<br/>abis_db<br/>indices en fecha/cuartel/<br/>nacionalidad/3 estados")]
         VIEWS[("Vistas de resumen<br/>db/views.sql")]
         REPORTE["reporteDiario.js<br/>(consulta vistas, calcula %)"]
-        FORMATO["formatearReporte.js<br/>(JSON -> Markdown)"]
+        FORMATO["formatearReporte.js<br/>(JSON -> Markdown,<br/>+ alertas de error)"]
         TGCLIENT["telegramClient.js<br/>(sendMessage, fetch nativo)"]
         RUNSQL["scripts/run-sql.js<br/>(aplica .sql sueltos)"]
         EXCEL[/"Excel diario de<br/>enrolamiento"/]
@@ -20,11 +20,13 @@ flowchart LR
         VALID["headerValidator.js<br/>(valida cabeceras)"]
         MAP["catalogMapper.js<br/>(texto -> ID, con correccion<br/>de tipeos menores)"]
         BULKINSERT["bulkInsert.js<br/>(insercion transaccional<br/>por lotes de 5000)"]
+        FLUJO["flujoDiario.js<br/>(orquesta todo + notifica<br/>errores por Telegram)"]
         CLI["scripts/ingest-excel.js<br/>(npm run ingest, solo lectura)"]
         CLIETL["scripts/procesar-excel.js<br/>(npm run etl, inserta)"]
         SINTETICO["scripts/carga-historica-sintetica.js<br/>(npm run carga-historica)"]
         INTEGRIDAD["scripts/validar-integridad-historica.js<br/>(npm run validar-integridad)"]
         CLITG["scripts/enviar-reporte-telegram.js<br/>(npm run telegram:enviar, manual)"]
+        CLIFLUJO["scripts/flujo-diario.js<br/>(npm run flujo-diario)"]
         TG(["Bot de Telegram<br/>@AbisSystemBot"])
 
         API --> POOL --> DB
@@ -39,14 +41,18 @@ flowchart LR
         INTEGRIDAD --> POOL
         CLITG --> REPORTE
         CLITG --> FORMATO --> TGCLIENT --> TG
+        CLIFLUJO --> FLUJO
+        FLUJO --> CLIETL
+        FLUJO --> REPORTE
+        FLUJO --> FORMATO
     end
 
-    subgraph plan["Planificado (Sprint 7+)"]
+    subgraph plan["Planificado (manual, a activar)"]
         direction LR
-        CRON(["Disparador automatico<br/>(tarea programada / cron)"])
+        CRON(["Tarea programada de Windows<br/>(node scripts/flujo-diario.js)"])
     end
 
-    CLITG -.-> CRON
+    CLIFLUJO -.-> CRON
 
     classDef planned stroke-dasharray: 4 3
     class CRON planned
@@ -69,9 +75,15 @@ flowchart LR
   del reporte diario con conteos y porcentajes ya calculados. `src/telegram/` (Sprint 6) toma esa
   data (`formatearReporte.js`), la convierte al mensaje Markdown, y `telegramClient.js` la manda
   vía la API de Telegram. `npm run telegram:enviar -- <fecha>` corre ese flujo manualmente.
-- **Planificado** (líneas punteadas): Sprint 7 va a agregar un disparador automático (tarea
-  programada) que corra `enviar-reporte-telegram.js` — o su equivalente ya integrado con el
-  ETL diario — sin intervención manual (ver [roadmap.md](roadmap.md)).
+  `src/flujo/flujoDiario.js` (Sprint 7) encadena Excel → ETL → BD → reporte → Telegram en un solo
+  llamado, notificando por Telegram (no en silencio) si el Excel viene vacío o corrupto.
+  `npm run flujo-diario -- <archivo.xlsx>` es el punto de entrada único para todo esto.
+- **Planificado** (líneas punteadas, listo pero no activado): una tarea programada de Windows a
+  nivel de usuario que corra `flujo-diario.js` automáticamente todos los días — el comando exacto
+  está documentado y probado en [`AVANCE_SPRINT7.md`](../sprints/AVANCE_SPRINT7.md), pero
+  registrarla de verdad queda a criterio del usuario (requiere definir antes la ruta real donde
+  cae el Excel diario, y crear tareas programadas es una acción que el modo automático de Claude
+  Code no ejecuta sin confirmación explícita).
 
 ## Notas sobre el módulo de ingesta y ETL
 

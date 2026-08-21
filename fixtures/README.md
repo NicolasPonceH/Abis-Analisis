@@ -21,3 +21,11 @@ Archivos de ejemplo para probar el proyecto manualmente, sin depender de datos r
   ```bash
   npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx
   ```
+
+- `enrolamiento_vacio.xlsx` — Excel con las cabeceras correctas pero **cero filas de datos**.
+  Para probar el manejo de excepciones del flujo diario completo (`src/flujo/`, Sprint 7): debe
+  disparar una alerta por Telegram en vez de fallar en silencio. Probar con:
+
+  ```bash
+  npm run flujo-diario -- fixtures/enrolamiento_vacio.xlsx
+  ```

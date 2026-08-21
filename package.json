@@ -13,7 +13,8 @@
     "carga-historica": "node scripts/carga-historica-sintetica.js",
     "validar-integridad": "node scripts/validar-integridad-historica.js",
     "datos-reporte-prueba": "node scripts/generar-datos-reporte-prueba.js",
-    "telegram:enviar": "node scripts/enviar-reporte-telegram.js"
+    "telegram:enviar": "node scripts/enviar-reporte-telegram.js",
+    "flujo-diario": "node scripts/flujo-diario.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

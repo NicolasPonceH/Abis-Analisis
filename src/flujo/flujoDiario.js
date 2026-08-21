@@ -1,0 +1,69 @@
+const { runEtl } = require("../etl");
+const { obtenerReporteDiario } = require("../reportes/reporteDiario");
+const { formatearReporte, formatearAlerta } = require("../telegram/formatearReporte");
+const { enviarMensaje } = require("../telegram/telegramClient");
+
+function credencialesTelegram() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) {
+    throw new Error("Faltan TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID en .env");
+  }
+  return { token, chatId };
+}
+
+async function notificar(texto) {
+  const { token, chatId } = credencialesTelegram();
+  await enviarMensaje({ token, chatId, texto });
+}
+
+// Orquesta el flujo diario completo (Sprint 7): Excel -> ETL -> BD -> reporte -> Telegram, sin
+// intervencion manual. Si algo falla (Excel corrupto, vacio, o con cabeceras invalidas), no
+// falla en silencio: notifica el problema por el mismo canal de Telegram, para que alguien se
+// entere aunque nadie este mirando la consola del servidor.
+async function ejecutarFlujoDiario(filePath, pool) {
+  let resultadoEtl;
+  try {
+    resultadoEtl = await runEtl(filePath, pool);
+  } catch (err) {
+    await notificar(formatearAlerta(`No se pudo leer el archivo "${filePath}": ${err.message}`));
+    throw err;
+  }
+
+  if (!resultadoEtl.headerValidation.ok) {
+    const detalle = [
+      resultadoEtl.headerValidation.missing.length > 0
+        ? `Faltan columnas: ${resultadoEtl.headerValidation.missing.join(", ")}.`
+        : null,
+      resultadoEtl.headerValidation.unexpected.length > 0
+        ? `Columnas no reconocidas: ${resultadoEtl.headerValidation.unexpected.join(", ")}.`
+        : null,
+    ].filter(Boolean).join(" ");
+    await notificar(formatearAlerta(`Cabeceras del Excel invalidas. ${detalle}`));
+    return { ...resultadoEtl, reporte: null, notificado: "alerta_cabeceras" };
+  }
+
+  if (resultadoEtl.insertResult.inserted === 0) {
+    const razon = resultadoEtl.errors.length > 0
+      ? `todas las filas (${resultadoEtl.errors.length}) tenian errores de datos`
+      : "el archivo no tiene ninguna fila de datos";
+    await notificar(formatearAlerta(`El Excel "${filePath}" no cargo ningun registro: ${razon}.`));
+    return { ...resultadoEtl, reporte: null, notificado: "alerta_vacio" };
+  }
+
+  // Un Excel diario deberia traer una sola fecha; si por algun motivo trae varias, reportamos
+  // sobre la mas reciente en vez de fallar.
+  const fechas = [...new Set(resultadoEtl.rows.map((r) => r.fecha_enrolamiento))].sort();
+  const fecha = fechas[fechas.length - 1];
+
+  const reporte = await obtenerReporteDiario(pool, fecha);
+  let texto = formatearReporte(reporte);
+  if (resultadoEtl.errors.length > 0) {
+    texto += `\n\n⚠️ ${resultadoEtl.errors.length} fila(s) del Excel no se pudieron procesar (ver logs del ETL).`;
+  }
+
+  await notificar(texto);
+  return { ...resultadoEtl, reporte, notificado: "reporte" };
+}
+
+module.exports = { ejecutarFlujoDiario };

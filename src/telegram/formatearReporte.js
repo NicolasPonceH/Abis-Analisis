@@ -64,4 +64,11 @@ function formatearReporte(reporte) {
   ].join("\n");
 }
 
-module.exports = { formatearReporte };
+// Mensaje de alerta (Sprint 7) para cuando el flujo automatico no pudo generar el reporte
+// diario — Excel vacio, corrupto, o con cabeceras invalidas. Se manda por el mismo canal de
+// Telegram: si el proceso automatico falla, alguien tiene que enterarse igual.
+function formatearAlerta(mensaje) {
+  return `⚠️ *Alerta - Carga diaria ABIS* ⚠️\n\n${escaparMarkdown(mensaje)}`;
+}
+
+module.exports = { formatearReporte, formatearAlerta };

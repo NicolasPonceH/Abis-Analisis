@@ -23,9 +23,12 @@ funcional, no funcional y el flujo de integración con Telegram.
       [`AVANCE_SPRINT5.md`](docs/sprints/AVANCE_SPRINT5.md)).
 - [x] **Sprint 6** (22-28 sep, `v0.6.0`): bot de Telegram, cliente HTTP y template del mensaje
       diario (`src/telegram/`), verificado con un envío real.
-- [ ] **Sprint 7** (29 sep-05 oct): automatización del flujo completo (Excel → ETL → BD →
-      Telegram) y disparadores programados.
-- [ ] Sprints 8-10: QA, preparación para producción y despliegue.
+- [x] **Sprint 7** (29 sep-05 oct, `v0.7.0`): flujo completo Excel → ETL → BD → Telegram en un
+      solo paso (`src/flujo/`), con notificación por Telegram si el Excel viene vacío o corrupto.
+      Disparador programado documentado y probado, no activado (ver
+      [`AVANCE_SPRINT7.md`](docs/sprints/AVANCE_SPRINT7.md)).
+- [ ] **Sprint 8** (6-12 oct): testing integrado y QA.
+- [ ] Sprints 9-10: preparación para producción y despliegue.
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
@@ -97,11 +100,12 @@ Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
 | `npm run db:seed` | Carga `db/seed_catalogos.sql` (datos de ejemplo en las tablas maestras). |
 | `npm run db:views` | Aplica `db/views.sql` (vistas de resumen para reportes, idempotente). |
 | `npm run ingest -- <archivo.xlsx>` | Modo de solo lectura: lee el Excel, valida cabeceras y mapea filas a IDs de catálogo. No inserta nada en la base — útil para previsualizar. |
-| `npm run etl -- <archivo.xlsx>` | Flujo completo (`src/etl/`): igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente (por lotes) las filas válidas en `registro_enrolamiento`. |
+| `npm run etl -- <archivo.xlsx>` | Igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente (por lotes) las filas válidas en `registro_enrolamiento`. No manda nada por Telegram. |
 | `npm run carga-historica -- <N>` | Genera e inserta `N` filas **sintéticas** (por defecto 95000) directamente contra los catálogos ya sembrados, para pruebas de estrés — no lee ningún Excel. |
 | `npm run validar-integridad` | Chequea integridad de `registro_enrolamiento` (NULLs inesperados, inconsistencias de edad, distribución por nacionalidad) y corre `EXPLAIN ANALYZE` sobre consultas representativas del futuro dashboard. |
 | `npm run datos-reporte-prueba` | Inserta un dataset fijo de 10 filas (fecha `2026-09-15`) con porcentajes exactos y conocidos, para probar `GET /reporte-diario` sin depender de datos aleatorios. |
-| `npm run telegram:enviar -- <YYYY-MM-DD>` | Arma el reporte de esa fecha, lo imprime en consola, y lo manda por Telegram al chat configurado en `TELEGRAM_CHAT_ID`. |
+| `npm run telegram:enviar -- <YYYY-MM-DD>` | Arma el reporte de esa fecha (de datos ya cargados), lo imprime en consola, y lo manda por Telegram al chat configurado en `TELEGRAM_CHAT_ID`. |
+| `npm run flujo-diario -- <archivo.xlsx>` | **El flujo completo de producción**: Excel → ETL → BD → reporte → Telegram en un solo paso. Si el Excel viene vacío, corrupto o con cabeceras inválidas, manda una alerta por Telegram en vez de fallar en silencio. |
 | `node scripts/run-sql.js <archivo.sql>` | Mecanismo genérico para aplicar cualquier `.sql` suelto contra `DATABASE_URL` — no solo schema/seed. |
 
 Ejemplos con los archivos de prueba incluidos en el repo:
@@ -112,6 +116,7 @@ npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx         # inserta (incluye 
 npm run carga-historica -- 95000                             # prueba de estrés con datos sinteticos
 npm run validar-integridad                                   # valida lo que se haya insertado
 npm run datos-reporte-prueba                                 # dataset fijo para probar /reporte-diario
+npm run flujo-diario -- fixtures/enrolamiento_etl_prueba.xlsx  # Excel -> ETL -> BD -> Telegram, todo junto
 ```
 
 **Nota**: `carga-historica` y `datos-reporte-prueba` insertan datos de prueba reales en la tabla —
@@ -192,6 +197,7 @@ docs/
 fixtures/
   enrolamiento_ejemplo.xlsx     Excel de prueba para npm run ingest (solo lectura)
   enrolamiento_etl_prueba.xlsx  Excel de prueba para npm run etl (incluye un tipeo corregible)
+  enrolamiento_vacio.xlsx       Excel sin filas de datos, para probar el manejo de excepciones
 scripts/
   run-sql.js                       Ejecuta un archivo .sql contra DATABASE_URL
   ingest-excel.js                  Corre el modulo de ingesta contra un Excel (npm run ingest)
@@ -199,14 +205,16 @@ scripts/
   carga-historica-sintetica.js     Prueba de estres: genera e inserta N filas sinteticas
   validar-integridad-historica.js  Valida integridad y uso de indices (EXPLAIN ANALYZE)
   generar-datos-reporte-prueba.js  Dataset fijo (10 filas) para probar /reporte-diario
-  enviar-reporte-telegram.js      Manda el reporte de una fecha por Telegram (npm run telegram:enviar)
+  enviar-reporte-telegram.js       Manda el reporte de una fecha por Telegram (npm run telegram:enviar)
+  flujo-diario.js                  Excel -> ETL -> BD -> Telegram, todo junto (npm run flujo-diario)
 src/
   db.js                      Pool de conexion a PostgreSQL
   server.js                  Servidor Express (GET /health, GET /reporte-diario)
   ingest/                    Lectura de Excel, validacion de cabeceras y mapeo a catalogos
   etl/                       Correccion de tipeos e insercion transaccional (bulk insert)
   reportes/                  Consulta las vistas y arma el JSON del reporte diario
-  telegram/                  Cliente HTTP y formateo del mensaje Markdown
+  telegram/                  Cliente HTTP y formateo del mensaje Markdown (reporte y alertas)
+  flujo/                     Orquesta el flujo diario completo (Sprint 7)
 ```
 
 ## Modelo de datos y arquitectura
