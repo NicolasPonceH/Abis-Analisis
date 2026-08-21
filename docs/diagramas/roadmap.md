@@ -25,7 +25,7 @@ gantt
     section Fase 4 - Pruebas finales y despliegue
     Sprint 8: Testing integrado y QA (v0.8.0) :done, s8, 2026-10-06, 2026-10-12
     Sprint 9: Preparacion para produccion (v0.9.0) :done, s9, 2026-10-13, 2026-10-19
-    Sprint 10: Despliegue y marcha blanca (v1.0.0) :active, s10, 2026-10-20, 2026-10-23
+    Sprint 10: Despliegue y marcha blanca (v1.0.0) :done, s10, 2026-10-20, 2026-10-23
 ```
 
 ## Detalle por sprint
@@ -41,14 +41,24 @@ gantt
 | 7 | 29 sep–05 oct | Automatización del flujo completo | Integración Excel → ETL → BD → cálculos → Telegram, cron jobs, manejo de excepciones (Excel vacío/corrupto) |
 | 8 | 06–12 oct | Testing integrado y QA | Simulación de cargas reales, corrección de bugs, validación de métricas Telegram vs. Excel manual |
 | 9 | 13–19 oct | Preparación para producción | Documentación técnica y manual de operación, configuración del entorno de producción, hardening de BD y scripts |
-| 10 | 20–23 oct | Despliegue y marcha blanca | Pase a producción, monitoreo de envíos reales, entrega final (viernes 23 de octubre) |
+| 10 | 20–23 oct | Despliegue y marcha blanca | Regresión final, plan de despliegue, entrega final (viernes 23 de octubre) — **sin pase a producción real**, ver nota abajo |
+
+**Nota sobre el alcance real del Sprint 10**: no existió un pase a producción — no hay máquina de
+servidor separada, fuente real del Excel diario, ni bot/catálogos de producción (son decisiones
+externas al proyecto). Se entregó en cambio la regresión final del sistema completo y un plan de
+despliegue documentado para cuando esos prerrequisitos existan. Ver
+[`AVANCE_SPRINT10.md`](../sprints/AVANCE_SPRINT10.md) y
+[`PLAN_DESPLIEGUE.md`](../PLAN_DESPLIEGUE.md).
 
 ## Hitos críticos
 
-- **Hito 1 (31 ago)**: base de datos desplegada, capacidad de leer y mapear el Excel con éxito.
-- **Hito 2 (21 sep)**: ETL completamente funcional, datos históricos (95k+ registros) cargados y consistentes.
-- **Hito 3 (05 oct)**: primera prueba exitosa end-to-end (Excel → notificación en Telegram).
-- **Hito 4 (23 oct)**: sistema en producción operando de forma autónoma.
+- **Hito 1 (31 ago)**: base de datos desplegada, capacidad de leer y mapear el Excel con éxito. ✅
+- **Hito 2 (21 sep)**: ETL completamente funcional, datos históricos (95k+ registros) cargados y consistentes. ✅
+- **Hito 3 (05 oct)**: primera prueba exitosa end-to-end (Excel → notificación en Telegram). ✅
+- **Hito 4 (23 oct)**: sistema en producción operando de forma autónoma. ⚠️ El sistema **puede**
+  operar de forma autónoma (demostrado repetidamente entre Sprints 6-10 con datos de prueba) —
+  pero no hay un despliegue de producción real que lo esté haciendo, por los prerrequisitos
+  externos de la nota de arriba.
 
 ## Convención de versionado
 

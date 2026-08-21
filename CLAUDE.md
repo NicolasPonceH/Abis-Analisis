@@ -6,10 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Sistema ABIS (Sistema de Gestión Automatizada de Identificación Biométrica): processes a daily
 biometric enrollment Excel file, normalizes it into PostgreSQL, computes daily summary metrics,
-and (eventually) notifies that summary via Telegram. The project follows a 10-week sprint roadmap
-(18 Aug – 23 Oct 2026); through Sprint 5 (of 10) is implemented — Excel ingestion, typo-tolerant
-catalog mapping, batched transactional inserts, and a daily-report endpoint all exist. Telegram
-integration (Sprint 6+) does not exist yet.
+and notifies that summary via Telegram. The project followed a 10-week sprint roadmap (18 Aug –
+23 Oct 2026) and is **functionally complete as of Sprint 10 (`v1.0.0`)** — every piece (ingestion,
+typo-tolerant mapping, batched inserts, reporting views/endpoint, Telegram bot, the automated
+daily flow, QA fixes, DB hardening) is implemented and verified with real test runs. **There was
+no real production deployment** — no separate server, no real daily-Excel source, no production
+Telegram bot/catalogs exist; see `docs/PLAN_DESPLIEGUE.md` for what's still needed and
+`docs/sprints/AVANCE_SPRINT10.md` for the honest final-state writeup. Treat this repo as
+feature-complete but not yet live.
 
 ## Commands
 
@@ -269,14 +273,27 @@ Six catalog (master) tables plus one transactional table:
   (target machine, real daily-Excel drop path, a separate production Telegram bot, the real
   institutional catalogs replacing `seed_catalogos.sql`), not a completed deployment.
 
+### Project closeout (Sprint 10, final)
+
+- No code changes — Sprint 10 was a final regression (re-ran `db:schema`/`db:seed`/`db:views`/
+  `db:hardening` from an already-applied state to confirm idempotency held, plus a full
+  `flujo-diario` + `/health` + `/reporte-diario` + `npm audit` pass) and two new docs:
+  `docs/PLAN_DESPLIEGUE.md` (the actual deployment runbook/checklist, consolidating Sprint 9's
+  checklist into concrete steps) and `docs/sprints/AVANCE_SPRINT10.md` (closing report).
+- **Don't describe this project as "in production" or "deployed."** It's feature-complete and
+  repeatedly verified with real Telegram sends against test/fixture data, but no real daily-Excel
+  source, production server, or production bot was ever connected. If asked to "go live" or
+  connect a real data source, that's new work building on top of a finished v1.0.0, not something
+  already done — start from `docs/PLAN_DESPLIEGUE.md`.
+
 ## Roadmap context
 
 Full 10-sprint plan (dates, deliverables, critical milestones) is in
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md); the original requirements doc is in
 [`docs/informe-requerimientos.md`](docs/informe-requerimientos.md); a copy of the source PDF is at
-`sistema_abis.pdf` on the Desktop (outside the repo). Sprint 10 (20–23 Oct 2026), the final
-sprint, is next: deployment and soft launch — contingent on the Sprint 9 production checklist
-actually being resolved (target machine, real Excel source, production bot/catalogs).
+`sistema_abis.pdf` on the Desktop (outside the repo). **All 10 sprints are closed** (`v1.0.0`,
+tagged and pushed) — there is no "next sprint." Any further work is either a new feature request
+or resolving `docs/PLAN_DESPLIEGUE.md`'s prerequisites for a real deployment.
 
 ## Documentation & versioning
 

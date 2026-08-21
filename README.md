@@ -1,11 +1,15 @@
 # Sistema ABIS
 
-Sistema de Gestión Automatizada de Identificación Biométrica. Procesa un Excel diario de
-enrolamiento biométrico, lo normaliza en PostgreSQL y notifica un resumen estadístico por
-Telegram.
+**Proyecto completo — 10/10 sprints, `v1.0.0`.** Sistema de Gestión Automatizada de
+Identificación Biométrica. Procesa un Excel diario de enrolamiento biométrico, lo normaliza en
+PostgreSQL y notifica un resumen estadístico por Telegram.
 
 Ver el [informe de requerimientos completo](docs/informe-requerimientos.md) para el detalle
-funcional, no funcional y el flujo de integración con Telegram.
+funcional, no funcional y el flujo de integración con Telegram. El sistema está implementado y
+verificado de punta a punta con datos de prueba — **no hubo un pase a producción real** (no existe
+todavía una máquina de servidor separada ni una fuente real del Excel diario); ver
+[`docs/PLAN_DESPLIEGUE.md`](docs/PLAN_DESPLIEGUE.md) para el checklist y procedimiento cuando esos
+prerrequisitos existan.
 
 ## Estado actual
 
@@ -33,7 +37,9 @@ funcional, no funcional y el flujo de integración con Telegram.
       hardening de la base (rol `abis_app` de privilegios mínimos, verificado con pruebas
       positivas y negativas) y checklist de entorno de producción (ver
       [`AVANCE_SPRINT9.md`](docs/sprints/AVANCE_SPRINT9.md)).
-- [ ] Sprint 10: despliegue y marcha blanca.
+- [x] **Sprint 10** (20-23 oct, `v1.0.0`): regresión final de todo el sistema y plan de
+      despliegue (`docs/PLAN_DESPLIEGUE.md`) — sin pase a producción real (ver nota arriba y
+      [`AVANCE_SPRINT10.md`](docs/sprints/AVANCE_SPRINT10.md)).
 
 Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
 [`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
@@ -239,11 +245,14 @@ src/
   transaccional `registro_enrolamiento`.
 - [`docs/diagramas/arquitectura.md`](docs/diagramas/arquitectura.md) — componentes implementados
   vs. planificados por sprint.
+- [`docs/MANUAL_OPERACION.md`](docs/MANUAL_OPERACION.md) — cómo operar el sistema día a día.
+- [`docs/PLAN_DESPLIEGUE.md`](docs/PLAN_DESPLIEGUE.md) — checklist y procedimiento de despliegue.
 
 ## Notas
 
 - Los catálogos de `seed_catalogos.sql` son de ejemplo (tomados del informe de requerimientos).
-  Deben completarse con el listado real de unidades/cuarteles antes de cargar datos reales (Sprint 3+).
+  Deben completarse con el listado real de unidades/cuarteles antes de un despliegue real (ver
+  `docs/PLAN_DESPLIEGUE.md`).
 - Las cabeceras esperadas del Excel (`src/ingest/headerSchema.js`) están **inferidas** del informe
   de requerimientos, no confirmadas todavía contra un archivo real de producción.
 - El token del bot de Telegram y las credenciales de BD se manejan por variables de entorno
