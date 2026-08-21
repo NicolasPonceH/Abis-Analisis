@@ -45,9 +45,16 @@ it uses the most recent date that has data.
 - Unlike the original setup machine (where it ran as the Windows service
   `postgresql-x64-17-abis`), here it runs as a **manually-started process** — this account lacks
   admin rights to register a Windows service. It does not survive a reboot; start it with:
-  `& "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Users\Nicolás\pgdata-abis-5433" -l "C:\Users\Nicolás\pgdata-abis-5433\server.log" start`
-  (stop with the same command plus `stop` instead of `start`). If `/health` reports
-  `db: disconnected`, check this first.
+  `powershell -File "C:\Users\Nicolás\pgdata-abis-5433\ensure-running.ps1"`. Stop with
+  `& "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Users\Nicolás\pgdata-abis-5433" stop`.
+  If `/health` reports `db: disconnected`, check this first.
+- **Never start it with `pg_ctl start` directly** — on Windows that leaves `postgres.exe` attached
+  to the launching console, and when that console/terminal window closes, Windows kills the
+  process with `STATUS_CONTROL_C_EXIT` (`0xC000013A` in `server.log`) instead of a clean shutdown.
+  This was the actual cause of repeated "random" crashes during Sprint 1-5 development.
+  `ensure-running.ps1` launches `postgres.exe` via `Invoke-CimMethod -ClassName Win32_Process
+  -MethodName Create` instead, fully detached from any console, so it survives the terminal
+  closing. `pg_ctl stop` is fine to use directly — it just signals the running process and exits.
 - Database: `abis_db`, superuser `postgres` / `abis_dev_pw`. Credentials and `DATABASE_URL` live in
   `.env` (gitignored); see `.env.example` for the shape.
 

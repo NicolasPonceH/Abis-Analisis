@@ -132,19 +132,27 @@ C:\Users\Nicolás\pgdata-abis-5433
 
 A diferencia de la máquina original (donde corría como servicio de Windows
 `postgresql-x64-17-abis`), acá corre como **proceso manual**, porque esta cuenta no tiene permisos
-de administrador para registrar un servicio. No sobrevive un reinicio de la PC ni una caída
-inesperada (crash de un cliente, cierre de sesión) — hay que levantarla a mano cuando pase.
+de administrador para registrar un servicio. No sobrevive un reinicio de la PC.
+
+**No usar `pg_ctl start` para iniciarla** — en Windows deja `postgres.exe` atado a la consola
+donde se lanzó, y cuando esa ventana se cierra (cerrás la terminal, la pestaña, etc.), Windows
+mata el proceso de golpe (`STATUS_CONTROL_C_EXIT`, código `0xC000013A` en el log) en vez de
+apagarlo ordenadamente — eso es lo que estaba causando las caídas "sorpresivas". En su lugar,
+correr el script que la lanza desprendida de cualquier consola:
 
 ```powershell
 # Revisar si esta corriendo
 Get-NetTCPConnection -LocalPort 5433 -State Listen -ErrorAction SilentlyContinue
 
-# Iniciar (o el script que hace ambos pasos: C:\Users\Nicolás\pgdata-abis-5433\ensure-running.ps1)
-& "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Users\Nicolás\pgdata-abis-5433" -l "C:\Users\Nicolás\pgdata-abis-5433\server.log" start
+# Iniciar (desprendido de la consola, no se cae si cerras la terminal)
+powershell -File "C:\Users\Nicolás\pgdata-abis-5433\ensure-running.ps1"
 
 # Detener
 & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Users\Nicolás\pgdata-abis-5433" stop
 ```
+
+(Detener sí es seguro con `pg_ctl stop` — ese comando solo le pide al proceso que se apague
+ordenadamente y termina, no queda nada atado a la consola.)
 
 - Superusuario: `postgres`, password `abis_dev_pw` (solo desarrollo local).
 - Base de datos creada: `abis_db`.
@@ -159,7 +167,8 @@ tener que tocar el puerto ni las credenciales.
 
 | Síntoma | Causa | Solución |
 |---|---|---|
-| `ECONNREFUSED` al correr `npm run db:schema`/`db:seed`/`npm start` | La instancia de 5433 no está corriendo | Correr el comando "Iniciar" de arriba |
+| `ECONNREFUSED` al correr `npm run db:schema`/`db:seed`/`npm start` | La instancia de 5433 no está corriendo | Correr `ensure-running.ps1` (ver arriba) |
+| Log muestra `STATUS_CONTROL_C_EXIT` / `0xC000013A` | Se cerró la consola/terminal donde quedó atado `postgres.exe` (típico si se inició con `pg_ctl start` en vez de `ensure-running.ps1`) | Usar siempre `ensure-running.ps1` para iniciarla, nunca `pg_ctl start` directo |
 | `pg_ctl: could not open log file ... Permission denied` | Ya está corriendo (el log está en uso por ese proceso) | No es un error real — confirmar con `Get-NetTCPConnection` |
 | `el sistema de base de datos está iniciándose` | Está terminando de recuperarse de una caída/apagado abrupto | Esperar unos segundos y reintentar el mismo comando |
 
