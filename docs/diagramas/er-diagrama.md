@@ -60,9 +60,11 @@ erDiagram
 
 ## Notas de diseño
 
-- `region` → `unidad` → `cuartel` es una jerarquía estricta (cada nivel referencia al anterior).
+- `region` → `unidad` → `cuartel` es una jerarquía estricta (cada nivel referencia al anterior) —
+  ver el árbol completo en [jerarquia-geografica.md](jerarquia-geografica.md).
 - `estado_proceso` es un catálogo genérico reutilizado en tres dominios independientes
-  (`tipo_estado`); no crear tablas de estado separadas por dominio.
+  (`tipo_estado`); no crear tablas de estado separadas por dominio — ver los valores de cada
+  dominio y su ciclo de vida inferido en [estados-proceso.md](estados-proceso.md).
 - `registro_enrolamiento` tiene **tres** llaves foráneas independientes hacia `estado_proceso`
   (sincronización, registro, general), además de las llaves hacia `nacionalidad`, `cuartel` y
   `equipo`.
@@ -70,9 +72,9 @@ erDiagram
   `id_estado_sincronizacion`, `id_estado_registro` e `id_estado_general` — pensados para las
   agrupaciones del reporte diario y el dashboard de estadísticas, verificados con `EXPLAIN
   ANALYZE` sobre 95k+ registros en [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
-- `db/views.sql` (Sprint 5) define 4 vistas de solo lectura sobre `registro_enrolamiento` para
-  facilitar reportes (resumen por estado, nacionalidad, cuartel y total diario) — no son parte del
-  modelo de datos en sí, no se muestran en el diagrama ER. Ver
+- `db/views.sql` (Sprint 5) define 7 vistas de solo lectura sobre `registro_enrolamiento` para
+  facilitar reportes (resumen por estado, nacionalidad, cuartel, unidad, género, edad y total
+  diario) — no son parte del modelo de datos en sí, no se muestran en el diagrama ER. Ver
   [`AVANCE_SPRINT5.md`](../sprints/AVANCE_SPRINT5.md).
 
 ## Cómo mantenerlo actualizado

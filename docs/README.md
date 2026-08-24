@@ -18,6 +18,10 @@ docs/
 - [`diagramas/casos-de-uso.md`](diagramas/casos-de-uso.md) — actores y casos de uso, vista de
   alto nivel de los 4 requerimientos funcionales.
 - [`diagramas/er-diagrama.md`](diagramas/er-diagrama.md) — modelo de datos (`db/schema.sql`).
+- [`diagramas/jerarquia-geografica.md`](diagramas/jerarquia-geografica.md) — árbol
+  Región → Unidad → Cuartel, separado del ERD.
+- [`diagramas/estados-proceso.md`](diagramas/estados-proceso.md) — los tres dominios de
+  `estado_proceso` (Sincronización, Registro, General), valores y su emoji en Telegram.
 - [`diagramas/arquitectura.md`](diagramas/arquitectura.md) — componentes implementados vs.
   planificados.
 - [`diagramas/roadmap.md`](diagramas/roadmap.md) — línea de tiempo completa de los 10 sprints,
