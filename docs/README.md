@@ -15,6 +15,8 @@ docs/
   organizados por sprint (índice rápido; el detalle completo está en cada `AVANCE_SPRINT{N}.md`).
 - [`informe-requerimientos.md`](informe-requerimientos.md) — informe de requerimientos original
   (funcionales, no funcionales, integración con Telegram), transcrito al repo.
+- [`diagramas/casos-de-uso.md`](diagramas/casos-de-uso.md) — actores y casos de uso, vista de
+  alto nivel de los 4 requerimientos funcionales.
 - [`diagramas/er-diagrama.md`](diagramas/er-diagrama.md) — modelo de datos (`db/schema.sql`).
 - [`diagramas/arquitectura.md`](diagramas/arquitectura.md) — componentes implementados vs.
   planificados.
@@ -22,6 +24,9 @@ docs/
   hitos críticos y convención de versionado por tags.
 - [`diagramas/secuencia-flujo-diario.md`](diagramas/secuencia-flujo-diario.md) — diagrama de
   secuencia del flujo diario completo (Excel → ETL → BD → Telegram), con las 3 ramas de error.
+- [`diagramas/normalizacion-limpieza.md`](diagramas/normalizacion-limpieza.md) — cómo se resuelve
+  un valor de texto libre del Excel contra los catálogos (corrección de tipeos vs. jerarquía
+  exacta).
 - [`sprints/AVANCE_SPRINT1.md`](sprints/AVANCE_SPRINT1.md) — Sprint 1, cerrado (`v0.1.0`).
 - [`sprints/AVANCE_SPRINT2.md`](sprints/AVANCE_SPRINT2.md) — Sprint 2, cerrado (`v0.2.0`).
 - [`sprints/AVANCE_SPRINT3.md`](sprints/AVANCE_SPRINT3.md) — Sprint 3, cerrado (`v0.3.0`).
