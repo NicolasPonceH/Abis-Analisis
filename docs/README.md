@@ -20,6 +20,8 @@ docs/
   planificados.
 - [`diagramas/roadmap.md`](diagramas/roadmap.md) — línea de tiempo completa de los 10 sprints,
   hitos críticos y convención de versionado por tags.
+- [`diagramas/secuencia-flujo-diario.md`](diagramas/secuencia-flujo-diario.md) — diagrama de
+  secuencia del flujo diario completo (Excel → ETL → BD → Telegram), con las 3 ramas de error.
 - [`sprints/AVANCE_SPRINT1.md`](sprints/AVANCE_SPRINT1.md) — Sprint 1, cerrado (`v0.1.0`).
 - [`sprints/AVANCE_SPRINT2.md`](sprints/AVANCE_SPRINT2.md) — Sprint 2, cerrado (`v0.2.0`).
 - [`sprints/AVANCE_SPRINT3.md`](sprints/AVANCE_SPRINT3.md) — Sprint 3, cerrado (`v0.3.0`).
