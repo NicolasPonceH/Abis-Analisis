@@ -39,6 +39,28 @@ app.get("/reporte-diario", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+const { iniciarBot, detenerBot } = require("./telegram/botService");
+
+const server = app.listen(port, () => {
   console.log(`Sistema ABIS escuchando en http://localhost:${port}`);
+
+  if (process.env.ENABLE_TELEGRAM_BOT !== "false" && process.env.TELEGRAM_BOT_TOKEN) {
+    iniciarBot({
+      token: process.env.TELEGRAM_BOT_TOKEN,
+      chatId: process.env.TELEGRAM_CHAT_ID,
+      pool,
+    }).catch((err) => {
+      console.error("Error iniciando bot interactivo en servidor:", err.message);
+    });
+  }
 });
+
+function cerrarServidor() {
+  detenerBot();
+  server.close(() => {
+    pool.end().finally(() => process.exit(0));
+  });
+}
+
+process.on("SIGINT", cerrarServidor);
+process.on("SIGTERM", cerrarServidor);

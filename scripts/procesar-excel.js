@@ -2,11 +2,8 @@ require("dotenv").config();
 const pool = require("../src/db");
 const { runEtl } = require("../src/etl");
 
-const filePath = process.argv[2];
-if (!filePath) {
-  console.error("Uso: node scripts/procesar-excel.js <ruta-al-excel.xlsx>");
-  process.exit(1);
-}
+const filePath = process.argv[2] || "New_Enrolados Abis.xlsx";
+console.log(`Procesando archivo Excel: ${filePath}`);
 
 runEtl(filePath, pool)
   .then((result) => {

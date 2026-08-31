@@ -1,20 +1,106 @@
-// Cabeceras esperadas del Excel diario de enrolamiento y su mapeo a campos internos.
-// INFERIDO del informe de requerimientos (seccion 4.2) — no se dispone todavia de un Excel
-// real de muestra. Si el Excel real usa otros nombres de columna, este es el unico archivo
-// que hay que editar: EXPECTED_COLUMNS es la fuente de verdad para lectura, validacion y mapeo.
+// Cabeceras esperadas del Excel de enrolamiento y sus alias para compatibilidad
+// con el archivo institucional real (New_Enrolados Abis.xlsx - hoja ENROLADOS).
+
 const EXPECTED_COLUMNS = [
-  { header: "Fecha Enrolamiento", field: "fechaEnrolamiento", required: true },
-  { header: "Nacionalidad", field: "nacionalidad", required: true },
-  { header: "Region", field: "region", required: true },
-  { header: "Unidad", field: "unidad", required: true },
-  { header: "Cuartel", field: "cuartel", required: true },
-  { header: "Equipo", field: "equipo", required: true },
-  { header: "Genero", field: "genero", required: true },
-  { header: "Mayor de Edad", field: "mayorEdad", required: true },
-  { header: "Edad Exacta", field: "edadExacta", required: false },
-  { header: "Estado Sincronizacion", field: "estadoSincronizacion", required: true },
-  { header: "Estado Registro", field: "estadoRegistro", required: true },
-  { header: "Estado General", field: "estadoGeneral", required: true },
+  {
+    header: "Fecha Enrolamiento",
+    aliases: ["Fecha", "FECHA_ENROLAMIENTO", "FECHA ENROLAMIENTO", "fecha_enrolamiento", "Fecha Enrolamiento"],
+    field: "fechaEnrolamiento",
+    required: true,
+  },
+  {
+    header: "Nacionalidad",
+    aliases: ["Nacionalidad", "NACIONALIDAD", "Emitido En", "DOCUMENTO_EMITIDO", "DOCUMENTO_EMITIDO_1"],
+    field: "nacionalidad",
+    required: true,
+  },
+  {
+    header: "Region",
+    aliases: ["Region", "REGION", "Región", "REGIÓN", "REGION2"],
+    field: "region",
+    required: false,
+  },
+  {
+    header: "Unidad",
+    aliases: ["Unidad", "UNIDAD"],
+    field: "unidad",
+    required: true,
+  },
+  {
+    header: "Cuartel",
+    aliases: ["Cuartel", "CUARTEL", "CUARTEL_NEW", "CUARTELNEW"],
+    field: "cuartel",
+    required: true,
+  },
+  {
+    header: "Equipo",
+    aliases: ["Equipo", "EQUIPO", "Dispositivo", "DISPOSITIVO"],
+    field: "equipo",
+    required: true,
+  },
+  {
+    header: "Genero",
+    aliases: ["Genero", "GENERO", "Género", "GÉNERO"],
+    field: "genero",
+    required: true,
+  },
+  {
+    header: "Mayor de Edad",
+    aliases: ["Mayor de Edad", "RANGO_ETARIO", "EDADES", "MAYOR DE EDAD", "Mayor de edad"],
+    field: "mayorEdad",
+    required: true,
+  },
+  {
+    header: "Edad Exacta",
+    aliases: ["Edad Exacta", "EDAD", "Edad", "EDAD_1"],
+    field: "edadExacta",
+    required: false,
+  },
+  {
+    header: "Estado Sincronizacion",
+    aliases: [
+      "Estado Sincronizacion",
+      "Sincronización PDI",
+      "SINCRONIZACION_PDI",
+      "Sincronizacion PDI",
+      "Estado Sincronización",
+    ],
+    field: "estadoSincronizacion",
+    required: true,
+  },
+  {
+    header: "Estado Registro",
+    aliases: [
+      "Estado Registro",
+      "Registración Biométrica",
+      "REGISTRACION_BIOMETRICA",
+      "Registracion Biometrica",
+      "Estado Registración",
+    ],
+    field: "estadoRegistro",
+    required: true,
+  },
+  {
+    header: "Estado General",
+    aliases: ["Estado General", "ESTADO_GENERAL", "Estado general"],
+    field: "estadoGeneral",
+    required: true,
+  },
 ];
 
-module.exports = { EXPECTED_COLUMNS };
+function normalizeHeaderName(h) {
+  return String(h || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function findMatchingHeader(columnDef, actualHeaders) {
+  const allAliases = [columnDef.header, ...(columnDef.aliases || [])];
+  const normalizedAliases = allAliases.map(normalizeHeaderName);
+  return actualHeaders.find((h) => normalizedAliases.includes(normalizeHeaderName(h)));
+}
+
+module.exports = { EXPECTED_COLUMNS, normalizeHeaderName, findMatchingHeader };
+

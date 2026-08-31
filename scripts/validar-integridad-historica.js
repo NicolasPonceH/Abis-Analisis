@@ -32,13 +32,11 @@ async function validarIntegridad() {
   `);
   console.log(`Filas con FK/campos obligatorios en NULL: ${nulos} (deberia ser 0)`);
 
-  // Inconsistencia logica: un menor de edad no deberia tener es_mayor_edad = true y
-  // simultaneamente una edad_exacta >= 18 (o viceversa) — esto no lo protege ninguna
-  // constraint del esquema, solo la logica del ETL, asi que vale la pena confirmarlo.
+  // Inconsistencia logica: un mayor de edad con edad_exacta < 18 o un menor de edad con edad_exacta >= 18
   const inconsistentes = await contar(`
     SELECT count(*) FROM registro_enrolamiento
-    WHERE (es_mayor_edad = true AND edad_exacta IS NOT NULL)
-       OR (es_mayor_edad = false AND edad_exacta IS NULL)
+    WHERE (es_mayor_edad = true AND edad_exacta < 18)
+       OR (es_mayor_edad = false AND edad_exacta >= 18)
   `);
   console.log(`Filas con es_mayor_edad/edad_exacta inconsistentes: ${inconsistentes} (deberia ser 0)`);
 

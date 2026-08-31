@@ -1,0 +1,428 @@
+const fs = require("fs");
+const path = require("path");
+const telegramClient = require("./telegramClient");
+const { obtenerReporteDiario } = require("../reportes/reporteDiario");
+const { formatearReporte } = require("./formatearReporte");
+
+const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function escaparHtml(texto) {
+  return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function leerUltimoEtl() {
+  const ruta = path.resolve(__dirname, "../../logs/ultimo-etl.json");
+  if (!fs.existsSync(ruta)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(ruta, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+async function manejarComandoAyuda({ token, chatId }) {
+  const texto = [
+    `🤖 <b>SISTEMA ABIS - GUÍA DE COMANDOS</b>`,
+    `━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `📊 <b>Reportes Analíticos:</b>`,
+    `• <code>/reporte</code> o <code>/hoy</code>`,
+    `  ↳ Genera el reporte diario del día más reciente.`,
+    ``,
+    `• <code>/reporte YYYY-MM-DD</code>`,
+    `  ↳ Genera el reporte completo de una fecha específica (ej: <code>/reporte 2024-11-15</code>).`,
+    ``,
+    `• <code>/errores</code> o <code>/errores YYYY-MM-DD</code>`,
+    `  ↳ Muestra qué cuarteles y unidades tuvieron errores ese día (ej: <code>/errores 2024-11-15</code>).`,
+    ``,
+    `⚙️ <b>Estado y Auditoría del Sistema:</b>`,
+    `• <code>/estado</code>`,
+    `  ↳ Muestra la salud de la BD, conexión y el total histórico acumulado de registros (95.474).`,
+    ``,
+    `• <code>/logs</code>`,
+    `  ↳ Detalle técnico del último archivo Excel procesado (archivo, filas insertadas y omitidas).`,
+    ``,
+    `• <code>/ayuda</code>`,
+    `  ↳ Muestra esta lista explicativa de comandos.`,
+  ].join("\n");
+
+  await telegramClient.enviarMensaje({ token, chatId, texto });
+}
+
+async function manejarComandoDetalleErrores({ token, chatId, pool, args }) {
+  let fecha = args[0];
+
+  if (fecha && !FECHA_REGEX.test(fecha)) {
+    return telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto: `⚠️ Formato de fecha inválido. Usa <code>YYYY-MM-DD</code> (ej: <code>/errores 2024-11-15</code>).`,
+    });
+  }
+
+  if (!fecha) {
+    const { rows } = await pool.query(
+      "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS fecha FROM registro_enrolamiento"
+    );
+    fecha = rows[0]?.fecha;
+    if (!fecha) {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: `ℹ️ No hay registros cargados en la base de datos.`,
+      });
+    }
+  }
+
+  const [totalDiaRes, cuartelesRes, causasRes, nacRes] = await Promise.all([
+    pool.query("SELECT count(*)::int AS total FROM registro_enrolamiento WHERE fecha_enrolamiento = $1", [fecha]),
+    pool.query(
+      `SELECT
+         c.nombre_cuartel,
+         u.nombre_unidad,
+         eq.tipo_equipo,
+         count(*)::int AS total,
+         count(*) FILTER (WHERE ep_reg.descripcion IN ('ERROR', 'CON_ERROR'))::int AS error_biometrico,
+         count(*) FILTER (WHERE ep_reg.descripcion NOT IN ('ERROR', 'CON_ERROR') AND ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))::int AS error_validacion
+       FROM registro_enrolamiento r
+       JOIN cuartel c ON c.id_cuartel = r.id_cuartel
+       JOIN unidad u ON u.id_unidad = c.id_unidad
+       JOIN equipo eq ON eq.id_equipo = r.id_equipo
+       JOIN estado_proceso ep_reg ON ep_reg.id_estado = r.id_estado_registro
+       JOIN estado_proceso ep_gen ON ep_gen.id_estado = r.id_estado_general
+       WHERE r.fecha_enrolamiento = $1
+         AND (ep_reg.descripcion IN ('ERROR', 'CON_ERROR') OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))
+       GROUP BY c.nombre_cuartel, u.nombre_unidad, eq.tipo_equipo
+       ORDER BY total DESC`,
+      [fecha]
+    ),
+    pool.query(
+      `SELECT
+         count(*) FILTER (WHERE ep_reg.descripcion IN ('ERROR', 'CON_ERROR'))::int AS bio_total,
+         count(*) FILTER (WHERE ep_reg.descripcion NOT IN ('ERROR', 'CON_ERROR') AND ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))::int AS val_total,
+         count(*) FILTER (WHERE eq.tipo_equipo = 'TABLET')::int AS tablet_total,
+         count(*) FILTER (WHERE eq.tipo_equipo = 'PC DE ESCRITORIO')::int AS pc_total,
+         count(*)::int AS total_errores
+       FROM registro_enrolamiento r
+       JOIN equipo eq ON eq.id_equipo = r.id_equipo
+       JOIN estado_proceso ep_reg ON ep_reg.id_estado = r.id_estado_registro
+       JOIN estado_proceso ep_gen ON ep_gen.id_estado = r.id_estado_general
+       WHERE r.fecha_enrolamiento = $1
+         AND (ep_reg.descripcion IN ('ERROR', 'CON_ERROR') OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))`,
+      [fecha]
+    ),
+    pool.query(
+      `SELECT n.descripcion AS nacionalidad, count(*)::int AS total
+       FROM registro_enrolamiento r
+       JOIN nacionalidad n ON n.id_nacionalidad = r.id_nacionalidad
+       JOIN estado_proceso ep_reg ON ep_reg.id_estado = r.id_estado_registro
+       JOIN estado_proceso ep_gen ON ep_gen.id_estado = r.id_estado_general
+       WHERE r.fecha_enrolamiento = $1
+         AND (ep_reg.descripcion IN ('ERROR', 'CON_ERROR') OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))
+       GROUP BY n.descripcion
+       ORDER BY total DESC
+       LIMIT 5`,
+      [fecha]
+    ),
+  ]);
+
+  const totalDia = totalDiaRes.rows[0]?.total || 0;
+  const causas = causasRes.rows[0] || { total_errores: 0, bio_total: 0, val_total: 0, tablet_total: 0, pc_total: 0 };
+  const totalErrores = causas.total_errores;
+
+  const [anio, mes, dia] = fecha.split("-");
+  const fechaFmt = `${dia}/${mes}/${anio}`;
+
+  if (totalErrores === 0) {
+    const texto = [
+      `🔍 <b>DETALLE DE AUDITORÍA Y ERRORES</b>`,
+      `📅 <i>${fechaFmt}</i>`,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `✅ <b>¡Cero errores registrados en esta fecha!</b>`,
+      `De los <b>${totalDia.toLocaleString("es-CL")}</b> enrolamientos realizados, el 100% se completó con éxito.`,
+      ``,
+      `💡 <i>Para ver el reporte completo escribe <code>/reporte ${fecha}</code></i>`,
+    ].join("\n");
+    return telegramClient.enviarMensaje({ token, chatId, texto });
+  }
+
+  const pctErrores = totalDia > 0 ? ((totalErrores / totalDia) * 100).toFixed(1) : "0";
+
+  const lineas = [
+    `🔍 <b>DIAGNÓSTICO DETALLADO DE ERRORES</b>`,
+    `📅 <i>${fechaFmt}</i>`,
+    `━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `⚠️ <b>Total con Falla:</b> <code>${totalErrores.toLocaleString("es-CL")}</code> de ${totalDia.toLocaleString("es-CL")} enrolamientos (<b>${pctErrores}%</b>)`,
+    ``,
+    `🛠 <b>Causa Raíz del Error:</b>`,
+  ];
+
+  if (causas.bio_total > 0) {
+    lineas.push(
+      `• <b>Falla en Captura Biométrica:</b> <code>${causas.bio_total}</code> caso(s)`,
+      `  ↳ <i>Falla física en escáner Suprema o cámara facial (huellas desgastadas, suciedad o sensor).</i>`
+    );
+  }
+  if (causas.val_total > 0) {
+    lineas.push(
+      `• <b>Falla de Validación General:</b> <code>${causas.val_total}</code> caso(s)`,
+      `  ↳ <i>Biometría capturada pero rechazada en validación central de documentos o duplicidad.</i>`
+    );
+  }
+
+  lineas.push(``, `💻 <b>Dispositivos donde ocurrió:</b>`);
+  if (causas.tablet_total > 0) lineas.push(`• <b>Tablet:</b> <code>${causas.tablet_total}</code> caso(s)`);
+  if (causas.pc_total > 0) lineas.push(`• <b>PC de Escritorio:</b> <code>${causas.pc_total}</code> caso(s)`);
+
+  lineas.push(``, `📍 <b>Cuarteles y Unidades Afectadas:</b>`);
+  cuartelesRes.rows.forEach((r) => {
+    const detalleCausa =
+      r.error_biometrico > 0 && r.error_validacion > 0
+        ? `(${r.error_biometrico} biometría, ${r.error_validacion} validación - ${r.tipo_equipo})`
+        : r.error_biometrico > 0
+        ? `(Falla Biométrica - ${r.tipo_equipo})`
+        : `(Falla Validación - ${r.tipo_equipo})`;
+    lineas.push(
+      `• <b>${escaparHtml(r.nombre_cuartel)}</b> [${escaparHtml(r.nombre_unidad)}]: <code>${r.total}</code> ${detalleCausa}`
+    );
+  });
+
+  if (nacRes.rows.length > 0) {
+    lineas.push(``, `🌎 <b>Nacionalidades de los afectados:</b>`);
+    const nacText = nacRes.rows.map((n) => `${escaparHtml(n.nacionalidad)} (${n.total})`).join(" · ");
+    lineas.push(`  ${nacText}`);
+  }
+
+  lineas.push(``, `💡 <i>Usa <code>/reporte ${fecha}</code> para ver las estadísticas generales del día.</i>`);
+
+  await telegramClient.enviarMensaje({ token, chatId, texto: lineas.join("\n") });
+}
+
+async function manejarComandoLogs({ token, chatId }) {
+  const ultimoEtl = leerUltimoEtl();
+
+  if (!ultimoEtl) {
+    const texto = `📄 <b>Logs ETL</b>\n\nNo hay registro de procesamiento previo en <code>logs/ultimo-etl.json</code>.`;
+    return telegramClient.enviarMensaje({ token, chatId, texto });
+  }
+
+  const lineas = [
+    `📄 <b>ÚLTIMO PROCESAMIENTO ETL</b>`,
+    `📁 Archivo: <code>${escaparHtml(ultimoEtl.archivo)}</code>`,
+    `🕒 Hora: <code>${ultimoEtl.timestamp ? ultimoEtl.timestamp.replace("T", " ").slice(0, 19) : "N/A"}</code>`,
+    `📥 Insertadas: <b>${Number(ultimoEtl.totalInsertadas).toLocaleString("es-CL")}</b>`,
+    `⚠️ Filas rechazadas: <b>${ultimoEtl.errores.length}</b>`,
+  ];
+
+  if (ultimoEtl.correcciones && ultimoEtl.correcciones.length > 0) {
+    lineas.push(``, `✨ <b>Correcciones automáticas (${ultimoEtl.correcciones.length}):</b>`);
+    ultimoEtl.correcciones.forEach((c) => {
+      lineas.push(`• <i>${escaparHtml(c)}</i>`);
+    });
+  }
+
+  if (ultimoEtl.errores.length > 0) {
+    lineas.push(``, `❌ <b>Detalle de errores (${ultimoEtl.errores.length}):</b>`);
+    const limite = 10;
+    const visibles = ultimoEtl.errores.slice(0, limite);
+
+    visibles.forEach((err) => {
+      const fila = err.excelRow || err.row || "?";
+      const motivos = Array.isArray(err.errors) ? err.errors.join("; ") : String(err.errors);
+      lineas.push(`• <b>Fila ${fila}:</b> ${escaparHtml(motivos)}`);
+      if (err.data) {
+        const datosClave = Object.entries(err.data)
+          .filter(([_, v]) => v)
+          .slice(0, 4)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(", ");
+        if (datosClave) {
+          lineas.push(`  <pre>${escaparHtml(datosClave)}</pre>`);
+        }
+      }
+    });
+
+    if (ultimoEtl.errores.length > limite) {
+      lineas.push(`<i>... y ${ultimoEtl.errores.length - limite} filas más (ver logs completos en el servidor)</i>`);
+    }
+  } else {
+    lineas.push(``, `✅ <i>No hubo filas rechazadas en este archivo.</i>`);
+  }
+
+  await telegramClient.enviarMensaje({ token, chatId, texto: lineas.join("\n") });
+}
+
+async function manejarComandoReporte({ token, chatId, pool, args }) {
+  let fecha = args[0];
+
+  if (fecha && !FECHA_REGEX.test(fecha)) {
+    return telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto: `⚠️ Formato de fecha inválido. Usa <code>YYYY-MM-DD</code> (ej: <code>/reporte 2026-09-01</code>).`,
+    });
+  }
+
+  if (!fecha) {
+    const { rows } = await pool.query(
+      "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS fecha FROM registro_enrolamiento"
+    );
+    fecha = rows[0]?.fecha;
+    if (!fecha) {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: `ℹ️ No hay registros cargados en la base de datos para generar reporte.`,
+      });
+    }
+  }
+
+  const reporte = await obtenerReporteDiario(pool, fecha);
+  const texto = formatearReporte(reporte);
+  await telegramClient.enviarMensaje({ token, chatId, texto });
+}
+
+async function manejarComandoEstado({ token, chatId, pool }) {
+  try {
+    const [dbCheck, totalRes, ultimasRes] = await Promise.all([
+      pool.query("SELECT 1"),
+      pool.query("SELECT count(*)::int AS total FROM registro_enrolamiento"),
+      pool.query(
+        "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS ultima, to_char(min(fecha_enrolamiento), 'YYYY-MM-DD') AS primera FROM registro_enrolamiento"
+      ),
+    ]);
+
+    const total = totalRes.rows[0].total;
+    const { ultima, primera } = ultimasRes.rows[0];
+    const ultimoEtl = leerUltimoEtl();
+
+    const lineas = [
+      `🟢 <b>ESTADO DEL SISTEMA ABIS</b>`,
+      ``,
+      `💾 <b>Base de Datos:</b> Conectada ✅`,
+      `👥 <b>Total registros históricos:</b> <code>${total.toLocaleString("es-CL")}</code>`,
+      `📅 <b>Rango de fechas:</b> <code>${primera || "N/A"}</code> ➔ <code>${ultima || "N/A"}</code>`,
+    ];
+
+    if (ultimoEtl) {
+      lineas.push(
+        `📂 <b>Último archivo ETL:</b> <code>${escaparHtml(ultimoEtl.archivo)}</code> (${Number(ultimoEtl.totalInsertadas).toLocaleString("es-CL")} insertadas, ${ultimoEtl.errores.length} omitidas)`
+      );
+    }
+
+    await telegramClient.enviarMensaje({ token, chatId, texto: lineas.join("\n") });
+  } catch (err) {
+    await telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto: `🔴 <b>Error de Estado:</b> Base de datos inaccesible (${escaparHtml(err.message)})`,
+    });
+  }
+}
+
+async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
+  const chatId = String(mensaje.chat.id);
+  const texto = (mensaje.text || "").trim();
+
+  // Si se definió TELEGRAM_CHAT_ID, restringir el acceso a ese chat por seguridad
+  if (authorizedChatId && String(authorizedChatId) !== chatId) {
+    console.warn(`Mensaje recibido de chat no autorizado: ${chatId}`);
+    return telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto: `⛔ <b>Acceso no autorizado</b>\nEste bot es de uso exclusivo del Sistema ABIS.`,
+    });
+  }
+
+  const partes = texto.split(/\s+/);
+  const comando = partes[0].toLowerCase().split("@")[0]; // Permite /logs@AbisSystemBot
+  const args = partes.slice(1);
+
+  switch (comando) {
+    case "/start":
+    case "/ayuda":
+    case "/help":
+      await manejarComandoAyuda({ token, chatId });
+      break;
+    case "/logs":
+    case "/log":
+      await manejarComandoLogs({ token, chatId });
+      break;
+    case "/errores":
+    case "/detalle":
+    case "/error":
+      await manejarComandoDetalleErrores({ token, chatId, pool, args });
+      break;
+    case "/reporte":
+    case "/informe":
+    case "/hoy":
+      await manejarComandoReporte({ token, chatId, pool, args });
+      break;
+    case "/estado":
+    case "/status":
+    case "/health":
+      await manejarComandoEstado({ token, chatId, pool });
+      break;
+    default: {
+      const comandoTexto = comando.startsWith("/") ? `el comando <code>${escaparHtml(comando)}</code>` : "tu mensaje";
+      await telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: [
+          `❓ <b>No entendí ${comandoTexto}.</b>`,
+          ``,
+          `💡 Escribe <code>/ayuda</code> para ver todos los comandos disponibles en el Sistema ABIS:`,
+          `• <code>/reporte [YYYY-MM-DD]</code> - Ver reporte diario`,
+          `• <code>/errores [YYYY-MM-DD]</code> - Ver detalle de errores por cuartel`,
+          `• <code>/estado</code> - Estado de la base de datos y total histórico`,
+          `• <code>/logs</code> - Ver detalle de la última carga ETL`,
+          `• <code>/ayuda</code> - Ver guía completa de comandos`,
+        ].join("\n"),
+      });
+      break;
+    }
+  }
+}
+
+let botActivo = false;
+
+async function iniciarBot({ token, chatId, pool, logger = console }) {
+  if (botActivo) {
+    logger.log("El bot de Telegram ya se encuentra en ejecución.");
+    return;
+  }
+
+  botActivo = true;
+  let offset = 0;
+  logger.log("🤖 Bot de Telegram interactivo iniciado (Long Polling activo)...");
+
+  while (botActivo) {
+    try {
+      const updates = await telegramClient.obtenerActualizaciones({ token, offset, timeout: 25 });
+      for (const update of updates) {
+        offset = update.update_id + 1;
+        if (update.message && update.message.text) {
+          try {
+            await procesarMensaje({ mensaje: update.message, token, authorizedChatId: chatId, pool });
+          } catch (err) {
+            logger.error(`Error procesando mensaje (${update.message.text}):`, err.message);
+          }
+        }
+      }
+    } catch (err) {
+      if (!botActivo) break;
+      logger.error("Error en polling de Telegram:", err.message);
+      // Pausa de 3 segundos ante caídas de red antes de reintentar
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+  }
+  logger.log("Bot de Telegram detenido.");
+}
+
+function detenerBot() {
+  botActivo = false;
+}
+
+module.exports = { iniciarBot, detenerBot, procesarMensaje };

@@ -18,7 +18,7 @@ async function enviarMensaje({ token, chatId, texto }) {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: truncarSiExcede(texto), parse_mode: "Markdown" }),
+    body: JSON.stringify({ chat_id: chatId, text: truncarSiExcede(texto), parse_mode: "HTML" }),
   });
 
   const data = await response.json();
@@ -28,4 +28,19 @@ async function enviarMensaje({ token, chatId, texto }) {
   return data.result;
 }
 
-module.exports = { enviarMensaje };
+async function obtenerActualizaciones({ token, offset, timeout = 30 }) {
+  const params = new URLSearchParams();
+  if (offset !== undefined && offset !== null) params.append("offset", offset);
+  if (timeout !== undefined && timeout !== null) params.append("timeout", timeout);
+
+  const url = `${TELEGRAM_API}/bot${token}/getUpdates?${params.toString()}`;
+  const response = await fetch(url);
+
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error(`Telegram API: ${data.description || "error desconocido"}`);
+  }
+  return data.result;
+}
+
+module.exports = { enviarMensaje, obtenerActualizaciones };

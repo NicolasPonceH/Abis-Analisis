@@ -13,7 +13,23 @@ la base caída), avisa por el mismo Telegram en vez de fallar en silencio.
 ## 2. Operación normal
 
 Si todo funciona bien, no hay que hacer nada: todos los días a la hora configurada llega un
-mensaje al chat de Telegram con el reporte del día (título "📊 Reporte Diario ABIS - DD/MM/AAAA").
+mensaje al chat de Telegram con el reporte del día (título "📋 REPORTE DIARIO ABIS - DD/MM/AAAA").
+
+### 2.1 Bot interactivo de Telegram (comandos)
+
+Puedes interactuar con el bot directamente desde Telegram escribiéndole comandos:
+
+- **`/logs`** (o `/errores`): Muestra el detalle del último archivo Excel procesado, las correcciones automáticas y la lista de filas rechazadas con el motivo exacto del descarte.
+- **`/reporte`**: Genera y envía el reporte diario más reciente a demanda.
+- **`/reporte YYYY-MM-DD`**: Genera el reporte diario para una fecha histórica específica (ej: `/reporte 2026-09-01`).
+- **`/estado`** (o `/status`): Consulta si la base de datos está conectada y muestra métricas históricas de enrolamiento.
+- **`/ayuda`**: Muestra la lista de comandos disponibles.
+
+Para iniciar el escuchador del bot de forma interactiva:
+```powershell
+npm run bot
+```
+*(Opcionalmente se puede configurar `ENABLE_TELEGRAM_BOT=true` en `.env` para que inicie junto con `npm start`).*
 
 ## 3. Chequeo rápido de salud (2 minutos)
 
@@ -68,9 +84,14 @@ Son dos cosas independientes:
 - **`npm start`** levanta el servidor Express (`/health`, `/reporte-diario`) — solo hace falta si
   alguien quiere consultar el reporte por HTTP a demanda. **No** es necesario para que el reporte
   diario automático funcione.
-- **La tarea programada** (`ABIS-FlujoDiario`) corre `flujo-diario.js` directamente con `node`,
-  sin pasar por el servidor Express. Es el proceso que efectivamente manda el reporte todos los
-  días.
+- **La tarea programada** (`ABIS-FlujoDiario`) corre `scripts\tarea-diaria.ps1`, que primero
+  garantiza que PostgreSQL esté lanzado (relanzándolo si la PC se reinició) y espera a que acepte
+  conexiones, y recién ahí corre `flujo-diario.js` con `node`, sin pasar por el servidor Express.
+  Es el proceso que efectivamente manda el reporte todos los días.
+- **La tarea de las 07:30** (`ABIS-FuenteDiaria`) es la que deja preparado el Excel del día:
+  genera datos en la BD simulada `abis_fuente` y los exporta a
+  `Documents\ABIS_excel_diario\enrolamiento_<fecha>.xlsx`. La de las 08:00 toma siempre el más
+  reciente de esa carpeta. Detalles en [`PruebDataBase_FAKE.md`](PruebDataBase_FAKE.md).
 
 Si el servidor web está caído, el reporte diario automático **sigue funcionando igual**.
 
@@ -115,5 +136,7 @@ más aparte.
   hora configurada — no es un servicio de Windows (ver `README.md`, sección de PostgreSQL, para
   el porqué de esa limitación en esta máquina).
 - No hay todavía una ruta real de "carpeta de llegada" del Excel diario desde el sistema origen —
-  la tarea programada, cuando se registre para uso real, tiene que apuntar a esa ruta en vez del
-  archivo de prueba.
+  hoy la llena la simulación (`ABIS-FuenteDiaria`, ver
+  [`PruebDataBase_FAKE.md`](PruebDataBase_FAKE.md)). Cuando exista la real, apuntar
+  `tarea-diaria.ps1` a esa carpeta (ya busca el archivo más reciente) y desactivar la tarea de
+  las 07:30.

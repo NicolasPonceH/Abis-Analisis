@@ -2,11 +2,8 @@ require("dotenv").config();
 const pool = require("../src/db");
 const { ejecutarFlujoDiario } = require("../src/flujo/flujoDiario");
 
-const filePath = process.argv[2];
-if (!filePath) {
-  console.error("Uso: node scripts/flujo-diario.js <ruta-al-excel.xlsx>");
-  process.exit(1);
-}
+const filePath = process.argv[2] || "New_Enrolados Abis.xlsx";
+console.log(`Iniciando flujo diario con archivo: ${filePath}`);
 
 ejecutarFlujoDiario(filePath, pool)
   .then((resultado) => {
@@ -14,6 +11,20 @@ ejecutarFlujoDiario(filePath, pool)
     if (resultado.insertResult) {
       console.log(`Filas insertadas: ${resultado.insertResult.inserted}`);
     }
+
+    if (resultado.rows) {
+      const correcciones = resultado.rows.flatMap((r) => r.correcciones || []);
+      if (correcciones.length > 0) {
+        console.log(`Correcciones automaticas aplicadas (${correcciones.length}):`);
+        correcciones.forEach((c) => console.log(`  - ${c}`));
+      }
+    }
+
+    if (resultado.errors && resultado.errors.length > 0) {
+      console.log(`Filas rechazadas / omitidas (${resultado.errors.length}):`);
+      console.log(JSON.stringify(resultado.errors, null, 2));
+    }
+
     // "..._sin_notificar" significa que el ETL funciono pero Telegram fallo al avisar — sale
     // con codigo de error igual, para que una tarea programada lo marque como fallido y alguien
     // se entere por otro medio (revisar logs), aunque los datos ya hayan quedado bien cargados.

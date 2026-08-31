@@ -9,18 +9,29 @@
     "db:seed": "node scripts/run-sql.js db/seed_catalogos.sql",
     "db:views": "node scripts/run-sql.js db/views.sql",
     "db:hardening": "node scripts/run-sql.js db/hardening.sql",
+    "db:limpiar": "node -e \"require('dotenv').config(); const pool = require('./src/db'); pool.query('TRUNCATE registro_enrolamiento RESTART IDENTITY;').then(() => { console.log('✅ Tabla registro_enrolamiento limpiada.'); pool.end(); }).catch(e => { console.error(e); pool.end(); });\"",
+    "db:poblar": "node scripts/poblar-desde-excel.js",
     "ingest": "node scripts/ingest-excel.js",
     "etl": "node scripts/procesar-excel.js",
     "carga-historica": "node scripts/carga-historica-sintetica.js",
     "validar-integridad": "node scripts/validar-integridad-historica.js",
     "datos-reporte-prueba": "node scripts/generar-datos-reporte-prueba.js",
     "telegram:enviar": "node scripts/enviar-reporte-telegram.js",
-    "flujo-diario": "node scripts/flujo-diario.js"
+    "flujo-diario": "node scripts/flujo-diario.js",
+    "bot": "node scripts/iniciar-bot.js",
+    "test:bot": "node scripts/test-bot.js",
+    "fuente:setup": "node scripts/fuente-setup.js",
+    "fuente:generar": "node scripts/fuente-generar.js",
+    "fuente:exportar": "node scripts/fuente-exportar.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "pg": "^8.12.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "playwright": "^1.62.1"
   }
 }

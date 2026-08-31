@@ -1,46 +1,159 @@
--- Poblamiento inicial de tablas maestras (Sprint 1)
--- Datos de ejemplo tomados del Informe de Requerimientos.
--- IMPORTANTE: reemplazar/completar con el listado real institucional
--- de unidades, cuarteles y nacionalidades antes de cargar datos reales (Sprint 3+).
+-- Poblamiento completo de tablas maestras con datos reales institucionales
+-- Extraido y normalizado a partir de New_Enrolados Abis.xlsx (Sprint 10 / Integracion)
 
+-- 1. NACIONALIDADES
 INSERT INTO nacionalidad (descripcion, codigo_iso) VALUES
-    ('CHILE', 'CHL'),
-    ('VENEZUELA', 'VEN'),
+    ('AFGANISTÁN', 'AFG'),
+    ('ALBANIA', 'ALB'),
+    ('ALEMANIA', 'DEU'),
+    ('ANDORRA', 'AND'),
+    ('ANGOLA', 'AGO'),
+    ('ARABIA SAUDITA', 'SAU'),
+    ('ARGENTINA', 'ARG'),
+    ('BAHAMAS', 'BHS'),
     ('BOLIVIA', 'BOL'),
-    ('PERU', 'PER'),
+    ('BONAIRE, SAN EUSTAQUIO Y SABA', 'BES'),
+    ('BRASIL', 'BRA'),
+    ('BULGARIA', 'BGR'),
+    ('CANADA', 'CAN'),
+    ('CHILE', 'CHL'),
+    ('CHINA', 'CHN'),
     ('COLOMBIA', 'COL'),
+    ('COSTA DE MARFIL', 'CIV'),
+    ('COSTA RICA', 'CRI'),
+    ('CROACIA', 'HRV'),
+    ('CUBA', 'CUB'),
+    ('DOMINICA', 'DMA'),
     ('ECUADOR', 'ECU'),
-    ('ARGENTINA', 'ARG')
+    ('EGIPTO', 'EGY'),
+    ('EMIRATOS ÁRABES UNIDOS', 'ARE'),
+    ('ESPAÑA', 'ESP'),
+    ('ESTADOS UNIDOS DE AMÉRICA', 'USA'),
+    ('FILIPINAS', 'PHL'),
+    ('FR', 'FRA'),
+    ('FRANCIA', 'FRA'),
+    ('GUYANA', 'GUY'),
+    ('HAIT', 'HTI'),
+    ('HAITÍ', 'HTI'),
+    ('INDIA', 'IND'),
+    ('IRAN', 'IRN'),
+    ('ITALIA', 'ITA'),
+    ('JAPON', 'JPN'),
+    ('JORDANIA', 'JOR'),
+    ('LA', 'LAO'),
+    ('LAOS', 'LAO'),
+    ('LESOTO', 'LSO'),
+    ('LETONIA', 'LVA'),
+    ('LIBANO', 'LBN'),
+    ('LIBERIA', 'LBR'),
+    ('MACAO', 'MAC'),
+    ('MARRUECOS', 'MAR'),
+    ('MEXICO', 'MEX'),
+    ('NAMBIA', 'NAM'),
+    ('NEPAL', 'NPL'),
+    ('NICARAGUA', 'NIC'),
+    ('NUEVA ZELANDA', 'NZL'),
+    ('PAKISTAN', 'PAK'),
+    ('PARAGUAY', 'PRY'),
+    ('PAÍSES BAJOS', 'NLD'),
+    ('PER', 'PER'),
+    ('PERÚ', 'PER'),
+    ('QATAR', 'QAT'),
+    ('REINO UNIDO', 'GBR'),
+    ('REP BLICA DOMINICANA', 'DOM'),
+    ('REPÚBLICA CHECA', 'CZE'),
+    ('REPÚBLICA DOMINICANA', 'DOM'),
+    ('RUANDA', 'RWA'),
+    ('SERVIA', 'SRB'),
+    ('SIRIA', 'SYR'),
+    ('SN', 'SEN'),
+    ('TAIWAN', 'TWN'),
+    ('TURQUÍA', 'TUR'),
+    ('URUGUAY', 'URY'),
+    ('VANUATU', 'VUT'),
+    ('VENEZUELA', 'VEN'),
+    ('VIETNAM', 'VNM')
 ON CONFLICT (descripcion) DO NOTHING;
 
+-- 2. REGIONES
 INSERT INTO region (nombre_region) VALUES
     ('ARICA - PARINACOTA'),
-    ('TARAPACA')
+    ('TARAPACA'),
+    ('ATACAMA'),
+    ('SERMIG'),
+    ('METROPOLITANA'),
+    ('ANTOFAGASTA')
 ON CONFLICT (nombre_region) DO NOTHING;
 
+-- 3. UNIDADES
 INSERT INTO unidad (nombre_unidad, id_region) VALUES
-    ('PREPOLIN ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA')),
-    ('JENATID', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA')),
-    ('BRIANCO ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA'))
+    ('PREPOLIN ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BRIANCO ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BH ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('PLANA MAYOR ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BICRIM ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BIDEMA ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BRISEX ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BITRAP ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BIRO ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('AVANCHACA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('ASETEC ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BRIDEC ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('BRITRAP ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('FTH ARICA', (SELECT id_region FROM region WHERE nombre_region = 'ARICA - PARINACOTA' LIMIT 1)),
+    ('POLINT IQUIQUE', (SELECT id_region FROM region WHERE nombre_region = 'TARAPACA' LIMIT 1)),
+    ('BRISEX IQUIQUE', (SELECT id_region FROM region WHERE nombre_region = 'TARAPACA' LIMIT 1)),
+    ('POLINT COPIAPO', (SELECT id_region FROM region WHERE nombre_region = 'ATACAMA' LIMIT 1)),
+    ('JENATID', (SELECT id_region FROM region WHERE nombre_region = 'SERMIG' LIMIT 1)),
+    ('JENAMIG', (SELECT id_region FROM region WHERE nombre_region = 'METROPOLITANA' LIMIT 1)),
+    ('NEC', (SELECT id_region FROM region WHERE nombre_region = 'METROPOLITANA' LIMIT 1)),
+    ('POLINT ANTOFAGASTA', (SELECT id_region FROM region WHERE nombre_region = 'ANTOFAGASTA' LIMIT 1)),
+    ('NO ESPECIFICADA', (SELECT id_region FROM region WHERE nombre_region = 'METROPOLITANA' LIMIT 1))
 ON CONFLICT (nombre_unidad, id_region) DO NOTHING;
 
+-- 4. CUARTELES
 INSERT INTO cuartel (nombre_cuartel, id_unidad) VALUES
-    ('COLCHANES', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA')),
-    ('ANGAMOS', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA')),
-    ('CHACALLUTA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA'))
+    ('ANGAMOS', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA' LIMIT 1)),
+    ('CHACALLUTA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA' LIMIT 1)),
+    ('CHUNGARA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA' LIMIT 1)),
+    ('BELEN', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'BRIANCO ARICA' LIMIT 1)),
+    ('CUYA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'PREPOLIN ARICA' LIMIT 1)),
+    ('COLCHANES', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('PEDRO PRADO', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('HUARA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('IQUIQUE', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('ALTO HOSPICIO', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('TIRANA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('LA TIRANA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('BARROS', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT IQUIQUE' LIMIT 1)),
+    ('COPIAPO', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT COPIAPO' LIMIT 1)),
+    ('CARRERA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT COPIAPO' LIMIT 1)),
+    ('JENATID', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'JENATID' LIMIT 1)),
+    ('JENAMIG', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'JENAMIG' LIMIT 1)),
+    ('SUBDICOR', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'JENAMIG' LIMIT 1)),
+    ('SUBDICORE', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'JENAMIG' LIMIT 1)),
+    ('NEC', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'NEC' LIMIT 1)),
+    ('AVANCHACA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'AVANCHACA' LIMIT 1)),
+    ('CUARTEL ANTOFAGASTA', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'POLINT ANTOFAGASTA' LIMIT 1)),
+    ('NO ESPECIFICADO', (SELECT id_unidad FROM unidad WHERE nombre_unidad = 'NO ESPECIFICADA' LIMIT 1))
 ON CONFLICT (nombre_cuartel, id_unidad) DO NOTHING;
 
+-- 5. EQUIPOS
 INSERT INTO equipo (tipo_equipo) VALUES
     ('PC DE ESCRITORIO'),
     ('TABLET')
 ON CONFLICT (tipo_equipo) DO NOTHING;
 
+-- 6. ESTADOS DE PROCESO
 INSERT INTO estado_proceso (tipo_estado, descripcion) VALUES
     ('SINCRONIZACION', 'SINCRONIZADO'),
     ('SINCRONIZACION', 'PENDIENTE'),
     ('SINCRONIZACION', 'ERROR'),
     ('REGISTRO', 'REGISTRADO'),
     ('REGISTRO', 'PENDIENTE'),
+    ('REGISTRO', 'ERROR'),
     ('GENERAL', 'OK'),
-    ('GENERAL', 'CON_ERROR')
+    ('GENERAL', 'REGISTRADO'),
+    ('GENERAL', 'CON_ERROR'),
+    ('GENERAL', 'ERROR')
 ON CONFLICT (tipo_estado, descripcion) DO NOTHING;

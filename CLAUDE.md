@@ -196,15 +196,18 @@ Six catalog (master) tables plus one transactional table:
   `GET https://api.telegram.org/bot<TOKEN>/getUpdates` and read `result[].message.chat.id`.
 - `telegramClient.js`'s `enviarMensaje({ token, chatId, texto })` wraps Telegram's `sendMessage`
   using Node 18's native `fetch` — no new dependency. Throws if Telegram responds `ok: false`.
-- `formatearReporte.js` turns `obtenerReporteDiario()`'s JSON (Sprint 5) into the Markdown message
-  from the requirements doc section 5. It does **not** hardcode status labels like "Sincronizados"
-  from that example — `estado_proceso` descriptions are catalog-driven and still placeholder data,
-  so each row is rendered with its actual `descripcion`, with an emoji picked by regex pattern
-  (`ERROR`→❌, `PENDIENTE`→⏳, `MENOR`→⚠️, else→✅).
-- **Markdown-escaping gotcha**: Telegram's classic `Markdown` parse mode uses `_` for italics: an
-  unescaped underscore in dynamic data (the seed catalog's `CON_ERROR` state, for instance) breaks
-  parsing of the *entire* message. Any value that comes from data (not a literal we wrote) must go
-  through `escaparMarkdown()` before being interpolated — confirmed necessary with a real send.
+- `formatearReporte.js` turns `obtenerReporteDiario()`'s JSON (Sprint 5) into the Telegram message,
+  using `parse_mode: "HTML"` (not the classic `Markdown` mode originally used — redesigned
+  27/08/2026 to a boxed layout with monospace `<code>` tables). It does **not** hardcode status
+  labels like "Sincronizados" — `estado_proceso` descriptions are catalog-driven and still
+  placeholder data, so `formatearEstadoProcesos()` renders every state that actually exists per
+  domain (sincronización/registro/general), title-cased from the real `descripcion`, with an emoji
+  picked by regex pattern (`ERROR`→❌, `PENDIENTE`→⏳, `MENOR`→⚠️, else→✅), column-aligned by padding
+  to the widest label/total/percentage actually present that day.
+- **HTML-escaping gotcha**: Telegram's `HTML` parse mode only reserves `&`, `<`, `>` — far fewer
+  special characters than classic `Markdown` (which needed escaping `_*\`[]`). Any value that comes
+  from data (not a literal we wrote) must still go through `escaparHtml()` before being
+  interpolated, e.g. inside the `<code>` blocks — confirmed necessary with a real send.
 - `scripts/enviar-reporte-telegram.js` (`npm run telegram:enviar -- <YYYY-MM-DD>`) is the manual
   trigger: builds the report, prints the plain-text message to console first (so a formatting bug
   is visible before spending a real Telegram send), then sends it. Sprint 7 will wire this into an
@@ -224,14 +227,19 @@ Six catalog (master) tables plus one transactional table:
 - If the Excel has rows spanning more than one `fecha_enrolamiento` (shouldn't happen for a real
   daily file, but not validated against), the report is generated for the **most recent** date
   among the inserted rows, not all of them.
-- **The scheduled trigger is documented but not left registered.** Same reasoning as the
-  PostgreSQL watchdog task: Claude Code's auto-mode classifier blocks `Register-ScheduledTask`
-  calls by default (it's also a common persistence technique), so it needs the user to run it
-  explicitly. The ready-to-run `Register-ScheduledTask` command is in
-  `docs/sprints/AVANCE_SPRINT7.md` — it points at a placeholder fixture path since there's no real
-  daily-drop folder defined yet, so update that before registering it for real. (The user did
-  register + `Start-ScheduledTask` + unregister it once, live, as a smoke test — it ran the
-  fixture successfully. Don't assume a task named `ABIS-FlujoDiario` currently exists.)
+- **Two scheduled tasks run the daily chain** (since Aug 24-25, 2026), user-level:
+  `ABIS-FuenteDiaria` (07:30) → `scripts/tarea-fuente.ps1`: ensures PostgreSQL is up
+  (`ensure-running.ps1` + wait on `pg_isready`, max ~60 s), generates today's rows into the
+  simulated source DB `abis_fuente` and exports `Documents\ABIS_excel_diario\enrolamiento_<date>.xlsx`
+  (log: `logs/fuente-diario.log`). Then `ABIS-FlujoDiario` (08:00) → `scripts/tarea-diaria.ps1`
+  picks the NEWEST matching xlsx from that folder and runs the flow (log:
+  `logs/flujo-diario.log`). Both redirect node output via `cmd.exe /c "... >> log"` (NOT
+  PowerShell's `>>`, which writes UTF-16 and garbles the log). The whole simulation is documented
+  in `docs/PruebDataBase_FAKE.md`; when a real daily-drop folder exists, point tarea-diaria at it
+  and unregister ABIS-FuenteDiaria. Re-registering over an existing task fails with "ya existe";
+  unregister first (`Unregister-ScheduledTask -Confirm:$false`).
+  Gotcha fixed on Aug 25: node-pg parses DATE columns as JS Date objects — always select them as
+  `::text` or the mapper rejects every row with "Fecha de enrolamiento invalida".
 
 ### QA fixes (Sprint 8)
 

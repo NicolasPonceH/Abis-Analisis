@@ -2,11 +2,8 @@ require("dotenv").config();
 const pool = require("../src/db");
 const { processExcelFile } = require("../src/ingest");
 
-const filePath = process.argv[2];
-if (!filePath) {
-  console.error("Uso: node scripts/ingest-excel.js <ruta-al-excel.xlsx>");
-  process.exit(1);
-}
+const filePath = process.argv[2] || "New_Enrolados Abis.xlsx";
+console.log(`Leyendo archivo Excel: ${filePath}`);
 
 processExcelFile(filePath, pool)
   .then((result) => {

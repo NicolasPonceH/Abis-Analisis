@@ -1,7 +1,31 @@
+const fs = require("fs");
+const path = require("path");
 const { runEtl } = require("../etl");
 const { obtenerReporteDiario } = require("../reportes/reporteDiario");
-const { formatearReporte, formatearAlerta } = require("../telegram/formatearReporte");
+const { formatearReporte, formatearAlerta, formatearAvisoFilasOmitidas } = require("../telegram/formatearReporte");
 const { enviarMensaje } = require("../telegram/telegramClient");
+
+function guardarUltimoEtl(filePath, resultadoEtl) {
+  try {
+    const logsDir = path.resolve(__dirname, "../../logs");
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    const logPath = path.join(logsDir, "ultimo-etl.json");
+    const info = {
+      timestamp: new Date().toISOString(),
+      archivo: path.basename(filePath),
+      rutaCompleta: filePath,
+      totalMapeadas: resultadoEtl.rows ? resultadoEtl.rows.length : 0,
+      totalInsertadas: resultadoEtl.insertResult ? resultadoEtl.insertResult.inserted : 0,
+      correcciones: resultadoEtl.rows ? resultadoEtl.rows.flatMap((r) => r.correcciones || []) : [],
+      errores: resultadoEtl.errors || [],
+    };
+    fs.writeFileSync(logPath, JSON.stringify(info, null, 2), "utf8");
+  } catch (err) {
+    console.error("No se pudo guardar logs/ultimo-etl.json:", err.message);
+  }
+}
 
 function credencialesTelegram() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -44,6 +68,8 @@ async function ejecutarFlujoDiario(filePath, pool) {
     throw err;
   }
 
+  guardarUltimoEtl(filePath, resultadoEtl);
+
   if (!resultadoEtl.headerValidation.ok) {
     const detalle = [
       resultadoEtl.headerValidation.missing.length > 0
@@ -73,7 +99,7 @@ async function ejecutarFlujoDiario(filePath, pool) {
   const reporte = await obtenerReporteDiario(pool, fecha);
   let texto = formatearReporte(reporte);
   if (resultadoEtl.errors.length > 0) {
-    texto += `\n\n⚠️ ${resultadoEtl.errors.length} fila(s) del Excel no se pudieron procesar (ver logs del ETL).`;
+    texto += `\n\n${formatearAvisoFilasOmitidas(resultadoEtl.errors)}`;
   }
 
   // Si Telegram falla aca, la carga en si igual fue exitosa (los datos ya estan en la BD) —

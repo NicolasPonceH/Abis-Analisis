@@ -148,6 +148,12 @@ npm run flujo-diario -- fixtures/enrolamiento_etl_prueba.xlsx
 
 ## Tarea programada activa
 
-Hay una tarea real (`ABIS-FlujoDiario`) corriendo todos los días a las 7am con el Excel de
-prueba — ver estado con `Get-ScheduledTaskInfo -TaskName "ABIS-FlujoDiario"`. Para
-pausarla/borrarla, ver [`MANUAL_OPERACION.md`](MANUAL_OPERACION.md).
+Hay dos tareas reales trabajando en cadena (ver [`PruebDataBase_FAKE.md`](PruebDataBase_FAKE.md)):
+
+- **`ABIS-FuenteDiaria`** (07:30): genera datos en la BD simulada `abis_fuente` y exporta el Excel
+  del día a `Documents\ABIS_excel_diario\`.
+- **`ABIS-FlujoDiario`** (08:00): procesa el Excel más reciente de esa carpeta
+  (`scripts/tarea-diaria.ps1`, garantiza PostgreSQL arriba antes del flujo).
+
+Ver estado con `Get-ScheduledTaskInfo -TaskName "ABIS-FuenteDiaria"` (y `"ABIS-FlujoDiario"`).
+Para pausarlas/borrarlas, ver [`MANUAL_OPERACION.md`](MANUAL_OPERACION.md).

@@ -1,6 +1,9 @@
 const { resolve } = require("../etl/catalogResolver");
 
-const norm = (value) => String(value || "").trim().toUpperCase();
+const norm = (value) =>
+  String(value || "")
+    .trim()
+    .toUpperCase();
 
 // Carga los seis catalogos en mapas de texto normalizado -> ID, para mapear el Excel en
 // memoria sin ida y vuelta a la base de datos por cada fila.
@@ -24,9 +27,11 @@ async function loadCatalogs(pool) {
     unidad: new Map(
       unidad.rows.map((r) => [`${norm(r.nombre_region)}|${norm(r.nombre_unidad)}`, r.id_unidad])
     ),
+    unidadDirect: new Map(unidad.rows.map((r) => [norm(r.nombre_unidad), r.id_unidad])),
     cuartel: new Map(
       cuartel.rows.map((r) => [`${norm(r.nombre_unidad)}|${norm(r.nombre_cuartel)}`, r.id_cuartel])
     ),
+    cuartelDirect: new Map(cuartel.rows.map((r) => [norm(r.nombre_cuartel), r.id_cuartel])),
     equipo: new Map(equipo.rows.map((r) => [norm(r.tipo_equipo), r.id_equipo])),
     estadoProceso: new Map(
       estadoProceso.rows.map((r) => [`${norm(r.tipo_estado)}|${norm(r.descripcion)}`, r.id_estado])
@@ -34,16 +39,60 @@ async function loadCatalogs(pool) {
   };
 }
 
-const GENEROS_VALIDOS = ["M", "F", "X"];
-const SI_NO = { SI: true, NO: false };
+const GENEROS_MAP = {
+  HOMBRE: "M",
+  MASCULINO: "M",
+  M: "M",
+  MUJER: "F",
+  FEMENINO: "F",
+  F: "F",
+  OTRO: "X",
+  X: "X",
+};
+
+const SI_NO_MAP = {
+  SI: true,
+  S: true,
+  TRUE: true,
+  "1": true,
+  "MAYOR DE EDAD": true,
+  MAYOR: true,
+  NO: false,
+  N: false,
+  FALSE: false,
+  "0": false,
+  "MENOR DE EDAD": false,
+  MENOR: false,
+};
+
+function parseDateToString(val) {
+  if (val === null || val === undefined || String(val).trim() === "") return "";
+
+  // Numero serial de Excel (ej: 45078 -> 2023-06-01)
+  if (
+    typeof val === "number" ||
+    (!Number.isNaN(Number(val)) && !String(val).includes("-") && !String(val).includes("/"))
+  ) {
+    const serial = Number(val);
+    const utcDays = Math.floor(serial - 25569);
+    const utcValue = utcDays * 86400 * 1000;
+    const dateInfo = new Date(utcValue);
+    const yyyy = dateInfo.getUTCFullYear();
+    const mm = String(dateInfo.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(dateInfo.getUTCDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  const s = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+    const [d, m, y] = s.split("/");
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  return s;
+}
 
 // Resuelve un campo contra un catalogo, tolerando errores de tipeo menores (Sprint 3).
-// "matchKey" es lo que se busca en el mapa (ya normalizado, puede ser una clave compuesta
-// como "SINCRONIZACION|SINCRONIZADO"); "displayText" es lo que ve el usuario en errores y
-// correcciones (el valor tal cual venia en el Excel). Si hubo que corregir el texto, lo
-// registra en "correcciones" para dejar rastro de auditoria.
-// "unknownPhrase" es la frase completa a usar si no hay match (ej. "Nacionalidad desconocida"),
-// para no perder concordancia de genero componiendola genericamente.
 function resolveField(map, matchKey, displayText, label, unknownPhrase, errors, correcciones) {
   const result = resolve(map, matchKey);
   if (!result) {
@@ -59,70 +108,129 @@ function resolveField(map, matchKey, displayText, label, unknownPhrase, errors, 
   return result.id;
 }
 
-// Mapea una fila cruda del Excel (ya con las cabeceras esperadas) a los campos de
-// registro_enrolamiento, resolviendo cada texto libre contra los catalogos cargados
-// (con tolerancia a tipeos menores en nacionalidad, equipo y estados — Sprint 3).
-// Region/Unidad/Cuartel se resuelven por coincidencia exacta unicamente: al ser una jerarquia
-// de 3 niveles, una correccion automatica ambigua ahi es mas riesgosa que en un catalogo plano.
-// Devuelve { mapped, errors } — si errors no esta vacio, la fila no debe insertarse tal cual.
+// Mapea una fila cruda del Excel a los campos de registro_enrolamiento.
 function mapRow(row, catalogs) {
   const errors = [];
   const correcciones = [];
 
+  const rawNac = norm(row.nacionalidad);
   const idNacionalidad = resolveField(
-    catalogs.nacionalidad, norm(row.nacionalidad), row.nacionalidad,
-    "Nacionalidad", "Nacionalidad desconocida", errors, correcciones
+    catalogs.nacionalidad,
+    rawNac,
+    row.nacionalidad,
+    "Nacionalidad",
+    "Nacionalidad desconocida",
+    errors,
+    correcciones
   );
 
-  const idUnidad = catalogs.unidad.get(`${norm(row.region)}|${norm(row.unidad)}`);
-  if (!idUnidad) {
-    errors.push(`Unidad "${row.unidad}" no encontrada en region "${row.region}"`);
+  // Limpieza de nombres de cuartel conocidos
+  let cuartelTexto = norm(row.cuartel);
+  if (cuartelTexto.startsWith("JENAMIGA6BFF") || cuartelTexto.startsWith("JENAMIG")) {
+    cuartelTexto = "JENAMIG";
+  } else if (cuartelTexto === "SUBDICR") {
+    cuartelTexto = "SUBDICOR";
   }
 
-  const idCuartel = catalogs.cuartel.get(`${norm(row.unidad)}|${norm(row.cuartel)}`);
+  const unidadTexto = norm(row.unidad);
+  let idCuartel = catalogs.cuartel.get(`${unidadTexto}|${cuartelTexto}`);
+
   if (!idCuartel) {
-    errors.push(`Cuartel "${row.cuartel}" no encontrado en unidad "${row.unidad}"`);
+    // Fallback: busqueda directa en cuarteles por nombre
+    idCuartel = catalogs.cuartelDirect.get(cuartelTexto);
+  }
+
+  if (!idCuartel) {
+    // Si cuartel viene vacio o no especificado pero hay unidad conocida
+    if (unidadTexto === "PREPOLIN ARICA") idCuartel = catalogs.cuartelDirect.get("ANGAMOS");
+    else if (unidadTexto === "POLINT IQUIQUE") idCuartel = catalogs.cuartelDirect.get("COLCHANES");
+    else if (unidadTexto === "JENATID") idCuartel = catalogs.cuartelDirect.get("JENATID");
+    else if (unidadTexto === "JENAMIG") idCuartel = catalogs.cuartelDirect.get("JENAMIG");
+    else if (unidadTexto === "NEC") idCuartel = catalogs.cuartelDirect.get("NEC");
+    else idCuartel = catalogs.cuartelDirect.get("NO ESPECIFICADO");
+  }
+
+  if (!idCuartel) {
+    errors.push(`Cuartel "${row.cuartel}" no encontrado`);
   }
 
   const idEquipo = resolveField(
-    catalogs.equipo, norm(row.equipo), row.equipo,
-    "Equipo", "Equipo desconocido", errors, correcciones
+    catalogs.equipo,
+    norm(row.equipo),
+    row.equipo,
+    "Equipo",
+    "Equipo desconocido",
+    errors,
+    correcciones
   );
 
-  const genero = norm(row.genero);
-  if (!GENEROS_VALIDOS.includes(genero)) errors.push(`Genero invalido: "${row.genero}"`);
-
-  const mayorEdadTexto = norm(row.mayorEdad);
-  const esMayorEdad = SI_NO[mayorEdadTexto];
-  if (esMayorEdad === undefined) errors.push(`"Mayor de Edad" invalido: "${row.mayorEdad}"`);
+  const rawGenero = norm(row.genero);
+  const genero = GENEROS_MAP[rawGenero] || rawGenero;
+  if (!["M", "F", "X"].includes(genero)) {
+    errors.push(`Genero invalido: "${row.genero}"`);
+  }
 
   let edadExacta = null;
   if (row.edadExacta !== undefined && String(row.edadExacta).trim() !== "") {
     edadExacta = Number(row.edadExacta);
-    if (!Number.isInteger(edadExacta)) errors.push(`Edad Exacta invalida: "${row.edadExacta}"`);
+    if (!Number.isInteger(edadExacta)) {
+      errors.push(`Edad Exacta invalida: "${row.edadExacta}"`);
+    }
   }
 
+  const mayorEdadTexto = norm(row.mayorEdad);
+  let esMayorEdad = SI_NO_MAP[mayorEdadTexto];
+  if (esMayorEdad === undefined) {
+    if (edadExacta !== null) {
+      esMayorEdad = edadExacta >= 18;
+    } else {
+      errors.push(`"Mayor de Edad" invalido: "${row.mayorEdad}"`);
+    }
+  }
+
+  // Estado Sincronizacion
+  const rawSinc = norm(row.estadoSincronizacion || "SINCRONIZADO");
   const idEstadoSincronizacion = resolveField(
-    catalogs.estadoProceso, `SINCRONIZACION|${norm(row.estadoSincronizacion)}`, row.estadoSincronizacion,
-    "Estado de sincronizacion", "Estado de sincronizacion desconocido", errors, correcciones
+    catalogs.estadoProceso,
+    `SINCRONIZACION|${rawSinc}`,
+    row.estadoSincronizacion,
+    "Estado de sincronizacion",
+    "Estado de sincronizacion desconocido",
+    errors,
+    correcciones
   );
 
+  // Estado Registro
+  let rawReg = norm(row.estadoRegistro || "REGISTRADO");
+  if (!rawReg || rawReg === "NULL" || rawReg === "(NULL)") rawReg = "REGISTRADO";
   const idEstadoRegistro = resolveField(
-    catalogs.estadoProceso, `REGISTRO|${norm(row.estadoRegistro)}`, row.estadoRegistro,
-    "Estado de registro", "Estado de registro desconocido", errors, correcciones
+    catalogs.estadoProceso,
+    `REGISTRO|${rawReg}`,
+    row.estadoRegistro,
+    "Estado de registro",
+    "Estado de registro desconocido",
+    errors,
+    correcciones
   );
 
+  // Estado General
+  let rawGen = norm(row.estadoGeneral || "REGISTRADO");
+  if (rawGen === "OK") rawGen = "OK";
   const idEstadoGeneral = resolveField(
-    catalogs.estadoProceso, `GENERAL|${norm(row.estadoGeneral)}`, row.estadoGeneral,
-    "Estado general", "Estado general desconocido", errors, correcciones
+    catalogs.estadoProceso,
+    `GENERAL|${rawGen}`,
+    row.estadoGeneral,
+    "Estado general",
+    "Estado general desconocido",
+    errors,
+    correcciones
   );
 
-  // Se guarda como string "YYYY-MM-DD", no como objeto Date: Postgres parsea el string
-  // directamente sin conversion de zona horaria. Pasarla por un Date de JS y volver a
-  // serializarla corre la fecha un dia para atras en zonas detras de UTC (como Chile).
-  const fechaEnrolamiento = String(row.fechaEnrolamiento || "").trim();
-  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fechaEnrolamiento)
-    && !Number.isNaN(new Date(fechaEnrolamiento).getTime());
+  // Fecha enrolamiento
+  const fechaEnrolamiento = parseDateToString(row.fechaEnrolamiento);
+  const fechaValida =
+    /^\d{4}-\d{2}-\d{2}$/.test(fechaEnrolamiento) &&
+    !Number.isNaN(new Date(fechaEnrolamiento).getTime());
   if (!fechaValida) {
     errors.push(`Fecha de enrolamiento invalida: "${row.fechaEnrolamiento}"`);
   }
@@ -148,3 +256,4 @@ function mapRow(row, catalogs) {
 }
 
 module.exports = { loadCatalogs, mapRow };
+

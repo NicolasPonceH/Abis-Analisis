@@ -31,8 +31,10 @@ prerrequisitos existan.
       diario (`src/telegram/`), verificado con un envío real.
 - [x] **Sprint 7** (29 sep-05 oct, `v0.7.0`): flujo completo Excel → ETL → BD → Telegram en un
       solo paso (`src/flujo/`), con notificación por Telegram si el Excel viene vacío o corrupto.
-      Disparador programado documentado y probado, no activado (ver
-      [`AVANCE_SPRINT7.md`](docs/sprints/AVANCE_SPRINT7.md)).
+      Disparador programado **activo**: `ABIS-FuenteDiaria` (07:30) genera y exporta el Excel
+      diario desde la BD simulada [`abis_fuente`](docs/PruebDataBase_FAKE.md), y `ABIS-FlujoDiario`
+      (08:00) lo procesa vía `scripts/tarea-diaria.ps1` (garantiza PostgreSQL arriba antes del
+      flujo).
 - [x] **Sprint 8** (6-12 oct, `v0.8.0`): testing integrado — simulación de cargas diarias reales,
       3 bugs de QA encontrados y corregidos (ver [`AVANCE_SPRINT8.md`](docs/sprints/AVANCE_SPRINT8.md)).
 - [x] **Sprint 9** (13-19 oct, `v0.9.0`): manual de operación (`docs/MANUAL_OPERACION.md`),
@@ -126,6 +128,9 @@ aplicar `schema.sql`/`views.sql`). En producción, la app debería conectarse co
 | `npm run telegram:enviar -- <YYYY-MM-DD>` | Arma el reporte de esa fecha (de datos ya cargados), lo imprime en consola, y lo manda por Telegram al chat configurado en `TELEGRAM_CHAT_ID`. |
 | `npm run flujo-diario -- <archivo.xlsx>` | **El flujo completo de producción**: Excel → ETL → BD → reporte → Telegram en un solo paso. Si el Excel viene vacío, corrupto o con cabeceras inválidas, manda una alerta por Telegram en vez de fallar en silencio. |
 | `node scripts/run-sql.js <archivo.sql>` | Mecanismo genérico para aplicar cualquier `.sql` suelto contra `DATABASE_URL` — no solo schema/seed. |
+| `npm run fuente:setup` | Crea la BD simulada `abis_fuente` (mismo servidor que `abis_db`) y su esquema. Idempotente. |
+| `npm run fuente:generar` | Genera 40–150 registros del día en `abis_fuente`, con tipeos y valores desconocidos inyectados a propósito (`--fecha`, `--min`, `--max`, `--forzar` opcionales). |
+| `npm run fuente:exportar` | Exporta el Excel diario de `abis_fuente` a `Documents\ABIS_excel_diario\enrolamiento_<fecha>.xlsx`. |
 
 Ejemplos con los archivos de prueba incluidos en el repo:
 
@@ -230,6 +235,12 @@ scripts/
   generar-datos-reporte-prueba.js  Dataset fijo (10 filas) para probar /reporte-diario
   enviar-reporte-telegram.js       Manda el reporte de una fecha por Telegram (npm run telegram:enviar)
   flujo-diario.js                  Excel -> ETL -> BD -> Telegram, todo junto (npm run flujo-diario)
+  tarea-diaria.ps1                 Tarea programada 08:00: garantiza PostgreSQL arriba, busca el
+                                   Excel mas reciente en la carpeta de llegada y corre el flujo
+  fuente-setup.js                  Crea la BD simulada abis_fuente (npm run fuente:setup)
+  fuente-generar.js                Genera datos del dia en abis_fuente, con ruido (npm run fuente:generar)
+  fuente-exportar.js               Exporta el Excel diario a la carpeta de llegada (npm run fuente:exportar)
+  tarea-fuente.ps1                 Tarea programada 07:30: genera + exporta (simula al sistema origen)
 src/
   db.js                      Pool de conexion a PostgreSQL
   server.js                  Servidor Express (GET /health, GET /reporte-diario)
@@ -255,6 +266,9 @@ src/
 - Los catálogos de `seed_catalogos.sql` son de ejemplo (tomados del informe de requerimientos).
   Deben completarse con el listado real de unidades/cuarteles antes de un despliegue real (ver
   `docs/PLAN_DESPLIEGUE.md`).
+- El Excel diario se simula localmente con la BD ficticia `abis_fuente` (tarea de las 07:30) —
+  ver [`docs/PruebDataBase_FAKE.md`](docs/PruebDataBase_FAKE.md). Cuando exista la carpeta real
+  del sistema origen, basta apuntar ahí la tarea de las 08:00.
 - Las cabeceras esperadas del Excel (`src/ingest/headerSchema.js`) están **inferidas** del informe
   de requerimientos, no confirmadas todavía contra un archivo real de producción.
 - El token del bot de Telegram y las credenciales de BD se manejan por variables de entorno

@@ -163,6 +163,37 @@ La redirección se verificó corriendo el mismo comando manualmente (no vía Tas
 confirmando que `logs/flujo-diario.log` recibe la salida esperada — ver
 [`AVANCE_SPRINT9.md`](AVANCE_SPRINT9.md).
 
+## Addendum (activación, 24/08/2026)
+
+El disparador quedó **registrado y activo**, con dos cambios sobre el comando de arriba:
+
+1. **Horario**: 08:00 en vez de 07:00.
+2. **Verificación previa de la BD**: la instancia PostgreSQL de esta máquina corre como proceso
+   manual y no sobrevive reinicios, así que el comando original fallaría si la PC se reinició
+   antes de las 08:00. La acción ahora ejecuta `scripts/tarea-diaria.ps1`, un wrapper que:
+   lanza `ensure-running.ps1` → espera a que el puerto acepte conexiones con `pg_isready`
+   (máx. ~60 s) → corre `flujo-diario.js` con log en `logs\flujo-diario.log`.
+
+```powershell
+$proyecto = "C:\Users\Nicolás\Desktop\sistema-abis"
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$proyecto\scripts\tarea-diaria.ps1`"" -WorkingDirectory $proyecto
+$trigger = New-ScheduledTaskTrigger -Daily -At "08:00"
+Register-ScheduledTask -TaskName "ABIS-FlujoDiario" -Action $action -Trigger $trigger -Description "Sistema ABIS: Excel -> ETL -> BD -> Telegram todos los dias a las 08:00."
+```
+
+Notas de la activación:
+
+- Si la tarea ya existe, `Register-ScheduledTask` falla con *"No se puede crear un archivo que ya
+  existe"*: hay que hacer `Unregister-ScheduledTask -Confirm:$false` antes de volver a registrarla.
+- El `>>` de PowerShell 5.1 redirige en UTF-16 y deja el log ilegible. Actualización 25/08: el
+  wrapper ya no usa `cmd.exe /c` para esto (abría una ventana de consola visible pese a
+  `-WindowStyle Hidden`) — ahora lanza `node.exe` vía `System.Diagnostics.Process` con
+  `CreateNoWindow=$true` y agrega la salida capturada al log con `UTF8Encoding($false)`.
+  `$excelDiario` ya no es un fixture fijo: busca el `enrolamiento_*.xlsx` más reciente en la
+  carpeta de llegada (ver [`PruebDataBase_FAKE.md`](../PruebDataBase_FAKE.md)).
+- Verificado: corrida manual del wrapper con exit 0, reporte recibido por Telegram, filas de
+  prueba insertadas y luego limpiadas (`TRUNCATE registro_enrolamiento RESTART IDENTITY`).
+
 ## 5. Próximos pasos (Sprint 8, 6–12 oct)
 
 Según la hoja de ruta, el siguiente ciclo corresponde a **testing integrado y QA**:

@@ -78,12 +78,12 @@ flowchart LR
   `src/flujo/flujoDiario.js` (Sprint 7) encadena Excel → ETL → BD → reporte → Telegram en un solo
   llamado, notificando por Telegram (no en silencio) si el Excel viene vacío o corrupto.
   `npm run flujo-diario -- <archivo.xlsx>` es el punto de entrada único para todo esto.
-- **Planificado** (líneas punteadas, listo pero no activado): una tarea programada de Windows a
-  nivel de usuario que corra `flujo-diario.js` automáticamente todos los días — el comando exacto
-  está documentado y probado en [`AVANCE_SPRINT7.md`](../sprints/AVANCE_SPRINT7.md), pero
-  registrarla de verdad queda a criterio del usuario (requiere definir antes la ruta real donde
-  cae el Excel diario, y crear tareas programadas es una acción que el modo automático de Claude
-  Code no ejecuta sin confirmación explícita).
+- **Activo** (desde el 24/08/2026): la tarea programada de Windows `ABIS-FlujoDiario` corre a
+  diario a las 08:00 a nivel de usuario, vía `scripts/tarea-diaria.ps1` — que garantiza que
+  PostgreSQL esté lanzado, espera a que acepte conexiones (`pg_isready`) y recién ahí lanza
+  `flujo-diario.js` con log en `logs/flujo-diario.log`. El Excel que procesa lo deja la tarea
+  `ABIS-FuenteDiaria` (07:30) en `Documents\ABIS_excel_diario\` — es un dato simulado, no la
+  fuente real; ver [`PruebDataBase_FAKE.md`](../PruebDataBase_FAKE.md).
 
 ## Notas sobre el módulo de ingesta y ETL
 
