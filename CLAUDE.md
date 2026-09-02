@@ -19,15 +19,18 @@ feature-complete but not yet live.
 
 ```bash
 npm install
-npm start                              # starts the Express server on http://localhost:3000
+npm start                              # starts the Express server & Telegram Bot on http://localhost:3000
 npm run db:schema                      # applies db/schema.sql against DATABASE_URL
-npm run db:seed                        # loads db/seed_catalogos.sql against DATABASE_URL
+npm run db:seed                        # loads official institutional catalogs (db/seed_catalogos.sql)
 npm run db:views                       # applies db/views.sql (reporting views) against DATABASE_URL
-npm run ingest -- <file.xlsx>          # dry-run: read/validate/map an Excel, no DB writes
-npm run etl -- <file.xlsx>             # full pipeline: maps + transactionally inserts
-npm run carga-historica -- <N>         # stress test: N synthetic rows (default 95000), no Excel
+npm run db:hardening                   # applies abis_app least-privilege role
+npm run db:limpiar                     # truncates registro_enrolamiento (resets IDs, preserves catalogs)
+npm run db:poblar                      # bulk loads all 95,474 real records from New_Enrolados Abis.xlsx
+npm run ingest                         # dry-run: read/validate/map New_Enrolados Abis.xlsx, no DB writes
+npm run etl                            # full ETL: maps + transactionally inserts in 5000-row batches
+npm run flujo-diario                   # automated pipeline: Ingest -> ETL -> DB -> Report -> Telegram
 npm run validar-integridad             # integrity checks + EXPLAIN ANALYZE on report-style queries
-npm run datos-reporte-prueba           # fixed 10-row deterministic dataset for testing /reporte-diario
+npm run telegram:enviar -- <YYYY-MM-DD># sends specific date report to Telegram
 ```
 
 There is no test suite, linter, or build step configured yet.

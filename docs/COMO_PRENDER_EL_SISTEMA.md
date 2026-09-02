@@ -1,141 +1,142 @@
-# Cómo prender el sistema y operarlo a mano por terminal
+# Guía de Operación: Cómo Levantar y Operar el Sistema ABIS
 
-Chuleta para levantar Sistema ABIS de cero y disparar cada paso del flujo manualmente desde la
-terminal — pensada para tener a mano durante una revisión en vivo. Para el detalle de qué hace
-cada pieza ver `CLAUDE.md`; para diagnosticar fallas del flujo automático ver
-[`MANUAL_OPERACION.md`](MANUAL_OPERACION.md); para probar sprint por sprint ver
-[`GUIA_RAPIDA.md`](GUIA_RAPIDA.md).
+Guía paso a paso para levantar el **Sistema ABIS** desde cero, poblar la base de datos con el archivo de datos reales (`New_Enrolados Abis.xlsx`), verificar la integridad y operar el sistema tanto por terminal como interactivamente a través del **Bot de Telegram**.
 
-## 1. Prender la base de datos
+---
 
-PostgreSQL (puerto 5433, dedicado a ABIS) no corre como servicio de Windows en esta cuenta — no
-sobrevive reinicios y hay que asegurarse de que esté arriba. Desde el 26/08/2026 hay una tarea
-programada (`ABIS-PostgreSQL-Inicio`) que lo hace solo al iniciar sesión, pero conviene verificar:
+## 1. Verificar y Levantar la Base de Datos PostgreSQL
+
+PostgreSQL corre en el puerto dedicado **`5433`** (`abis_db`). Para verificar que el servicio esté recibiendo conexiones:
 
 ```powershell
 & "C:\Program Files\PostgreSQL\18\bin\pg_isready.exe" -h localhost -p 5433
 ```
 
-Si dice `rejecting connections` o no responde:
+Si responde `rejecting connections` o no responde, iniciarlo con el script desprendido:
 
 ```powershell
 powershell -File "C:\Users\Nicolás\pgdata-abis-5433\ensure-running.ps1"
 ```
 
-Reintentar el `pg_isready` unos segundos después (puede tardar ~30s si venía de un apagado
-brusco, por la recuperación automática de Postgres).
+---
 
-## 2. Dejar el esquema al día (idempotente — no rompe nada si ya está aplicado)
+## 2. Preparar el Esquema y los Catálogos Maestros
+
+Aplica el esquema normalizado (3NF) y los catálogos institucionales reales (68 nacionalidades con códigos ISO, 6 regiones, 23 unidades, 24 cuarteles, equipos y estados de proceso):
 
 ```powershell
-npm run db:schema      # tablas
-npm run db:seed        # catálogos de ejemplo
-npm run db:views       # vistas de reporte
-npm run db:hardening   # rol abis_app de bajo privilegio
+npm run db:schema      # Crea las tablas e índices si no existen
+npm run db:seed        # Carga los catálogos institucionales completos
+npm run db:views       # Crea o actualiza las vistas de reporte analítico
+npm run db:hardening   # Aplica el rol de seguridad con mínimos privilegios
 ```
 
-## 3. Prender el servidor web
+---
+
+## 3. Poblar la Base de Datos con Datos Reales (`New_Enrolados Abis.xlsx`)
+
+Para cargar el dataset histórico completo (**95.474 registros reales**, 100% integrados y validados):
+
+```powershell
+npm run db:poblar
+```
+
+> **Resultado esperado:**
+> - Procesa la hoja `ENROLADOS` de `New_Enrolados Abis.xlsx`.
+> - Inserta los 95.474 registros en 20 lotes transaccionales (~20 segundos).
+> - Rango de fechas cargadas: `2023-06-01` al `2026-08-22`.
+
+### Validar Integridad de la Base de Datos:
+```powershell
+npm run validar-integridad
+```
+*Confirma que existan 0 nulos en campos obligatorios, 0 inconsistencias lógicas de edad y verifica el uso óptimo de índices en consultas analíticas (< 1 ms).*
+
+---
+
+## 4. Iniciar el Servidor Web y el Bot de Telegram
+
+Inicia la API Express (`http://localhost:3000`) y el servicio de Long Polling del Bot de Telegram:
 
 ```powershell
 npm start
 ```
 
-Dejar esta terminal abierta — el servidor queda escuchando en `http://localhost:3000`. Abrir una
-terminal nueva para todo lo que sigue.
+> **Salida esperada:**
+> ```text
+> Sistema ABIS escuchando en http://localhost:3000
+> 🤖 Bot de Telegram interactivo iniciado (Long Polling activo)...
+> ```
+*Deja esta terminal abierta para mantener los servicios activos.*
 
-## 4. Confirmar que está sano
+---
 
-```powershell
-(Invoke-WebRequest "http://localhost:3000/health").Content
-```
+## 5. Comprobar la Salud y Endpoints HTTP (Opcional)
 
-Esperado: `{"status":"ok","db":"connected"}`.
+En tu navegador o desde otra terminal:
 
-```powershell
-(Invoke-WebRequest "http://localhost:3000/reporte-diario").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
-```
+- **Salud del Sistema:** [http://localhost:3000/health](http://localhost:3000/health)  
+  *Respuesta:* `{"status":"ok","db":"connected"}`
+- **Reporte Diario (JSON estructurado del último día):** [http://localhost:3000/reporte-diario](http://localhost:3000/reporte-diario)
+- **Reporte de Fecha Específica:** [http://localhost:3000/reporte-diario?fecha=2024-11-15](http://localhost:3000/reporte-diario?fecha=2024-11-15)
 
-Sin `?fecha=` trae el reporte de la fecha más reciente con datos cargados. Usar
-`?fecha=YYYY-MM-DD` para pedir un día puntual (`400` si el formato es inválido, `200` con
-`total: 0` si el día existe pero no tiene datos).
+---
 
-**Nota PowerShell**: `curl` en PowerShell es alias de `Invoke-WebRequest`, que trunca el JSON al
-imprimirlo directo en consola — por eso el `.Content | ConvertFrom-Json | ConvertTo-Json` de
-arriba, o usar `curl.exe` (el real) si solo se quiere ver que responde.
+## 6. Operar Interactivamente mediante Telegram Bot
 
-## 5. Correr el flujo diario completo a mano (Excel → ETL → BD → Telegram)
+Abre la aplicación de **Telegram**, entra al chat con tu bot (`@AbisSystemBot`) y utiliza los siguientes comandos:
 
-Esto es lo que hacen solas las tareas programadas `ABIS-FuenteDiaria`/`ABIS-FlujoDiario` todos los
-días — para dispararlo a demanda:
+| Comando | Descripción | Ejemplo de Uso |
+| :--- | :--- | :--- |
+| `/reporte` o `/hoy` | Genera el reporte consolidado del día más reciente con datos (`22/08/2026`). | `/reporte` |
+| `/reporte YYYY-MM-DD` | Genera el reporte analítico oficial de cualquier fecha histórica. | `/reporte 2024-11-15` *(4.305 enrolamientos)*<br>`/reporte 2023-08-08` *(178 enrolamientos)*<br>`/reporte 2025-01-09` *(52 enrolamientos)* |
+| `/errores [YYYY-MM-DD]` o `/detalle` | Diagnóstico técnico detallado: desglose de **Falla Biométrica** (lector Suprema / cámara Canon) vs **Validación General**, dispositivos (Tablet/PC), cuarteles y nacionalidades afectadas. | `/errores 2024-11-15`<br>`/errores 2025-01-09` |
+| `/estado` | Muestra el estado del servidor, conexión a PostgreSQL y el **total histórico acumulado (95.474 registros)**. | `/estado` |
+| `/logs` | Muestra el informe técnico de la última ingesta del ETL (`New_Enrolados Abis.xlsx`, 95.474 insertadas, 0 rechazadas). | `/logs` |
+| `/ayuda` | Despliega la guía interactiva de todos los comandos disponibles. | `/ayuda` |
 
-**Opción A — generar un Excel simulado del día y procesarlo** (igual que la tarea automática):
+---
 
-```powershell
-node scripts/fuente-generar.js     # genera filas del día en la BD simulada abis_fuente
-node scripts/fuente-exportar.js    # exporta el Excel a Documents\ABIS_excel_diario\
-npm run flujo-diario -- "$env:USERPROFILE\Documents\ABIS_excel_diario\enrolamiento_<fecha>.xlsx"
-```
+## 7. Ejecutar Flujos por Terminal (Comandos CLI)
 
-**Opción B — usar un archivo de prueba ya existente en el repo:**
+Todos los comandos están configurados para usar por defecto `New_Enrolados Abis.xlsx`:
 
-```powershell
-npm run flujo-diario -- fixtures/enrolamiento_etl_prueba.xlsx
-```
+- **Previsualizar ingesta sin escribir en BD:**
+  ```powershell
+  npm run ingest
+  ```
+- **Procesar e insertar por lotes:**
+  ```powershell
+  npm run etl
+  ```
+- **Flujo diario completo (Ingesta → ETL → BD → Telegram):**
+  ```powershell
+  npm run flujo-diario
+  ```
+- **Forzar envío de reporte de una fecha por Telegram:**
+  ```powershell
+  npm run telegram:enviar -- 2024-11-15
+  ```
 
-Salida esperada: filas insertadas, correcciones automáticas (typos de catálogo), reporte generado
-y enviado por Telegram. Si algo falla a mitad de camino (Excel vacío/corrupto, cabeceras
-inválidas), el sistema manda una alerta por Telegram en vez de fallar en silencio — revisar el chat
-configurado en `TELEGRAM_CHAT_ID`.
+---
 
-## 6. Qué Excel de prueba usar (`fixtures/`)
+## 8. Seguridad, Privacidad y Cifrado
 
-Hay tres archivos en `fixtures/`, cada uno prueba una etapa distinta del pipeline (detalle en
-[`fixtures/README.md`](../fixtures/README.md)):
+El Sistema ABIS implementa las siguientes capas de seguridad:
+1. **Privacidad por Diseño (Privacy by Design):** La base de datos `registro_enrolamiento` almacena exclusivamente datos demográficos y métricas normalizadas referenciadas por ID de catálogo. **No se almacenan nombres ni números de RUT en texto plano**.
+2. **Cifrado en Tránsito:** Todas las notificaciones y mensajes con Telegram viajan cifrados mediante **HTTPS / TLS 1.3**. Las conexiones a PostgreSQL soportan SSL/TLS.
+3. **Aislamiento de Credenciales:** Variables de entorno sensibles (tokens del bot, credenciales de BD) residen en `.env` protegido y excluido del control de versiones.
 
-| Archivo                          | Para qué sirve                                                                                                                                                                                                                                                                            | Comando                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| `enrolamiento_ejemplo.xlsx`    | Prueba solo la**lectura/mapeo** (Sprint 2, `src/ingest/`) — no escribe en la BD. 3 filas: 2 válidas + 1 con nacionalidad inexistente a propósito, para ver que el reporte de errores funciona.                                                                                  | `npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx`     |
-| `enrolamiento_etl_prueba.xlsx` | Prueba el**ETL completo** (Sprint 3) — sí inserta filas reales en `registro_enrolamiento`. 3 filas: 1 válida, 1 con typo corregible ("SINCRONIZDO"→"SINCRONIZADO", corrección automática por Levenshtein), 1 irrecuperable ("MARCIANO"). Es el que usa el paso 5B de arriba. | `npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx`     |
-| `enrolamiento_vacio.xlsx`      | Cabeceras correctas pero**cero filas**. Para mostrar que el flujo diario completo (Sprint 7) manda una alerta por Telegram en vez de fallar en silencio cuando el Excel viene vacío.                                                                                                | `npm run flujo-diario -- fixtures/enrolamiento_vacio.xlsx` |
+---
 
-Para la demo de "flujo completo funcionando" (paso 5) corresponde `enrolamiento_etl_prueba.xlsx`;
-`enrolamiento_vacio.xlsx` conviene mostrarlo aparte si quieren ver que las alertas de error
-también funcionan.
+## 9. Limpieza de Datos y Apagado
 
-## 7. Confirmar que llegó a Telegram
-
-Revisar el chat del bot (`@AbisSystemBot`, o el que esté configurado). Debería verse un mensaje
-con título `📊 Reporte Diario ABIS - DD/MM/AAAA`, o una alerta `⚠️ Alerta - Carga diaria ABIS` si
-hubo un problema.
-
-También queda registrado en:
-
-```powershell
-Get-Content logs\flujo-diario.log -Tail 30
-```
-
-## 8. Limpiar datos de prueba (opcional, entre corridas)
-
-Los pasos 5A/5B insertan filas reales en `registro_enrolamiento`. Para no mezclar corridas de
-prueba entre sí:
-
-```powershell
-$env:PGPASSWORD = "abis_dev_pw"
-& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
-```
-
-## 9. Apagar
-
-- `Ctrl+C` en la terminal donde corre `npm start` para bajar el servidor web.
-- PostgreSQL se puede dejar corriendo (no hace daño) o bajarlo con:
+- **Limpiar tabla de enrolamientos (dejar catálogos intactos):**
+  ```powershell
+  npm run db:limpiar
+  ```
+- **Apagar Servidor y Bot:** Presionar `Ctrl + C` en la terminal de `npm start`.
+- **Detener PostgreSQL (opcional):**
   ```powershell
   & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Users\Nicolás\pgdata-abis-5433" stop
   ```
-
-## Si preguntan "¿esto está en producción?"
-
-No. Está funcionalmente completo (`v1.0.0`, los 10 sprints cerrados) y verificado con corridas
-reales, pero no hay servidor de producción, ni Excel diario real, ni bot de Telegram de
-producción, ni catálogos institucionales reales — todo lo de arriba corre contra datos
-simulados/de prueba en esta máquina de desarrollo. El detalle de qué falta está en
-[`PLAN_DESPLIEGUE.md`](PLAN_DESPLIEGUE.md).

@@ -28,13 +28,13 @@ async function enviarMensaje({ token, chatId, texto }) {
   return data.result;
 }
 
-async function obtenerActualizaciones({ token, offset, timeout = 30 }) {
+async function obtenerActualizaciones({ token, offset, timeout = 25 }) {
   const params = new URLSearchParams();
   if (offset !== undefined && offset !== null) params.append("offset", offset);
   if (timeout !== undefined && timeout !== null) params.append("timeout", timeout);
 
   const url = `${TELEGRAM_API}/bot${token}/getUpdates?${params.toString()}`;
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout((timeout + 15) * 1000) });
 
   const data = await response.json();
   if (!data.ok) {

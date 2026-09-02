@@ -1,6 +1,9 @@
 -- Esquema normalizado (3NF) para el Sistema de Gestion ABIS
 -- Ver Informe de Requerimientos, seccion 4 (Diseno de la Base de Datos)
 
+-- Extension criptografica nativa para cifrado simetrico AES-256 y funciones hash
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS nacionalidad (
     id_nacionalidad SERIAL PRIMARY KEY,
     descripcion     VARCHAR(100) NOT NULL UNIQUE,
@@ -63,3 +66,16 @@ CREATE INDEX IF NOT EXISTS idx_registro_nacionalidad ON registro_enrolamiento (i
 CREATE INDEX IF NOT EXISTS idx_registro_estado_sincronizacion ON registro_enrolamiento (id_estado_sincronizacion);
 CREATE INDEX IF NOT EXISTS idx_registro_estado_registro ON registro_enrolamiento (id_estado_registro);
 CREATE INDEX IF NOT EXISTS idx_registro_estado_general ON registro_enrolamiento (id_estado_general);
+
+-- Tabla de trazabilidad y auditoria criptografica (No-repudio e integridad SHA-256)
+CREATE TABLE IF NOT EXISTS registro_auditoria_cifrada (
+    id_auditoria          BIGSERIAL PRIMARY KEY,
+    fecha_evento          TIMESTAMP NOT NULL DEFAULT NOW(),
+    tipo_evento           VARCHAR(50) NOT NULL,
+    archivo_procesado     VARCHAR(255) NOT NULL,
+    hash_sha256           VARCHAR(64) NOT NULL,
+    detalles_cifrados     TEXT,
+    usuario_o_proceso     VARCHAR(100) NOT NULL DEFAULT 'SISTEMA_ABIS'
+);
+
+CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON registro_auditoria_cifrada (fecha_evento);

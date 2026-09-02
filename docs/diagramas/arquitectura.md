@@ -23,7 +23,7 @@ flowchart LR
         FLUJO["flujoDiario.js<br/>(orquesta todo + notifica<br/>errores por Telegram)"]
         CLI["scripts/ingest-excel.js<br/>(npm run ingest, solo lectura)"]
         CLIETL["scripts/procesar-excel.js<br/>(npm run etl, inserta)"]
-        SINTETICO["scripts/carga-historica-sintetica.js<br/>(npm run carga-historica)"]
+        POBLAR["scripts/poblar-desde-excel.js<br/>(npm run db:poblar)"]
         INTEGRIDAD["scripts/validar-integridad-historica.js<br/>(npm run validar-integridad)"]
         CLITG["scripts/enviar-reporte-telegram.js<br/>(npm run telegram:enviar, manual)"]
         CLIFLUJO["scripts/flujo-diario.js<br/>(npm run flujo-diario)"]
@@ -37,7 +37,7 @@ flowchart LR
         MAP --> BULKINSERT --> POOL
         CLI --> READER
         CLIETL --> READER
-        SINTETICO --> BULKINSERT
+        POBLAR --> BULKINSERT
         INTEGRIDAD --> POOL
         CLITG --> REPORTE
         CLITG --> FORMATO --> TGCLIENT --> TG

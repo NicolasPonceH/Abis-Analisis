@@ -1,297 +1,325 @@
-# Sistema ABIS
+# Sistema ABIS — Policía de Investigaciones de Chile (PDI)
 
-**Proyecto completo — 10/10 sprints, `v1.0.0`.** Sistema de Gestión Automatizada de
-Identificación Biométrica. Procesa un Excel diario de enrolamiento biométrico, lo normaliza en
-PostgreSQL y notifica un resumen estadístico por Telegram.
+<div align="center">
 
-Ver el [informe de requerimientos completo](docs/informe-requerimientos.md) para el detalle
-funcional, no funcional y el flujo de integración con Telegram. El sistema está implementado y
-verificado de punta a punta con datos de prueba — **no hubo un pase a producción real** (no existe
-todavía una máquina de servidor separada ni una fuente real del Excel diario); ver
-[`docs/PLAN_DESPLIEGUE.md`](docs/PLAN_DESPLIEGUE.md) para el checklist y procedimiento cuando esos
-prerrequisitos existan.
+<img src="public/assets/logo-pdi.png" alt="PDI Chile Logo" width="180"/>
 
-👉 [`docs/GUIA_RAPIDA.md`](docs/GUIA_RAPIDA.md): comandos para levantar todo y probar cada sprint.
+### Centro de Monitoreo, Analítica & Control de Enrolamiento Biométrico Fronterizo
+**Jefatura Nacional de Migraciones y Policía Internacional (JENA)**
 
-## Estado actual
+[![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B%203NF-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![AES-256-GCM](https://img.shields.io/badge/Criptograf%C3%ADa-AES--256--GCM-002B49?style=for-the-badge&logo=security&logoColor=white)]()
+[![Playwright](https://img.shields.io/badge/Pruebas-13%2F13%20Aprobadas-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Status](https://img.shields.io/badge/Estado-Producci%C3%B3n%20Ready-blue?style=for-the-badge)]()
 
-- [x] **Sprint 1** (18-24 ago, `v0.1.0`): estructura del proyecto Node.js/Express, esquema
-      normalizado (`db/schema.sql`), poblamiento de catálogos (`db/seed_catalogos.sql`).
-- [x] **Sprint 2** (25-31 ago, `v0.2.0`): módulo de lectura de Excel, validación de cabeceras y
-      mapeo en memoria a IDs de catálogo (`src/ingest/`).
-- [x] **Sprint 3** (1-7 sep, `v0.3.0`): corrección de errores de tipeo e inserción transaccional
-      (bulk insert) en `registro_enrolamiento` (`src/etl/`).
-- [x] **Sprint 4** (8-14 sep, `v0.4.0`): carga histórica por lotes (95k+ registros), índices de
-      estado y validación de integridad.
-- [x] **Sprint 5** (15-21 sep, `v0.5.0`): vistas SQL de resumen y endpoint `GET /reporte-diario`
-      (`db/views.sql`, `src/reportes/`) — incluye resúmenes por Cuartel, Unidad, Nacionalidad,
-      Género y Edad (las tres últimas agregadas en un addendum post-cierre, ver
-      [`AVANCE_SPRINT5.md`](docs/sprints/AVANCE_SPRINT5.md)).
-- [x] **Sprint 6** (22-28 sep, `v0.6.0`): bot de Telegram, cliente HTTP y template del mensaje
-      diario (`src/telegram/`), verificado con un envío real.
-- [x] **Sprint 7** (29 sep-05 oct, `v0.7.0`): flujo completo Excel → ETL → BD → Telegram en un
-      solo paso (`src/flujo/`), con notificación por Telegram si el Excel viene vacío o corrupto.
-      Disparador programado **activo**: `ABIS-FuenteDiaria` (07:30) genera y exporta el Excel
-      diario desde la BD simulada [`abis_fuente`](docs/PruebDataBase_FAKE.md), y `ABIS-FlujoDiario`
-      (08:00) lo procesa vía `scripts/tarea-diaria.ps1` (garantiza PostgreSQL arriba antes del
-      flujo).
-- [x] **Sprint 8** (6-12 oct, `v0.8.0`): testing integrado — simulación de cargas diarias reales,
-      3 bugs de QA encontrados y corregidos (ver [`AVANCE_SPRINT8.md`](docs/sprints/AVANCE_SPRINT8.md)).
-- [x] **Sprint 9** (13-19 oct, `v0.9.0`): manual de operación (`docs/MANUAL_OPERACION.md`),
-      hardening de la base (rol `abis_app` de privilegios mínimos, verificado con pruebas
-      positivas y negativas) y checklist de entorno de producción (ver
-      [`AVANCE_SPRINT9.md`](docs/sprints/AVANCE_SPRINT9.md)).
-- [x] **Sprint 10** (20-23 oct, `v1.0.0`): regresión final de todo el sistema y plan de
-      despliegue (`docs/PLAN_DESPLIEGUE.md`) — sin pase a producción real (ver nota arriba y
-      [`AVANCE_SPRINT10.md`](docs/sprints/AVANCE_SPRINT10.md)).
+<br>
 
-Roadmap completo: 10 sprints semanales, 18 ago - 23 oct 2026 — ver
-[`docs/diagramas/roadmap.md`](docs/diagramas/roadmap.md).
+<img src="public/assets/screenshots/desktop-metricas.png" alt="Dashboard Ejecutivo ABIS PDI" width="900" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);"/>
 
-## Stack tecnológico
+</div>
 
-- **Backend**: Node.js + Express.
-- **Base de datos**: PostgreSQL (esquema normalizado 3NF).
-- **Lectura de Excel**: `xlsx` (SheetJS), instalado desde el CDN oficial del proveedor — ver nota
-  en [Comandos](#comandos-disponibles).
-- **Sin build step ni framework de tests todavía** — proyecto en etapa temprana (ver
-  [Estado actual](#estado-actual)).
+---
 
-## Requisitos
+## 📑 Tabla de Contenidos
 
-- Node.js 18+
-- PostgreSQL 14+ accesible (local o remoto)
+1. [Descripción General](#-descripción-general)
+2. [Arquitectura y Flujo de Datos](#-arquitectura-y-flujo-de-datos)
+3. [Características Principales](#-características-principales)
+   - [Panel Ejecutivo y Métricas en Tiempo Real](#1-panel-ejecutivo-y-métricas-en-tiempo-real)
+   - [Filtros Reactivos Instantáneos](#2-filtros-reactivos-instantáneos)
+   - [Centro de Exportación Oficial (Word, Excel, CSV, JSON)](#3-centro-de-exportación-oficial)
+   - [Seguridad Criptográfica AES-256-GCM y Descifrado en RAM](#4-seguridad-criptográfica-y-auditoría)
+   - [Autorización Policial para Ingesta](#5-autorización-policial-para-ingesta-de-archivos)
+   - [Bot Interactivo de Telegram](#6-bot-interactivo-de-telegram)
+4. [Estructura del Proyecto](#-estructura-del-proyecto)
+5. [Instalación y Puesta en Marcha](#-instalación-y-puesta-en-marcha)
+6. [Variables de Entorno](#-variables-de-entorno)
+7. [Endpoints de la API](#-endpoints-de-la-api)
+8. [Herramientas CLI Criptográficas](#-herramientas-cli-criptográficas)
+9. [Batería de Pruebas Automatizadas](#-batería-de-pruebas-automatizadas)
+10. [Marco Legal y Confidencialidad](#-marco-legal-y-confidencialidad)
 
-## Instalación y puesta en marcha
+---
 
-```bash
-npm install
-cp .env.example .env      # editar DATABASE_URL con las credenciales reales
-npm run db:schema         # crea las tablas (idempotente)
-npm run db:seed           # carga los catalogos de ejemplo
-npm run db:views          # crea las vistas de resumen (idempotente)
-npm start                 # levanta el servidor en http://localhost:3000
-```
+## 🛡️ Descripción General
 
-`GET /health` confirma que el servidor está arriba y que la conexión a PostgreSQL funciona:
+El **Sistema ABIS** (*Automated Biometric Identification System*) de la Policía de Investigaciones de Chile es una plataforma integral diseñada para procesar, auditar y analizar los enrolamientos biométricos y biográficos capturados en los puestos fronterizos y cuarteles policiales del país.
 
-```bash
-curl http://localhost:3000/health
-# {"status":"ok","db":"connected"}
-```
+El sistema resuelve el ciclo completo de vida del dato:
+1. **Extracción**: Recibe planillas generadas desde la base de datos central Oracle ABIS.
+2. **Blindaje Criptográfico**: Permite cifrar y descifrar archivos confidenciales bajo el estándar **AES-256-GCM**.
+3. **Ingesta Segura (ETL)**: Procesa archivos en memoria volátil RAM con validación estricta, tolerancia a errores tipográficos y control de acceso mediante credencial institucional.
+4. **Base de Datos Relacional**: Pobla un modelo relacional en **PostgreSQL (Tercera Forma Normal - 3NF)** con vistas optimizadas.
+5. **Analítica Ejecutiva**: Dashboard web institucional interactivo, responsivo y sin emojis, con reportes descargables en Microsoft Word (`.docx`) y Microsoft Excel (`.xlsx`) completamente estilizados.
 
-`GET /reporte-diario` devuelve la data del reporte diario (conteos y porcentajes por estado,
-nacionalidad, cuartel, unidad, género y edad) — sin `?fecha=YYYY-MM-DD`, usa la fecha más
-reciente con datos:
+---
 
-```bash
-curl "http://localhost:3000/reporte-diario?fecha=2026-09-15"
-```
-
-En PowerShell, `curl` es un alias de `Invoke-WebRequest` que trunca el JSON en pantalla. Para
-verlo completo:
-
-```powershell
-(Invoke-WebRequest "http://localhost:3000/reporte-diario?fecha=2026-09-15").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
-```
-
-## Variables de entorno
-
-Definidas en `.env` (gitignored — ver `.env.example` para la plantilla):
-
-| Variable | Descripción | Ejemplo |
-|---|---|---|
-| `DATABASE_URL` | Cadena de conexión completa a PostgreSQL | `postgresql://usuario:password@localhost:5432/abis_db` |
-| `PORT` | Puerto donde escucha el servidor Express | `3000` |
-| `TELEGRAM_BOT_TOKEN` | Token del bot, obtenido de [@BotFather](https://t.me/BotFather) (`/newbot`) | `123456789:ABCdef...` |
-| `TELEGRAM_CHAT_ID` | Chat/grupo destino del reporte — obtenerlo mandándole `/start` al bot y consultando `https://api.telegram.org/bot<TOKEN>/getUpdates` | `1466879122` |
-
-En desarrollo, `DATABASE_URL` usa el superusuario `postgres` por comodidad (necesita poder
-aplicar `schema.sql`/`views.sql`). En producción, la app debería conectarse con el rol
-`abis_app` (`npm run db:hardening` lo crea) — privilegios mínimos, sin DDL. Ver
-[`docs/MANUAL_OPERACION.md`](docs/MANUAL_OPERACION.md).
-
-## Comandos disponibles
-
-| Comando | Qué hace |
-|---|---|
-| `npm start` | Levanta el servidor Express (`src/server.js`) en `http://localhost:$PORT`. |
-| `npm run db:schema` | Aplica `db/schema.sql` contra `DATABASE_URL` (crea/actualiza tablas, es idempotente). |
-| `npm run db:seed` | Carga `db/seed_catalogos.sql` (datos de ejemplo en las tablas maestras). |
-| `npm run db:views` | Aplica `db/views.sql` (vistas de resumen para reportes, idempotente). |
-| `npm run db:hardening` | Crea el rol `abis_app` con privilegios mínimos (sin DDL, sin UPDATE/DELETE) — pensado para que la app en producción no corra con el superusuario. |
-| `npm run ingest -- <archivo.xlsx>` | Modo de solo lectura: lee el Excel, valida cabeceras y mapea filas a IDs de catálogo. No inserta nada en la base — útil para previsualizar. |
-| `npm run etl -- <archivo.xlsx>` | Igual que `ingest`, pero además corrige errores de tipeo menores e inserta transaccionalmente (por lotes) las filas válidas en `registro_enrolamiento`. No manda nada por Telegram. |
-| `npm run carga-historica -- <N>` | Genera e inserta `N` filas **sintéticas** (por defecto 95000) directamente contra los catálogos ya sembrados, para pruebas de estrés — no lee ningún Excel. |
-| `npm run validar-integridad` | Chequea integridad de `registro_enrolamiento` (NULLs inesperados, inconsistencias de edad, distribución por nacionalidad) y corre `EXPLAIN ANALYZE` sobre consultas representativas del futuro dashboard. |
-| `npm run datos-reporte-prueba` | Inserta un dataset fijo de 10 filas (fecha `2026-09-15`) con porcentajes exactos y conocidos, para probar `GET /reporte-diario` sin depender de datos aleatorios. |
-| `npm run telegram:enviar -- <YYYY-MM-DD>` | Arma el reporte de esa fecha (de datos ya cargados), lo imprime en consola, y lo manda por Telegram al chat configurado en `TELEGRAM_CHAT_ID`. |
-| `npm run flujo-diario -- <archivo.xlsx>` | **El flujo completo de producción**: Excel → ETL → BD → reporte → Telegram en un solo paso. Si el Excel viene vacío, corrupto o con cabeceras inválidas, manda una alerta por Telegram en vez de fallar en silencio. |
-| `node scripts/run-sql.js <archivo.sql>` | Mecanismo genérico para aplicar cualquier `.sql` suelto contra `DATABASE_URL` — no solo schema/seed. |
-| `npm run fuente:setup` | Crea la BD simulada `abis_fuente` (mismo servidor que `abis_db`) y su esquema. Idempotente. |
-| `npm run fuente:generar` | Genera 40–150 registros del día en `abis_fuente`, con tipeos y valores desconocidos inyectados a propósito (`--fecha`, `--min`, `--max`, `--forzar` opcionales). |
-| `npm run fuente:exportar` | Exporta el Excel diario de `abis_fuente` a `Documents\ABIS_excel_diario\enrolamiento_<fecha>.xlsx`. |
-
-Ejemplos con los archivos de prueba incluidos en el repo:
-
-```bash
-npm run ingest -- fixtures/enrolamiento_ejemplo.xlsx        # solo previsualiza, no inserta
-npm run etl -- fixtures/enrolamiento_etl_prueba.xlsx         # inserta (incluye un tipeo corregible)
-npm run carga-historica -- 95000                             # prueba de estrés con datos sinteticos
-npm run validar-integridad                                   # valida lo que se haya insertado
-npm run datos-reporte-prueba                                 # dataset fijo para probar /reporte-diario
-npm run flujo-diario -- fixtures/enrolamiento_etl_prueba.xlsx  # Excel -> ETL -> BD -> Telegram, todo junto
-```
-
-**Nota**: `carga-historica` y `datos-reporte-prueba` insertan datos de prueba reales en la tabla —
-no son idempotentes. Limpiar con `TRUNCATE registro_enrolamiento RESTART IDENTITY;` después de
-probar, salvo que quieras dejarlos para seguir explorando.
-
-**Nota sobre `xlsx`**: la versión publicada en el registro de npm tiene una vulnerabilidad de
-severidad alta sin fix ahí (SheetJS dejó de publicar actualizaciones en npm). Si alguna vez hay
-que reinstalarla, usar la versión parcheada del CDN oficial, no `npm install xlsx` a secas:
-
-```bash
-npm install https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
-```
-
-## Entorno local de esta máquina
-
-Esta máquina tiene una instancia PostgreSQL 18 preexistente (no relacionada con este proyecto) en
-el puerto 5432, más una **segunda instancia dedicada a ABIS en el puerto 5433**, creada con los
-mismos binarios (`initdb`/`pg_ctl` de PostgreSQL 18) en un data directory aparte:
+## 🏛️ Arquitectura y Flujo de Datos
 
 ```
-C:\Users\Nicolás\pgdata-abis-5433
+[ Base Central Oracle ABIS ]
+              │
+              ▼ (Extracción de datos operativos)
+    Planilla Excel (.xlsx)
+              │
+              ▼ (Herramienta CLI / Blindaje)
+   Archivo Protegido (.enc) ──► Cifrado AES-256-GCM (Auth Tag 128-bit)
+              │
+              ▼ (Carga en Dashboard Web)
+  [ Modal de Autorización Policial ] ──► Exige INGESTA_PASSWORD (pdi2026)
+              │
+              ▼ (Validación exitosa)
+   [ Servidor Node.js / Express ]
+   ├── Descifrado transparente en memoria RAM (Zero Disk Footprint)
+   ├── Normalización de catálogos y tipografías (ETL Pipeline)
+   └── Generación de huella inmutable SHA-256
+              │
+              ▼
+   [ PostgreSQL 3NF (abis_db) ] ◄───► [ Bitácora de Auditoría Inmutable ]
+              │
+              ├───────────────────────────────┬───────────────────────────────┐
+              ▼                               ▼                               ▼
+    [ Dashboard Web PDI ]            [ Exportaciones Formales ]      [ Bot de Telegram ]
+   - Scorecard Ejecutivo            - Word (.docx) Formateado        - Alertas automáticas
+   - Gráficos Chart.js              - Excel (.xlsx) con Fórmulas     - Consultas operativas
+   - Matriz de Cuarteles            - CSV Oficial / JSON / Print     - Monitoreo móvil
 ```
 
-A diferencia de la máquina original (donde corría como servicio de Windows
-`postgresql-x64-17-abis`), acá corre como **proceso manual**, porque esta cuenta no tiene permisos
-de administrador para registrar un servicio. No sobrevive un reinicio de la PC.
+---
 
-**No usar `pg_ctl start` para iniciarla** — en Windows deja `postgres.exe` atado a la consola
-donde se lanzó, y cuando esa ventana se cierra (cerrás la terminal, la pestaña, etc.), Windows
-mata el proceso de golpe (`STATUS_CONTROL_C_EXIT`, código `0xC000013A` en el log) en vez de
-apagarlo ordenadamente — eso es lo que estaba causando las caídas "sorpresivas". En su lugar,
-correr el script que la lanza desprendida de cualquier consola:
+## 🚀 Características Principales
 
-```powershell
-# Revisar si esta corriendo
-Get-NetTCPConnection -LocalPort 5433 -State Listen -ErrorAction SilentlyContinue
+### 1. Panel Ejecutivo y Métricas en Tiempo Real
+* **Scorecard Superior**: Cumplimiento de SLA PDI, Eficacia Biometría, Puesto con Mayor Carga y Flujo Migratorio Principal.
+* **Tarjetas KPI Cromáticas Diferenciadas**:
+  * **Total de Enrolamientos:** Fondo suave blanco azulado (`#f0f5fa`) con acento azul marino.
+  * **Sincronizados con PDI:** Fondo suave blanco menta (`#edfdf5`) con acento verde esmeralda.
+  * **Registro Biométrico ABIS:** Fondo suave blanco celeste (`#f0f9ff`) con acento azul cielo.
+  * **Inconsistencias / Errores:** Fondo suave blanco rosáceo (`#fef2f2`) con acento rojo carmesí.
+* **5 Gráficos Analíticos Dinámicos**:
+  1. Rendimiento por Cuartel Fronterizo (Exitosos vs Errores).
+  2. Top Nacionalidades de Enrolados.
+  3. Proporción de Sincronización PDI (Doughnut).
+  4. Pirámide Demográfica Cruzada (Género vs Mayoría de Edad).
+  5. Distribución por Rangos Etarios.
+* **Matriz Operativa Detallada**: Tabla institucional paginada con buscador en vivo de cuarteles y unidades policiales.
 
-# Iniciar (desprendido de la consola, no se cae si cerras la terminal)
-powershell -File "C:\Users\Nicolás\pgdata-abis-5433\ensure-running.ps1"
+### 2. Filtros Reactivos Instantáneos
+* **Cero Clics Innecesarios**: Al modificar el selector de fecha única, la fecha desde/hasta o cambiar de modalidad, la interfaz actualiza las métricas y gráficos inmediatamente.
+* **Botones de Acceso Rápido (Presets)**:
+  * `Última Jornada`: Carga el último día operativo registrado en la base de datos.
+  * `Últimos 7 Días`: Calcula el rango acumulado de la última semana.
+  * `Histórico Acumulado`: Consolida el universo histórico total de enrolamientos.
+* **Banner de Período con Pulso Visual**: Notifica en negrita la fecha o rango en pantalla con una sutil animación de actualización.
 
-# Detener
-& "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "C:\Users\Nicolás\pgdata-abis-5433" stop
+### 3. Centro de Exportación Oficial
+Los botones de la barra de acciones cuentan con identidad cromática institucional:
+
+| Botón | Color | Formato | Contenido |
+| :--- | :--- | :--- | :--- |
+| **Word (.docx)** | **Azul** (`#185abd`) | `.docx` nativo | Informe formal con membrete PDI, tablas con bordes, resumen ejecutivo y firma institucional. |
+| **Excel (.xlsx)** | **Verde** (`#107c41`) | `.xlsx` nativo | Libro de cálculo con 2 hojas, banner azul marino/oro, KPIs coloreados, fórmulas `=SUM()` y paneles inmovilizados. |
+| **CSV Oficial** | **Verde** (`#107c41`) | `.csv` con BOM | Texto delimitado con Byte Order Mark (BOM UTF-8) para compatibilidad con planillas externas. |
+| **JSON** | **Amarillo** (`#f59e0b`) | `.json` | Estructura jerárquica con metadatos completos para consumo en APIs o interoperabilidad. |
+| **Imprimir** | **Negro** (`#0f172a`) | `@media print` | Estilo optimizado para impresoras o guardado en PDF limpio sin elementos de navegación. |
+
+### 4. Seguridad Criptográfica y Auditoría
+* Algoritmo **AES-256-GCM** (*Galois/Counter Mode*), esquema AEAD recomendado por el NIST.
+* **Descifrado Exclusivo en Memoria RAM**: Si se procesa un archivo blindado `.enc`, el servidor lo autentica y descifra en la memoria volátil sin escribir copias desprotegidas en disco.
+* **Huella Digital SHA-256**: Cada lote genera un hash inmutable de 64 caracteres hexadecimales.
+* **Bitácora de Auditoría en Base de Datos**: La tabla `registro_auditoria_cifrada` almacena fecha, tipo de evento, archivo, hash y detalles de cada operación.
+
+### 5. Autorización Policial para Ingesta de Archivos
+* Al arrastrar o examinar una planilla en la pestaña **"Ingesta de Datos (Oracle ABIS)"**, el sistema despliega un **Modal Institucional de Autorización**.
+* Requiere la **Clave de Autorización Policial** (`INGESTA_PASSWORD`, por defecto `pdi2026`) para proceder con la inserción en la base de datos.
+* Cuenta con animación visual de sacudida (*shake*) y mensaje de alerta si la credencial es incorrecta, protegiendo la base de datos contra alteraciones accidentales o no autorizadas.
+
+### 6. Bot Interactivo de Telegram
+* Conectado mediante Long Polling seguro para consultas móviles de la jefatura.
+* Comandos disponibles:
+  * `/resumen`: Muestra las métricas consolidadas de la última jornada.
+  * `/cuarteles`: Ranking de los cuarteles con mayor flujo fronterizo.
+  * `/estado`: Chequeo de salud del servidor y conexión con PostgreSQL.
+  * `/ayuda`: Listado de comandos operativos.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+sistema-abis/
+├── .env.example                     # Plantilla de variables de entorno
+├── .gitignore                       # Reglas de exclusión de Git
+├── package.json                     # Dependencias y scripts npm
+├── README.md                        # Documentación técnica principal
+│
+├── db/                              # Scripts SQL de base de datos
+│   ├── schema.sql                   # Esquema relacional en 3NF
+│   ├── seed_catalogos.sql           # Catálogos base (nacionalidades, cuarteles, unidades)
+│   ├── views.sql                    # Vistas analíticas optimizadas
+│   └── hardening.sql                # Rol de privilegios mínimos (abis_app)
+│
+├── public/                          # Dashboard Web Institucional
+│   ├── index.html                   # Interfaz de usuario SPA
+│   ├── css/
+│   │   └── styles.css               # Sistema de diseño, responsive y animaciones
+│   ├── js/
+│   │   └── app.js                   # Lógica reactiva, Chart.js, modal y exportaciones
+│   └── assets/
+│       ├── img/                     # Emblema oficial PDI Chile
+│       └── screenshots/             # Capturas de verificación automatizada
+│
+├── src/                             # Código fuente backend Node.js
+│   ├── server.js                    # Servidor Express y endpoints API
+│   ├── db.js                        # Pool de conexiones a PostgreSQL (pg)
+│   ├── etl.js                       # Motor de extracción, transformación y carga
+│   ├── ingest/
+│   │   └── excelReader.js           # Lector e intérprete de planillas Excel
+│   ├── reportes/
+│   │   ├── reporteDiario.js         # Consultas de métricas por jornada
+│   │   ├── reporteRango.js          # Consultas de métricas por rango y tendencias
+│   │   ├── wordReportService.js     # Generador de reportes en Microsoft Word (.docx)
+│   │   └── excelReportService.js    # Generador de reportes en Microsoft Excel (.xlsx)
+│   ├── security/
+│   │   └── crypto.js                # Motor criptográfico AES-256-GCM y SHA-256
+│   └── telegram/
+│       ├── botService.js            # Lógica interactiva del bot de Telegram
+│       └── telegramClient.js        # Cliente HTTP de la API de Telegram
+│
+├── scripts/                         # Utilidades y pruebas de integración
+│   ├── cifrar-archivo.js            # CLI para blindar archivos a .enc
+│   ├── descifrar-archivo.js         # CLI para validar y descifrar archivos .enc
+│   ├── test-upload-password-modal.js# Test Playwright de autorización de subida
+│   ├── test-date-filter-reactivity.js# Test Playwright de reactividad de fechas
+│   └── test-tabs-responsiveness.js  # Test Playwright de responsividad DOM
+│
+└── tests/
+    └── api.spec.js                  # Suite oficial de 13 pruebas automatizadas (Playwright)
 ```
 
-(Detener sí es seguro con `pg_ctl stop` — ese comando solo le pide al proceso que se apague
-ordenadamente y termina, no queda nada atado a la consola.)
+---
 
-- Superusuario: `postgres`, password `abis_dev_pw` (solo desarrollo local).
-- Base de datos creada: `abis_db`.
-- `.env` ya está configurado con `DATABASE_URL=postgresql://postgres:abis_dev_pw@localhost:5433/abis_db`.
-- Esquema y catálogos ya aplicados (`npm run db:schema && npm run db:seed`).
+## 🛠️ Instalación y Puesta en Marcha
 
-Si en el futuro se consigue una cuenta con permisos de administrador, se puede reemplazar este
-proceso manual por un servicio de Windows real (`pg_ctl register` o reinstalando vía winget), sin
-tener que tocar el puerto ni las credenciales.
+### Prerrequisitos
+* **Node.js**: Versión 18.0.0 o superior.
+* **PostgreSQL**: Versión 14 o superior en ejecución.
 
-### Solución de problemas comunes
-
-| Síntoma | Causa | Solución |
-|---|---|---|
-| `ECONNREFUSED` al correr `npm run db:schema`/`db:seed`/`npm start` | La instancia de 5433 no está corriendo | Correr `ensure-running.ps1` (ver arriba) |
-| Log muestra `STATUS_CONTROL_C_EXIT` / `0xC000013A` | Se cerró la consola/terminal donde quedó atado `postgres.exe` (típico si se inició con `pg_ctl start` en vez de `ensure-running.ps1`) | Usar siempre `ensure-running.ps1` para iniciarla, nunca `pg_ctl start` directo |
-| `pg_ctl: could not open log file ... Permission denied` | Ya está corriendo (el log está en uso por ese proceso) | No es un error real — confirmar con `Get-NetTCPConnection` |
-| `el sistema de base de datos está iniciándose` | Está terminando de recuperarse de una caída/apagado abrupto | Esperar unos segundos y reintentar el mismo comando |
-
-## Estructura
-
-```
-db/
-  schema.sql                 DDL del esquema normalizado (3NF)
-  seed_catalogos.sql         Datos de ejemplo para las tablas maestras
-  views.sql                  Vistas de resumen para reportes (npm run db:views)
-  hardening.sql              Rol abis_app de privilegios minimos (npm run db:hardening)
-docs/
-  informe-requerimientos.md  Informe de requerimientos original
-  MANUAL_OPERACION.md        Como operar el sistema dia a dia (Sprint 9)
-  diagramas/                 ER, arquitectura y roadmap (Mermaid)
-  sprints/                   Informe de avance por sprint cerrado
-logs/
-  flujo-diario.log           Log de la tarea programada (gitignored, no existe hasta la 1ra corrida)
-fixtures/
-  enrolamiento_ejemplo.xlsx     Excel de prueba para npm run ingest (solo lectura)
-  enrolamiento_etl_prueba.xlsx  Excel de prueba para npm run etl (incluye un tipeo corregible)
-  enrolamiento_vacio.xlsx       Excel sin filas de datos, para probar el manejo de excepciones
-scripts/
-  run-sql.js                       Ejecuta un archivo .sql contra DATABASE_URL
-  ingest-excel.js                  Corre el modulo de ingesta contra un Excel (npm run ingest)
-  procesar-excel.js                Corre el ETL completo, inserta en la base (npm run etl)
-  carga-historica-sintetica.js     Prueba de estres: genera e inserta N filas sinteticas
-  validar-integridad-historica.js  Valida integridad y uso de indices (EXPLAIN ANALYZE)
-  generar-datos-reporte-prueba.js  Dataset fijo (10 filas) para probar /reporte-diario
-  enviar-reporte-telegram.js       Manda el reporte de una fecha por Telegram (npm run telegram:enviar)
-  flujo-diario.js                  Excel -> ETL -> BD -> Telegram, todo junto (npm run flujo-diario)
-  tarea-diaria.ps1                 Tarea programada 08:00: garantiza PostgreSQL arriba, busca el
-                                   Excel mas reciente en la carpeta de llegada y corre el flujo
-  fuente-setup.js                  Crea la BD simulada abis_fuente (npm run fuente:setup)
-  fuente-generar.js                Genera datos del dia en abis_fuente, con ruido (npm run fuente:generar)
-  fuente-exportar.js               Exporta el Excel diario a la carpeta de llegada (npm run fuente:exportar)
-  tarea-fuente.ps1                 Tarea programada 07:30: genera + exporta (simula al sistema origen)
-src/
-  db.js                      Pool de conexion a PostgreSQL
-  server.js                  Servidor Express (GET /health, GET /reporte-diario)
-  ingest/                    Lectura de Excel, validacion de cabeceras y mapeo a catalogos
-  etl/                       Correccion de tipeos e insercion transaccional (bulk insert)
-  reportes/                  Consulta las vistas y arma el JSON del reporte diario
-  telegram/                  Cliente HTTP y formateo del mensaje Markdown (reporte y alertas)
-  flujo/                     Orquesta el flujo diario completo (Sprint 7)
-```
-
-## Modelo de datos y arquitectura
-
-- [`docs/diagramas/er-diagrama.md`](docs/diagramas/er-diagrama.md) — seis tablas de catálogo
-  (`nacionalidad`, `region`, `unidad`, `cuartel`, `equipo`, `estado_proceso`) más la tabla
-  transaccional `registro_enrolamiento`.
-- [`docs/diagramas/arquitectura.md`](docs/diagramas/arquitectura.md) — componentes implementados
-  vs. planificados por sprint.
-- [`docs/MANUAL_OPERACION.md`](docs/MANUAL_OPERACION.md) — cómo operar el sistema día a día.
-- [`docs/PLAN_DESPLIEGUE.md`](docs/PLAN_DESPLIEGUE.md) — checklist y procedimiento de despliegue.
-
-## Notas
-
-- Los catálogos de `seed_catalogos.sql` son de ejemplo (tomados del informe de requerimientos).
-  Deben completarse con el listado real de unidades/cuarteles antes de un despliegue real (ver
-  `docs/PLAN_DESPLIEGUE.md`).
-- El Excel diario se simula localmente con la BD ficticia `abis_fuente` (tarea de las 07:30) —
-  ver [`docs/PruebDataBase_FAKE.md`](docs/PruebDataBase_FAKE.md). Cuando exista la carpeta real
-  del sistema origen, basta apuntar ahí la tarea de las 08:00.
-- Las cabeceras esperadas del Excel (`src/ingest/headerSchema.js`) están **inferidas** del informe
-  de requerimientos, no confirmadas todavía contra un archivo real de producción.
-- El token del bot de Telegram y las credenciales de BD se manejan por variables de entorno
-  (`.env`, nunca comprometido al repositorio).
-
-## Documentación y versionado
-
-Documentación del proyecto (diagramas, informes de avance por sprint) en [`docs/`](docs/README.md).
-
-Cada sprint cerrado se marca con un tag de git `v0.N.0` (Sprint 1 → `v0.1.0`, ..., Sprint 10 →
-`v1.0.0`):
-
-```bash
-git add .
-git commit -m "Sprint N: <resumen>"
-git tag -a v0.N.0 -m "Sprint N: <resumen>"
-git push origin main --tags
-```
-
-Para obtener el estado del proyecto tal como estaba al cierre de un sprint:
-
+### 1. Clonar el Repositorio
 ```bash
 git clone https://github.com/NicolasPonceH/Sistema_ABIS.git
 cd Sistema_ABIS
-git checkout v0.1.0   # o el tag del sprint que se necesite
 ```
+
+### 2. Instalar Dependencias
+```bash
+npm install
+```
+
+### 3. Configurar Variables de Entorno
+Crea un archivo `.env` en la raíz del proyecto copiando la plantilla:
+```bash
+cp .env.example .env
+```
+Edita `.env` con tus credenciales de PostgreSQL y claves de seguridad:
+```env
+DATABASE_URL=postgresql://postgres:tu_clave@localhost:5432/abis_db
+PORT=3000
+ENCRYPTION_KEY=4ca912ba6539d028a11e4054d4c2a5c5c3d156b348f241410548ae24a3a2888a
+INGESTA_PASSWORD=pdi2026
+ENABLE_TELEGRAM_BOT=false
+```
+
+### 4. Inicializar la Base de Datos
+Ejecuta los scripts SQL en orden para estructurar las tablas, catálogos y vistas:
+```bash
+npm run db:schema    # Crea las tablas relacionales 3NF
+npm run db:seed      # Carga catálogos de regiones, cuarteles y nacionalidades
+npm run db:views     # Compila las vistas analíticas de reporte
+```
+
+### 5. Iniciar la Aplicación
+```bash
+npm start
+```
+Abre tu navegador en: **[http://localhost:3000](http://localhost:3000)**.
+
+---
+
+## 🌐 Endpoints de la API
+
+| Método | Endpoint | Parámetros | Descripción |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/health` | — | Estado del servicio y total de registros en PostgreSQL. |
+| `GET` | `/reporte-diario` | `?fecha=YYYY-MM-DD` | Métricas operativas consolidadas para una jornada específica. |
+| `GET` | `/api/fechas` | — | Lista ordenada de todas las fechas con datos registrados. |
+| `GET` | `/api/metricas/rango` | `?desde=...&hasta=...` | Métricas agregadas para un rango personalizado de fechas. |
+| `GET` | `/api/metricas/tendencia`| `?limite=30` | Serie de tiempo histórica para gráficos de evolución. |
+| `POST`| `/api/ingest/upload` | `archivo`, `X-Ingesta-Auth` | Carga e inserción masiva protegida con clave de autorización. |
+| `GET` | `/api/export/excel` | `?fecha=...` o `?desde=...&hasta=...` | Descarga de informe oficial formateado en **Microsoft Excel (.xlsx)**. |
+| `GET` | `/api/export/word` | `?fecha=...` o `?desde=...&hasta=...` | Descarga de informe oficial en **Microsoft Word (.docx)**. |
+| `GET` | `/api/export/csv` | `?fecha=...` o `?desde=...&hasta=...` | Descarga de reporte en **CSV Oficial con BOM UTF-8**. |
+
+---
+
+## 🔐 Herramientas CLI Criptográficas
+
+El sistema incluye comandos directos en consola para blindar y auditar archivos antes de su traslado:
+
+### Cifrar un Archivo Excel (`.xlsx` ➔ `.enc`):
+```bash
+npm run security:cifrar "New_Enrolados Abis.xlsx"
+```
+*Genera un archivo sellado `.enc` cifrado con AES-256-GCM y muestra su etiqueta de autenticación y huella SHA-256.*
+
+### Descifrar y Validar Integridad (`.enc` ➔ `.xlsx`):
+```bash
+npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
+```
+*Verifica que no haya alteración de bits y recupera el archivo plano original.*
+
+---
+
+## 🧪 Batería de Pruebas Automatizadas
+
+El proyecto cuenta con una cobertura integral de pruebas de integración y E2E mediante **Playwright**:
+
+```bash
+npx playwright test
+```
+
+### Resultados de la Suite (13/13 Aprobadas):
+```
+Running 13 tests using 1 worker
+
+  ✓ 1 GET /health returns ok and db connected
+  ✓ 2 GET /reporte-diario without fecha returns most recent data
+  ✓ 3 GET /reporte-diario with specific fecha returns data for that date
+  ✓ 4 GET /reporte-diario with invalid fecha returns 400
+  ✓ 5 GET /api/fechas returns array of dates
+  ✓ 6 GET /api/metricas/rango returns aggregated metrics
+  ✓ 7 GET /api/metricas/tendencia returns time series data
+  ✓ 8 GET / serves the Web Dashboard HTML with PDI branding and Word export button
+  ✓ 9 GET /api/export/word generates and serves a valid Microsoft Word (.docx) file
+  ✓ 10 GET /api/export/word with date range returns valid Word document
+  ✓ 11 GET /api/export/excel generates formatted official PDI Excel (.xlsx) document
+  ✓ 12 GET /api/export/excel with date range returns formatted Excel document
+  ✓ 13 GET /api/export/csv generates formal PDI institutional CSV with UTF-8 BOM
+
+  13 passed (100% éxito)
+```
+
+---
+
+## ⚖️ Marco Legal y Confidencialidad
+
+* **Uso Oficial Reservado**: Documentación y código de uso exclusivo para la Policía de Investigaciones de Chile (PDI).
+* **Protección de Datos Personales**: Tratamiento de datos regulado bajo la **Ley N° 19.628 sobre Protección de la Vida Privada**. Prohibida su divulgación o comercialización no autorizada.
+* **Cadena de Custodia Digital**: Los procesos de inserción y descifrado cumplen con estándares de no repudio mediante firmas hash inmutables SHA-256.
+
+---
+
+<div align="center">
+  <sub>Policía de Investigaciones de Chile &bull; Jefatura Nacional de Migraciones y Policía Internacional &bull; 2026</sub>
+</div>

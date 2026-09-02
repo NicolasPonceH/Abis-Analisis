@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema ABIS - Panel Analítico de Enrolamiento Biométrico | PDI Chile</title>
+  
+  <!-- Favicon y Tipografía -->
+  <link rel="icon" type="image/png" href="assets/logo-pdi.png">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Header Institucional PDI -->
+  <header class="header-institutional">
+    <div class="header-inner">
+      <div class="brand-section">
+        <img src="assets/logo-pdi.png" alt="Policía de Investigaciones de Chile" class="logo-pdi" id="pdi-logo-header">
+        <div class="brand-titles">
+          <div class="brand-title">
+            <span>SISTEMA ABIS</span>
+            <span class="brand-badge">PDI CHILE</span>
+          </div>
+          <div class="brand-subtitle">Centro de Analítica & Monitoreo de Enrolamiento Biométrico Fronterizo</div>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div class="system-badge" id="db-status-badge">
+          <span class="status-dot"></span> Verificando conexión...
+        </div>
+        <div class="system-badge" style="background: rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.5); color: #fef08a; display: inline-flex; align-items: center; gap: 6px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#fef08a;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect width="8" height="5" x="8" y="11" rx="1"/><path d="M10 11V9a2 2 0 1 1 4 0v2"/></svg>
+          <span>Enclave AES-256-GCM Activo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Navegación Superior Oficial (Navbar Centrada sin Emojis) -->
+    <div class="header-nav-container">
+      <nav class="tabs-nav navbar-top" id="main-navbar">
+        <button class="tab-button active" data-tab="metricas">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1"/>
+            <rect width="7" height="5" x="14" y="3" rx="1"/>
+            <rect width="7" height="9" x="14" y="12" rx="1"/>
+            <rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+          <span>Panel Ejecutivo & Analítica</span>
+        </button>
+        <button class="tab-button" data-tab="ingesta">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" x2="12" y1="3" y2="15"/>
+          </svg>
+          <span>Ingesta de Datos (Oracle ABIS)</span>
+        </button>
+        <button class="tab-button" data-tab="tendencias">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+            <polyline points="16 7 22 7 22 13"/>
+          </svg>
+          <span>Evolución & Tendencias</span>
+        </button>
+        <button class="tab-button" data-tab="seguridad">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          <span>Criptografía & Auditoría</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="app-container">
+
+    <!-- Scorecard de Resumen Ejecutivo y Salud Operativa -->
+    <section class="executive-banner" id="executive-banner">
+      <div class="exec-stat-item">
+        <div class="exec-stat-icon sla-ok" id="sla-icon">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="exec-stat-content">
+          <span class="exec-stat-label">Cumplimiento SLA PDI</span>
+          <span class="exec-stat-value" id="exec-sla-val">98.5% <small class="badge badge-success" id="exec-sla-badge">Óptimo</small></span>
+          <span class="exec-stat-sub">Meta Institucional: &ge; 95%</span>
+        </div>
+      </div>
+
+      <div class="exec-stat-item">
+        <div class="exec-stat-icon bio">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><rect width="18" height="14" x="3" y="5" rx="2"/><circle cx="9" cy="12" r="2"/><path d="M15 9h2M15 13h2M15 15h2"/></svg>
+        </div>
+        <div class="exec-stat-content">
+          <span class="exec-stat-label">Eficacia Biometría</span>
+          <span class="exec-stat-value" id="exec-bio-val">94.2%</span>
+          <span class="exec-stat-sub">Registros con captura válida</span>
+        </div>
+      </div>
+
+      <div class="exec-stat-item">
+        <div class="exec-stat-icon top-quarter">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
+        </div>
+        <div class="exec-stat-content">
+          <span class="exec-stat-label">Cuartel con Mayor Carga</span>
+          <span class="exec-stat-value" id="exec-quarter-val">Cargando...</span>
+          <span class="exec-stat-sub" id="exec-quarter-sub">Volumen operativo líder</span>
+        </div>
+      </div>
+
+      <div class="exec-stat-item">
+        <div class="exec-stat-icon top-nat">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+        </div>
+        <div class="exec-stat-content">
+          <span class="exec-stat-label">Flujo Migratorio Principal</span>
+          <span class="exec-stat-value" id="exec-nat-val">Cargando...</span>
+          <span class="exec-stat-sub" id="exec-nat-sub">Mayor incidencia en registros</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: MÉTRICAS Y ANALÍTICA AVANZADA -->
+    <!-- ========================================== -->
+    <section id="tab-metricas" class="tab-content" style="display: block;">
+
+      <!-- Tarjeta de Filtros -->
+      <div class="filters-card">
+        <div class="filters-header">
+          <div class="filters-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>
+            <span>Parámetros de Filtrado Analítico</span>
+            <span id="loading-indicator" style="display:none; font-size:0.8rem; color:var(--status-info); margin-left:10px;">
+              <span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Consultando vistas SQL...
+            </span>
+          </div>
+          <div class="filter-presets">
+            <button class="preset-btn active" data-preset="latest">Última Jornada</button>
+            <button class="preset-btn" data-preset="7days">Últimos 7 Días</button>
+            <button class="preset-btn" data-preset="all">Histórico Acumulado</button>
+          </div>
+        </div>
+
+        <div class="filters-grid">
+          <!-- Modo de Filtro -->
+          <div class="filter-group">
+            <label class="filter-label" for="filter-mode-select">Modalidad de Consulta</label>
+            <select id="filter-mode-select" class="form-control">
+              <option value="single">Fecha Específica (Jornada Diaria)</option>
+              <option value="range">Rango Temporal Personalizado</option>
+            </select>
+          </div>
+
+          <!-- Fecha Única -->
+          <div class="filter-group" id="group-date-single">
+            <label class="filter-label" for="filter-date-single">Fecha Operativa</label>
+            <select id="filter-date-single" class="form-control">
+              <option value="">Cargando fechas disponibles...</option>
+            </select>
+          </div>
+
+          <!-- Rango Desde -->
+          <div class="filter-group" id="group-date-from" style="display: none;">
+            <label class="filter-label" for="filter-date-from">Fecha Inicial (Desde)</label>
+            <input type="date" id="filter-date-from" class="form-control">
+          </div>
+
+          <!-- Rango Hasta -->
+          <div class="filter-group" id="group-date-to" style="display: none;">
+            <label class="filter-label" for="filter-date-to">Fecha Final (Hasta)</label>
+            <input type="date" id="filter-date-to" class="form-control">
+          </div>
+
+          <!-- Acciones -->
+          <div class="actions-group">
+            <button id="btn-apply-filter" class="btn btn-primary" style="flex:1;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Actualizar Analítica</span>
+            </button>
+            <button id="btn-export-word" class="btn btn-word" title="Descargar Informe Oficial en Microsoft Word (.docx)">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+              <span>Word (.docx)</span>
+            </button>
+            <button id="btn-export-excel" class="btn btn-excel" title="Descargar Informe Oficial Formateado en Microsoft Excel (.xlsx)">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 13 8 4"/><path d="m16 13-8 4"/></svg>
+              <span>Excel (.xlsx)</span>
+            </button>
+            <button id="btn-export-csv" class="btn btn-csv" title="Descargar Reporte Oficial en Formato CSV">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
+              <span>CSV Oficial</span>
+            </button>
+            <button id="btn-export-json" class="btn btn-json" title="Exportar Reporte en Formato JSON">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <span>JSON</span>
+            </button>
+            <button id="btn-print" class="btn btn-print" title="Imprimir Informe Formal">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+              <span>Imprimir</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="period-summary-banner" id="period-summary-container">
+          <svg class="period-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span id="period-summary-text">Consolidando registros analíticos...</span>
+        </div>
+      </div>
+
+      <!-- Tarjetas de KPIs Principales -->
+      <div class="kpi-grid">
+        <!-- KPI 1: Total Enrolamientos -->
+        <div class="kpi-card blue">
+          <div class="kpi-top">
+            <span class="kpi-title">Total de Enrolamientos</span>
+            <span class="kpi-pill">Volumen Bruto</span>
+          </div>
+          <div class="kpi-value" id="kpi-total-enrolados">0</div>
+          <div class="kpi-subtext">Registros biográficos y biométricos procesados</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- KPI 2: Sincronización PDI -->
+        <div class="kpi-card success">
+          <div class="kpi-top">
+            <span class="kpi-title">Sincronizados con PDI</span>
+            <span class="kpi-pill" id="kpi-sinc-tag">Conforme</span>
+          </div>
+          <div class="kpi-value" id="kpi-sincronizados">0</div>
+          <div class="kpi-subtext" id="kpi-sinc-pct">0% del total procesado</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar" id="kpi-sinc-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- KPI 3: Registrados Biométricos -->
+        <div class="kpi-card info">
+          <div class="kpi-top">
+            <span class="kpi-title">Registro Biométrico ABIS</span>
+            <span class="kpi-pill">Captura OK</span>
+          </div>
+          <div class="kpi-value" id="kpi-registrados">0</div>
+          <div class="kpi-subtext" id="kpi-reg-pct">0% del total procesado</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar" id="kpi-reg-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- KPI 4: Con Error / Incidentes -->
+        <div class="kpi-card danger">
+          <div class="kpi-top">
+            <span class="kpi-title">Inconsistencias / Errores</span>
+            <span class="kpi-pill" id="kpi-err-tag">Sin Alerta</span>
+          </div>
+          <div class="kpi-value" id="kpi-errores">0</div>
+          <div class="kpi-subtext" id="kpi-err-pct">0% del total procesado</div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar" id="kpi-err-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Gráficos Analíticos -->
+      <div class="charts-grid">
+        
+        <!-- Gráfico 1: Rendimiento por Cuartel (Sincronizados vs Errores) -->
+        <div class="chart-card col-7">
+          <div class="chart-header">
+            <div class="chart-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
+              <span>Rendimiento Operativo por Cuartel Fronterizo</span>
+            </div>
+            <span class="chart-badge">Sincronizados vs Con Error</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-cuarteles"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Top Nacionalidades -->
+        <div class="chart-card col-5">
+          <div class="chart-header">
+            <div class="chart-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+              <span>Top Nacionalidades de Enrolados</span>
+            </div>
+            <span class="chart-badge">Países de Origen</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-nacionalidades"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 3: Estado de Sincronización PDI (Donut) -->
+        <div class="chart-card col-4">
+          <div class="chart-header">
+            <div class="chart-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+              <span>Distribución de Sincronización</span>
+            </div>
+            <span class="chart-badge">PDI / ABIS</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-sincronizacion"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 4: Demografía Cruzada (Pirámide Género x Grupo Etario) -->
+        <div class="chart-card col-5">
+          <div class="chart-header">
+            <div class="chart-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Composición Demográfica Cruzada</span>
+            </div>
+            <span class="chart-badge">Adultos vs N.N.A. por Sexo</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-demografia-cruzada"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 5: Resumen de Protección de Menores N.N.A. -->
+        <div class="chart-card col-3">
+          <div class="chart-header">
+            <div class="chart-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Rango Etario</span>
+            </div>
+            <span class="chart-badge">Mayores vs Menores</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-edad"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabla Detallada Operativa con Buscador y Filtros -->
+      <div class="table-card">
+        <div class="table-header-bar">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+            <span>Matriz Operativa de Cuarteles y Eficiencia de Sincronización</span>
+          </div>
+          <input type="text" id="table-search-input" class="form-control search-input" placeholder="Filtrar por cuartel, unidad o nacionalidad...">
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Puesto / Cuartel</th>
+                <th>Unidad Policial</th>
+                <th style="text-align:right;">Total Enrolados</th>
+                <th style="text-align:right;">Sincronizados PDI</th>
+                <th style="text-align:right;">Con Error</th>
+                <th>Tasa de Efectividad (%)</th>
+              </tr>
+            </thead>
+            <tbody id="data-table-body">
+              <tr>
+                <td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                  Cargando matriz analítica...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: INGESTA DE DATOS (UPLOAD ETL) -->
+    <!-- ========================================== -->
+    <section id="tab-ingesta" class="tab-content" style="display: none;">
+      
+      <div class="upload-wrapper">
+        
+        <!-- Zona Dropzone -->
+        <div class="dropzone" id="upload-dropzone">
+          <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
+          <div class="dropzone-icon">
+            <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title">Carga Directa de Archivo Excel ABIS (Oracle)</div>
+          <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic para examinar</div>
+          <button type="button" id="btn-select-file" class="btn btn-primary">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+            <span>Seleccionar Archivo desde el Equipo</span>
+          </button>
+          <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
+            Formatos admitidos: <strong>.xlsx</strong> nativo o archivo protegido <strong>.enc</strong> (AES-256-GCM)
+          </div>
+        </div>
+
+        <!-- Tarjeta de Instrucciones de Seguridad -->
+        <div class="upload-info-card">
+          <h3 style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Protocolo de Seguridad e Integridad ETL</span>
+          </h3>
+
+          <div class="info-item">
+            <div class="info-item-icon">
+              <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="info-item-content">
+              <h4>Descifrado Exclusivo en Memoria RAM</h4>
+              <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil del servidor sin escribir datos planos temporales en el disco.</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-item-icon">
+              <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+            </div>
+            <div class="info-item-content">
+              <h4>Normalización y Tolerancia a Errores Tipográficos</h4>
+              <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y nacionalidades) hacia el modelo relacional 3NF.</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-item-icon">
+              <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="info-item-content">
+              <h4>Inserción Atómica y Trazabilidad Criptográfica</h4>
+              <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de la información procesada.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Resultados de la subida -->
+      <div class="upload-results" id="upload-results">
+        <div id="upload-status"></div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: EVOLUCIÓN Y TENDENCIAS -->
+    <!-- ========================================== -->
+    <section id="tab-tendencias" class="tab-content" style="display: none;">
+      
+      <div class="chart-card col-12" style="margin-bottom: 24px;">
+        <div class="chart-header">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <span>Evolución Temporal de Enrolamientos Biométricos</span>
+          </div>
+          <span class="chart-badge">Serie Histórica Completa</span>
+        </div>
+        <div class="chart-body" style="min-height: 440px;">
+          <canvas id="chart-tendencia-historica"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: CRIPTOGRAFÍA & AUDITORÍA -->
+    <!-- ========================================== -->
+    <section id="tab-seguridad" class="tab-content" style="display: none;">
+      
+      <div class="filters-card">
+        <h3 style="font-size: 1.15rem; color: var(--pdi-navy); margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+          <span>Estándar de Seguridad Criptográfica Institucional</span>
+        </h3>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 20px;">
+          El sistema implementa el algoritmo <strong>AES-256-GCM</strong> (Galois/Counter Mode), esquema AEAD recomendado por el NIST que garantiza confidencialidad absoluta, autenticación e integridad para la base de datos de identificación biométrica.
+        </p>
+
+        <div style="background: #0f172a; border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+          <h4 style="font-size: 0.9rem; color: #38bdf8; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:#38bdf8;"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+            <span>Herramientas de Cifrado CLI Disponibles:</span>
+          </h4>
+          <pre style="font-family: 'Consolas', monospace; font-size: 0.85rem; color: #f8fafc; overflow-x: auto; line-height: 1.6;">
+# 1. Cifrar un archivo de enrolamiento a formato protegido .enc en milisegundos:
+npm run security:cifrar "New_Enrolados Abis.xlsx"
+
+# 2. Descifrar y validar la integridad criptográfica del archivo:
+npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
+          </pre>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+          <div style="background: #f8fafc; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="color: var(--status-success); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--status-success);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Cifrado Autenticado (AEAD)</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+              Genera una etiqueta de autenticación (Auth Tag de 128 bits). Cualquier alteración de un solo bit en el archivo protegido es detectada de inmediato antes de su apertura.
+            </div>
+          </div>
+          <div style="background: #f8fafc; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="color: var(--pdi-navy); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3M18.5 4.5l3 3"/></svg>
+              <span>Gestión de Claves y Derivación Scrypt</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+              La clave maestra <code>ENCRYPTION_KEY</code> se almacena en variables de entorno seguras, con soporte para claves hexadecimales de 256 bits y derivación robusta.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal de Autorización de Seguridad para Ingesta -->
+  <div class="modal-backdrop" id="modal-auth-ingesta" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-icon-shield">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <rect width="8" height="5" x="8" y="11" rx="1"/>
+              <path d="M10 11V9a2 2 0 1 1 4 0v2"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Autorización de Seguridad</h3>
+            <p>Control de Acceso para Ingesta y Poblado de Base de Datos</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close" id="btn-modal-auth-close" title="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="file-summary-card">
+          <div class="file-summary-icon">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="file-summary-info">
+            <strong id="modal-file-name">archivo_enrolamiento.xlsx</strong>
+            <span id="modal-file-details">0.0 MB &bull; Planilla Excel</span>
+          </div>
+        </div>
+
+        <div class="auth-warning-box">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #b45309; flex-shrink: 0;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>Para poblar la base de datos se requiere verificar su credencial policial de operador autorizado.</span>
+        </div>
+
+        <div class="auth-input-group">
+          <label for="input-auth-clave" class="auth-label">Clave de Autorización Policial</label>
+          <div class="auth-input-wrapper">
+            <svg class="svg-icon svg-icon-sm auth-input-icon" viewBox="0 0 24 24">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input 
+              type="password" 
+              id="input-auth-clave" 
+              class="form-control auth-control" 
+              placeholder="Ingrese clave de operador..." 
+              autocomplete="current-password"
+            >
+            <button type="button" class="btn-toggle-eye" id="btn-toggle-password" title="Mostrar u ocultar clave">
+              <svg class="svg-icon svg-icon-xs" id="eye-icon" viewBox="0 0 24 24">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="auth-error-msg" id="modal-auth-error" style="display: none;"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-modal-auth-cancel">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-modal-auth-confirm">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span>Autorizar y Poblar BD</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Institucional -->
+  <footer class="footer">
+    <div><strong>Sistema de Gestión ABIS</strong> &bull; Policía de Investigaciones de Chile (PDI) &bull; Jefatura Nacional de Migraciones y Policía Internacional</div>
+    <div style="margin-top: 4px; color: var(--text-light); font-size: 0.76rem;">
+      Base de Datos: PostgreSQL 3NF &bull; Cifrado: AES-256-GCM &bull; Ingesta ETL Integrada
+    </div>
+  </footer>
+
+  <!-- Script Principal -->
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -59,12 +59,11 @@ $env:PGPASSWORD = "abis_dev_pw"
 
 📄 [`AVANCE_SPRINT3.md`](sprints/AVANCE_SPRINT3.md)
 
-## Sprint 4 — Carga histórica y estrés
+## Sprint 4 — Carga de datos reales y validación de integridad
 
 ```powershell
-npm run carga-historica -- 95000    # ~2.6s, 19 lotes
-npm run validar-integridad          # chequeos + EXPLAIN ANALYZE
-& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
+npm run db:poblar          # ~20s, carga los 95.474 registros reales en 20 lotes
+npm run validar-integridad # chequeos de integridad + EXPLAIN ANALYZE
 ```
 
 📄 [`AVANCE_SPRINT4.md`](sprints/AVANCE_SPRINT4.md)
@@ -73,22 +72,16 @@ npm run validar-integridad          # chequeos + EXPLAIN ANALYZE
 
 ```powershell
 npm run db:views
-npm run datos-reporte-prueba        # 10 filas fijas, fecha 2026-09-15
-npm start                           # en otra terminal si no está corriendo
-(Invoke-WebRequest "http://localhost:3000/reporte-diario?fecha=2026-09-15").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
-& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
+npm start                  # en otra terminal si no está corriendo
+(Invoke-WebRequest "http://localhost:3000/reporte-diario?fecha=2024-11-15").Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ```
-
-Esperado: porcentajes redondos (70/20/10, 80/20, 90/10, 40/30/20/10, 40/30/30, 50/50, 90/10).
 
 📄 [`AVANCE_SPRINT5.md`](sprints/AVANCE_SPRINT5.md)
 
 ## Sprint 6 — Bot de Telegram
 
 ```powershell
-npm run datos-reporte-prueba
-npm run telegram:enviar -- 2026-09-15
-& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
+npm run telegram:enviar -- 2024-11-15
 ```
 
 Revisar el chat con el bot configurado en `TELEGRAM_CHAT_ID` — debería llegar el reporte
@@ -99,9 +92,7 @@ formateado.
 ## Sprint 7 — Flujo diario completo (Excel → ETL → BD → Telegram)
 
 ```powershell
-npm run flujo-diario -- fixtures/enrolamiento_etl_prueba.xlsx   # caso exitoso
-npm run flujo-diario -- fixtures/enrolamiento_vacio.xlsx        # caso de alerta (Excel vacío)
-& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5433 -U postgres -d abis_db -c "TRUNCATE registro_enrolamiento RESTART IDENTITY;"
+npm run flujo-diario      # procesa New_Enrolados Abis.xlsx completo y notifica a Telegram
 ```
 
 📄 [`AVANCE_SPRINT7.md`](sprints/AVANCE_SPRINT7.md) (incluye el comando de la tarea programada)

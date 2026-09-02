@@ -413,7 +413,11 @@ async function iniciarBot({ token, chatId, pool, logger = console }) {
       }
     } catch (err) {
       if (!botActivo) break;
-      logger.error("Error en polling de Telegram:", err.message);
+      if (err.message && err.message.includes("Conflict")) {
+        logger.warn("⚠️ Aviso Telegram: Otra instancia del bot fue iniciada o la conexión se reinició. Reintentando en 3s...");
+      } else {
+        logger.warn(`⚠️ Aviso de conexión Telegram (${err.message}). Reintentando en 3s...`);
+      }
       // Pausa de 3 segundos ante caídas de red antes de reintentar
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }

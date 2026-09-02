@@ -2,4 +2,6 @@ node_modules/
 .env
 logs/*.log
 test-results/
-
+*.enc
+test-banner-seba.png
+*.tmp
