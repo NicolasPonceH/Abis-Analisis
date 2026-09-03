@@ -141,13 +141,20 @@ Los botones de la barra de acciones cuentan con identidad cromática institucion
 * Cuenta con animación visual de sacudida (*shake*) y mensaje de alerta si la credencial es incorrecta, protegiendo todas las operaciones críticas.
 * Toda operación autorizada queda auditada en PostgreSQL con su huella SHA-256 respectiva.
 
-### 6. Bot Interactivo de Telegram
-* Conectado mediante Long Polling seguro para consultas móviles de la jefatura.
-* Comandos disponibles:
-  * `/resumen`: Muestra las métricas consolidadas de la última jornada.
-  * `/cuarteles`: Ranking de los cuarteles con mayor flujo fronterizo.
-  * `/estado`: Chequeo de salud del servidor y conexión con PostgreSQL.
-  * `/ayuda`: Listado de comandos operativos.
+### 6. Bot Interactivo de Telegram y Despacho Extendido
+* **Reporte Extendido de Alto Impacto**: Tanto el botón del Dashboard como las consultas del Bot emiten un informe exhaustivo que incluye:
+  * **Período Operativo Remarcado**: Fecha única en formato extendido o rango de fechas claramente destacado.
+  * **Indicadores Clave (SLA PDI)**: Cumplimiento de sincronización, tasa biométrica ABIS, errores y casos pendientes con cantidades exactas.
+  * **Despliegue Territorial**: Ranking de los cuarteles con mayor carga operativa, volumen y porcentaje de éxito.
+  * **Flujo Migratorio**: Top 5 nacionalidades con volumen de enrolados y porcentaje.
+  * **Perfil Demográfico & NNA**: Proporción de género y detección prioritaria de Niños, Niñas y Adolescentes (NNA).
+* Comandos disponibles en Telegram:
+  * `/reporte` o `/resumen`: Emite el reporte operativo extendido de la última jornada.
+  * `/reporte YYYY-MM-DD`: Emite el reporte extendido de una fecha en particular.
+  * `/errores`: Diagnóstico de causas raíz y cuarteles con inconsistencias.
+  * `/estado`: Chequeo de salud del servidor y total histórico acumulado en PostgreSQL.
+  * `/logs`: Detalle técnico del último procesamiento ETL.
+  * `/ayuda`: Guía explicativa de comandos institucionales.
 
 ---
 

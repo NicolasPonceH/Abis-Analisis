@@ -173,4 +173,132 @@ function formatearAvisoFilasOmitidas(erroresOParam) {
   return lineas.join("\n");
 }
 
-module.exports = { formatearReporte, formatearAlerta, formatearAvisoFilasOmitidas };
+function formatearPeriodoDestacado(reporte, { desde, hasta, fecha } = {}) {
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  function formatearFechaEspanol(fStr) {
+    if (!fStr || !fStr.includes("-")) return fStr || "";
+    const [a, m, d] = fStr.split("-");
+    const mesNom = meses[parseInt(m, 10) - 1] || m;
+    return `${parseInt(d, 10)} de ${mesNom} de ${a}`;
+  }
+
+  function formatearFechaCorta(fStr) {
+    if (!fStr || !fStr.includes("-")) return fStr || "";
+    const [a, m, d] = fStr.split("-");
+    return `${d}/${m}/${a}`;
+  }
+
+  const d = desde || reporte.desde;
+  const h = hasta || reporte.hasta;
+  const f = fecha || reporte.fecha;
+
+  if (d && h && d !== h) {
+    return `DEL ${formatearFechaCorta(d)} AL ${formatearFechaCorta(h)}`;
+  } else if (f) {
+    return `${formatearFechaEspanol(f).toUpperCase()} (${f})`;
+  } else if (d) {
+    return `${formatearFechaEspanol(d).toUpperCase()} (${d})`;
+  }
+  return "JORNADA HISTÓRICA CONSOLIDADA";
+}
+
+// Formatea el reporte extendido de alto impacto para Telegram
+function formatearReporteExtenso(reporte, opciones = {}) {
+  const total = reporte.total || 0;
+  const exec = reporte.resumenEjecutivo || {};
+  const periodoTexto = formatearPeriodoDestacado(reporte, opciones);
+
+  const sincData = reporte.sincronizacion || [];
+  const regData = reporte.registro || [];
+  const sincOK = sincData.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.total || 0;
+  const regOK = regData.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO"))?.total || 0;
+  const errSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0;
+  const pendSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("PENDIENTE"))?.total || 0;
+
+  // Cuarteles
+  const cuarteles = reporte.rendimientoCuarteles || [];
+  const topCuarteles = cuarteles.slice(0, 4);
+
+  // Nacionalidades
+  const nacs = reporte.nacionalidadesPrincipales || [];
+  const topNacs = nacs.slice(0, 5);
+
+  // Demografía
+  const genero = reporte.genero || [];
+  const masc = genero.find((g) => g.genero.toUpperCase().startsWith("M"));
+  const fem = genero.find((g) => g.genero.toUpperCase().startsWith("F"));
+  const mascPct = masc ? masc.porcentaje : 0;
+  const femPct = fem ? fem.porcentaje : 0;
+
+  const edad = reporte.edad || [];
+  const menores = edad.find((e) => e.categoria.toUpperCase().includes("MENOR"));
+  const adultos = edad.find((e) => e.categoria.toUpperCase().includes("MAYOR"));
+  const menoresCount = menores ? menores.total : 0;
+  const adultosCount = adultos ? adultos.total : 0;
+  const adultosPct = total > 0 ? Math.round((adultosCount / total) * 1000) / 10 : 0;
+
+  // Timestamp actual en formato legible
+  const ahora = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const horaStr = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
+  const fechaStr = `${pad(ahora.getDate())}/${pad(ahora.getMonth() + 1)}/${ahora.getFullYear()}`;
+
+  let texto = `🏛 <b>POLICÍA DE INVESTIGACIONES DE CHILE</b>\n`;
+  texto += `<b>Jefatura Nacional de Migraciones y Policía Internacional</b>\n`;
+  texto += `📑 <i>Reporte Operativo ABIS de Enrolamiento Biométrico</i>\n`;
+  texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  texto += `📅 <b>PERÍODO OPERATIVO:</b>\n`;
+  texto += `👉 <b><u>${periodoTexto}</u></b> 👈\n`;
+  texto += `👥 <b>Total Enrolamientos:</b> <b>${total.toLocaleString("es-CL")} registros</b>\n`;
+  texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  // 1. Indicadores Clave SLA
+  texto += `📊 <b>INDICADORES CLAVE (SLA PDI)</b>\n`;
+  texto += `• Sincronización PDI: <b>${exec.tasaSincronizacion || 0}%</b> (${sincOK.toLocaleString("es-CL")} casos) — <b>${exec.estadoSLA || "Óptimo"}</b>\n`;
+  texto += `• Biometría ABIS: <b>${exec.tasaRegistroBiometrico || 0}%</b> (${regOK.toLocaleString("es-CL")} casos)\n`;
+  texto += `• Inconsistencias / Errores: <b>${exec.tasaError || 0}%</b> (${errSinc.toLocaleString("es-CL")} casos)\n`;
+  if (pendSinc > 0) {
+    texto += `• Casos Pendientes: <b>${pendSinc.toLocaleString("es-CL")}</b> (${Math.round((pendSinc / total) * 1000) / 10}%)\n`;
+  }
+  texto += `\n`;
+
+  // 2. Top Cuarteles con mayor carga
+  if (topCuarteles.length > 0) {
+    texto += `🏢 <b>TOP CUARTELES CON MAYOR CARGA</b>\n`;
+    topCuarteles.forEach((c, idx) => {
+      const pct = total > 0 ? (Math.round((c.total / total) * 1000) / 10).toFixed(1) : "0.0";
+      texto += `${idx + 1}. <b>${escaparHtml(c.cuartel)}:</b> <b>${c.total.toLocaleString("es-CL")}</b> (${pct}%) — <i>${c.tasaExito}% éxito</i>\n`;
+    });
+    texto += `\n`;
+  }
+
+  // 3. Flujos Migratorios
+  if (topNacs.length > 0) {
+    texto += `🌎 <b>PRINCIPALES FLUJOS MIGRATORIOS</b>\n`;
+    topNacs.forEach((n) => {
+      texto += `• ${escaparHtml(n.nacionalidad)}: <b>${n.total.toLocaleString("es-CL")}</b> (${n.porcentaje}%)\n`;
+    });
+    texto += `\n`;
+  }
+
+  // 4. Perfil Demográfico & NNA
+  texto += `👥 <b>PERFIL DEMOGRÁFICO & NNA</b>\n`;
+  texto += `• Género: <b>${mascPct}%</b> Masc · <b>${femPct}%</b> Fem\n`;
+  texto += `• Menores de Edad (NNA): <b>${menoresCount.toLocaleString("es-CL")}</b> (${exec.tasaMenoresNNA || 0}%)\n`;
+  texto += `• Adultos: <b>${adultosCount.toLocaleString("es-CL")}</b> (${adultosPct}%)\n`;
+  texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  texto += `⏰ <i>Generado: ${fechaStr} ${horaStr} hrs vía ${opciones.origen || "Dashboard Web PDI"}</i>`;
+
+  return texto;
+}
+
+module.exports = {
+  formatearReporte,
+  formatearReporteExtenso,
+  formatearAlerta,
+  formatearAvisoFilasOmitidas,
+};

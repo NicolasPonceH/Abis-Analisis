@@ -17,6 +17,7 @@ const {
   descifrarBuffer,
 } = require("./security/crypto");
 const telegramClient = require("./telegram/telegramClient");
+const { formatearReporteExtenso } = require("./telegram/formatearReporte");
 const { generarReporteWord } = require("./reportes/wordReportService");
 const { generarReporteExcel } = require("./reportes/excelReportService");
 
@@ -385,28 +386,13 @@ app.post("/api/telegram/enviar", async (req, res) => {
       return res.status(500).json({ ok: false, error: "Token o Chat ID de Telegram no configurados en el archivo .env" });
     }
 
-    const exec = reporte.resumenEjecutivo || {};
-    const total = reporte.total || 0;
     const periodo = desde && hasta ? `${desde} al ${hasta}` : (reporte.fecha || fecha);
-
-    let texto = `🏛 <b>POLICÍA DE INVESTIGACIONES DE CHILE</b>\n`;
-    texto += `<b>Jefatura Nacional de Migraciones y Policía Internacional</b>\n`;
-    texto += `📊 <i>Reporte Operativo ABIS de Enrolamiento Biométrico</i>\n`;
-    texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    texto += `🗓 <b>Período:</b> <code>${periodo}</code>\n`;
-    texto += `👥 <b>Total Enrolamientos:</b> <b>${total.toLocaleString()}</b>\n`;
-    texto += `✅ <b>SLA Sincronización PDI:</b> <b>${exec.tasaSincronizacion || 100}%</b> (${exec.estadoSLA || 'Óptimo'})\n`;
-    texto += `🪪 <b>Registro Biométrico ABIS:</b> <b>${exec.tasaRegistroBiometrico || 0}%</b>\n`;
-    texto += `⚠️ <b>Inconsistencias / Errores:</b> <b>${exec.tasaError || 0}%</b>\n`;
-    if (exec.cuartelLider) {
-      texto += `🏢 <b>Puesto Mayor Carga:</b> ${exec.cuartelLider.nombre} (${exec.cuartelLider.porcentaje}%)\n`;
-    }
-    if (exec.nacionalidadLider) {
-      texto += `🌎 <b>Flujo Migratorio:</b> ${exec.nacionalidadLider.nombre} (${exec.nacionalidadLider.porcentaje}%)\n`;
-    }
-    texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    texto += `🔐 <i>Seguridad Criptográfica: AES-256-GCM / SHA-256</i>\n`;
-    texto += `📡 <i>Notificación enviada a solicitud del operador desde el Dashboard Web</i>`;
+    const texto = formatearReporteExtenso(reporte, {
+      desde,
+      hasta,
+      fecha: reporte.fecha || fecha,
+      origen: "Dashboard Web PDI",
+    });
 
     const envio = await telegramClient.enviarMensaje({ token, chatId, texto });
 

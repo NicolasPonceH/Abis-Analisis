@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const telegramClient = require("./telegramClient");
 const { obtenerReporteDiario } = require("../reportes/reporteDiario");
-const { formatearReporte } = require("./formatearReporte");
+const { formatearReporte, formatearReporteExtenso } = require("./formatearReporte");
 
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -280,7 +280,7 @@ async function manejarComandoReporte({ token, chatId, pool, args }) {
   }
 
   const reporte = await obtenerReporteDiario(pool, fecha);
-  const texto = formatearReporte(reporte);
+  const texto = formatearReporteExtenso(reporte, { fecha, origen: "Bot Telegram PDI" });
   await telegramClient.enviarMensaje({ token, chatId, texto });
 }
 
@@ -356,6 +356,7 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
       await manejarComandoDetalleErrores({ token, chatId, pool, args });
       break;
     case "/reporte":
+    case "/resumen":
     case "/informe":
     case "/hoy":
       await manejarComandoReporte({ token, chatId, pool, args });
