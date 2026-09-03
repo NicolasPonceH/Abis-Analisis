@@ -477,7 +477,99 @@ const BKLIT_TOOLTIP = {
   footerColor: "#0284c7",
 };
 
-// Renderizado de gráficos con Chart.js (Estilo bklit-ui / shadcn)
+// ==========================================================================
+// PLUGINS DE CHART.JS PARA VISUALIZACIÓN DIRECTA DE NÚMEROS Y MÉTRICAS
+// ==========================================================================
+
+// Plugin 1: Etiquetas numéricas directas en barras (verticales y horizontales)
+const bklitBarLabelsPlugin = {
+  id: "bklitBarLabels",
+  afterDatasetsDraw(chart, args, pluginOptions) {
+    if (!pluginOptions || pluginOptions.display === false) return;
+    const { ctx } = chart;
+    const isHorizontal = chart.config.options?.indexAxis === "y";
+    const opts = pluginOptions || {};
+
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      const meta = chart.getDatasetMeta(datasetIndex);
+      if (meta.hidden) return;
+
+      meta.data.forEach((element, index) => {
+        const val = dataset.data[index];
+        if (val === undefined || val === null) return;
+        const numVal = Number(val);
+        if (opts.hideZero && numVal === 0) return;
+
+        ctx.save();
+        ctx.font = opts.font || "700 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillStyle = opts.color || (isHorizontal ? "#0f172a" : "#1e293b");
+
+        let text = numVal.toLocaleString("es-CL");
+        if (typeof opts.formatter === "function") {
+          text = opts.formatter(numVal, index, dataset, chart.data);
+        }
+
+        if (isHorizontal) {
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          const x = element.x + 8;
+          const y = element.y;
+          ctx.fillText(text, x, y);
+        } else {
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          const x = element.x;
+          const y = element.y - 4;
+          ctx.fillText(text, x, y);
+        }
+        ctx.restore();
+      });
+    });
+  },
+};
+
+// Plugin 2: Cifra total ejecutiva y categoría en el centro de los Doughnuts
+const bklitDoughnutCenterPlugin = {
+  id: "bklitDoughnutCenter",
+  beforeDraw(chart, args, pluginOptions) {
+    if (!pluginOptions || pluginOptions.display === false) return;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+
+    const opts = pluginOptions || {};
+    const centerX = (chartArea.left + chartArea.right) / 2;
+    const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+    const dataset = chart.data.datasets[0];
+    const total = opts.total !== undefined ? opts.total : (
+      dataset?.data?.reduce((acc, v) => acc + (Number(v) || 0), 0) || 0
+    );
+    const label = opts.label || "TOTAL";
+
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Cifra numérica principal (Grande, destacada)
+    ctx.font = "800 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(Number(total).toLocaleString("es-CL"), centerX, centerY - 8);
+
+    // Etiqueta secundaria descriptiva
+    ctx.font = "700 9.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText(String(label).toUpperCase(), centerX, centerY + 13);
+
+    ctx.restore();
+  },
+};
+
+// Registro de plugins personalizados en Chart.js
+if (typeof Chart !== "undefined") {
+  Chart.register(bklitBarLabelsPlugin, bklitDoughnutCenterPlugin);
+}
+
+// Renderizado de gráficos con Chart.js (Estilo bklit-ui / shadcn con cifras directas)
 function renderCharts(data) {
   // Configuración global de Chart.js
   Chart.defaults.color = "#64748b";
@@ -489,32 +581,32 @@ function renderCharts(data) {
   // 1. Matriz de Rendimiento por Cuartel (Barras apiladas / agrupadas: Sincronizados vs Errores)
   renderCuartelesRendimientoChart(data);
 
-  // 2. Gráfico de Nacionalidades (Horizontal Bar)
+  // 2. Gráfico de Nacionalidades (Horizontal Bar con cifras y porcentajes)
   renderHorizontalBarChart(
     "chart-nacionalidades",
     data.nacionalidadesPrincipales || []
   );
 
-  // 3. Gráfico de Estados de Sincronización (Donut flotante)
+  // 3. Gráfico de Estados de Sincronización (Donut flotante con Total central y leyenda métrica)
   renderDoughnutChart(
     "chart-sincronizacion",
     data.sincronizacion || [],
     [CHART_PALETTE.emerald, CHART_PALETTE.crimson, CHART_PALETTE.amber, CHART_PALETTE.cyan]
   );
 
-  // 4. Demografía Cruzada (Pirámide de Género vs Adultos / N.N.A.)
+  // 4. Demografía Cruzada (Pirámide de Género vs Adultos / N.N.A. con valores en cada barra)
   renderDemografiaCruzadaChart(data.demografiaCruzada || [], data.genero || []);
 
-  // 5. Gráfico de Edad / N.N.A. (Donut flotante)
+  // 5. Gráfico de Edad / N.N.A. (Donut flotante con Total y desglose de menores)
   renderEdadChart("chart-edad", data.edad || []);
 
-  // 6. Gráfico de Dispositivos (Tablet vs PC)
+  // 6. Gráfico de Dispositivos (Tablet vs PC con Total central y porcentajes)
   renderDispositivosChart(data.dispositivos || []);
 
-  // 7. Gráfico de Regiones Policiales (Despliegue Macro-Zonal)
+  // 7. Gráfico de Regiones Policiales (Despliegue Macro-Zonal con cifras a la derecha)
   renderRegionesChart(data.regiones || []);
 
-  // 8. Gráfico de Tramos Etarios & Protección NNA
+  // 8. Gráfico de Tramos Etarios & Protección NNA (Histograma con cifras sobre las barras)
   renderTramosEtariosChart(data.tramosEtarios || []);
 }
 
@@ -525,7 +617,7 @@ function destroyChart(name) {
   }
 }
 
-// Gráfico 1: Rendimiento por Cuartel (Estilo bklit-ui con esquinas redondeadas y cuadrícula punteada)
+// Gráfico 1: Rendimiento por Cuartel (Estilo bklit-ui con cifras sobre cada barra)
 function renderCuartelesRendimientoChart(data) {
   destroyChart("chart-cuarteles");
   const ctx = document.getElementById("chart-cuarteles")?.getContext("2d");
@@ -533,8 +625,19 @@ function renderCuartelesRendimientoChart(data) {
 
   const items = (data.rendimientoCuarteles || []).slice(0, 8);
   const labels = items.map((i) => i.cuartel);
-  const sincronizados = items.map((i) => i.sincronizados);
-  const conError = items.map((i) => i.conError);
+  const sincronizados = items.map((i) => Number(i.sincronizados) || 0);
+  const conError = items.map((i) => Number(i.conError) || 0);
+
+  const totalSinc = sincronizados.reduce((a, b) => a + b, 0);
+  const totalErr = conError.reduce((a, b) => a + b, 0);
+  const totalGlobal = totalSinc + totalErr;
+  const tasaPromedio = totalGlobal > 0 ? ((totalSinc / totalGlobal) * 100).toFixed(1) : "100.0";
+
+  // Actualizar badge del encabezado del gráfico con el número relacionado
+  const badge = document.getElementById("badge-chart-cuarteles");
+  if (badge) {
+    badge.textContent = `${items.length} Cuarteles · ${tasaPromedio}% Efectividad (${totalGlobal.toLocaleString("es-CL")} casos)`;
+  }
 
   state.charts["chart-cuarteles"] = new Chart(ctx, {
     type: "bar",
@@ -548,7 +651,7 @@ function renderCuartelesRendimientoChart(data) {
           hoverBackgroundColor: "#059669",
           borderRadius: 8,
           borderSkipped: false,
-          maxBarThickness: 30,
+          maxBarThickness: 32,
         },
         {
           label: "Con Error",
@@ -557,14 +660,14 @@ function renderCuartelesRendimientoChart(data) {
           hoverBackgroundColor: "#e11d48",
           borderRadius: 8,
           borderSkipped: false,
-          maxBarThickness: 30,
+          maxBarThickness: 32,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 0.7,
+      barPercentage: 0.72,
       categoryPercentage: 0.75,
       plugins: {
         legend: {
@@ -578,7 +681,28 @@ function renderCuartelesRendimientoChart(data) {
             padding: 16,
             color: "#334155",
             font: { weight: "600", size: 12 },
+            generateLabels: (chart) => {
+              return chart.data.datasets.map((ds, idx) => {
+                const sum = ds.data.reduce((a, b) => a + (Number(b) || 0), 0);
+                const pct = totalGlobal > 0 ? ((sum / totalGlobal) * 100).toFixed(1) : "0.0";
+                return {
+                  text: `${ds.label}: ${sum.toLocaleString("es-CL")} (${pct}%)`,
+                  fillStyle: ds.backgroundColor,
+                  strokeStyle: ds.backgroundColor,
+                  lineWidth: 0,
+                  hidden: !chart.isDatasetVisible(idx),
+                  datasetIndex: idx,
+                  pointStyle: "circle",
+                };
+              });
+            },
           },
+        },
+        bklitBarLabels: {
+          display: true,
+          hideZero: true,
+          font: "700 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          color: "#1e293b",
         },
         tooltip: {
           ...BKLIT_TOOLTIP,
@@ -587,7 +711,7 @@ function renderCuartelesRendimientoChart(data) {
               const idx = tooltipItems[0].dataIndex;
               const totalCuartel = items[idx]?.total || 0;
               const tasa = items[idx]?.tasaExito || 100;
-              return `Total: ${totalCuartel.toLocaleString()} (${tasa}% éxito)`;
+              return `Total Cuartel: ${Number(totalCuartel).toLocaleString("es-CL")} (${tasa}% éxito)`;
             },
           },
         },
@@ -596,12 +720,16 @@ function renderCuartelesRendimientoChart(data) {
         x: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#64748b", font: { weight: "500" }, maxRotation: 35, minRotation: 0 },
+          ticks: { color: "#475569", font: { weight: "600" }, maxRotation: 35, minRotation: 0 },
         },
         y: {
+          grace: "15%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            callback: (val) => Number(val).toLocaleString("es-CL"),
+          },
           beginAtZero: true,
         },
       },
@@ -609,15 +737,22 @@ function renderCuartelesRendimientoChart(data) {
   });
 }
 
-// Gráfico 2: Nacionalidades (Barra horizontal bklit-ui con esquinas curvadas)
+// Gráfico 2: Nacionalidades (Barra horizontal bklit-ui con cifras y porcentaje a la derecha)
 function renderHorizontalBarChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
   if (!ctx) return;
 
-  const topItems = items.slice(0, 8);
+  const topItems = (items || []).slice(0, 8);
   const labels = topItems.map((i) => i.nacionalidad + (i.codigo_iso ? ` (${i.codigo_iso})` : ""));
-  const values = topItems.map((i) => i.total);
+  const values = topItems.map((i) => Number(i.total) || 0);
+  const totalSum = values.reduce((a, b) => a + b, 0);
+
+  // Actualizar badge de encabezado con el flujo migratorio principal
+  const badge = document.getElementById("badge-chart-nacionalidades");
+  if (badge && topItems.length > 0) {
+    badge.textContent = `Top 1: ${topItems[0].nacionalidad} (${topItems[0].porcentaje}%)`;
+  }
 
   state.charts[canvasId] = new Chart(ctx, {
     type: "bar",
@@ -639,18 +774,34 @@ function renderHorizontalBarChart(canvasId, items) {
       barPercentage: 0.68,
       plugins: {
         legend: { display: false },
+        bklitBarLabels: {
+          display: true,
+          font: "700 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          color: "#0f172a",
+          formatter: (val, idx) => {
+            const pct = topItems[idx]?.porcentaje !== undefined
+              ? topItems[idx].porcentaje
+              : (totalSum > 0 ? ((val / totalSum) * 100).toFixed(1) : 0);
+            return `${val.toLocaleString("es-CL")} (${pct}%)`;
+          },
+        },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${topItems[ctx.dataIndex]?.porcentaje}%)`,
+            label: (ctx) => ` Total: ${ctx.raw.toLocaleString("es-CL")} (${topItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
         },
       },
       scales: {
         x: {
+          grace: "22%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            callback: (val) => Number(val).toLocaleString("es-CL"),
+          },
+          beginAtZero: true,
         },
         y: {
           grid: { display: false },
@@ -662,14 +813,24 @@ function renderHorizontalBarChart(canvasId, items) {
   });
 }
 
-// Gráfico 3: Sincronización Donut Flotante (bklit-ui style: cutout grande + spacing + border radius)
+// Gráfico 3: Sincronización Donut Flotante (bklit-ui con Total Central y Leyenda Métrica)
 function renderDoughnutChart(canvasId, items, colors) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
   if (!ctx) return;
 
-  const labels = items.map((i) => i.descripcion);
-  const values = items.map((i) => i.total);
+  const validItems = items || [];
+  const labels = validItems.map((i) => i.descripcion);
+  const values = validItems.map((i) => Number(i.total) || 0);
+  const total = values.reduce((a, b) => a + b, 0);
+
+  // Actualizar badge de encabezado con la tasa de cumplimiento
+  const badge = document.getElementById("badge-chart-sincronizacion");
+  if (badge) {
+    const sincOK = validItems.find((s) => String(s.descripcion).toUpperCase().includes("SINCRONIZADO"));
+    const pct = sincOK ? (sincOK.porcentaje !== undefined ? sincOK.porcentaje : ((sincOK.total / (total || 1)) * 100).toFixed(1)) : 100;
+    badge.textContent = `${pct}% Sincronizado PDI`;
+  }
 
   state.charts[canvasId] = new Chart(ctx, {
     type: "doughnut",
@@ -677,7 +838,7 @@ function renderDoughnutChart(canvasId, items, colors) {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: colors.slice(0, items.length),
+        backgroundColor: colors.slice(0, validItems.length),
         borderWidth: 0,
         borderRadius: 8,
         spacing: 5,
@@ -689,6 +850,11 @@ function renderDoughnutChart(canvasId, items, colors) {
       maintainAspectRatio: false,
       cutout: "76%",
       plugins: {
+        bklitDoughnutCenter: {
+          display: true,
+          total,
+          label: "TOTAL PDI",
+        },
         legend: {
           position: "bottom",
           labels: {
@@ -696,15 +862,34 @@ function renderDoughnutChart(canvasId, items, colors) {
             pointStyle: "circle",
             boxWidth: 7,
             boxHeight: 7,
-            padding: 16,
+            padding: 14,
             color: "#334155",
             font: { weight: "600", size: 11.5 },
+            generateLabels: (chart) => {
+              const dataset = chart.data.datasets[0];
+              return chart.data.labels.map((lbl, i) => {
+                const val = Number(dataset.data[i]) || 0;
+                const pct = validItems[i]?.porcentaje !== undefined
+                  ? validItems[i].porcentaje
+                  : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
+                const bg = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor;
+                return {
+                  text: `${lbl}: ${val.toLocaleString("es-CL")} (${pct}%)`,
+                  fillStyle: bg,
+                  strokeStyle: bg,
+                  lineWidth: 0,
+                  hidden: !chart.getDataVisibility(i),
+                  index: i,
+                  pointStyle: "circle",
+                };
+              });
+            },
           },
         },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${items[ctx.dataIndex]?.porcentaje}%)`,
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
         },
       },
@@ -712,7 +897,7 @@ function renderDoughnutChart(canvasId, items, colors) {
   });
 }
 
-// Gráfico 4: Demografía Cruzada (Adultos vs Menores N.N.A. por Sexo)
+// Gráfico 4: Demografía Cruzada (Adultos vs Menores N.N.A. por Sexo con cifras sobre barras)
 function renderDemografiaCruzadaChart(demografia, generoFallback) {
   destroyChart("chart-demografia-cruzada");
   const ctx = document.getElementById("chart-demografia-cruzada")?.getContext("2d");
@@ -721,16 +906,31 @@ function renderDemografiaCruzadaChart(demografia, generoFallback) {
   let mascAdultos = 0, mascMenores = 0;
   let femAdultos = 0, femMenores = 0;
 
-  if (demografia.length > 0) {
-    demografia.forEach(d => {
+  if (demografia && demografia.length > 0) {
+    demografia.forEach((d) => {
       if (d.genero === "M") {
-        if (d.esMayorEdad) mascAdultos += d.total;
-        else mascMenores += d.total;
+        if (d.esMayorEdad) mascAdultos += Number(d.total);
+        else mascMenores += Number(d.total);
       } else if (d.genero === "F") {
-        if (d.esMayorEdad) femAdultos += d.total;
-        else femMenores += d.total;
+        if (d.esMayorEdad) femAdultos += Number(d.total);
+        else femMenores += Number(d.total);
       }
     });
+  }
+
+  const totalAdultos = mascAdultos + femAdultos;
+  const totalMenores = mascMenores + femMenores;
+  const totalDemo = totalAdultos + totalMenores;
+  const totalMasc = mascAdultos + mascMenores;
+  const totalFem = femAdultos + femMenores;
+
+  const pctMasc = totalDemo > 0 ? ((totalMasc / totalDemo) * 100).toFixed(1) : 0;
+  const pctFem = totalDemo > 0 ? ((totalFem / totalDemo) * 100).toFixed(1) : 0;
+
+  // Actualizar badge de encabezado con los totales demográficos
+  const badge = document.getElementById("badge-chart-demografia");
+  if (badge) {
+    badge.textContent = `Hombres: ${pctMasc}% (${totalMasc.toLocaleString("es-CL")}) · Mujeres: ${pctFem}% (${totalFem.toLocaleString("es-CL")})`;
   }
 
   state.charts["chart-demografia-cruzada"] = new Chart(ctx, {
@@ -775,20 +975,61 @@ function renderDemografiaCruzadaChart(demografia, generoFallback) {
             padding: 16,
             color: "#334155",
             font: { weight: "600", size: 12 },
+            generateLabels: (chart) => {
+              return [
+                {
+                  text: `Adultos (≥ 18): ${totalAdultos.toLocaleString("es-CL")}`,
+                  fillStyle: CHART_PALETTE.blue,
+                  strokeStyle: CHART_PALETTE.blue,
+                  lineWidth: 0,
+                  hidden: !chart.isDatasetVisible(0),
+                  datasetIndex: 0,
+                  pointStyle: "circle",
+                },
+                {
+                  text: `Menores N.N.A.: ${totalMenores.toLocaleString("es-CL")}`,
+                  fillStyle: CHART_PALETTE.amber,
+                  strokeStyle: CHART_PALETTE.amber,
+                  lineWidth: 0,
+                  hidden: !chart.isDatasetVisible(1),
+                  datasetIndex: 1,
+                  pointStyle: "circle",
+                },
+              ];
+            },
           },
         },
-        tooltip: BKLIT_TOOLTIP,
+        bklitBarLabels: {
+          display: true,
+          hideZero: false,
+          font: "700 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          color: "#0f172a",
+        },
+        tooltip: {
+          ...BKLIT_TOOLTIP,
+          callbacks: {
+            label: (ctx) => {
+              const val = ctx.raw || 0;
+              const pct = totalDemo > 0 ? ((val / totalDemo) * 100).toFixed(1) : 0;
+              return ` ${ctx.dataset.label}: ${val.toLocaleString("es-CL")} (${pct}% del total)`;
+            },
+          },
+        },
       },
       scales: {
         x: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#1e293b", font: { weight: "600" } },
+          ticks: { color: "#1e293b", font: { weight: "700", size: 12 } },
         },
         y: {
+          grace: "15%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            callback: (val) => Number(val).toLocaleString("es-CL"),
+          },
           beginAtZero: true,
         },
       },
@@ -796,14 +1037,28 @@ function renderDemografiaCruzadaChart(demografia, generoFallback) {
   });
 }
 
-// Gráfico 5: Grupo Etario Donut Flotante
+// Gráfico 5: Grupo Etario Donut Flotante (Con Total Central y Métricas NNA)
 function renderEdadChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
   if (!ctx) return;
 
-  const labels = items.map((i) => i.categoria);
-  const values = items.map((i) => i.total);
+  const validItems = items || [];
+  const labels = validItems.map((i) => i.categoria);
+  const values = validItems.map((i) => Number(i.total) || 0);
+  const total = values.reduce((a, b) => a + b, 0);
+
+  const menoresItem = validItems.find((e) => String(e.categoria).toUpperCase().includes("MENOR"));
+  const menoresCount = menoresItem ? Number(menoresItem.total) : 0;
+  const menoresPct = menoresItem?.porcentaje !== undefined
+    ? menoresItem.porcentaje
+    : (total > 0 ? ((menoresCount / total) * 100).toFixed(1) : 0);
+
+  // Actualizar badge de encabezado con menores NNA
+  const badge = document.getElementById("badge-chart-edad");
+  if (badge) {
+    badge.textContent = `${menoresCount.toLocaleString("es-CL")} Menores NNA (${menoresPct}%)`;
+  }
 
   state.charts[canvasId] = new Chart(ctx, {
     type: "doughnut",
@@ -823,6 +1078,11 @@ function renderEdadChart(canvasId, items) {
       maintainAspectRatio: false,
       cutout: "74%",
       plugins: {
+        bklitDoughnutCenter: {
+          display: true,
+          total,
+          label: "ENROLADOS",
+        },
         legend: {
           position: "bottom",
           labels: {
@@ -833,15 +1093,39 @@ function renderEdadChart(canvasId, items) {
             padding: 12,
             color: "#334155",
             font: { weight: "600", size: 11.5 },
+            generateLabels: (chart) => {
+              const dataset = chart.data.datasets[0];
+              return chart.data.labels.map((lbl, i) => {
+                const val = Number(dataset.data[i]) || 0;
+                const pct = validItems[i]?.porcentaje !== undefined
+                  ? validItems[i].porcentaje
+                  : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
+                const bg = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor;
+                return {
+                  text: `${lbl}: ${val.toLocaleString("es-CL")} (${pct}%)`,
+                  fillStyle: bg,
+                  strokeStyle: bg,
+                  lineWidth: 0,
+                  hidden: !chart.getDataVisibility(i),
+                  index: i,
+                  pointStyle: "circle",
+                };
+              });
+            },
           },
         },
-        tooltip: BKLIT_TOOLTIP,
+        tooltip: {
+          ...BKLIT_TOOLTIP,
+          callbacks: {
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+          },
+        },
       },
     },
   });
 }
 
-// Gráfico 6: Dispositivos de Captura (Tablet en terreno vs PC en estación fija)
+// Gráfico 6: Dispositivos de Captura (Tablet vs PC con Total central y porcentajes)
 function renderDispositivosChart(items) {
   destroyChart("chart-dispositivos");
   const ctx = document.getElementById("chart-dispositivos")?.getContext("2d");
@@ -853,8 +1137,18 @@ function renderDispositivosChart(items) {
   ];
 
   const labels = validItems.map((i) => i.dispositivo);
-  const values = validItems.map((i) => i.total);
+  const values = validItems.map((i) => Number(i.total) || 0);
+  const total = values.reduce((a, b) => a + b, 0);
   const colors = [CHART_PALETTE.cyan, CHART_PALETTE.blue];
+
+  const tabletItem = validItems.find((d) => String(d.dispositivo).toUpperCase().includes("TABLET"));
+  const tabletPct = tabletItem?.porcentaje !== undefined ? tabletItem.porcentaje : (total > 0 ? ((tabletItem?.total / total) * 100).toFixed(1) : 0);
+
+  // Actualizar badge de encabezado con la distribución de dispositivos
+  const badge = document.getElementById("badge-chart-dispositivos");
+  if (badge) {
+    badge.textContent = `Tablet: ${tabletPct}% · PC: ${(100 - tabletPct).toFixed(1)}%`;
+  }
 
   state.charts["chart-dispositivos"] = new Chart(ctx, {
     type: "doughnut",
@@ -874,6 +1168,11 @@ function renderDispositivosChart(items) {
       maintainAspectRatio: false,
       cutout: "76%",
       plugins: {
+        bklitDoughnutCenter: {
+          display: true,
+          total,
+          label: "DISPOSITIVOS",
+        },
         legend: {
           position: "bottom",
           labels: {
@@ -884,12 +1183,31 @@ function renderDispositivosChart(items) {
             padding: 14,
             color: "#334155",
             font: { weight: "600", size: 11.5 },
+            generateLabels: (chart) => {
+              const dataset = chart.data.datasets[0];
+              return chart.data.labels.map((lbl, i) => {
+                const val = Number(dataset.data[i]) || 0;
+                const pct = validItems[i]?.porcentaje !== undefined
+                  ? validItems[i].porcentaje
+                  : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
+                const bg = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor;
+                return {
+                  text: `${lbl}: ${val.toLocaleString("es-CL")} (${pct}%)`,
+                  fillStyle: bg,
+                  strokeStyle: bg,
+                  lineWidth: 0,
+                  hidden: !chart.getDataVisibility(i),
+                  index: i,
+                  pointStyle: "circle",
+                };
+              });
+            },
           },
         },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
         },
       },
@@ -897,7 +1215,7 @@ function renderDispositivosChart(items) {
   });
 }
 
-// Gráfico 7: Despliegue Territorial por Región Policial (Barras Horizontales)
+// Gráfico 7: Despliegue Territorial por Región Policial (Barras Horizontales con Cifras)
 function renderRegionesChart(items) {
   destroyChart("chart-regiones");
   const ctx = document.getElementById("chart-regiones")?.getContext("2d");
@@ -908,7 +1226,14 @@ function renderRegionesChart(items) {
   ];
 
   const labels = validItems.map((i) => i.region);
-  const values = validItems.map((i) => i.total);
+  const values = validItems.map((i) => Number(i.total) || 0);
+  const total = values.reduce((a, b) => a + b, 0);
+
+  // Actualizar badge de encabezado con cantidad de regiones
+  const badge = document.getElementById("badge-chart-regiones");
+  if (badge) {
+    badge.textContent = `${validItems.length} Regiones · Total: ${total.toLocaleString("es-CL")}`;
+  }
 
   state.charts["chart-regiones"] = new Chart(ctx, {
     type: "bar",
@@ -931,18 +1256,34 @@ function renderRegionesChart(items) {
       barPercentage: 0.65,
       plugins: {
         legend: { display: false },
+        bklitBarLabels: {
+          display: true,
+          font: "700 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          color: "#0f172a",
+          formatter: (val, idx) => {
+            const pct = validItems[idx]?.porcentaje !== undefined
+              ? validItems[idx].porcentaje
+              : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
+            return `${val.toLocaleString("es-CL")} (${pct}%)`;
+          },
+        },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Total: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
         },
       },
       scales: {
         x: {
+          grace: "22%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            callback: (val) => Number(val).toLocaleString("es-CL"),
+          },
+          beginAtZero: true,
         },
         y: {
           grid: { display: false },
@@ -954,7 +1295,7 @@ function renderRegionesChart(items) {
   });
 }
 
-// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Barras Verticales Suaves)
+// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Cifras y Porcentajes sobre Barras)
 function renderTramosEtariosChart(items) {
   destroyChart("chart-tramos-etarios");
   const ctx = document.getElementById("chart-tramos-etarios")?.getContext("2d");
@@ -965,7 +1306,14 @@ function renderTramosEtariosChart(items) {
   ];
 
   const labels = validItems.map((i) => i.tramo);
-  const values = validItems.map((i) => i.total);
+  const values = validItems.map((i) => Number(i.total) || 0);
+  const total = values.reduce((a, b) => a + b, 0);
+
+  // Actualizar badge de encabezado con los tramos analizados
+  const badge = document.getElementById("badge-chart-tramos");
+  if (badge) {
+    badge.textContent = `${validItems.length} Grupos Etarios (${total.toLocaleString("es-CL")})`;
+  }
 
   // Colores diferenciados: Ámbar cálido para menores NNA (vulnerabilidad), Azul real para adultos
   const backgroundColors = validItems.map((i) => {
@@ -1004,10 +1352,21 @@ function renderTramosEtariosChart(items) {
       barPercentage: 0.65,
       plugins: {
         legend: { display: false },
+        bklitBarLabels: {
+          display: true,
+          font: "700 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          color: "#0f172a",
+          formatter: (val, idx) => {
+            const pct = validItems[idx]?.porcentaje !== undefined
+              ? validItems[idx].porcentaje
+              : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
+            return `${val.toLocaleString("es-CL")} (${pct}%)`;
+          },
+        },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Cantidad: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Cantidad: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
             afterLabel: (ctx) => {
               const t = String(validItems[ctx.dataIndex]?.tramo || "").toUpperCase();
               if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA")) {
@@ -1030,9 +1389,13 @@ function renderTramosEtariosChart(items) {
           },
         },
         y: {
+          grace: "15%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            callback: (val) => Number(val).toLocaleString("es-CL"),
+          },
           beginAtZero: true,
         },
       },
@@ -1060,9 +1423,17 @@ function renderTrendChart(items) {
   if (!ctx || !items || items.length === 0) return;
 
   const labels = items.map((i) => i.fecha);
-  const totalData = items.map((i) => i.total);
-  const sincData = items.map((i) => i.sincronizados);
-  const errData = items.map((i) => i.con_error);
+  const totalData = items.map((i) => Number(i.total) || 0);
+  const sincData = items.map((i) => Number(i.sincronizados) || 0);
+  const errData = items.map((i) => Number(i.con_error) || 0);
+
+  const totalTrend = totalData.reduce((a, b) => a + b, 0);
+
+  // Actualizar badge de encabezado
+  const badge = document.getElementById("badge-chart-tendencias");
+  if (badge) {
+    badge.textContent = `${items.length} Jornadas · Total Histórico: ${totalTrend.toLocaleString("es-CL")}`;
+  }
 
   // Gradiente suave de área estilo bklit-ui
   const gradientArea = ctx.createLinearGradient(0, 0, 0, 320);
@@ -1136,7 +1507,10 @@ function renderTrendChart(items) {
         y: {
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            callback: (val) => Number(val).toLocaleString("es-CL"),
+          },
         },
       },
     },
