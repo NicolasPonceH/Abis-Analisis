@@ -17,33 +17,34 @@ const state = {
 };
 
 // Paleta de colores ejecutiva institucional para Chart.js (Fondo claro / Alto contraste)
+// Paleta de colores ejecutiva inspirada en la estética bklit-ui / shadcn
 const CHART_PALETTE = {
-  navy: "#002B49",
-  navyLight: "#0A4A7A",
-  blue: "#2563EB",
-  blueLight: "#60A5FA",
-  blueSubtle: "rgba(37, 99, 235, 0.12)",
-  emerald: "#059669",
-  emeraldLight: "#34D399",
-  emeraldSubtle: "rgba(5, 150, 105, 0.12)",
-  amber: "#D97706",
-  amberLight: "#FBBF24",
-  amberSubtle: "rgba(217, 119, 6, 0.12)",
-  crimson: "#DC2626",
-  crimsonLight: "#F87171",
-  crimsonSubtle: "rgba(220, 38, 38, 0.12)",
-  gold: "#C69214",
-  goldLight: "#F5CF53",
-  indigo: "#4F46E5",
-  purple: "#7C3AED",
-  teal: "#0D9488",
-  cyan: "#0284C7",
-  slate: "#64748B",
-  gridColor: "rgba(203, 213, 225, 0.45)",
-  textColor: "#334155",
+  navy: "#0f172a",
+  navyLight: "#1e293b",
+  blue: "#2563eb",
+  blueLight: "#60a5fa",
+  blueSubtle: "rgba(37, 99, 235, 0.10)",
+  emerald: "#10b981", // Bklit Vivid Emerald
+  emeraldLight: "#34d399",
+  emeraldSubtle: "rgba(16, 185, 129, 0.12)",
+  amber: "#f59e0b", // Warm Amber
+  amberLight: "#fbbf24",
+  amberSubtle: "rgba(245, 158, 11, 0.12)",
+  crimson: "#f43f5e", // Modern Soft Rose / Crimson
+  crimsonLight: "#fb7185",
+  crimsonSubtle: "rgba(244, 63, 94, 0.12)",
+  gold: "#c69214",
+  goldLight: "#f5cf53",
+  indigo: "#6366f1",
+  purple: "#8b5cf6",
+  teal: "#14b8a6",
+  cyan: "#06b6d4",
+  slate: "#64748b",
+  gridColor: "rgba(226, 232, 240, 0.75)",
+  textColor: "#475569",
   nations: [
-    "#002B49", "#0284C7", "#059669", "#7C3AED", "#D97706",
-    "#2563EB", "#0D9488", "#DC2626", "#4F46E5", "#C69214"
+    "#2563eb", "#0ea5e9", "#10b981", "#8b5cf6", "#f59e0b",
+    "#06b6d4", "#f43f5e", "#6366f1", "#14b8a6", "#3b82f6"
   ]
 };
 
@@ -452,13 +453,33 @@ function animateValue(id, endValue) {
   window.requestAnimationFrame(step);
 }
 
-// Renderizado de gráficos con Chart.js
+// Configuración de Tooltip estilo bklit-ui / shadcn (Card flotante clara, sombra suave, punto de color)
+const BKLIT_TOOLTIP = {
+  backgroundColor: "rgba(255, 255, 255, 0.98)",
+  titleColor: "#0f172a",
+  bodyColor: "#334155",
+  borderColor: "rgba(226, 232, 240, 0.95)",
+  borderWidth: 1,
+  padding: { top: 9, bottom: 9, left: 13, right: 13 },
+  boxPadding: 6,
+  usePointStyle: true,
+  boxWidth: 7,
+  boxHeight: 7,
+  cornerRadius: 10,
+  titleFont: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size: 12, weight: "700" },
+  bodyFont: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size: 12, weight: "500" },
+  footerFont: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size: 11, weight: "600" },
+  footerColor: "#0284c7",
+};
+
+// Renderizado de gráficos con Chart.js (Estilo bklit-ui / shadcn)
 function renderCharts(data) {
-  // Configuración global de Chart.js para fondo claro profesional
-  Chart.defaults.color = CHART_PALETTE.textColor;
+  // Configuración global de Chart.js
+  Chart.defaults.color = "#64748b";
   Chart.defaults.borderColor = CHART_PALETTE.gridColor;
   Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  Chart.defaults.font.size = 12;
+  Chart.defaults.font.size = 11.5;
+  Chart.defaults.font.weight = "500";
 
   // 1. Matriz de Rendimiento por Cuartel (Barras apiladas / agrupadas: Sincronizados vs Errores)
   renderCuartelesRendimientoChart(data);
@@ -469,7 +490,7 @@ function renderCharts(data) {
     data.nacionalidadesPrincipales || []
   );
 
-  // 3. Gráfico de Estados de Sincronización (Donut)
+  // 3. Gráfico de Estados de Sincronización (Donut flotante)
   renderDoughnutChart(
     "chart-sincronizacion",
     data.sincronizacion || [],
@@ -479,7 +500,7 @@ function renderCharts(data) {
   // 4. Demografía Cruzada (Pirámide de Género vs Adultos / N.N.A.)
   renderDemografiaCruzadaChart(data.demografiaCruzada || [], data.genero || []);
 
-  // 5. Gráfico de Edad / N.N.A.
+  // 5. Gráfico de Edad / N.N.A. (Donut flotante)
   renderEdadChart("chart-edad", data.edad || []);
 }
 
@@ -490,7 +511,7 @@ function destroyChart(name) {
   }
 }
 
-// Gráfico 1: Rendimiento por Cuartel (Sincronizados vs Con Error)
+// Gráfico 1: Rendimiento por Cuartel (Estilo bklit-ui con esquinas redondeadas y cuadrícula punteada)
 function renderCuartelesRendimientoChart(data) {
   destroyChart("chart-cuarteles");
   const ctx = document.getElementById("chart-cuarteles")?.getContext("2d");
@@ -507,44 +528,66 @@ function renderCuartelesRendimientoChart(data) {
       labels,
       datasets: [
         {
-          label: "Sincronizados PDI (Exitosos)",
+          label: "Sincronizados PDI",
           data: sincronizados,
           backgroundColor: CHART_PALETTE.emerald,
-          borderRadius: 4,
-          maxBarThickness: 32,
+          hoverBackgroundColor: "#059669",
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 30,
         },
         {
-          label: "Con Error de Sincronización",
+          label: "Con Error",
           data: conError,
           backgroundColor: CHART_PALETTE.crimson,
-          borderRadius: 4,
-          maxBarThickness: 32,
+          hoverBackgroundColor: "#e11d48",
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 30,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      barPercentage: 0.7,
+      categoryPercentage: 0.75,
       plugins: {
-        legend: { position: "top", labels: { boxWidth: 12, padding: 14 } },
+        legend: {
+          position: "top",
+          align: "end",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 16,
+            color: "#334155",
+            font: { weight: "600", size: 12 },
+          },
+        },
         tooltip: {
+          ...BKLIT_TOOLTIP,
           callbacks: {
             footer: (tooltipItems) => {
               const idx = tooltipItems[0].dataIndex;
               const totalCuartel = items[idx]?.total || 0;
               const tasa = items[idx]?.tasaExito || 100;
-              return `Total Cuartel: ${totalCuartel.toLocaleString()} (${tasa}% éxito)`;
-            }
-          }
-        }
+              return `Total: ${totalCuartel.toLocaleString()} (${tasa}% éxito)`;
+            },
+          },
+        },
       },
       scales: {
         x: {
           grid: { display: false },
-          ticks: { maxRotation: 35, minRotation: 0 },
+          border: { display: false },
+          ticks: { color: "#64748b", font: { weight: "500" }, maxRotation: 35, minRotation: 0 },
         },
         y: {
-          grid: { color: CHART_PALETTE.gridColor },
+          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
           beginAtZero: true,
         },
       },
@@ -552,7 +595,7 @@ function renderCuartelesRendimientoChart(data) {
   });
 }
 
-// Gráfico 2: Nacionalidades (Barra horizontal profesional)
+// Gráfico 2: Nacionalidades (Barra horizontal bklit-ui con esquinas curvadas)
 function renderHorizontalBarChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
@@ -570,31 +613,42 @@ function renderHorizontalBarChart(canvasId, items) {
         label: "Enrolamientos",
         data: values,
         backgroundColor: CHART_PALETTE.nations.slice(0, topItems.length),
-        borderRadius: 5,
-        maxBarThickness: 24,
+        borderRadius: 7,
+        borderSkipped: false,
+        maxBarThickness: 22,
       }],
     },
     options: {
       indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
+      barPercentage: 0.68,
       plugins: {
         legend: { display: false },
         tooltip: {
+          ...BKLIT_TOOLTIP,
           callbacks: {
             label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${topItems[ctx.dataIndex]?.porcentaje}%)`,
           },
         },
       },
       scales: {
-        x: { grid: { color: CHART_PALETTE.gridColor } },
-        y: { grid: { display: false } },
+        x: {
+          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
+        },
+        y: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "#1e293b", font: { weight: "600" } },
+        },
       },
     },
   });
 }
 
-// Gráfico 3: Sincronización Donut
+// Gráfico 3: Sincronización Donut Flotante (bklit-ui style: cutout grande + spacing + border radius)
 function renderDoughnutChart(canvasId, items, colors) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
@@ -610,23 +664,36 @@ function renderDoughnutChart(canvasId, items, colors) {
       datasets: [{
         data: values,
         backgroundColor: colors.slice(0, items.length),
-        borderWidth: 2,
-        borderColor: "#ffffff",
+        borderWidth: 0,
+        borderRadius: 8,
+        spacing: 5,
         hoverOffset: 6,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      cutout: "76%",
       plugins: {
-        legend: { position: "bottom", labels: { boxWidth: 12, padding: 12 } },
+        legend: {
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 16,
+            color: "#334155",
+            font: { weight: "600", size: 11.5 },
+          },
+        },
         tooltip: {
+          ...BKLIT_TOOLTIP,
           callbacks: {
             label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${items[ctx.dataIndex]?.porcentaje}%)`,
           },
         },
       },
-      cutout: "70%",
     },
   });
 }
@@ -658,36 +725,64 @@ function renderDemografiaCruzadaChart(demografia, generoFallback) {
       labels: ["Hombres (M)", "Mujeres (F)"],
       datasets: [
         {
-          label: "Adultos (&ge; 18)",
+          label: "Adultos (≥ 18)",
           data: [mascAdultos, femAdultos],
           backgroundColor: CHART_PALETTE.blue,
-          borderRadius: 4,
-          maxBarThickness: 36,
+          hoverBackgroundColor: "#1d4ed8",
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 34,
         },
         {
           label: "Menores N.N.A. (0-17)",
           data: [mascMenores, femMenores],
           backgroundColor: CHART_PALETTE.amber,
-          borderRadius: 4,
-          maxBarThickness: 36,
+          hoverBackgroundColor: "#d97706",
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 34,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      barPercentage: 0.65,
+      categoryPercentage: 0.7,
       plugins: {
-        legend: { position: "top", labels: { boxWidth: 12, padding: 12 } },
+        legend: {
+          position: "top",
+          align: "end",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 16,
+            color: "#334155",
+            font: { weight: "600", size: 12 },
+          },
+        },
+        tooltip: BKLIT_TOOLTIP,
       },
       scales: {
-        x: { grid: { display: false } },
-        y: { grid: { color: CHART_PALETTE.gridColor }, beginAtZero: true },
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "#1e293b", font: { weight: "600" } },
+        },
+        y: {
+          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
+          beginAtZero: true,
+        },
       },
     },
   });
 }
 
-// Gráfico 5: Grupo Etario
+// Gráfico 5: Grupo Etario Donut Flotante
 function renderEdadChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
@@ -702,18 +797,32 @@ function renderEdadChart(canvasId, items) {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: [CHART_PALETTE.navy, CHART_PALETTE.amber],
-        borderWidth: 2,
-        borderColor: "#ffffff",
+        backgroundColor: [CHART_PALETTE.navyLight, CHART_PALETTE.amber],
+        borderWidth: 0,
+        borderRadius: 8,
+        spacing: 5,
+        hoverOffset: 6,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      cutout: "74%",
       plugins: {
-        legend: { position: "bottom", labels: { boxWidth: 12, padding: 10 } },
+        legend: {
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 12,
+            color: "#334155",
+            font: { weight: "600", size: 11.5 },
+          },
+        },
+        tooltip: BKLIT_TOOLTIP,
       },
-      cutout: "65%",
     },
   });
 }
@@ -730,16 +839,22 @@ async function loadTrendData() {
   }
 }
 
-// Gráfico de Tendencia Histórica Profesional
+// Gráfico de Tendencia Histórica Profesional (Gradiente Canvas Área estilo bklit-ui)
 function renderTrendChart(items) {
   destroyChart("chart-tendencia-historica");
-  const ctx = document.getElementById("chart-tendencia-historica")?.getContext("2d");
+  const canvas = document.getElementById("chart-tendencia-historica");
+  const ctx = canvas?.getContext("2d");
   if (!ctx || !items || items.length === 0) return;
 
   const labels = items.map((i) => i.fecha);
   const totalData = items.map((i) => i.total);
   const sincData = items.map((i) => i.sincronizados);
   const errData = items.map((i) => i.con_error);
+
+  // Gradiente suave de área estilo bklit-ui
+  const gradientArea = ctx.createLinearGradient(0, 0, 0, 320);
+  gradientArea.addColorStop(0, "rgba(37, 99, 235, 0.22)");
+  gradientArea.addColorStop(1, "rgba(37, 99, 235, 0.00)");
 
   state.charts["chart-tendencia-historica"] = new Chart(ctx, {
     type: "line",
@@ -749,22 +864,25 @@ function renderTrendChart(items) {
         {
           label: "Total Enrolamientos",
           data: totalData,
-          borderColor: CHART_PALETTE.navy,
-          backgroundColor: "rgba(0, 43, 73, 0.08)",
+          borderColor: "#2563eb",
+          backgroundColor: gradientArea,
           fill: true,
-          tension: 0.3,
+          tension: 0.35,
           borderWidth: 2.5,
-          pointRadius: 2,
+          pointRadius: 2.5,
           pointHoverRadius: 6,
+          pointBackgroundColor: "#ffffff",
+          pointBorderColor: "#2563eb",
+          pointBorderWidth: 2,
         },
         {
           label: "Sincronizados PDI",
           data: sincData,
           borderColor: CHART_PALETTE.emerald,
-          borderDash: [4, 4],
+          borderDash: [5, 5],
           borderWidth: 2,
           pointRadius: 1,
-          tension: 0.25,
+          tension: 0.3,
         },
         {
           label: "Con Error",
@@ -772,7 +890,7 @@ function renderTrendChart(items) {
           borderColor: CHART_PALETTE.crimson,
           borderWidth: 2,
           pointRadius: 2,
-          tension: 0.25,
+          tension: 0.3,
         },
       ],
     },
@@ -781,11 +899,32 @@ function renderTrendChart(items) {
       maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { position: "top", labels: { boxWidth: 14, padding: 16 } },
+        legend: {
+          position: "top",
+          align: "end",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 16,
+            color: "#334155",
+            font: { weight: "600", size: 12 },
+          },
+        },
+        tooltip: BKLIT_TOOLTIP,
       },
       scales: {
-        x: { grid: { color: "rgba(203, 213, 225, 0.3)" } },
-        y: { grid: { color: CHART_PALETTE.gridColor } },
+        x: {
+          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
+        },
+        y: {
+          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
+        },
       },
     },
   });

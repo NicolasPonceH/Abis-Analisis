@@ -97,12 +97,17 @@ El sistema resuelve el ciclo completo de vida del dato:
   * **Sincronizados con PDI:** Fondo suave blanco menta (`#edfdf5`) con acento verde esmeralda.
   * **Registro Biométrico ABIS:** Fondo suave blanco celeste (`#f0f9ff`) con acento azul cielo.
   * **Inconsistencias / Errores:** Fondo suave blanco rosáceo (`#fef2f2`) con acento rojo carmesí.
-* **5 Gráficos Analíticos Dinámicos**:
+* **5 Gráficos Analíticos Dinámicos (Estética bklit-ui / shadcn)**:
+  * **Barras con curvatura suave (`borderRadius: 8px`)** sin bordes duros rectangulares.
+  * **Donuts Flotantes con Espaciado (`spacing: 5px`) y gran radio interior (`cutout: 76%`)**.
+  * **Cuadrículas minimalistas punteadas (`borderDash: [5, 5]`)** con reducción total de ruido visual.
+  * **Tooltips Flotantes Tipo Card**: Tarjeta blanca estilizada con punto de color, sombra suave y bordes translúcidos.
+  * **Gradientes Canvas en Series Temporales**: Relleno degradado que se desvanece suavemente a transparente.
   1. Rendimiento por Cuartel Fronterizo (Exitosos vs Errores).
-  2. Top Nacionalidades de Enrolados.
-  3. Proporción de Sincronización PDI (Doughnut).
-  4. Pirámide Demográfica Cruzada (Género vs Mayoría de Edad).
-  5. Distribución por Rangos Etarios.
+  2. Top Nacionalidades de Enrolados (Barras horizontales píldora).
+  3. Proporción de Sincronización PDI (Doughnut Flotante).
+  4. Pirámide Demográfica Cruzada (Adultos vs N.N.A. por Género).
+  5. Distribución por Rangos Etarios (Doughnut Flotante).
 * **Matriz Operativa Detallada**: Tabla institucional paginada con buscador en vivo de cuarteles y unidades policiales.
 
 ### 2. Filtros Reactivos Instantáneos
