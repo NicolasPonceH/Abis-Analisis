@@ -110,25 +110,8 @@ function formatearDistribucion(reporte) {
 
 // Formatea la data de obtenerReporteDiario() (Sprint 5) como el mensaje de Telegram (HTML parse
 // mode). No consulta la base de datos ni sabe como se calculo esa data — solo la formatea.
-function formatearReporte(reporte) {
-  const fecha = formatearFecha(reporte.fecha);
-  const encabezado = [
-    `📋 <b>REPORTE DIARIO ABIS</b>`,
-    `📅 <i>${fecha}</i>`,
-    SEPARADOR,
-  ].join("\n");
-
-  if (reporte.total === 0) {
-    return `${encabezado}\n\nNo hubo enrolamientos registrados en esta fecha.`;
-  }
-
-  const secciones = [
-    `👥 <b>Total Enrolamientos:</b> <code>${reporte.total.toLocaleString("es-CL")}</code>`,
-    formatearEstadoProcesos(reporte),
-    formatearDistribucion(reporte),
-  ].filter(Boolean);
-
-  return `${encabezado}\n\n${secciones.join("\n\n")}`;
+function formatearReporte(reporte, opciones = {}) {
+  return formatearReporteExtenso(reporte, opciones);
 }
 
 // Mensaje de alerta (Sprint 7) para cuando el flujo automatico no pudo generar el reporte
