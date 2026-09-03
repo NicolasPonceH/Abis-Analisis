@@ -18,8 +18,10 @@ const {
 } = require("./security/crypto");
 const telegramClient = require("./telegram/telegramClient");
 const { formatearReporteExtenso } = require("./telegram/formatearReporte");
+const { crearBotonesDescarga } = require("./telegram/botService");
 const { generarReporteWord } = require("./reportes/wordReportService");
 const { generarReporteExcel } = require("./reportes/excelReportService");
+const schedulerService = require("./services/schedulerService");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -404,7 +406,8 @@ app.post("/api/telegram/enviar", async (req, res) => {
       origen: "Dashboard Web PDI",
     });
 
-    const envio = await telegramClient.enviarMensaje({ token, chatId, texto });
+    const replyMarkup = crearBotonesDescarga({ fecha: reporte.fecha || fecha, desde, hasta });
+    const envio = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
 
     res.json({
       ok: true,
@@ -523,6 +526,77 @@ app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) =
   }
 });
 
+// ==========================================================================
+// AJUSTES Y GESTIÓN DE HORARIOS DE REPORTES AUTOMÁTICOS
+// ==========================================================================
+
+// Obtiene la configuración actual de horarios de reporte y próxima ejecución
+app.get("/api/settings/schedule", (req, res) => {
+  try {
+    const config = schedulerService.getConfig();
+    const next = schedulerService.getNextExecution(config);
+    const horaChile = schedulerService.obtenerHoraChile();
+
+    res.json({
+      ok: true,
+      config,
+      next,
+      horaChile,
+      telegramConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
+      defaultChatId: process.env.TELEGRAM_CHAT_ID
+        ? String(process.env.TELEGRAM_CHAT_ID).slice(0, 4) + "***" + String(process.env.TELEGRAM_CHAT_ID).slice(-3)
+        : null,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Guarda la configuración actualizada de horarios de reporte
+app.post("/api/settings/schedule", (req, res) => {
+  try {
+    const { enabled, times, days, reportType, telegramChatId } = req.body || {};
+    const updated = schedulerService.saveConfig({
+      enabled: enabled !== undefined ? Boolean(enabled) : undefined,
+      times,
+      days,
+      reportType,
+      telegramChatId,
+    });
+    const next = schedulerService.getNextExecution(updated);
+
+    res.json({
+      ok: true,
+      mensaje: "Configuración de horarios de reporte actualizada exitosamente.",
+      config: updated,
+      next,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Disparo de prueba manual de notificación programada
+app.post("/api/settings/schedule/test", async (req, res) => {
+  try {
+    const { chatId } = req.body || {};
+    const resultado = await schedulerService.triggerScheduledReport({
+      pool,
+      isTest: true,
+      customChatId: chatId,
+    });
+
+    res.json({
+      ok: true,
+      mensaje: "Reporte de prueba enviado exitosamente al canal de Telegram.",
+      resultado,
+    });
+  } catch (err) {
+    console.error("[SCHEDULE TEST ERROR]", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 const { iniciarBot, detenerBot } = require("./telegram/botService");
 
 const server = app.listen(port, () => {
@@ -537,10 +611,14 @@ const server = app.listen(port, () => {
       console.error("Error iniciando bot interactivo en servidor:", err.message);
     });
   }
+
+  // Iniciar servicio de horarios y reportes automáticos
+  schedulerService.iniciarScheduler({ pool });
 });
 
 function cerrarServidor() {
   detenerBot();
+  schedulerService.detenerScheduler();
   server.close(() => {
     pool.end().finally(() => process.exit(0));
   });
@@ -548,4 +626,5 @@ function cerrarServidor() {
 
 process.on("SIGINT", cerrarServidor);
 process.on("SIGTERM", cerrarServidor);
+
 

@@ -5,15 +5,15 @@ function escaparHtml(texto) {
   return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-const EMOJI_POR_PATRON = [
-  { patron: /ERROR/i, emoji: "❌" },
-  { patron: /PENDIENTE/i, emoji: "⏳" },
-  { patron: /MENOR/i, emoji: "⚠️" },
+const ESTADO_POR_PATRON = [
+  { patron: /ERROR/i, indicador: "[ERROR]" },
+  { patron: /PENDIENTE/i, indicador: "[PENDIENTE]" },
+  { patron: /MENOR/i, indicador: "[ALERTA]" },
 ];
 
-function emojiPara(descripcion) {
-  const encontrado = EMOJI_POR_PATRON.find((e) => e.patron.test(descripcion));
-  return encontrado ? encontrado.emoji : "✅";
+function indicadorPara(descripcion) {
+  const encontrado = ESTADO_POR_PATRON.find((e) => e.patron.test(descripcion));
+  return encontrado ? encontrado.indicador : "[OK]";
 }
 
 // "SINCRONIZADO" / "CON_ERROR" -> "Sincronizado" / "Con Error". Solo cosmetica: el dato real
@@ -57,11 +57,11 @@ function formatearEstadoProcesos(reporte) {
       const etiqueta = escaparHtml(tituloDesde(f.descripcion)).padEnd(anchoEtiqueta);
       const total = String(f.total).padStart(anchoTotal);
       const porcentaje = String(f.porcentaje).padStart(anchoPorcentaje);
-      return `  - ${etiqueta} : ${total} [${porcentaje}%] ${emojiPara(f.descripcion)}`;
+      return `  - ${etiqueta} : ${total} [${porcentaje}%] ${indicadorPara(f.descripcion)}`;
     }),
   ]);
 
-  return `📊 <b>ESTADO DE PROCESOS</b>\n<code>${lineas.join("\n")}</code>`;
+  return `<b>ESTADO DE PROCESOS</b>\n<code>${lineas.join("\n")}</code>`;
 }
 
 // Tope de items por lista (Sprint 8, QA): con el catalogo de ejemplo hay como mucho 3
@@ -105,7 +105,7 @@ function formatearDistribucion(reporte) {
     formatearItemDistribucion("Unidades", reporte.unidadesActivas, "unidad"),
     formatearDemografia(reporte.genero, reporte.edad),
   ];
-  return `📌 <b>DISTRIBUCIÓN</b>\n\n${bloques.join("\n\n")}`;
+  return `<b>DISTRIBUCIÓN OPERATIVA</b>\n\n${bloques.join("\n\n")}`;
 }
 
 // Formatea la data de obtenerReporteDiario() (Sprint 5) como el mensaje de Telegram (HTML parse
@@ -118,7 +118,7 @@ function formatearReporte(reporte, opciones = {}) {
 // diario — Excel vacio, corrupto, o con cabeceras invalidas. Se manda por el mismo canal de
 // Telegram: si el proceso automatico falla, alguien tiene que enterarse igual.
 function formatearAlerta(mensaje) {
-  return `⚠️ <b>Alerta - Carga diaria ABIS</b> ⚠️\n\n${escaparHtml(mensaje)}`;
+  return `[ALERTA] <b>Carga diaria ABIS</b>\n\n${escaparHtml(mensaje)}`;
 }
 
 // Linea de aviso que flujoDiario.js agrega al final del reporte cuando el ETL
@@ -126,7 +126,7 @@ function formatearAlerta(mensaje) {
 // reporte, solo lo avisa, mostrando los motivos principales y sugiriendo usar /logs.
 function formatearAvisoFilasOmitidas(erroresOParam) {
   if (typeof erroresOParam === "number") {
-    return `${SEPARADOR}\n⚠️ <b>${erroresOParam} fila(s) omitida(s) en ETL</b>\n💡 Escribe <code>/logs</code> para ver el detalle.`;
+    return `${SEPARADOR}\n[AVISO] <b>${erroresOParam} fila(s) omitida(s) en ETL</b>\nEscribe <code>/logs</code> para ver el detalle.`;
   }
 
   const lista = Array.isArray(erroresOParam) ? erroresOParam : [];
@@ -135,7 +135,7 @@ function formatearAvisoFilasOmitidas(erroresOParam) {
 
   const lineas = [
     `${SEPARADOR}`,
-    `⚠️ <b>${cantidad} fila(s) omitida(s) en ETL:</b>`,
+    `[AVISO] <b>${cantidad} fila(s) omitida(s) en ETL:</b>`,
   ];
 
   const maxVisibles = 3;
@@ -151,7 +151,7 @@ function formatearAvisoFilasOmitidas(erroresOParam) {
     lineas.push(`<i>... y ${restantes} más</i>`);
   }
 
-  lineas.push(`💡 Escribe <code>/logs</code> para ver el detalle completo.`);
+  lineas.push(`Escribe <code>/logs</code> para ver el detalle completo.`);
 
   return lineas.join("\n");
 }
@@ -230,17 +230,17 @@ function formatearReporteExtenso(reporte, opciones = {}) {
   const horaStr = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
   const fechaStr = `${pad(ahora.getDate())}/${pad(ahora.getMonth() + 1)}/${ahora.getFullYear()}`;
 
-  let texto = `🏛 <b>POLICÍA DE INVESTIGACIONES DE CHILE</b>\n`;
+  let texto = `<b>POLICÍA DE INVESTIGACIONES DE CHILE</b>\n`;
   texto += `<b>Jefatura Nacional de Migraciones y Policía Internacional</b>\n`;
-  texto += `📑 <i>Reporte Operativo ABIS de Enrolamiento Biométrico</i>\n`;
+  texto += `<i>Reporte Operativo ABIS de Enrolamiento Biométrico</i>\n`;
   texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  texto += `📅 <b>PERÍODO OPERATIVO:</b>\n`;
-  texto += `👉 <b><u>${periodoTexto}</u></b> 👈\n`;
-  texto += `👥 <b>Total Enrolamientos:</b> <b>${total.toLocaleString("es-CL")} registros</b>\n`;
+  texto += `<b>PERÍODO OPERATIVO:</b>\n`;
+  texto += `<b><u>${periodoTexto}</u></b>\n`;
+  texto += `<b>Total Enrolamientos:</b> <b>${total.toLocaleString("es-CL")} registros</b>\n`;
   texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   // 1. Indicadores Clave SLA
-  texto += `📊 <b>INDICADORES CLAVE (SLA PDI)</b>\n`;
+  texto += `[SLA PDI] <b>INDICADORES CLAVE</b>\n`;
   texto += `• Sincronización PDI: <b>${exec.tasaSincronizacion || 0}%</b> (${sincOK.toLocaleString("es-CL")} casos) — <b>${exec.estadoSLA || "Óptimo"}</b>\n`;
   texto += `• Biometría ABIS: <b>${exec.tasaRegistroBiometrico || 0}%</b> (${regOK.toLocaleString("es-CL")} casos)\n`;
   texto += `• Inconsistencias / Errores: <b>${exec.tasaError || 0}%</b> (${errSinc.toLocaleString("es-CL")} casos)\n`;
@@ -251,7 +251,7 @@ function formatearReporteExtenso(reporte, opciones = {}) {
 
   // 2. Top Cuarteles con mayor carga
   if (topCuarteles.length > 0) {
-    texto += `🏢 <b>TOP CUARTELES CON MAYOR CARGA</b>\n`;
+    texto += `[CUARTELES] <b>TOP CUARTELES CON MAYOR CARGA</b>\n`;
     topCuarteles.forEach((c, idx) => {
       const pct = total > 0 ? (Math.round((c.total / total) * 1000) / 10).toFixed(1) : "0.0";
       texto += `${idx + 1}. <b>${escaparHtml(c.cuartel)}:</b> <b>${c.total.toLocaleString("es-CL")}</b> (${pct}%) — <i>${c.tasaExito}% éxito</i>\n`;
@@ -261,7 +261,7 @@ function formatearReporteExtenso(reporte, opciones = {}) {
 
   // 3. Flujos Migratorios
   if (topNacs.length > 0) {
-    texto += `🌎 <b>PRINCIPALES FLUJOS MIGRATORIOS</b>\n`;
+    texto += `[MIGRACIONES] <b>PRINCIPALES FLUJOS MIGRATORIOS</b>\n`;
     topNacs.forEach((n) => {
       texto += `• ${escaparHtml(n.nacionalidad)}: <b>${n.total.toLocaleString("es-CL")}</b> (${n.porcentaje}%)\n`;
     });
@@ -269,12 +269,12 @@ function formatearReporteExtenso(reporte, opciones = {}) {
   }
 
   // 4. Perfil Demográfico & NNA
-  texto += `👥 <b>PERFIL DEMOGRÁFICO & NNA</b>\n`;
+  texto += `[DEMOGRAFÍA] <b>PERFIL DEMOGRÁFICO & NNA</b>\n`;
   texto += `• Género: <b>${mascPct}%</b> Masc · <b>${femPct}%</b> Fem\n`;
   texto += `• Menores de Edad (NNA): <b>${menoresCount.toLocaleString("es-CL")}</b> (${exec.tasaMenoresNNA || 0}%)\n`;
   texto += `• Adultos: <b>${adultosCount.toLocaleString("es-CL")}</b> (${adultosPct}%)\n`;
   texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  texto += `⏰ <i>Generado: ${fechaStr} ${horaStr} hrs vía ${opciones.origen || "Dashboard Web PDI"}</i>`;
+  texto += `<i>Generado: ${fechaStr} ${horaStr} hrs vía ${opciones.origen || "Dashboard Web PDI"}</i>`;
 
   return texto;
 }

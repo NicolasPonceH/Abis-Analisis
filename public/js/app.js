@@ -13,6 +13,9 @@ const state = {
   availableDates: [],
   metricsData: null,
   trendData: null,
+  trendRange: "30", // "15" | "30" | "90" | "365" | "all"
+  trendGranularity: "day", // "day" | "month"
+  trendExpanded: false,
   charts: {},
 };
 
@@ -56,6 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadAvailableDates();
   await loadMetrics();
   await loadTrendData();
+  await loadScheduleSettings();
 });
 
 // Configuración de escuchadores de eventos
@@ -75,6 +79,10 @@ function setupEventListeners() {
 
       if (tabTarget === "tendencias" && !state.trendData) {
         loadTrendData();
+      }
+
+      if (tabTarget === "ajustes") {
+        loadScheduleSettings();
       }
     });
   });
@@ -132,10 +140,10 @@ function setupEventListeners() {
     });
   }
 
-  // Botones de presets rápidos
-  document.querySelectorAll(".preset-btn").forEach((btn) => {
+  // Botones de presets rápidos para métricas
+  document.querySelectorAll(".preset-btn[data-preset]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".preset-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".preset-btn[data-preset]").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       applyPreset(btn.getAttribute("data-preset"));
     });
@@ -183,6 +191,12 @@ function setupEventListeners() {
 
   // Inicializar herramientas web criptográficas (Sin terminal)
   setupCryptoWebTools();
+
+  // Inicializar controles interactivos de Tendencias y Evolución
+  setupTrendControls();
+
+  // Inicializar controles de Ajustes y Horarios
+  setupScheduleEvents();
 }
 
 // Verifica el estado del backend y la base de datos con métricas del Connection Pool
@@ -193,10 +207,10 @@ async function checkSystemHealth() {
     const badgeEl = document.getElementById("db-status-badge");
     if (badgeEl && data.status === "ok") {
       const pool = data.pool;
-      const poolTexto = pool ? ` · Pool ${pool.totalConexiones}/${pool.configuracion?.maxConexiones || 20}` : "";
-      badgeEl.innerHTML = `<span class="status-dot"></span> PostgreSQL Conectado (${(data.totalRegistros || 0).toLocaleString()} reg.${poolTexto})`;
+      const totalReg = (data.totalRegistros || 0).toLocaleString("es-CL");
+      badgeEl.innerHTML = `<span class="status-dot"></span> ${totalReg} registros`;
       if (pool) {
-        badgeEl.title = `Connection Pool PDI: ${pool.totalConexiones} conex. activas (${pool.conexionesLibres} libres / ${pool.conexionesActivas} en uso) | Max: ${pool.configuracion?.maxConexiones} | Estado: ${pool.salud}`;
+        badgeEl.title = `Base de Datos PostgreSQL Conectada | Pool: ${pool.totalConexiones}/${pool.configuracion?.maxConexiones || 20} (${pool.conexionesLibres} libres / ${pool.conexionesActivas} activas) | Estado: ${pool.salud}`;
       }
       badgeEl.classList.add("connected");
     }
@@ -204,7 +218,7 @@ async function checkSystemHealth() {
     console.error("Error en health check:", err);
     const badgeEl = document.getElementById("db-status-badge");
     if (badgeEl) {
-      badgeEl.innerHTML = `<span class="status-dot" style="background:#dc2626;box-shadow:0 0 8px #dc2626;"></span> Desconectado`;
+      badgeEl.innerHTML = `<span class="status-dot" style="background:#dc2626;box-shadow:0 0 8px #dc2626;"></span> Error de conexión`;
     }
   }
 }
@@ -349,6 +363,9 @@ function updateFilterSummary(data) {
 
 // Renderiza el banner superior de salud ejecutiva (Scorecard)
 function renderExecutiveBanner(data) {
+  const banner = document.getElementById("executive-banner");
+  if (!banner) return;
+
   const exec = data.resumenEjecutivo || {};
   const total = data.total || 0;
 
@@ -477,99 +494,167 @@ const BKLIT_TOOLTIP = {
   footerColor: "#0284c7",
 };
 
-// ==========================================================================
-// PLUGINS DE CHART.JS PARA VISUALIZACIÓN DIRECTA DE NÚMEROS Y MÉTRICAS
-// ==========================================================================
-
-// Plugin 1: Etiquetas numéricas directas en barras (verticales y horizontales)
-const bklitBarLabelsPlugin = {
-  id: "bklitBarLabels",
-  afterDatasetsDraw(chart, args, pluginOptions) {
-    if (!pluginOptions || pluginOptions.display === false) return;
+// Plugin de etiquetas numéricas directas y métricas visuales estilo bklit-ui
+const bklitDataLabelsPlugin = {
+  id: "bklitDataLabels",
+  afterDatasetsDraw(chart, args, options) {
+    if (!options || options.display === false) return;
     const { ctx } = chart;
-    const isHorizontal = chart.config.options?.indexAxis === "y";
-    const opts = pluginOptions || {};
+    ctx.save();
 
-    chart.data.datasets.forEach((dataset, datasetIndex) => {
-      const meta = chart.getDatasetMeta(datasetIndex);
+    const isHorizontal = chart.options.indexAxis === "y";
+    const isDoughnut = chart.config.type === "doughnut";
+
+    // 1. Centro del Doughnut: Métricas destacadas en el hueco central
+    if (isDoughnut) {
+      if (options.centerText) {
+        const meta = chart.getDatasetMeta(0);
+        if (meta && meta.data && meta.data[0]) {
+          const centerX = meta.data[0].x;
+          const centerY = meta.data[0].y;
+
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          ctx.font = "800 21px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillStyle = options.centerTextColor || "#0f172a";
+          ctx.fillText(options.centerText, centerX, centerY - 9);
+
+          if (options.centerSubtext) {
+            ctx.font = "600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            ctx.fillStyle = "#64748b";
+            ctx.fillText(options.centerSubtext, centerX, centerY + 13);
+          }
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    // 2. Gráficos de Barras: Etiquetas numéricas impresas sobre o junto a las barras
+    chart.data.datasets.forEach((dataset, datasetIdx) => {
+      const meta = chart.getDatasetMeta(datasetIdx);
       if (meta.hidden) return;
 
       meta.data.forEach((element, index) => {
         const val = dataset.data[index];
-        if (val === undefined || val === null) return;
-        const numVal = Number(val);
-        if (opts.hideZero && numVal === 0) return;
+        if (val === null || val === undefined || (options.hideZero && val === 0)) return;
 
-        ctx.save();
-        ctx.font = opts.font || "700 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        ctx.fillStyle = opts.color || (isHorizontal ? "#0f172a" : "#1e293b");
+        ctx.font = "700 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillStyle = options.color || "#334155";
 
-        let text = numVal.toLocaleString("es-CL");
-        if (typeof opts.formatter === "function") {
-          text = opts.formatter(numVal, index, dataset, chart.data);
-        }
+        const formattedVal = Number(val).toLocaleString("es-CL");
 
         if (isHorizontal) {
           ctx.textAlign = "left";
           ctx.textBaseline = "middle";
-          const x = element.x + 8;
+          const x = element.x + 6;
           const y = element.y;
+
+          let text = formattedVal;
+          if (options.percentages && options.percentages[index] !== undefined) {
+            text += ` (${options.percentages[index]}%)`;
+          }
           ctx.fillText(text, x, y);
         } else {
           ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
           const x = element.x;
-          const y = element.y - 4;
-          ctx.fillText(text, x, y);
+          const y = element.y - 3;
+          ctx.fillText(formattedVal, x, y);
         }
-        ctx.restore();
       });
     });
-  },
-};
-
-// Plugin 2: Cifra total ejecutiva y categoría en el centro de los Doughnuts
-const bklitDoughnutCenterPlugin = {
-  id: "bklitDoughnutCenter",
-  beforeDraw(chart, args, pluginOptions) {
-    if (!pluginOptions || pluginOptions.display === false) return;
-    const { ctx, chartArea } = chart;
-    if (!chartArea) return;
-
-    const opts = pluginOptions || {};
-    const centerX = (chartArea.left + chartArea.right) / 2;
-    const centerY = (chartArea.top + chartArea.bottom) / 2;
-
-    const dataset = chart.data.datasets[0];
-    const total = opts.total !== undefined ? opts.total : (
-      dataset?.data?.reduce((acc, v) => acc + (Number(v) || 0), 0) || 0
-    );
-    const label = opts.label || "TOTAL";
-
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // Cifra numérica principal (Grande, destacada)
-    ctx.font = "800 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    ctx.fillStyle = "#0f172a";
-    ctx.fillText(Number(total).toLocaleString("es-CL"), centerX, centerY - 8);
-
-    // Etiqueta secundaria descriptiva
-    ctx.font = "700 9.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    ctx.fillStyle = "#64748b";
-    ctx.fillText(String(label).toUpperCase(), centerX, centerY + 13);
 
     ctx.restore();
   },
 };
+Chart.register(bklitDataLabelsPlugin);
 
-// Registro de plugins personalizados en Chart.js
-if (typeof Chart !== "undefined") {
-  Chart.register(bklitBarLabelsPlugin, bklitDoughnutCenterPlugin);
+// Actualiza los badges en las cabeceras de las tarjetas de gráficos con los números relacionados
+function updateChartBadges(data) {
+  const total = Number(data.total) || 0;
+
+  // 1. Cuarteles
+  const badgeCuarteles = document.getElementById("badge-chart-cuarteles");
+  if (badgeCuarteles) {
+    const cuarteles = data.rendimientoCuarteles || [];
+    const sinc = cuarteles.reduce((acc, c) => acc + (Number(c.sincronizados) || 0), 0);
+    const err = cuarteles.reduce((acc, c) => acc + (Number(c.conError) || 0), 0);
+    badgeCuarteles.textContent = `${cuarteles.length} Cuarteles · ${sinc.toLocaleString("es-CL")} OK · ${err.toLocaleString("es-CL")} Error`;
+  }
+
+  // 2. Nacionalidades
+  const badgeNac = document.getElementById("badge-chart-nacionalidades");
+  if (badgeNac) {
+    const nacs = data.nacionalidadesPrincipales || [];
+    badgeNac.textContent = `Top ${nacs.length} Países · ${total.toLocaleString("es-CL")} Casos`;
+  }
+
+  // 3. Sincronización (Distribución PDI / ABIS)
+  const badgeSinc = document.getElementById("badge-chart-sincronizacion");
+  if (badgeSinc) {
+    const sincList = data.sincronizacion || [];
+    const sincOk = sincList.find(s => String(s.descripcion).toUpperCase().includes("SINCRONIZADO"))?.total || 0;
+    const errOk = sincList.find(s => String(s.descripcion).toUpperCase().includes("ERROR"))?.total || 0;
+    const pct = total > 0 ? ((sincOk / total) * 100).toFixed(1) : "100";
+    badgeSinc.textContent = `${Number(sincOk).toLocaleString("es-CL")} OK · ${Number(errOk).toLocaleString("es-CL")} Error (${pct}% SLA)`;
+  }
+
+  // 4. Demografía Cruzada
+  const badgeDemo = document.getElementById("badge-chart-demografia-cruzada");
+  if (badgeDemo) {
+    let masc = 0, fem = 0;
+    (data.genero || []).forEach(g => {
+      if (String(g.genero).toUpperCase().startsWith("M")) masc = Number(g.total) || 0;
+      if (String(g.genero).toUpperCase().startsWith("F")) fem = Number(g.total) || 0;
+    });
+    badgeDemo.textContent = `${masc.toLocaleString("es-CL")} Hombres · ${fem.toLocaleString("es-CL")} Mujeres`;
+  }
+
+  // 5. Rango Etario (Adultos vs Menores)
+  const badgeEdad = document.getElementById("badge-chart-edad");
+  if (badgeEdad) {
+    const edadList = data.edad || [];
+    const mayores = edadList.find(e => String(e.categoria).toUpperCase().includes("MAYOR"))?.total || 0;
+    const menores = edadList.find(e => String(e.categoria).toUpperCase().includes("MENOR"))?.total || 0;
+    const pctNna = total > 0 ? ((menores / total) * 100).toFixed(1) : "0";
+    badgeEdad.textContent = `${Number(mayores).toLocaleString("es-CL")} Adultos · ${Number(menores).toLocaleString("es-CL")} N.N.A. (${pctNna}%)`;
+  }
+
+  // 6. Dispositivos de Captura
+  const badgeDisp = document.getElementById("badge-chart-dispositivos");
+  if (badgeDisp) {
+    const dispList = data.dispositivos || [];
+    const pc = dispList.find(d => String(d.dispositivo).toUpperCase().includes("PC"))?.total || 0;
+    const tab = dispList.find(d => String(d.dispositivo).toUpperCase().includes("TABLET"))?.total || 0;
+    badgeDisp.textContent = `${Number(pc).toLocaleString("es-CL")} PC Fija · ${Number(tab).toLocaleString("es-CL")} Tablet`;
+  }
+
+  // 7. Regiones Policiales
+  const badgeReg = document.getElementById("badge-chart-regiones");
+  if (badgeReg) {
+    const regs = data.regiones || [];
+    badgeReg.textContent = `${regs.length} Regiones · ${total.toLocaleString("es-CL")} Registros`;
+  }
+
+  // 8. Tramos Etarios
+  const badgeTramos = document.getElementById("badge-chart-tramos-etarios");
+  if (badgeTramos) {
+    let menores = 0, adultos = 0;
+    (data.tramosEtarios || []).forEach(t => {
+      const nom = String(t.tramo || "").toUpperCase();
+      if (nom.includes("INFANCIA") || nom.includes("NIÑEZ") || nom.includes("NNA") || nom.includes("ADOLESCENTES")) {
+        menores += Number(t.total) || 0;
+      } else {
+        adultos += Number(t.total) || 0;
+      }
+    });
+    badgeTramos.textContent = `${menores.toLocaleString("es-CL")} Menores NNA · ${adultos.toLocaleString("es-CL")} Adultos`;
+  }
 }
 
-// Renderizado de gráficos con Chart.js (Estilo bklit-ui / shadcn con cifras directas)
+// Renderizado de gráficos con Chart.js (Estilo bklit-ui / shadcn)
 function renderCharts(data) {
   // Configuración global de Chart.js
   Chart.defaults.color = "#64748b";
@@ -578,35 +663,38 @@ function renderCharts(data) {
   Chart.defaults.font.size = 11.5;
   Chart.defaults.font.weight = "500";
 
+  // Actualizar los números destacados en los badges de cada tarjeta
+  updateChartBadges(data);
+
   // 1. Matriz de Rendimiento por Cuartel (Barras apiladas / agrupadas: Sincronizados vs Errores)
   renderCuartelesRendimientoChart(data);
 
-  // 2. Gráfico de Nacionalidades (Horizontal Bar con cifras y porcentajes)
+  // 2. Gráfico de Nacionalidades (Horizontal Bar)
   renderHorizontalBarChart(
     "chart-nacionalidades",
     data.nacionalidadesPrincipales || []
   );
 
-  // 3. Gráfico de Estados de Sincronización (Donut flotante con Total central y leyenda métrica)
+  // 3. Gráfico de Estados de Sincronización (Donut flotante)
   renderDoughnutChart(
     "chart-sincronizacion",
     data.sincronizacion || [],
     [CHART_PALETTE.emerald, CHART_PALETTE.crimson, CHART_PALETTE.amber, CHART_PALETTE.cyan]
   );
 
-  // 4. Demografía Cruzada (Pirámide de Género vs Adultos / N.N.A. con valores en cada barra)
+  // 4. Demografía Cruzada (Pirámide de Género vs Adultos / N.N.A.)
   renderDemografiaCruzadaChart(data.demografiaCruzada || [], data.genero || []);
 
-  // 5. Gráfico de Edad / N.N.A. (Donut flotante con Total y desglose de menores)
+  // 5. Gráfico de Edad / N.N.A. (Donut flotante)
   renderEdadChart("chart-edad", data.edad || []);
 
-  // 6. Gráfico de Dispositivos (Tablet vs PC con Total central y porcentajes)
+  // 6. Gráfico de Dispositivos (Tablet vs PC)
   renderDispositivosChart(data.dispositivos || []);
 
-  // 7. Gráfico de Regiones Policiales (Despliegue Macro-Zonal con cifras a la derecha)
+  // 7. Gráfico de Regiones Policiales (Despliegue Macro-Zonal)
   renderRegionesChart(data.regiones || []);
 
-  // 8. Gráfico de Tramos Etarios & Protección NNA (Histograma con cifras sobre las barras)
+  // 8. Gráfico de Tramos Etarios & Protección NNA
   renderTramosEtariosChart(data.tramosEtarios || []);
 }
 
@@ -617,7 +705,7 @@ function destroyChart(name) {
   }
 }
 
-// Gráfico 1: Rendimiento por Cuartel (Estilo bklit-ui con cifras sobre cada barra)
+// Gráfico 1: Rendimiento por Cuartel (Con números directos sobre barras)
 function renderCuartelesRendimientoChart(data) {
   destroyChart("chart-cuarteles");
   const ctx = document.getElementById("chart-cuarteles")?.getContext("2d");
@@ -625,19 +713,8 @@ function renderCuartelesRendimientoChart(data) {
 
   const items = (data.rendimientoCuarteles || []).slice(0, 8);
   const labels = items.map((i) => i.cuartel);
-  const sincronizados = items.map((i) => Number(i.sincronizados) || 0);
-  const conError = items.map((i) => Number(i.conError) || 0);
-
-  const totalSinc = sincronizados.reduce((a, b) => a + b, 0);
-  const totalErr = conError.reduce((a, b) => a + b, 0);
-  const totalGlobal = totalSinc + totalErr;
-  const tasaPromedio = totalGlobal > 0 ? ((totalSinc / totalGlobal) * 100).toFixed(1) : "100.0";
-
-  // Actualizar badge del encabezado del gráfico con el número relacionado
-  const badge = document.getElementById("badge-chart-cuarteles");
-  if (badge) {
-    badge.textContent = `${items.length} Cuarteles · ${tasaPromedio}% Efectividad (${totalGlobal.toLocaleString("es-CL")} casos)`;
-  }
+  const sincronizados = items.map((i) => i.sincronizados);
+  const conError = items.map((i) => i.conError);
 
   state.charts["chart-cuarteles"] = new Chart(ctx, {
     type: "bar",
@@ -651,7 +728,7 @@ function renderCuartelesRendimientoChart(data) {
           hoverBackgroundColor: "#059669",
           borderRadius: 8,
           borderSkipped: false,
-          maxBarThickness: 32,
+          maxBarThickness: 30,
         },
         {
           label: "Con Error",
@@ -660,14 +737,14 @@ function renderCuartelesRendimientoChart(data) {
           hoverBackgroundColor: "#e11d48",
           borderRadius: 8,
           borderSkipped: false,
-          maxBarThickness: 32,
+          maxBarThickness: 30,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 0.72,
+      barPercentage: 0.7,
       categoryPercentage: 0.75,
       plugins: {
         legend: {
@@ -681,28 +758,7 @@ function renderCuartelesRendimientoChart(data) {
             padding: 16,
             color: "#334155",
             font: { weight: "600", size: 12 },
-            generateLabels: (chart) => {
-              return chart.data.datasets.map((ds, idx) => {
-                const sum = ds.data.reduce((a, b) => a + (Number(b) || 0), 0);
-                const pct = totalGlobal > 0 ? ((sum / totalGlobal) * 100).toFixed(1) : "0.0";
-                return {
-                  text: `${ds.label}: ${sum.toLocaleString("es-CL")} (${pct}%)`,
-                  fillStyle: ds.backgroundColor,
-                  strokeStyle: ds.backgroundColor,
-                  lineWidth: 0,
-                  hidden: !chart.isDatasetVisible(idx),
-                  datasetIndex: idx,
-                  pointStyle: "circle",
-                };
-              });
-            },
           },
-        },
-        bklitBarLabels: {
-          display: true,
-          hideZero: true,
-          font: "700 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: "#1e293b",
         },
         tooltip: {
           ...BKLIT_TOOLTIP,
@@ -711,48 +767,43 @@ function renderCuartelesRendimientoChart(data) {
               const idx = tooltipItems[0].dataIndex;
               const totalCuartel = items[idx]?.total || 0;
               const tasa = items[idx]?.tasaExito || 100;
-              return `Total Cuartel: ${Number(totalCuartel).toLocaleString("es-CL")} (${tasa}% éxito)`;
+              return `Total: ${totalCuartel.toLocaleString()} (${tasa}% éxito)`;
             },
           },
+        },
+        bklitDataLabels: {
+          display: true,
+          hideZero: true,
+          color: "#1e293b",
         },
       },
       scales: {
         x: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#475569", font: { weight: "600" }, maxRotation: 35, minRotation: 0 },
+          ticks: { color: "#64748b", font: { weight: "500" }, maxRotation: 35, minRotation: 0 },
         },
         y: {
-          grace: "15%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: {
-            color: "#64748b",
-            callback: (val) => Number(val).toLocaleString("es-CL"),
-          },
+          ticks: { color: "#64748b" },
           beginAtZero: true,
+          grace: "18%",
         },
       },
     },
   });
 }
 
-// Gráfico 2: Nacionalidades (Barra horizontal bklit-ui con cifras y porcentaje a la derecha)
+// Gráfico 2: Nacionalidades (Barra horizontal con números y porcentaje impresos)
 function renderHorizontalBarChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
   if (!ctx) return;
 
-  const topItems = (items || []).slice(0, 8);
+  const topItems = items.slice(0, 8);
   const labels = topItems.map((i) => i.nacionalidad + (i.codigo_iso ? ` (${i.codigo_iso})` : ""));
-  const values = topItems.map((i) => Number(i.total) || 0);
-  const totalSum = values.reduce((a, b) => a + b, 0);
-
-  // Actualizar badge de encabezado con el flujo migratorio principal
-  const badge = document.getElementById("badge-chart-nacionalidades");
-  if (badge && topItems.length > 0) {
-    badge.textContent = `Top 1: ${topItems[0].nacionalidad} (${topItems[0].porcentaje}%)`;
-  }
+  const values = topItems.map((i) => i.total);
 
   state.charts[canvasId] = new Chart(ctx, {
     type: "bar",
@@ -774,34 +825,24 @@ function renderHorizontalBarChart(canvasId, items) {
       barPercentage: 0.68,
       plugins: {
         legend: { display: false },
-        bklitBarLabels: {
-          display: true,
-          font: "700 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: "#0f172a",
-          formatter: (val, idx) => {
-            const pct = topItems[idx]?.porcentaje !== undefined
-              ? topItems[idx].porcentaje
-              : (totalSum > 0 ? ((val / totalSum) * 100).toFixed(1) : 0);
-            return `${val.toLocaleString("es-CL")} (${pct}%)`;
-          },
-        },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Total: ${ctx.raw.toLocaleString("es-CL")} (${topItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${topItems[ctx.dataIndex]?.porcentaje}%)`,
           },
+        },
+        bklitDataLabels: {
+          display: true,
+          percentages: topItems.map((i) => i.porcentaje),
+          color: "#0f172a",
         },
       },
       scales: {
         x: {
-          grace: "22%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: {
-            color: "#64748b",
-            callback: (val) => Number(val).toLocaleString("es-CL"),
-          },
-          beginAtZero: true,
+          ticks: { color: "#64748b" },
+          grace: "25%",
         },
         y: {
           grid: { display: false },
@@ -813,24 +854,18 @@ function renderHorizontalBarChart(canvasId, items) {
   });
 }
 
-// Gráfico 3: Sincronización Donut Flotante (bklit-ui con Total Central y Leyenda Métrica)
+// Gráfico 3: Sincronización Donut Flotante (Con cifra central y conteo en leyendas)
 function renderDoughnutChart(canvasId, items, colors) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
   if (!ctx) return;
 
-  const validItems = items || [];
-  const labels = validItems.map((i) => i.descripcion);
-  const values = validItems.map((i) => Number(i.total) || 0);
-  const total = values.reduce((a, b) => a + b, 0);
+  const labels = items.map((i) => i.descripcion);
+  const values = items.map((i) => i.total);
 
-  // Actualizar badge de encabezado con la tasa de cumplimiento
-  const badge = document.getElementById("badge-chart-sincronizacion");
-  if (badge) {
-    const sincOK = validItems.find((s) => String(s.descripcion).toUpperCase().includes("SINCRONIZADO"));
-    const pct = sincOK ? (sincOK.porcentaje !== undefined ? sincOK.porcentaje : ((sincOK.total / (total || 1)) * 100).toFixed(1)) : 100;
-    badge.textContent = `${pct}% Sincronizado PDI`;
-  }
+  const total = items.reduce((acc, i) => acc + (Number(i.total) || 0), 0);
+  const sincOk = items.find((i) => String(i.descripcion).toUpperCase().includes("SINCRONIZADO"))?.total || 0;
+  const pctSinc = total > 0 ? ((sincOk / total) * 100).toFixed(1) : "100";
 
   state.charts[canvasId] = new Chart(ctx, {
     type: "doughnut",
@@ -838,7 +873,7 @@ function renderDoughnutChart(canvasId, items, colors) {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: colors.slice(0, validItems.length),
+        backgroundColor: colors.slice(0, items.length),
         borderWidth: 0,
         borderRadius: 8,
         spacing: 5,
@@ -850,11 +885,6 @@ function renderDoughnutChart(canvasId, items, colors) {
       maintainAspectRatio: false,
       cutout: "76%",
       plugins: {
-        bklitDoughnutCenter: {
-          display: true,
-          total,
-          label: "TOTAL PDI",
-        },
         legend: {
           position: "bottom",
           labels: {
@@ -866,38 +896,35 @@ function renderDoughnutChart(canvasId, items, colors) {
             color: "#334155",
             font: { weight: "600", size: 11.5 },
             generateLabels: (chart) => {
-              const dataset = chart.data.datasets[0];
-              return chart.data.labels.map((lbl, i) => {
-                const val = Number(dataset.data[i]) || 0;
-                const pct = validItems[i]?.porcentaje !== undefined
-                  ? validItems[i].porcentaje
-                  : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
-                const bg = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor;
-                return {
-                  text: `${lbl}: ${val.toLocaleString("es-CL")} (${pct}%)`,
-                  fillStyle: bg,
-                  strokeStyle: bg,
-                  lineWidth: 0,
-                  hidden: !chart.getDataVisibility(i),
-                  index: i,
-                  pointStyle: "circle",
-                };
+              const orig = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+              orig.forEach((l, idx) => {
+                const it = items[idx];
+                if (it) {
+                  l.text = `${it.descripcion}: ${Number(it.total).toLocaleString("es-CL")} (${it.porcentaje}%)`;
+                }
               });
+              return orig;
             },
           },
         },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${items[ctx.dataIndex]?.porcentaje}%)`,
           },
+        },
+        bklitDataLabels: {
+          display: true,
+          centerText: `${pctSinc}%`,
+          centerSubtext: "Sincronizados",
+          centerTextColor: "#059669",
         },
       },
     },
   });
 }
 
-// Gráfico 4: Demografía Cruzada (Adultos vs Menores N.N.A. por Sexo con cifras sobre barras)
+// Gráfico 4: Demografía Cruzada (Números sobre cada barra)
 function renderDemografiaCruzadaChart(demografia, generoFallback) {
   destroyChart("chart-demografia-cruzada");
   const ctx = document.getElementById("chart-demografia-cruzada")?.getContext("2d");
@@ -906,31 +933,16 @@ function renderDemografiaCruzadaChart(demografia, generoFallback) {
   let mascAdultos = 0, mascMenores = 0;
   let femAdultos = 0, femMenores = 0;
 
-  if (demografia && demografia.length > 0) {
-    demografia.forEach((d) => {
+  if (demografia.length > 0) {
+    demografia.forEach(d => {
       if (d.genero === "M") {
-        if (d.esMayorEdad) mascAdultos += Number(d.total);
-        else mascMenores += Number(d.total);
+        if (d.esMayorEdad) mascAdultos += d.total;
+        else mascMenores += d.total;
       } else if (d.genero === "F") {
-        if (d.esMayorEdad) femAdultos += Number(d.total);
-        else femMenores += Number(d.total);
+        if (d.esMayorEdad) femAdultos += d.total;
+        else femMenores += d.total;
       }
     });
-  }
-
-  const totalAdultos = mascAdultos + femAdultos;
-  const totalMenores = mascMenores + femMenores;
-  const totalDemo = totalAdultos + totalMenores;
-  const totalMasc = mascAdultos + mascMenores;
-  const totalFem = femAdultos + femMenores;
-
-  const pctMasc = totalDemo > 0 ? ((totalMasc / totalDemo) * 100).toFixed(1) : 0;
-  const pctFem = totalDemo > 0 ? ((totalFem / totalDemo) * 100).toFixed(1) : 0;
-
-  // Actualizar badge de encabezado con los totales demográficos
-  const badge = document.getElementById("badge-chart-demografia");
-  if (badge) {
-    badge.textContent = `Hombres: ${pctMasc}% (${totalMasc.toLocaleString("es-CL")}) · Mujeres: ${pctFem}% (${totalFem.toLocaleString("es-CL")})`;
   }
 
   state.charts["chart-demografia-cruzada"] = new Chart(ctx, {
@@ -975,90 +987,45 @@ function renderDemografiaCruzadaChart(demografia, generoFallback) {
             padding: 16,
             color: "#334155",
             font: { weight: "600", size: 12 },
-            generateLabels: (chart) => {
-              return [
-                {
-                  text: `Adultos (≥ 18): ${totalAdultos.toLocaleString("es-CL")}`,
-                  fillStyle: CHART_PALETTE.blue,
-                  strokeStyle: CHART_PALETTE.blue,
-                  lineWidth: 0,
-                  hidden: !chart.isDatasetVisible(0),
-                  datasetIndex: 0,
-                  pointStyle: "circle",
-                },
-                {
-                  text: `Menores N.N.A.: ${totalMenores.toLocaleString("es-CL")}`,
-                  fillStyle: CHART_PALETTE.amber,
-                  strokeStyle: CHART_PALETTE.amber,
-                  lineWidth: 0,
-                  hidden: !chart.isDatasetVisible(1),
-                  datasetIndex: 1,
-                  pointStyle: "circle",
-                },
-              ];
-            },
           },
         },
-        bklitBarLabels: {
+        tooltip: BKLIT_TOOLTIP,
+        bklitDataLabels: {
           display: true,
-          hideZero: false,
-          font: "700 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: "#0f172a",
-        },
-        tooltip: {
-          ...BKLIT_TOOLTIP,
-          callbacks: {
-            label: (ctx) => {
-              const val = ctx.raw || 0;
-              const pct = totalDemo > 0 ? ((val / totalDemo) * 100).toFixed(1) : 0;
-              return ` ${ctx.dataset.label}: ${val.toLocaleString("es-CL")} (${pct}% del total)`;
-            },
-          },
+          hideZero: true,
+          color: "#1e293b",
         },
       },
       scales: {
         x: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#1e293b", font: { weight: "700", size: 12 } },
+          ticks: { color: "#1e293b", font: { weight: "600" } },
         },
         y: {
-          grace: "15%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: {
-            color: "#64748b",
-            callback: (val) => Number(val).toLocaleString("es-CL"),
-          },
+          ticks: { color: "#64748b" },
           beginAtZero: true,
+          grace: "18%",
         },
       },
     },
   });
 }
 
-// Gráfico 5: Grupo Etario Donut Flotante (Con Total Central y Métricas NNA)
+// Gráfico 5: Grupo Etario Donut Flotante (Con cifras en leyendas y centro)
 function renderEdadChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
   if (!ctx) return;
 
-  const validItems = items || [];
-  const labels = validItems.map((i) => i.categoria);
-  const values = validItems.map((i) => Number(i.total) || 0);
-  const total = values.reduce((a, b) => a + b, 0);
+  const labels = items.map((i) => i.categoria);
+  const values = items.map((i) => i.total);
 
-  const menoresItem = validItems.find((e) => String(e.categoria).toUpperCase().includes("MENOR"));
-  const menoresCount = menoresItem ? Number(menoresItem.total) : 0;
-  const menoresPct = menoresItem?.porcentaje !== undefined
-    ? menoresItem.porcentaje
-    : (total > 0 ? ((menoresCount / total) * 100).toFixed(1) : 0);
-
-  // Actualizar badge de encabezado con menores NNA
-  const badge = document.getElementById("badge-chart-edad");
-  if (badge) {
-    badge.textContent = `${menoresCount.toLocaleString("es-CL")} Menores NNA (${menoresPct}%)`;
-  }
+  const total = items.reduce((acc, i) => acc + (Number(i.total) || 0), 0);
+  const menores = items.find(i => String(i.categoria).toUpperCase().includes("MENOR"))?.total || 0;
+  const pctNna = total > 0 ? ((menores / total) * 100).toFixed(1) : "0";
 
   state.charts[canvasId] = new Chart(ctx, {
     type: "doughnut",
@@ -1078,11 +1045,6 @@ function renderEdadChart(canvasId, items) {
       maintainAspectRatio: false,
       cutout: "74%",
       plugins: {
-        bklitDoughnutCenter: {
-          display: true,
-          total,
-          label: "ENROLADOS",
-        },
         legend: {
           position: "bottom",
           labels: {
@@ -1094,38 +1056,30 @@ function renderEdadChart(canvasId, items) {
             color: "#334155",
             font: { weight: "600", size: 11.5 },
             generateLabels: (chart) => {
-              const dataset = chart.data.datasets[0];
-              return chart.data.labels.map((lbl, i) => {
-                const val = Number(dataset.data[i]) || 0;
-                const pct = validItems[i]?.porcentaje !== undefined
-                  ? validItems[i].porcentaje
-                  : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
-                const bg = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor;
-                return {
-                  text: `${lbl}: ${val.toLocaleString("es-CL")} (${pct}%)`,
-                  fillStyle: bg,
-                  strokeStyle: bg,
-                  lineWidth: 0,
-                  hidden: !chart.getDataVisibility(i),
-                  index: i,
-                  pointStyle: "circle",
-                };
+              const orig = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+              orig.forEach((l, idx) => {
+                const it = items[idx];
+                if (it) {
+                  l.text = `${it.categoria}: ${Number(it.total).toLocaleString("es-CL")} (${it.porcentaje}%)`;
+                }
               });
+              return orig;
             },
           },
         },
-        tooltip: {
-          ...BKLIT_TOOLTIP,
-          callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
-          },
+        tooltip: BKLIT_TOOLTIP,
+        bklitDataLabels: {
+          display: true,
+          centerText: `${total.toLocaleString("es-CL")}`,
+          centerSubtext: "Total Enrolados",
+          centerTextColor: "#0f172a",
         },
       },
     },
   });
 }
 
-// Gráfico 6: Dispositivos de Captura (Tablet vs PC con Total central y porcentajes)
+// Gráfico 6: Dispositivos de Captura (Tablet vs PC)
 function renderDispositivosChart(items) {
   destroyChart("chart-dispositivos");
   const ctx = document.getElementById("chart-dispositivos")?.getContext("2d");
@@ -1137,18 +1091,10 @@ function renderDispositivosChart(items) {
   ];
 
   const labels = validItems.map((i) => i.dispositivo);
-  const values = validItems.map((i) => Number(i.total) || 0);
-  const total = values.reduce((a, b) => a + b, 0);
+  const values = validItems.map((i) => i.total);
   const colors = [CHART_PALETTE.cyan, CHART_PALETTE.blue];
 
-  const tabletItem = validItems.find((d) => String(d.dispositivo).toUpperCase().includes("TABLET"));
-  const tabletPct = tabletItem?.porcentaje !== undefined ? tabletItem.porcentaje : (total > 0 ? ((tabletItem?.total / total) * 100).toFixed(1) : 0);
-
-  // Actualizar badge de encabezado con la distribución de dispositivos
-  const badge = document.getElementById("badge-chart-dispositivos");
-  if (badge) {
-    badge.textContent = `Tablet: ${tabletPct}% · PC: ${(100 - tabletPct).toFixed(1)}%`;
-  }
+  const total = validItems.reduce((acc, i) => acc + (Number(i.total) || 0), 0);
 
   state.charts["chart-dispositivos"] = new Chart(ctx, {
     type: "doughnut",
@@ -1168,11 +1114,6 @@ function renderDispositivosChart(items) {
       maintainAspectRatio: false,
       cutout: "76%",
       plugins: {
-        bklitDoughnutCenter: {
-          display: true,
-          total,
-          label: "DISPOSITIVOS",
-        },
         legend: {
           position: "bottom",
           labels: {
@@ -1184,38 +1125,35 @@ function renderDispositivosChart(items) {
             color: "#334155",
             font: { weight: "600", size: 11.5 },
             generateLabels: (chart) => {
-              const dataset = chart.data.datasets[0];
-              return chart.data.labels.map((lbl, i) => {
-                const val = Number(dataset.data[i]) || 0;
-                const pct = validItems[i]?.porcentaje !== undefined
-                  ? validItems[i].porcentaje
-                  : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
-                const bg = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor;
-                return {
-                  text: `${lbl}: ${val.toLocaleString("es-CL")} (${pct}%)`,
-                  fillStyle: bg,
-                  strokeStyle: bg,
-                  lineWidth: 0,
-                  hidden: !chart.getDataVisibility(i),
-                  index: i,
-                  pointStyle: "circle",
-                };
+              const orig = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+              orig.forEach((l, idx) => {
+                const it = validItems[idx];
+                if (it) {
+                  l.text = `${it.dispositivo}: ${Number(it.total).toLocaleString("es-CL")} (${it.porcentaje || 0}%)`;
+                }
               });
+              return orig;
             },
           },
         },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
+        },
+        bklitDataLabels: {
+          display: true,
+          centerText: `${total.toLocaleString("es-CL")}`,
+          centerSubtext: "Dispositivos",
+          centerTextColor: "#0284c7",
         },
       },
     },
   });
 }
 
-// Gráfico 7: Despliegue Territorial por Región Policial (Barras Horizontales con Cifras)
+// Gráfico 7: Despliegue Territorial por Región Policial (Con números en barras)
 function renderRegionesChart(items) {
   destroyChart("chart-regiones");
   const ctx = document.getElementById("chart-regiones")?.getContext("2d");
@@ -1226,14 +1164,7 @@ function renderRegionesChart(items) {
   ];
 
   const labels = validItems.map((i) => i.region);
-  const values = validItems.map((i) => Number(i.total) || 0);
-  const total = values.reduce((a, b) => a + b, 0);
-
-  // Actualizar badge de encabezado con cantidad de regiones
-  const badge = document.getElementById("badge-chart-regiones");
-  if (badge) {
-    badge.textContent = `${validItems.length} Regiones · Total: ${total.toLocaleString("es-CL")}`;
-  }
+  const values = validItems.map((i) => i.total);
 
   state.charts["chart-regiones"] = new Chart(ctx, {
     type: "bar",
@@ -1256,34 +1187,24 @@ function renderRegionesChart(items) {
       barPercentage: 0.65,
       plugins: {
         legend: { display: false },
-        bklitBarLabels: {
-          display: true,
-          font: "700 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: "#0f172a",
-          formatter: (val, idx) => {
-            const pct = validItems[idx]?.porcentaje !== undefined
-              ? validItems[idx].porcentaje
-              : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
-            return `${val.toLocaleString("es-CL")} (${pct}%)`;
-          },
-        },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Total: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
+        },
+        bklitDataLabels: {
+          display: true,
+          percentages: validItems.map((i) => i.porcentaje),
+          color: "#0284c7",
         },
       },
       scales: {
         x: {
-          grace: "22%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: {
-            color: "#64748b",
-            callback: (val) => Number(val).toLocaleString("es-CL"),
-          },
-          beginAtZero: true,
+          ticks: { color: "#64748b" },
+          grace: "25%",
         },
         y: {
           grid: { display: false },
@@ -1295,7 +1216,7 @@ function renderRegionesChart(items) {
   });
 }
 
-// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Cifras y Porcentajes sobre Barras)
+// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Con números sobre barras)
 function renderTramosEtariosChart(items) {
   destroyChart("chart-tramos-etarios");
   const ctx = document.getElementById("chart-tramos-etarios")?.getContext("2d");
@@ -1306,14 +1227,7 @@ function renderTramosEtariosChart(items) {
   ];
 
   const labels = validItems.map((i) => i.tramo);
-  const values = validItems.map((i) => Number(i.total) || 0);
-  const total = values.reduce((a, b) => a + b, 0);
-
-  // Actualizar badge de encabezado con los tramos analizados
-  const badge = document.getElementById("badge-chart-tramos");
-  if (badge) {
-    badge.textContent = `${validItems.length} Grupos Etarios (${total.toLocaleString("es-CL")})`;
-  }
+  const values = validItems.map((i) => i.total);
 
   // Colores diferenciados: Ámbar cálido para menores NNA (vulnerabilidad), Azul real para adultos
   const backgroundColors = validItems.map((i) => {
@@ -1352,29 +1266,23 @@ function renderTramosEtariosChart(items) {
       barPercentage: 0.65,
       plugins: {
         legend: { display: false },
-        bklitBarLabels: {
-          display: true,
-          font: "700 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: "#0f172a",
-          formatter: (val, idx) => {
-            const pct = validItems[idx]?.porcentaje !== undefined
-              ? validItems[idx].porcentaje
-              : (total > 0 ? ((val / total) * 100).toFixed(1) : 0);
-            return `${val.toLocaleString("es-CL")} (${pct}%)`;
-          },
-        },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Cantidad: ${ctx.raw.toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Cantidad: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
             afterLabel: (ctx) => {
               const t = String(validItems[ctx.dataIndex]?.tramo || "").toUpperCase();
               if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA")) {
-                return "⚠️ Atención prioritaria: Menor de edad (NNA)";
+                return "[!] Atención prioritaria: Menor de edad (NNA)";
               }
               return "";
             },
           },
+        },
+        bklitDataLabels: {
+          display: true,
+          hideZero: true,
+          color: "#0f172a",
         },
       },
       scales: {
@@ -1389,58 +1297,140 @@ function renderTramosEtariosChart(items) {
           },
         },
         y: {
-          grace: "15%",
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: {
-            color: "#64748b",
-            callback: (val) => Number(val).toLocaleString("es-CL"),
-          },
+          ticks: { color: "#64748b" },
           beginAtZero: true,
+          grace: "18%",
         },
       },
     },
   });
 }
 
-// Carga de la serie histórica de tendencias
+// ==========================================================================
+// MÓDULO AVANZADO: EVOLUCIÓN TEMPORAL Y TENDENCIAS HISTÓRICAS (TAB 3)
+// ==========================================================================
+
+// Carga de la serie histórica de tendencias desde la API
 async function loadTrendData() {
   try {
     const res = await fetch("/api/metricas/tendencia");
     const data = await res.json();
-    state.trendData = data;
-    renderTrendChart(data);
+    state.trendData = Array.isArray(data) ? data : [];
+    updateTrendView();
   } catch (err) {
     console.error("Error al cargar tendencia:", err);
   }
 }
 
+// Actualiza vista de tendencias: KPIs, filtros, gráfico y matriz detallada
+function updateTrendView() {
+  const rawItems = state.trendData || [];
+  if (rawItems.length === 0) return;
+
+  // 1. Calcular KPIs globales de la serie histórica completa
+  const totalHistorico = rawItems.reduce((acc, i) => acc + (Number(i.total) || 0), 0);
+  const totalSincronizados = rawItems.reduce((acc, i) => acc + (Number(i.sincronizados) || 0), 0);
+  const totalDias = rawItems.length;
+  const promedioDiario = totalDias > 0 ? Math.round(totalHistorico / totalDias) : 0;
+  
+  let recordDia = { fecha: "N/D", total: 0 };
+  rawItems.forEach(i => {
+    if (Number(i.total) > recordDia.total) {
+      recordDia = { fecha: i.fecha, total: Number(i.total) };
+    }
+  });
+
+  const slaGlobal = totalHistorico > 0 ? ((totalSincronizados / totalHistorico) * 100).toFixed(1) : "100";
+
+  // Actualizar tarjetas de KPI
+  const elTotal = document.getElementById("trend-kpi-total");
+  const elDays = document.getElementById("trend-kpi-days");
+  const elAvg = document.getElementById("trend-kpi-avg");
+  const elPeak = document.getElementById("trend-kpi-peak");
+  const elPeakDate = document.getElementById("trend-kpi-peak-date");
+  const elSla = document.getElementById("trend-kpi-sla");
+
+  if (elTotal) elTotal.textContent = totalHistorico.toLocaleString("es-CL");
+  if (elDays) elDays.textContent = `${totalDias.toLocaleString("es-CL")} jornadas`;
+  if (elAvg) elAvg.textContent = `${promedioDiario.toLocaleString("es-CL")} / día`;
+  if (elPeak) elPeak.textContent = `${recordDia.total.toLocaleString("es-CL")}`;
+  if (elPeakDate) elPeakDate.textContent = `Pico el ${recordDia.fecha}`;
+  if (elSla) elSla.textContent = `${slaGlobal}%`;
+
+  // 2. Filtrar items según el rango temporal seleccionado
+  let filteredItems = [...rawItems];
+  if (state.trendRange === "15") {
+    filteredItems = rawItems.slice(-15);
+  } else if (state.trendRange === "30") {
+    filteredItems = rawItems.slice(-30);
+  } else if (state.trendRange === "90") {
+    filteredItems = rawItems.slice(-90);
+  } else if (state.trendRange === "365") {
+    filteredItems = rawItems.slice(-365);
+  }
+
+  // 3. Aplicar agrupación si es mensual
+  let displayItems = filteredItems;
+  if (state.trendGranularity === "month") {
+    const monthsMap = new Map();
+    filteredItems.forEach(item => {
+      const mesKey = item.fecha.slice(0, 7); // YYYY-MM
+      if (!monthsMap.has(mesKey)) {
+        monthsMap.set(mesKey, { fecha: mesKey, total: 0, sincronizados: 0, con_error: 0, pendientes: 0 });
+      }
+      const m = monthsMap.get(mesKey);
+      m.total += Number(item.total) || 0;
+      m.sincronizados += Number(item.sincronizados) || 0;
+      m.con_error += Number(item.con_error) || 0;
+      m.pendientes += Number(item.pendientes) || 0;
+    });
+    displayItems = Array.from(monthsMap.values());
+  }
+
+  // Actualizar badge del gráfico de tendencia
+  const badgeTrend = document.getElementById("badge-chart-tendencia");
+  if (badgeTrend) {
+    const sumTotal = displayItems.reduce((acc, i) => acc + i.total, 0);
+    const sumSinc = displayItems.reduce((acc, i) => acc + i.sincronizados, 0);
+    const pct = sumTotal > 0 ? ((sumSinc / sumTotal) * 100).toFixed(1) : "100";
+    badgeTrend.textContent = `${displayItems.length} ${state.trendGranularity === 'month' ? 'Meses' : 'Días'} · ${sumTotal.toLocaleString("es-CL")} Enrolamientos (${pct}% SLA)`;
+  }
+
+  // Renderizar gráfico de tendencia principal
+  renderTrendChart(displayItems, "chart-tendencia-historica");
+
+  // Renderizar tabla detallada día a día
+  renderTrendTable(filteredItems);
+
+  // Si el modal está abierto, renderizar gráfico en modal
+  const modal = document.getElementById("modal-trend-fullscreen");
+  if (modal && modal.style.display !== "none") {
+    renderTrendChart(displayItems, "chart-tendencia-modal");
+  }
+}
+
 // Gráfico de Tendencia Histórica Profesional (Gradiente Canvas Área estilo bklit-ui)
-function renderTrendChart(items) {
-  destroyChart("chart-tendencia-historica");
-  const canvas = document.getElementById("chart-tendencia-historica");
+function renderTrendChart(items, canvasId = "chart-tendencia-historica") {
+  destroyChart(canvasId);
+  const canvas = document.getElementById(canvasId);
   const ctx = canvas?.getContext("2d");
   if (!ctx || !items || items.length === 0) return;
 
   const labels = items.map((i) => i.fecha);
-  const totalData = items.map((i) => Number(i.total) || 0);
-  const sincData = items.map((i) => Number(i.sincronizados) || 0);
-  const errData = items.map((i) => Number(i.con_error) || 0);
-
-  const totalTrend = totalData.reduce((a, b) => a + b, 0);
-
-  // Actualizar badge de encabezado
-  const badge = document.getElementById("badge-chart-tendencias");
-  if (badge) {
-    badge.textContent = `${items.length} Jornadas · Total Histórico: ${totalTrend.toLocaleString("es-CL")}`;
-  }
+  const totalData = items.map((i) => i.total);
+  const sincData = items.map((i) => i.sincronizados);
+  const errData = items.map((i) => i.con_error);
 
   // Gradiente suave de área estilo bklit-ui
-  const gradientArea = ctx.createLinearGradient(0, 0, 0, 320);
+  const gradientArea = ctx.createLinearGradient(0, 0, 0, 360);
   gradientArea.addColorStop(0, "rgba(37, 99, 235, 0.22)");
   gradientArea.addColorStop(1, "rgba(37, 99, 235, 0.00)");
 
-  state.charts["chart-tendencia-historica"] = new Chart(ctx, {
+  const showPointLabels = items.length <= 25;
+
+  state.charts[canvasId] = new Chart(ctx, {
     type: "line",
     data: {
       labels,
@@ -1451,9 +1441,9 @@ function renderTrendChart(items) {
           borderColor: "#2563eb",
           backgroundColor: gradientArea,
           fill: true,
-          tension: 0.35,
+          tension: 0.32,
           borderWidth: 2.5,
-          pointRadius: 2.5,
+          pointRadius: items.length > 60 ? 1 : 3,
           pointHoverRadius: 6,
           pointBackgroundColor: "#ffffff",
           pointBorderColor: "#2563eb",
@@ -1465,7 +1455,7 @@ function renderTrendChart(items) {
           borderColor: CHART_PALETTE.emerald,
           borderDash: [5, 5],
           borderWidth: 2,
-          pointRadius: 1,
+          pointRadius: items.length > 60 ? 0 : 2,
           tension: 0.3,
         },
         {
@@ -1473,7 +1463,7 @@ function renderTrendChart(items) {
           data: errData,
           borderColor: CHART_PALETTE.crimson,
           borderWidth: 2,
-          pointRadius: 2,
+          pointRadius: items.length > 60 ? 0 : 2.5,
           tension: 0.3,
         },
       ],
@@ -1496,26 +1486,301 @@ function renderTrendChart(items) {
             font: { weight: "600", size: 12 },
           },
         },
-        tooltip: BKLIT_TOOLTIP,
+        tooltip: {
+          ...BKLIT_TOOLTIP,
+          callbacks: {
+            afterBody: (tooltipItems) => {
+              const idx = tooltipItems[0].dataIndex;
+              const it = items[idx];
+              if (!it) return "";
+              const tasa = it.total > 0 ? ((it.sincronizados / it.total) * 100).toFixed(1) : "100";
+              return `Cumplimiento SLA PDI: ${tasa}%`;
+            }
+          }
+        },
+        bklitDataLabels: {
+          display: showPointLabels,
+          hideZero: true,
+          color: "#1e40af",
+        },
       },
       scales: {
         x: {
           grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: {
+            color: "#64748b",
+            maxRotation: 45,
+            minRotation: items.length > 30 ? 25 : 0,
+            autoSkip: true,
+            maxTicksLimit: items.length > 60 ? 24 : items.length,
+          },
         },
         y: {
           grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
           border: { display: false },
-          ticks: {
-            color: "#64748b",
-            callback: (val) => Number(val).toLocaleString("es-CL"),
-          },
+          ticks: { color: "#64748b" },
+          beginAtZero: true,
+          grace: "12%",
         },
       },
     },
   });
 }
+
+// Renderizado de tabla de desglose histórico día por día
+function renderTrendTable(items) {
+  const tbody = document.getElementById("trend-table-body");
+  const countEl = document.getElementById("trend-matrix-count");
+  if (!tbody) return;
+
+  if (countEl) {
+    countEl.textContent = `${items.length} jornadas operativas`;
+  }
+
+  if (items.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No hay jornadas para mostrar en el rango seleccionado</td></tr>`;
+    return;
+  }
+
+  const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+  // Ordenar descendente (los días más recientes primero)
+  const sorted = [...items].reverse();
+
+  tbody.innerHTML = sorted.map((row) => {
+    let diaNombre = "Día";
+    if (row.fecha && row.fecha.includes("-") && row.fecha.length === 10) {
+      const [y, m, d] = row.fecha.split("-");
+      const dt = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+      diaNombre = diasSemana[dt.getDay()] || "Día";
+    }
+
+    const total = Number(row.total) || 0;
+    const sinc = Number(row.sincronizados) || 0;
+    const err = Number(row.con_error) || 0;
+    const pend = Number(row.pendientes) || 0;
+    const tasa = total > 0 ? Math.round((sinc / total) * 1000) / 10 : 100;
+
+    let slaBadge = `<span class="badge badge-success" style="font-weight:700;">${tasa}% Óptimo</span>`;
+    if (tasa < 90) {
+      slaBadge = `<span class="badge badge-danger" style="font-weight:700;">${tasa}% Crítico</span>`;
+    } else if (tasa < 95) {
+      slaBadge = `<span class="badge badge-warning" style="font-weight:700;">${tasa}% Aceptable</span>`;
+    }
+
+    const errorHtml = err > 0
+      ? `<span class="badge badge-danger" style="font-weight:700;">${err.toLocaleString("es-CL")}</span>`
+      : `<span style="color:#94a3b8;">0</span>`;
+
+    return `
+      <tr>
+        <td style="font-weight: 700; color: var(--pdi-navy);">
+          <code>${row.fecha}</code>
+        </td>
+        <td>
+          <span class="badge badge-info">${diaNombre}</span>
+        </td>
+        <td style="text-align: right; font-weight: 700; color: #0f172a;">
+          ${total.toLocaleString("es-CL")}
+        </td>
+        <td style="text-align: right; font-weight: 600; color: #059669;">
+          ${sinc.toLocaleString("es-CL")}
+        </td>
+        <td style="text-align: right;">
+          ${errorHtml}
+        </td>
+        <td style="text-align: right; color: var(--text-muted);">
+          ${pend.toLocaleString("es-CL")}
+        </td>
+        <td>
+          ${slaBadge}
+        </td>
+        <td style="text-align: center;">
+          <button class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 0.74rem;" onclick="examinarFecha('${row.fecha}')" title="Cargar este día en el Panel Analítico">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#ffffff;"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+            <span>Examinar</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// Configuración de eventos de la pestaña de Evolución y Tendencias
+function setupTrendControls() {
+  // Presets de rango temporal de tendencia
+  document.querySelectorAll("#trend-period-presets .preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#trend-period-presets .preset-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.trendRange = btn.getAttribute("data-trend-range");
+      updateTrendView();
+    });
+  });
+
+  // Selector de granularidad (Diario vs Mensual)
+  document.querySelectorAll(".granularity-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".granularity-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.trendGranularity = btn.getAttribute("data-granularity");
+      updateTrendView();
+    });
+  });
+
+  // Botón Expandir / Contraer Gráfico y Detalle
+  const btnExpandTrend = document.getElementById("btn-toggle-expand-trend");
+  if (btnExpandTrend) {
+    btnExpandTrend.addEventListener("click", () => {
+      state.trendExpanded = !state.trendExpanded;
+      const chartBody = document.getElementById("trend-chart-body");
+      const matrixCard = document.getElementById("trend-detail-matrix");
+      const expandText = document.getElementById("trend-expand-text");
+
+      if (chartBody) {
+        chartBody.classList.toggle("is-expanded", state.trendExpanded);
+      }
+      if (matrixCard) {
+        matrixCard.style.display = state.trendExpanded ? "block" : "none";
+        if (state.trendExpanded) {
+          matrixCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+      if (expandText) {
+        expandText.textContent = state.trendExpanded ? "Contraer Vista" : "Expandir Vista Detallada";
+      }
+
+      // Redibujar gráfico para ajustarse a nueva altura
+      setTimeout(() => {
+        state.charts["chart-tendencia-historica"]?.resize();
+      }, 150);
+    });
+  }
+
+  // Botón contraer dentro de la tabla
+  const btnCollapseTrend = document.getElementById("btn-collapse-trend");
+  if (btnCollapseTrend) {
+    btnCollapseTrend.addEventListener("click", () => {
+      btnExpandTrend?.click();
+    });
+  }
+
+  // Botón Pantalla Completa Modal
+  const btnFullscreen = document.getElementById("btn-fullscreen-trend");
+  const modalFullscreen = document.getElementById("modal-trend-fullscreen");
+  const btnCloseFullscreen = document.getElementById("btn-close-trend-fullscreen");
+
+  if (btnFullscreen && modalFullscreen) {
+    btnFullscreen.addEventListener("click", () => {
+      modalFullscreen.style.display = "flex";
+      setTimeout(() => {
+        updateTrendView();
+      }, 100);
+    });
+  }
+
+  if (btnCloseFullscreen && modalFullscreen) {
+    btnCloseFullscreen.addEventListener("click", () => {
+      modalFullscreen.style.display = "none";
+      destroyChart("chart-tendencia-modal");
+    });
+  }
+
+  // Cerrar modal con Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalFullscreen && modalFullscreen.style.display !== "none") {
+      modalFullscreen.style.display = "none";
+      destroyChart("chart-tendencia-modal");
+    }
+  });
+
+  // Búsqueda en la matriz detallada de tendencias
+  const searchInput = document.getElementById("trend-search-input");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      const rows = document.querySelectorAll("#trend-table-body tr");
+      rows.forEach((tr) => {
+        const text = tr.textContent.toLowerCase();
+        tr.style.display = text.includes(term) ? "" : "none";
+      });
+    });
+  }
+
+  // Botón Exportar Serie CSV
+  const btnExportCsv = document.getElementById("btn-export-trend-csv");
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener("click", exportTrendCsv);
+  }
+}
+
+// Exporta la serie temporal histórica a formato CSV institucional
+function exportTrendCsv() {
+  const items = state.trendData || [];
+  if (items.length === 0) {
+    alert("No hay registros disponibles para exportar.");
+    return;
+  }
+
+  const lines = [];
+  lines.push('"POLICÍA DE INVESTIGACIONES DE CHILE"');
+  lines.push('"JEFATURA NACIONAL DE MIGRACIONES Y POLICÍA INTERNACIONAL"');
+  lines.push('"SISTEMA ABIS - SERIE TEMPORAL HISTÓRICA DE ENROLAMIENTOS"');
+  lines.push(`"Fecha de Emisión","${new Date().toLocaleString('es-CL')}"`);
+  lines.push(`"Total Registros","${items.reduce((a, i) => a + i.total, 0)}"`);
+  lines.push('""');
+  lines.push('"Fecha","Total Enrolamientos","Sincronizados PDI","Con Error","Pendientes","Cumplimiento SLA (%)"');
+
+  items.forEach((item) => {
+    const total = item.total || 0;
+    const sinc = item.sincronizados || 0;
+    const err = item.con_error || 0;
+    const pend = item.pendientes || 0;
+    const sla = total > 0 ? ((sinc / total) * 100).toFixed(1) : "100.0";
+    lines.push(`"${item.fecha}",${total},${sinc},${err},${pend},"${sla}%"`);
+  });
+
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Serie_Temporal_Historica_ABIS_PDI_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Acción interactiva: Salta desde la matriz histórica directamente a la jornada en el Panel Analítico
+window.examinarFecha = function(fecha) {
+  if (!fecha) return;
+
+  // 1. Activar pestaña de Métricas
+  const tabBtn = document.querySelector('.tab-button[data-tab="metricas"]');
+  if (tabBtn) tabBtn.click();
+
+  // 2. Establecer modo a Fecha Específica
+  const filterModeSelect = document.getElementById("filter-mode-select");
+  if (filterModeSelect) {
+    filterModeSelect.value = "single";
+    state.filterMode = "single";
+    updateFilterInputsVisibility();
+  }
+
+  // 3. Establecer selector de fecha
+  const dateSingle = document.getElementById("filter-date-single");
+  if (dateSingle) {
+    dateSingle.value = fecha;
+    state.currentDate = fecha;
+  }
+
+  // 4. Cargar métricas de esa fecha
+  loadMetrics();
+
+  // 5. Scroll suave al inicio del panel
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 // Renderizado de tabla de desglose operativo con indicadores de efectividad
 function renderDataTable(data) {
@@ -2046,10 +2311,10 @@ async function sendReportToTelegram() {
       throw new Error(data.error || "Error en el despacho del mensaje.");
     }
 
-    alert(`✅ ${data.mensaje}`);
+    alert(data.mensaje);
   } catch (err) {
     console.error("Error enviando reporte a Telegram:", err);
-    alert(`❌ No se pudo enviar el reporte a Telegram: ${err.message}`);
+    alert(`No se pudo enviar el reporte a Telegram: ${err.message}`);
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHtml;
@@ -2226,7 +2491,10 @@ async function executeWebEncrypt(file, clave) {
       feedbackEncrypt.className = "crypto-feedback-box success";
       feedbackEncrypt.style.display = "block";
       feedbackEncrypt.innerHTML = `
-        <strong>🛡️ Archivo Blindado con Éxito (Operación Autorizada)</strong><br>
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Archivo Blindado con Éxito (Operación Autorizada)</span>
+        </div>
         Se descargó <code>${file.name}.enc</code> tras validar la credencial de operador.<br>
         <small>• Huella SHA-256 Original: <code>${hashOriginal.substring(0, 16)}...</code><br>
         • Huella SHA-256 Cifrada: <code>${hashCifrado.substring(0, 16)}...</code><br>
@@ -2239,7 +2507,13 @@ async function executeWebEncrypt(file, clave) {
     if (feedbackEncrypt) {
       feedbackEncrypt.className = "crypto-feedback-box error";
       feedbackEncrypt.style.display = "block";
-      feedbackEncrypt.innerHTML = `<strong>❌ Error al cifrar:</strong> ${err.message}`;
+      feedbackEncrypt.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error al cifrar:</span>
+        </div>
+        ${err.message}
+      `;
     }
   }
 }
@@ -2307,7 +2581,10 @@ async function executeWebDecrypt(file, clave) {
       feedbackDecrypt.className = "crypto-feedback-box success";
       feedbackDecrypt.style.display = "block";
       feedbackDecrypt.innerHTML = `
-        <strong>🔓 Integridad Validada & Descifrado Correcto (Operación Autorizada)</strong><br>
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+          <span>Integridad Validada & Descifrado Correcto (Operación Autorizada)</span>
+        </div>
         Se descargó el archivo original <code>${downloadName}</code> tras validar su credencial.<br>
         <small>• Verificación de Integridad: <strong>VÁLIDA (100% inalterado)</strong><br>
         • Huella SHA-256 Descifrada: <code>${hashDescifrado.substring(0, 16)}...</code><br>
@@ -2320,7 +2597,401 @@ async function executeWebDecrypt(file, clave) {
     if (feedbackDecrypt) {
       feedbackDecrypt.className = "crypto-feedback-box error";
       feedbackDecrypt.style.display = "block";
-      feedbackDecrypt.innerHTML = `<strong>❌ Error de Descifrado:</strong> ${err.message}`;
+      feedbackDecrypt.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error de Descifrado:</span>
+        </div>
+        ${err.message}
+      `;
     }
+  }
+}
+
+// ==========================================================================
+// MÓDULO DE AJUSTES: GESTIÓN DE HORARIOS DE REPORTE Y AUTOMATIZACIÓN
+// ==========================================================================
+
+state.scheduleConfig = null;
+state.currentScheduleTimes = ["08:30", "19:00"];
+
+// Carga la configuración actual de horarios desde la API
+async function loadScheduleSettings() {
+  try {
+    const res = await fetch("/api/settings/schedule");
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "No se pudo cargar la configuración.");
+
+    state.scheduleConfig = data.config;
+    state.currentScheduleTimes = Array.isArray(data.config.times) ? [...data.config.times] : ["08:30", "19:00"];
+
+    // 1. Reloj del Servidor & Próximo Envío
+    const clockDisplay = document.getElementById("schedule-clock-display");
+    if (clockDisplay && data.horaChile) {
+      clockDisplay.innerHTML = `Zona Horaria Oficial: <strong>America/Santiago (Chile)</strong> &bull; Hora Servidor: <strong>${data.horaChile.timeStr} hrs</strong> (${data.horaChile.dateStr})`;
+    }
+
+    const nextBadge = document.getElementById("schedule-next-text");
+    if (nextBadge && data.next) {
+      nextBadge.textContent = `Próximo Envío: ${data.next.text}`;
+    }
+
+    // 2. Switch Habilitado / Deshabilitado
+    const toggle = document.getElementById("schedule-enabled-toggle");
+    if (toggle) {
+      toggle.checked = Boolean(data.config.enabled);
+      updateScheduleToggleAlert(toggle.checked);
+    }
+
+    // 3. Renderizar Chips de Horarios
+    renderTimeChips(state.currentScheduleTimes);
+
+    // 4. Marcar Días de la Semana
+    const activeDays = Array.isArray(data.config.days) ? data.config.days : [1, 2, 3, 4, 5, 6, 0];
+    document.querySelectorAll(".day-check").forEach((cb) => {
+      cb.checked = activeDays.includes(Number(cb.value));
+    });
+
+    // 5. Tipo de Reporte
+    const reportTypeSelect = document.getElementById("schedule-report-type");
+    if (reportTypeSelect && data.config.reportType) {
+      reportTypeSelect.value = data.config.reportType;
+    }
+
+    // 6. Canal de Telegram Info
+    const chatIdDisplay = document.getElementById("telegram-chat-id-display");
+    if (chatIdDisplay) {
+      chatIdDisplay.textContent = data.defaultChatId || "Canal Institucional PDI (.env)";
+    }
+
+    const freqSummary = document.getElementById("schedule-freq-summary");
+    if (freqSummary) {
+      const timesCount = state.currentScheduleTimes.length;
+      freqSummary.textContent = `${timesCount} ${timesCount === 1 ? 'envío programado' : 'envíos programados'} al día`;
+    }
+
+    // 7. Renderizar Historial de Despachos
+    renderScheduleHistory(data.config.history || []);
+
+  } catch (err) {
+    console.error("Error al cargar ajustes de horario:", err);
+  }
+}
+
+// Renderiza los chips visuales de las horas configuradas
+function renderTimeChips(times) {
+  const container = document.getElementById("time-chips-container");
+  if (!container) return;
+
+  if (!times || times.length === 0) {
+    container.innerHTML = `<span style="color:var(--text-muted); font-size:0.8rem; padding: 4px;">No hay horarios definidos. Añade uno con el formulario inferior.</span>`;
+    return;
+  }
+
+  // Ordenar cronológicamente
+  const sorted = [...times].sort();
+  state.currentScheduleTimes = sorted;
+
+  container.innerHTML = sorted.map((time) => `
+    <div class="time-chip">
+      <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: #0284c7;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>${time} hrs</span>
+      <button type="button" class="time-chip-del" onclick="eliminarHorario('${time}')" title="Quitar este horario">&times;</button>
+    </div>
+  `).join("");
+
+  const freqSummary = document.getElementById("schedule-freq-summary");
+  if (freqSummary) {
+    const c = sorted.length;
+    freqSummary.textContent = `${c} ${c === 1 ? 'envío programado' : 'envíos programados'} al día`;
+  }
+}
+
+// Elimina un horario de la lista en memoria
+window.eliminarHorario = function(time) {
+  state.currentScheduleTimes = state.currentScheduleTimes.filter((t) => t !== time);
+  renderTimeChips(state.currentScheduleTimes);
+};
+
+// Añade un horario si no existe y es válido
+function agregarHorario(newTime) {
+  if (!newTime || !/^([01]\d|2[0-3]):[0-5]\d$/.test(newTime)) {
+    alert("Por favor ingresa un horario válido en formato HH:MM (24 horas).");
+    return;
+  }
+  if (!state.currentScheduleTimes.includes(newTime)) {
+    state.currentScheduleTimes.push(newTime);
+    renderTimeChips(state.currentScheduleTimes);
+  }
+}
+
+// Actualiza el texto de alerta según el toggle switch
+function updateScheduleToggleAlert(enabled) {
+  const alertBox = document.getElementById("schedule-enabled-alert");
+  const alertText = document.getElementById("schedule-enabled-text");
+  if (!alertBox || !alertText) return;
+
+  if (enabled) {
+    alertBox.className = "schedule-enabled-alert";
+    alertText.innerHTML = `
+      <span style="display:inline-flex; align-items:center; gap:6px;">
+        <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
+      </span>
+    `;
+  } else {
+    alertBox.className = "schedule-enabled-alert disabled";
+    alertText.innerHTML = `
+      <span style="display:inline-flex; align-items:center; gap:6px;">
+        <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#991b1b;"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+        <span>Los envíos automáticos están pausados temporalmente. No se emitirán reportes hasta reactivarlo.</span>
+      </span>
+    `;
+  }
+}
+
+// Renderiza la tabla de bitácora histórica de despachos
+function renderScheduleHistory(history) {
+  const tbody = document.getElementById("schedule-history-tbody");
+  const countBadge = document.getElementById("schedule-history-count");
+  if (!tbody) return;
+
+  if (countBadge) {
+    countBadge.textContent = `${history.length} despachos`;
+  }
+
+  if (!history || history.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No se registran envíos automáticos recientes</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = history.map((item) => {
+    const isExito = item.estado === "EXITO";
+    const estadoBadge = isExito
+      ? `<span class="badge badge-success">Entregado</span>`
+      : `<span class="badge badge-danger">Fallo</span>`;
+
+    const tipoBadge = item.tipo === "PRUEBA_MANUAL"
+      ? `<span class="badge badge-info">Prueba Manual</span>`
+      : `<span class="badge badge-primary">Automático</span>`;
+
+    const slaText = item.slaPDI ? `${item.slaPDI}%` : "N/D";
+    const enroladosText = item.totalEnrolados !== undefined ? item.totalEnrolados.toLocaleString("es-CL") : "-";
+
+    return `
+      <tr>
+        <td style="font-weight:600; color:var(--pdi-navy);">
+          <code>${item.horaChile || item.timestamp?.slice(0, 19).replace('T', ' ') || '-'}</code>
+        </td>
+        <td>${tipoBadge}</td>
+        <td><code>${item.fechaReportada || '-'}</code></td>
+        <td style="text-align:right; font-weight:700;">${enroladosText}</td>
+        <td><span class="badge badge-success">${slaText} SLA</span></td>
+        <td><small>${item.canal || 'Telegram'}</small></td>
+        <td>${estadoBadge}</td>
+        <td><small><code>#${item.messageId || 'N/D'}</code></small></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// Configura los eventos interactivos del módulo de Ajustes
+function setupScheduleEvents() {
+  // Toggle Switch Habilitado
+  const toggle = document.getElementById("schedule-enabled-toggle");
+  if (toggle) {
+    toggle.addEventListener("change", (e) => {
+      updateScheduleToggleAlert(e.target.checked);
+    });
+  }
+
+  // Botón Añadir Horario
+  const btnAddTime = document.getElementById("btn-add-time");
+  const inputNewTime = document.getElementById("input-new-time");
+  if (btnAddTime && inputNewTime) {
+    btnAddTime.addEventListener("click", () => {
+      agregarHorario(inputNewTime.value);
+    });
+  }
+
+  // Botones de Preajustes Operativos PDI
+  document.querySelectorAll(".preset-pill-btn[data-add-time]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const timeToAdd = btn.getAttribute("data-add-time");
+      agregarHorario(timeToAdd);
+    });
+  });
+
+  // Selector rápido Días Hábiles
+  const btnWeekdays = document.getElementById("btn-select-weekdays");
+  if (btnWeekdays) {
+    btnWeekdays.addEventListener("click", () => {
+      document.querySelectorAll(".day-check").forEach((cb) => {
+        const val = Number(cb.value);
+        cb.checked = val >= 1 && val <= 5;
+      });
+    });
+  }
+
+  // Selector rápido Todos los Días
+  const btnAllDays = document.getElementById("btn-select-all-days");
+  if (btnAllDays) {
+    btnAllDays.addEventListener("click", () => {
+      document.querySelectorAll(".day-check").forEach((cb) => {
+        cb.checked = true;
+      });
+    });
+  }
+
+  // Guardar Ajustes de Programación
+  const btnSaveSchedule = document.getElementById("btn-save-schedule");
+  const saveFeedback = document.getElementById("schedule-save-feedback");
+  if (btnSaveSchedule) {
+    btnSaveSchedule.addEventListener("click", async () => {
+      try {
+        btnSaveSchedule.disabled = true;
+        btnSaveSchedule.innerHTML = `<span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Guardando ajustes...`;
+
+        const enabled = document.getElementById("schedule-enabled-toggle")?.checked ?? true;
+        const reportType = document.getElementById("schedule-report-type")?.value || "extenso";
+
+        const days = [];
+        document.querySelectorAll(".day-check:checked").forEach((cb) => {
+          days.push(Number(cb.value));
+        });
+
+        if (state.currentScheduleTimes.length === 0) {
+          throw new Error("Debes definir al menos un horario para la programación.");
+        }
+
+        if (days.length === 0) {
+          throw new Error("Debes seleccionar al menos un día de la semana para el despacho.");
+        }
+
+        const res = await fetch("/api/settings/schedule", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            enabled,
+            times: state.currentScheduleTimes,
+            days,
+            reportType,
+          }),
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "Fallo al guardar.");
+
+        if (saveFeedback) {
+          saveFeedback.className = "crypto-feedback-box success";
+          saveFeedback.style.display = "block";
+          saveFeedback.innerHTML = `
+            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Configuración Guardada Exitosamente</span>
+            </div>
+            • Horarios activos: <strong>${data.config.times.join(", ")} hrs</strong><br>
+            • Próxima ejecución: <strong>${data.next?.text || 'Calculando...'}</strong><br>
+            • Frecuencia: <strong>${data.config.times.length} despachos diarios programados</strong>
+          `;
+          setTimeout(() => {
+            saveFeedback.style.display = "none";
+          }, 6000);
+        }
+
+        // Actualizar badge de próximo envío
+        const nextBadge = document.getElementById("schedule-next-text");
+        if (nextBadge && data.next) {
+          nextBadge.textContent = `Próximo Envío: ${data.next.text}`;
+        }
+
+      } catch (err) {
+        if (saveFeedback) {
+          saveFeedback.className = "crypto-feedback-box error";
+          saveFeedback.style.display = "block";
+          saveFeedback.innerHTML = `
+            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <span>Error:</span>
+            </div>
+            ${err.message}
+          `;
+        }
+      } finally {
+        btnSaveSchedule.disabled = false;
+        btnSaveSchedule.innerHTML = `
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>Guardar Ajustes de Programación</span>
+        `;
+      }
+    });
+  }
+
+  // Disparo de Prueba Inmediata a Telegram
+  const btnTestSchedule = document.getElementById("btn-trigger-test-schedule");
+  const testFeedback = document.getElementById("schedule-test-feedback");
+  if (btnTestSchedule) {
+    btnTestSchedule.addEventListener("click", async () => {
+      try {
+        btnTestSchedule.disabled = true;
+        btnTestSchedule.innerHTML = `<span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Conectando y enviando a Telegram...`;
+
+        if (testFeedback) testFeedback.style.display = "none";
+
+        const res = await fetch("/api/settings/schedule/test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "Fallo en el despacho de prueba.");
+
+        if (testFeedback) {
+          testFeedback.className = "crypto-feedback-box success";
+          testFeedback.style.display = "block";
+          testFeedback.innerHTML = `
+            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Reporte de Prueba Despachado Exitosamente</span>
+            </div>
+            • Canal: <strong>Telegram Oficial PDI</strong><br>
+            • Message ID: <code>#${data.resultado?.messageId || 'N/D'}</code><br>
+            • Período: <code>${data.resultado?.fechaReportada || 'Actual'}</code> (${data.resultado?.totalEnrolados?.toLocaleString("es-CL")} registros)<br>
+            • SLA: <strong>${data.resultado?.slaPDI}% Conforme</strong>
+          `;
+        }
+
+        // Recargar historial para ver la nueva fila
+        loadScheduleSettings();
+
+      } catch (err) {
+        if (testFeedback) {
+          testFeedback.className = "crypto-feedback-box error";
+          testFeedback.style.display = "block";
+          testFeedback.innerHTML = `
+            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <span>Error al despachar prueba:</span>
+            </div>
+            ${err.message}
+          `;
+        }
+      } finally {
+        btnTestSchedule.disabled = false;
+        btnTestSchedule.innerHTML = `
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <span>Enviar Reporte de Prueba a Telegram Ahora</span>
+        `;
+      }
+    });
+  }
+
+  // Botón Refrescar Historial
+  const btnRefreshHistory = document.getElementById("btn-refresh-schedule-history");
+  if (btnRefreshHistory) {
+    btnRefreshHistory.addEventListener("click", () => {
+      loadScheduleSettings();
+    });
   }
 }

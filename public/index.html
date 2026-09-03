@@ -15,6 +15,8 @@
 <body>
 
   <!-- Header Institucional PDI -->
+  <!-- Header Institucional PDI Unificado (Logo al extremo y Paneles centrados) -->
+  <!-- Header Institucional PDI Unificado (Logo al extremo y Paneles centrados) -->
   <header class="header-institutional">
     <div class="header-inner">
       <div class="brand-section">
@@ -22,25 +24,12 @@
         <div class="brand-titles">
           <div class="brand-title">
             <span>SISTEMA ABIS</span>
-            <span class="brand-badge">PDI CHILE</span>
           </div>
-          <div class="brand-subtitle">Centro de Analítica & Monitoreo de Enrolamiento Biométrico Fronterizo</div>
+          <div class="brand-subtitle">PDI &bull; Migraciones</div>
         </div>
       </div>
 
-      <div class="header-badges">
-        <div class="system-badge" id="db-status-badge">
-          <span class="status-dot"></span> Verificando conexión...
-        </div>
-        <div class="system-badge" style="background: rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.5); color: #fef08a; display: inline-flex; align-items: center; gap: 6px;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#fef08a;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect width="8" height="5" x="8" y="11" rx="1"/><path d="M10 11V9a2 2 0 1 1 4 0v2"/></svg>
-          <span>Enclave AES-256-GCM Activo</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Barra de Navegación Superior Oficial (Navbar Centrada sin Emojis) -->
-    <div class="header-nav-container">
+      <!-- Barra de Navegación de Paneles Centrada -->
       <nav class="tabs-nav navbar-top" id="main-navbar">
         <button class="tab-button active" data-tab="metricas">
           <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -49,7 +38,7 @@
             <rect width="7" height="9" x="14" y="12" rx="1"/>
             <rect width="7" height="5" x="3" y="16" rx="1"/>
           </svg>
-          <span>Panel Ejecutivo & Analítica</span>
+          <span>Panel Ejecutivo</span>
         </button>
         <button class="tab-button" data-tab="ingesta">
           <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -57,7 +46,7 @@
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" x2="12" y1="3" y2="15"/>
           </svg>
-          <span>Ingesta de Datos (Oracle ABIS)</span>
+          <span>Ingesta ABIS</span>
         </button>
         <button class="tab-button" data-tab="tendencias">
           <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -73,59 +62,19 @@
           </svg>
           <span>Criptografía & Auditoría</span>
         </button>
+        <button class="tab-button" data-tab="ajustes">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Ajustes & Horarios</span>
+        </button>
       </nav>
     </div>
   </header>
 
   <!-- Contenedor Principal -->
   <main class="app-container">
-
-    <!-- Scorecard de Resumen Ejecutivo y Salud Operativa -->
-    <section class="executive-banner" id="executive-banner">
-      <div class="exec-stat-item">
-        <div class="exec-stat-icon sla-ok" id="sla-icon">
-          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        </div>
-        <div class="exec-stat-content">
-          <span class="exec-stat-label">Cumplimiento SLA PDI</span>
-          <span class="exec-stat-value" id="exec-sla-val">98.5% <small class="badge badge-success" id="exec-sla-badge">Óptimo</small></span>
-          <span class="exec-stat-sub">Meta Institucional: &ge; 95%</span>
-        </div>
-      </div>
-
-      <div class="exec-stat-item">
-        <div class="exec-stat-icon bio">
-          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><rect width="18" height="14" x="3" y="5" rx="2"/><circle cx="9" cy="12" r="2"/><path d="M15 9h2M15 13h2M15 15h2"/></svg>
-        </div>
-        <div class="exec-stat-content">
-          <span class="exec-stat-label">Eficacia Biometría</span>
-          <span class="exec-stat-value" id="exec-bio-val">94.2%</span>
-          <span class="exec-stat-sub">Registros con captura válida</span>
-        </div>
-      </div>
-
-      <div class="exec-stat-item">
-        <div class="exec-stat-icon top-quarter">
-          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
-        </div>
-        <div class="exec-stat-content">
-          <span class="exec-stat-label">Cuartel con Mayor Carga</span>
-          <span class="exec-stat-value" id="exec-quarter-val">Cargando...</span>
-          <span class="exec-stat-sub" id="exec-quarter-sub">Volumen operativo líder</span>
-        </div>
-      </div>
-
-      <div class="exec-stat-item">
-        <div class="exec-stat-icon top-nat">
-          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
-        </div>
-        <div class="exec-stat-content">
-          <span class="exec-stat-label">Flujo Migratorio Principal</span>
-          <span class="exec-stat-value" id="exec-nat-val">Cargando...</span>
-          <span class="exec-stat-sub" id="exec-nat-sub">Mayor incidencia en registros</span>
-        </div>
-      </div>
-    </section>
 
     <!-- ========================================== -->
     <!-- TAB 1: MÉTRICAS Y ANALÍTICA AVANZADA -->
@@ -138,6 +87,9 @@
           <div class="filters-title">
             <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>
             <span>Parámetros de Filtrado Analítico</span>
+            <div class="db-filter-status" id="db-status-badge">
+              <span class="status-dot"></span> Consultando registros...
+            </div>
             <span id="loading-indicator" style="display:none; font-size:0.8rem; color:var(--status-info); margin-left:10px;">
               <span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Consultando vistas SQL...
             </span>
@@ -192,14 +144,6 @@
             <button id="btn-export-excel" class="btn btn-excel" title="Descargar Informe Oficial Formateado en Microsoft Excel (.xlsx)">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 13 8 4"/><path d="m16 13-8 4"/></svg>
               <span>Excel (.xlsx)</span>
-            </button>
-            <button id="btn-export-csv" class="btn btn-csv" title="Descargar Reporte Oficial en Formato CSV">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
-              <span>CSV Oficial</span>
-            </button>
-            <button id="btn-export-json" class="btn btn-json" title="Exportar Reporte en Formato JSON">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-              <span>JSON</span>
             </button>
             <button id="btn-export-telegram" class="btn btn-telegram" title="Enviar reporte del período actual por Telegram al canal institucional">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -330,7 +274,7 @@
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>Composición Demográfica Cruzada</span>
             </div>
-            <span class="chart-badge" id="badge-chart-demografia">Adultos vs N.N.A. por Sexo</span>
+            <span class="chart-badge" id="badge-chart-demografia-cruzada">Adultos vs N.N.A. por Sexo</span>
           </div>
           <div class="chart-body">
             <canvas id="chart-demografia-cruzada"></canvas>
@@ -386,7 +330,7 @@
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>Distribución por Tramos Etarios</span>
             </div>
-            <span class="chart-badge" id="badge-chart-tramos">Protección N.N.A.</span>
+            <span class="chart-badge" id="badge-chart-tramos-etarios">Protección N.N.A.</span>
           </div>
           <div class="chart-body">
             <canvas id="chart-tramos-etarios"></canvas>
@@ -505,20 +449,151 @@
     <!-- ========================================== -->
     <section id="tab-tendencias" class="tab-content" style="display: none;">
       
-      <div class="chart-card col-12" style="margin-bottom: 24px;">
+      <!-- KPIs Resumen de Tendencias -->
+      <div class="trend-kpi-grid">
+        <div class="trend-kpi-card blue">
+          <span class="trend-kpi-label">Volumen Acumulado</span>
+          <span class="trend-kpi-val" id="trend-kpi-total">0</span>
+          <span class="trend-kpi-sub">Total serie histórica analizada</span>
+        </div>
+        <div class="trend-kpi-card info">
+          <span class="trend-kpi-label">Jornadas Operativas</span>
+          <span class="trend-kpi-val" id="trend-kpi-days">0</span>
+          <span class="trend-kpi-sub">Días con registros activos</span>
+        </div>
+        <div class="trend-kpi-card default">
+          <span class="trend-kpi-label">Promedio por Jornada</span>
+          <span class="trend-kpi-val" id="trend-kpi-avg">0</span>
+          <span class="trend-kpi-sub">Enrolamientos promedio diarios</span>
+        </div>
+        <div class="trend-kpi-card peak">
+          <span class="trend-kpi-label">Jornada Récord (Pico)</span>
+          <span class="trend-kpi-val" id="trend-kpi-peak">0</span>
+          <span class="trend-kpi-sub" id="trend-kpi-peak-date">Cargando afluencia líder...</span>
+        </div>
+        <div class="trend-kpi-card success">
+          <span class="trend-kpi-label">SLA Global Histórico</span>
+          <span class="trend-kpi-val" id="trend-kpi-sla">100%</span>
+          <span class="trend-kpi-sub">Tasa media de sincronización PDI</span>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros y Expansión -->
+      <div class="trend-toolbar-card">
+        <div class="trend-toolbar-left">
+          <div class="trend-toolbar-group">
+            <span class="trend-toolbar-label">Período:</span>
+            <div class="filter-presets" id="trend-period-presets">
+              <button class="preset-btn" data-trend-range="15">15 Días</button>
+              <button class="preset-btn active" data-trend-range="30">30 Días</button>
+              <button class="preset-btn" data-trend-range="90">90 Días</button>
+              <button class="preset-btn" data-trend-range="365">1 Año</button>
+              <button class="preset-btn" data-trend-range="all">Todo el Histórico</button>
+            </div>
+          </div>
+
+          <div class="trend-toolbar-group">
+            <span class="trend-toolbar-label">Agrupación:</span>
+            <div class="trend-granularity-toggle">
+              <button class="granularity-btn active" id="btn-granularity-day" data-granularity="day">Diario</button>
+              <button class="granularity-btn" id="btn-granularity-month" data-granularity="month">Mensual</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="trend-toolbar-right">
+          <button id="btn-toggle-expand-trend" class="btn btn-primary" title="Expandir gráfico para ver detalladamente">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg>
+            <span id="trend-expand-text">Expandir Vista Detallada</span>
+          </button>
+          <button id="btn-fullscreen-trend" class="btn btn-secondary" title="Modo Pantalla Completa">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m3 9 6-6M9 21l-6-6M15 3l6 6M21 15l-6 6"/></svg>
+            <span>Pantalla Completa</span>
+          </button>
+          <button id="btn-export-trend-csv" class="btn btn-csv" title="Descargar Serie Temporal en Formato CSV">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
+            <span>Exportar CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjeta del Gráfico de Evolución Temporal -->
+      <div class="chart-card col-12" id="trend-chart-card" style="margin-bottom: 24px;">
         <div class="chart-header">
           <div class="chart-title">
             <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            <span>Evolución Temporal de Enrolamientos Biométricos</span>
+            <span>Curva de Evolución Temporal de Enrolamientos Biométricos</span>
           </div>
-          <span class="chart-badge" id="badge-chart-tendencias">Serie Histórica Completa</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="chart-badge" id="badge-chart-tendencia">Cargando serie...</span>
+          </div>
         </div>
-        <div class="chart-body" style="min-height: 440px;">
+        <div class="chart-body" id="trend-chart-body" style="min-height: 420px; transition: min-height 0.3s ease;">
           <canvas id="chart-tendencia-historica"></canvas>
         </div>
       </div>
 
+      <!-- Matriz Detallada Día a Día (Expandible) -->
+      <div class="table-card" id="trend-detail-matrix">
+        <div class="table-header-bar">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            <span>Matriz Histórica Detallada Día por Día</span>
+            <span class="badge badge-info" id="trend-matrix-count" style="margin-left: 8px;">0 jornadas</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="trend-search-input" class="form-control search-input" placeholder="Buscar fecha (ej: 2024-11, 2026)..." style="width: 260px;">
+            <button id="btn-collapse-trend" class="btn btn-secondary btn-sm" title="Contraer o alternar matriz">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+              <span>Alternar Tabla</span>
+            </button>
+          </div>
+        </div>
+        <div class="table-container" style="max-height: 480px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha Operativa</th>
+                <th>Día</th>
+                <th style="text-align:right;">Total Enrolados</th>
+                <th style="text-align:right;">Sincronizados PDI</th>
+                <th style="text-align:right;">Con Error</th>
+                <th style="text-align:right;">Pendientes</th>
+                <th>Cumplimiento SLA</th>
+                <th style="text-align:center;">Acción Directa</th>
+              </tr>
+            </thead>
+            <tbody id="trend-table-body">
+              <tr>
+                <td colspan="8" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                  Cargando serie detallada...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </section>
+
+    <!-- Modal Pantalla Completa para Evolución y Tendencias -->
+    <div class="modal-backdrop" id="modal-trend-fullscreen" style="display: none;">
+      <div class="modal-dialog modal-fullscreen-dialog">
+        <div class="modal-header">
+          <div class="modal-title">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <span>Centro de Mando: Evolución y Tendencias Históricas ABIS</span>
+            <span class="badge badge-primary" id="modal-trend-badge">Alta Resolución</span>
+          </div>
+          <button class="modal-close-btn" id="btn-close-trend-fullscreen">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1;">
+          <div style="flex: 1; min-height: 520px; position: relative;">
+            <canvas id="chart-tendencia-modal"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- TAB 4: CRIPTOGRAFÍA & AUDITORÍA -->
@@ -623,6 +698,227 @@ npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
           </div>
         </div>
 
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: AJUSTES & GESTIÓN DE HORARIOS -->
+    <!-- ========================================== -->
+    <section id="tab-ajustes" class="tab-content" style="display: none;">
+
+      <!-- Banner de Estado y Horario Oficial PDI -->
+      <div class="schedule-status-banner">
+        <div class="schedule-status-left">
+          <div class="schedule-clock-icon">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="schedule-clock-title">Reloj del Servidor & Automatización PDI</div>
+            <div class="schedule-clock-time" id="schedule-clock-display">Zona Horaria: America/Santiago (Chile) &bull; Sincronizando...</div>
+          </div>
+        </div>
+        <div class="schedule-status-right">
+          <div class="schedule-next-badge" id="schedule-next-badge">
+            <span class="status-dot"></span>
+            <span id="schedule-next-text">Próximo Envío: Calculando...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Configuración de Horarios y Canal -->
+      <div class="settings-grid">
+        
+        <!-- Tarjeta 1: Gestión de Horas y Frecuencia de Envío -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Programación de Horarios de Reporte</span>
+            </div>
+            <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
+              <input type="checkbox" id="schedule-enabled-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-card-body">
+            
+            <!-- Estado del Switch -->
+            <div class="schedule-enabled-alert" id="schedule-enabled-alert">
+              <span id="schedule-enabled-text" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
+              </span>
+            </div>
+
+            <!-- Horarios Configurados Actualmente -->
+            <div class="form-group" style="margin-top: 16px;">
+              <label class="filter-label">Horarios Programados Activos (Formato 24 Horas):</label>
+              <div class="time-chips-container" id="time-chips-container">
+                <!-- Se poblará dinámicamente con chips: 08:30 hrs ×, 19:00 hrs × -->
+              </div>
+            </div>
+
+            <!-- Agregar Nuevo Horario -->
+            <div class="add-time-box">
+              <label class="filter-label" for="input-new-time">Añadir nueva hora de envío:</label>
+              <div class="add-time-row">
+                <input type="time" id="input-new-time" class="form-control" value="12:00">
+                <button type="button" id="btn-add-time" class="btn btn-primary">
+                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span>Agregar Hora</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Presets Rápidos Institucionales -->
+            <div class="form-group" style="margin-top: 14px;">
+              <label class="filter-label">Preajustes Operativos PDI:</label>
+              <div class="time-presets-grid">
+                <button type="button" class="preset-pill-btn" data-add-time="08:30">+ Apertura Matutina (08:30)</button>
+                <button type="button" class="preset-pill-btn" data-add-time="14:00">+ Cambio Turno (14:00)</button>
+                <button type="button" class="preset-pill-btn" data-add-time="19:00">+ Cierre Vespertino (19:00)</button>
+                <button type="button" class="preset-pill-btn" data-add-time="22:00">+ Cierre Nocturno (22:00)</button>
+              </div>
+            </div>
+
+            <!-- Días de la Semana -->
+            <div class="form-group" style="margin-top: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label class="filter-label" style="margin-bottom:0;">Días de Envío Semanal:</label>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="btn-link-action" id="btn-select-weekdays">Lunes a Viernes</button>
+                  <span style="color:#cbd5e1;">&bull;</span>
+                  <button type="button" class="btn-link-action" id="btn-select-all-days">Todos los Días</button>
+                </div>
+              </div>
+              <div class="days-selector-grid">
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked> <span>Lun</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked> <span>Mar</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked> <span>Mié</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked> <span>Jue</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked> <span>Vie</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked> <span>Sáb</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked> <span>Dom</span></label>
+              </div>
+            </div>
+
+            <!-- Formato del Reporte -->
+            <div class="form-group" style="margin-top: 18px;">
+              <label class="filter-label" for="schedule-report-type">Estructura del Reporte a Despachar:</label>
+              <select id="schedule-report-type" class="form-control">
+                <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)</option>
+                <option value="resumen">Resumen Ejecutivo Compacto (KPIs Rápidos)</option>
+              </select>
+            </div>
+
+            <!-- Botón Guardar Cambios -->
+            <button type="button" id="btn-save-schedule" class="btn btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <span>Guardar Ajustes de Programación</span>
+            </button>
+            <div id="schedule-save-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
+
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: Canal de Notificaciones & Prueba Inmediata -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              <span>Canal de Notificaciones (Telegram Oficial)</span>
+            </div>
+          </div>
+
+          <div class="settings-card-body">
+            
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+              Los reportes automáticos se envían mediante la API de Telegram hacia el canal institucional de la Jefatura Nacional de Migraciones y Policía Internacional.
+            </p>
+
+            <div class="channel-info-box">
+              <div class="channel-info-row">
+                <span class="channel-info-label">Bot Institucional:</span>
+                <span class="channel-info-val" id="telegram-bot-badge">@AbisSystemBot &bull; Enclave Activo</span>
+              </div>
+              <div class="channel-info-row">
+                <span class="channel-info-label">Chat ID Destino:</span>
+                <span class="channel-info-val" id="telegram-chat-id-display">Cargando...</span>
+              </div>
+              <div class="channel-info-row">
+                <span class="channel-info-label">Frecuencia Activa:</span>
+                <span class="channel-info-val" id="schedule-freq-summary">2 envíos al día</span>
+              </div>
+            </div>
+
+            <!-- Sección de Prueba Manual -->
+            <div class="test-dispatch-box" style="margin-top: 20px;">
+              <h4 style="font-size: 0.92rem; color: var(--pdi-navy); margin-bottom: 8px; display:flex; align-items:center; gap:8px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>Prueba de Despacho Inmediato</span>
+              </h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                Verifica que el canal reciba el reporte sin esperar la hora programada. Esto emitirá un reporte de prueba con los datos más recientes.
+              </p>
+              <button type="button" id="btn-trigger-test-schedule" class="btn btn-telegram" style="width: 100%;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                <span>Enviar Reporte de Prueba a Telegram Ahora</span>
+              </button>
+              <div id="schedule-test-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
+            </div>
+
+            <!-- Aviso de Seguridad -->
+            <div style="margin-top: 20px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md); font-size: 0.8rem; color: #166534;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; margin-bottom: 4px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: #166534;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>Trazabilidad y No-Repudio</span>
+              </div>
+              Cada despacho automático queda registrado en la bitácora criptográfica de PostgreSQL (<code>registro_auditoria_cifrada</code>) con identificador de mensaje y timestamp oficial.
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tarjeta 3: Bitácora de Envíos y Auditoría de Notificaciones -->
+      <div class="table-card" style="margin-top: 24px;">
+        <div class="table-header-bar">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            <span>Historial de Envíos de Reportes y Notificaciones</span>
+            <span class="badge badge-info" id="schedule-history-count">0 registros</span>
+          </div>
+          <button type="button" id="btn-refresh-schedule-history" class="btn btn-secondary btn-sm" title="Actualizar historial">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            <span>Actualizar</span>
+          </button>
+        </div>
+        <div class="table-container" style="max-height: 380px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha y Hora (Chile)</th>
+                <th>Tipo de Despacho</th>
+                <th>Período Reportado</th>
+                <th style="text-align:right;">Total Enrolados</th>
+                <th>Cumplimiento SLA</th>
+                <th>Canal Destino</th>
+                <th>Estado Entrega</th>
+                <th>Message ID</th>
+              </tr>
+            </thead>
+            <tbody id="schedule-history-tbody">
+              <tr>
+                <td colspan="8" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                  Cargando bitácora de despachos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </section>

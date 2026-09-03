@@ -91,7 +91,7 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(response.ok()).toBeTruthy();
     const text = await response.text();
     expect(text).toContain('SISTEMA ABIS');
-    expect(text).toContain('PDI CHILE');
+    expect(text).toContain('Policía de Investigaciones de Chile');
     expect(text).toContain('btn-export-word');
   });
 
@@ -206,5 +206,46 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(decRes.ok()).toBeTruthy();
     const decBuffer = await decRes.body();
     expect(decBuffer.toString('utf8')).toBe(sampleText);
+  });
+
+  test('GET /api/settings/schedule returns scheduler configuration, next execution and Chile time', async ({ request }) => {
+    const res = await request.get(`${BASE_URL}/api/settings/schedule`);
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    expect(data.ok).toBe(true);
+    expect(data.config).toBeDefined();
+    expect(Array.isArray(data.config.times)).toBeTruthy();
+    expect(data.horaChile).toBeDefined();
+    expect(data.horaChile.timeStr).toMatch(/^\d{2}:\d{2}$/);
+    expect(data.next).toBeDefined();
+  });
+
+  test('POST /api/settings/schedule updates schedule times and options', async ({ request }) => {
+    const res = await request.post(`${BASE_URL}/api/settings/schedule`, {
+      data: {
+        enabled: true,
+        times: ['08:30', '14:00', '19:00'],
+        days: [1, 2, 3, 4, 5],
+        reportType: 'extenso',
+      }
+    });
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    expect(data.ok).toBe(true);
+    expect(data.config.times).toEqual(['08:30', '14:00', '19:00']);
+    expect(data.config.days).toEqual([1, 2, 3, 4, 5]);
+    expect(data.next).toBeDefined();
+  });
+
+  test('POST /api/settings/schedule/test executes immediate test dispatch with valid audit', async ({ request }) => {
+    const res = await request.post(`${BASE_URL}/api/settings/schedule/test`, {
+      data: {}
+    });
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    expect(data.ok).toBe(true);
+    expect(data.resultado).toBeDefined();
+    expect(data.resultado.estado).toBe('EXITO');
+    expect(data.resultado.canal).toBe('Telegram Oficial PDI');
   });
 });

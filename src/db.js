@@ -27,7 +27,7 @@ const pool = new Pool(poolConfig);
 
 // Evento Crítico: Manejo de errores en clientes inactivos (evita caídas del proceso Node.js)
 pool.on("error", (err, client) => {
-  console.error("⚠️ [DATABASE POOL ERROR] Error en cliente inactivo de PostgreSQL:", err.message);
+  console.error("[DATABASE POOL ERROR] Error en cliente inactivo de PostgreSQL:", err.message);
   // El pool descarta automáticamente el socket muerto y crea uno nuevo cuando se requiera
 });
 
