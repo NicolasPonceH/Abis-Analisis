@@ -135,4 +135,51 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(text).toContain('JEFATURA NACIONAL DE MIGRACIONES');
     expect(text).toContain('MATRIZ DE RENDIMIENTO OPERATIVO POR CUARTEL');
   });
+
+  test('POST /api/telegram/enviar sends operational report to Telegram channel', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/telegram/enviar`, {
+      data: { fecha: '2026-08-22' }
+    });
+    expect(response.ok()).toBeTruthy();
+    const data = await response.json();
+    expect(data.ok).toBe(true);
+    expect(data.mensaje).toContain('enviado exitosamente');
+    expect(data.messageId).toBeDefined();
+  });
+
+  test('POST /api/security/cifrar and /api/security/descifrar roundtrip protects and recovers file', async ({ request }) => {
+    const sampleText = 'PRUEBA_INTEGRIDAD_PDI_2026';
+    const sampleBuffer = Buffer.from(sampleText, 'utf8');
+
+    // Cifrar
+    const encRes = await request.post(`${BASE_URL}/api/security/cifrar`, {
+      multipart: {
+        archivo: {
+          name: 'prueba.xlsx',
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          buffer: sampleBuffer,
+        }
+      }
+    });
+    expect(encRes.ok()).toBeTruthy();
+    expect(encRes.headers()['x-hash-original']).toBeDefined();
+    expect(encRes.headers()['x-hash-cifrado']).toBeDefined();
+    const encBuffer = await encRes.body();
+    // Cabecera mágica ABIS_ENC_V1
+    expect(encBuffer.toString('utf8', 0, 11)).toBe('ABIS_ENC_V1');
+
+    // Descifrar
+    const decRes = await request.post(`${BASE_URL}/api/security/descifrar`, {
+      multipart: {
+        archivo: {
+          name: 'prueba.xlsx.enc',
+          mimeType: 'application/octet-stream',
+          buffer: encBuffer,
+        }
+      }
+    });
+    expect(decRes.ok()).toBeTruthy();
+    const decBuffer = await decRes.body();
+    expect(decBuffer.toString('utf8')).toBe(sampleText);
+  });
 });

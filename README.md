@@ -10,7 +10,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B%203NF-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![AES-256-GCM](https://img.shields.io/badge/Criptograf%C3%ADa-AES--256--GCM-002B49?style=for-the-badge&logo=security&logoColor=white)]()
-[![Playwright](https://img.shields.io/badge/Pruebas-13%2F13%20Aprobadas-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Playwright](https://img.shields.io/badge/Pruebas-15%2F15%20Aprobadas-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
 [![Status](https://img.shields.io/badge/Estado-Producci%C3%B3n%20Ready-blue?style=for-the-badge)]()
 
 <br>
@@ -28,15 +28,15 @@
 3. [Características Principales](#-características-principales)
    - [Panel Ejecutivo y Métricas en Tiempo Real](#1-panel-ejecutivo-y-métricas-en-tiempo-real)
    - [Filtros Reactivos Instantáneos](#2-filtros-reactivos-instantáneos)
-   - [Centro de Exportación Oficial (Word, Excel, CSV, JSON)](#3-centro-de-exportación-oficial)
-   - [Seguridad Criptográfica AES-256-GCM y Descifrado en RAM](#4-seguridad-criptográfica-y-auditoría)
+   - [Centro de Exportación Oficial & Disparo a Telegram](#3-centro-de-exportación-oficial--disparo-a-telegram)
+   - [Suite Criptográfica Web y Terminal](#4-suite-criptográfica-web-y-auditoría)
    - [Autorización Policial para Ingesta](#5-autorización-policial-para-ingesta-de-archivos)
    - [Bot Interactivo de Telegram](#6-bot-interactivo-de-telegram)
 4. [Estructura del Proyecto](#-estructura-del-proyecto)
 5. [Instalación y Puesta en Marcha](#-instalación-y-puesta-en-marcha)
 6. [Variables de Entorno](#-variables-de-entorno)
 7. [Endpoints de la API](#-endpoints-de-la-api)
-8. [Herramientas CLI Criptográficas](#-herramientas-cli-criptográficas)
+8. [Herramientas Criptográficas (Web y CLI)](#-herramientas-criptográficas-web-y-cli)
 9. [Batería de Pruebas Automatizadas](#-batería-de-pruebas-automatizadas)
 10. [Marco Legal y Confidencialidad](#-marco-legal-y-confidencialidad)
 
@@ -48,10 +48,10 @@ El **Sistema ABIS** (*Automated Biometric Identification System*) de la Policía
 
 El sistema resuelve el ciclo completo de vida del dato:
 1. **Extracción**: Recibe planillas generadas desde la base de datos central Oracle ABIS.
-2. **Blindaje Criptográfico**: Permite cifrar y descifrar archivos confidenciales bajo el estándar **AES-256-GCM**.
+2. **Blindaje Criptográfico**: Permite cifrar y descifrar archivos confidenciales bajo el estándar **AES-256-GCM** (directamente desde el navegador web o vía terminal).
 3. **Ingesta Segura (ETL)**: Procesa archivos en memoria volátil RAM con validación estricta, tolerancia a errores tipográficos y control de acceso mediante credencial institucional.
 4. **Base de Datos Relacional**: Pobla un modelo relacional en **PostgreSQL (Tercera Forma Normal - 3NF)** con vistas optimizadas.
-5. **Analítica Ejecutiva**: Dashboard web institucional interactivo, responsivo y sin emojis, con reportes descargables en Microsoft Word (`.docx`) y Microsoft Excel (`.xlsx`) completamente estilizados.
+5. **Analítica Ejecutiva**: Dashboard web institucional interactivo, responsivo y sin emojis, con reportes descargables en Microsoft Word (`.docx`) y Microsoft Excel (`.xlsx`) completamente estilizados, y despacho manual a Telegram.
 
 ---
 
@@ -63,7 +63,7 @@ El sistema resuelve el ciclo completo de vida del dato:
               ▼ (Extracción de datos operativos)
     Planilla Excel (.xlsx)
               │
-              ▼ (Herramienta CLI / Blindaje)
+              ▼ (Cifrador Web o Herramienta CLI)
    Archivo Protegido (.enc) ──► Cifrado AES-256-GCM (Auth Tag 128-bit)
               │
               ▼ (Carga en Dashboard Web)
@@ -83,7 +83,7 @@ El sistema resuelve el ciclo completo de vida del dato:
     [ Dashboard Web PDI ]            [ Exportaciones Formales ]      [ Bot de Telegram ]
    - Scorecard Ejecutivo            - Word (.docx) Formateado        - Alertas automáticas
    - Gráficos Chart.js              - Excel (.xlsx) con Fórmulas     - Consultas operativas
-   - Matriz de Cuarteles            - CSV Oficial / JSON / Print     - Monitoreo móvil
+   - Matriz de Cuarteles            - CSV Oficial / JSON / Print     - Envío manual web
 ```
 
 ---
@@ -113,7 +113,7 @@ El sistema resuelve el ciclo completo de vida del dato:
   * `Histórico Acumulado`: Consolida el universo histórico total de enrolamientos.
 * **Banner de Período con Pulso Visual**: Notifica en negrita la fecha o rango en pantalla con una sutil animación de actualización.
 
-### 3. Centro de Exportación Oficial
+### 3. Centro de Exportación Oficial & Disparo a Telegram
 Los botones de la barra de acciones cuentan con identidad cromática institucional:
 
 | Botón | Color | Formato | Contenido |
@@ -122,13 +122,18 @@ Los botones de la barra de acciones cuentan con identidad cromática institucion
 | **Excel (.xlsx)** | **Verde** (`#107c41`) | `.xlsx` nativo | Libro de cálculo con 2 hojas, banner azul marino/oro, KPIs coloreados, fórmulas `=SUM()` y paneles inmovilizados. |
 | **CSV Oficial** | **Verde** (`#107c41`) | `.csv` con BOM | Texto delimitado con Byte Order Mark (BOM UTF-8) para compatibilidad con planillas externas. |
 | **JSON** | **Amarillo** (`#f59e0b`) | `.json` | Estructura jerárquica con metadatos completos para consumo en APIs o interoperabilidad. |
+| **Telegram** | **Celeste** (`#229ed9`) | Disparo manual API | Notificación instantánea formateada del período consultado al canal oficial de Telegram. |
 | **Imprimir** | **Negro** (`#0f172a`) | `@media print` | Estilo optimizado para impresoras o guardado en PDF limpio sin elementos de navegación. |
 
-### 4. Seguridad Criptográfica y Auditoría
-* Algoritmo **AES-256-GCM** (*Galois/Counter Mode*), esquema AEAD recomendado por el NIST.
-* **Descifrado Exclusivo en Memoria RAM**: Si se procesa un archivo blindado `.enc`, el servidor lo autentica y descifra en la memoria volátil sin escribir copias desprotegidas en disco.
+### 4. Suite Criptográfica Web y Auditoría
+* **Herramientas Web Integradas (Sin Terminal)**: En la pestaña *"Criptografía & Auditoría"*, cualquier funcionario u operador puede:
+  * **Blindar Archivos (.xlsx &rarr; .enc)**: Cifrado inmediato con descarga automática del archivo blindado.
+  * **Descifrar y Validar (.enc &rarr; .xlsx)**: Verificación de autenticidad del Auth Tag y descarga del Excel original.
+* **Algoritmo Militar AES-256-GCM** (*Galois/Counter Mode*), esquema AEAD recomendado por el NIST.
+* **Descifrado Exclusivo en Memoria RAM**: El servidor autentica y descifra en la memoria volátil sin escribir copias desprotegidas en disco.
 * **Huella Digital SHA-256**: Cada lote genera un hash inmutable de 64 caracteres hexadecimales.
 * **Bitácora de Auditoría en Base de Datos**: La tabla `registro_auditoria_cifrada` almacena fecha, tipo de evento, archivo, hash y detalles de cada operación.
+* **Consola CLI (Opcional)**: Comandos de terminal disponibles como alternativa avanzada para administradores en servidores headless.
 
 ### 5. Autorización Policial para Ingesta de Archivos
 * Al arrastrar o examinar una planilla en la pestaña **"Ingesta de Datos (Oracle ABIS)"**, el sistema despliega un **Modal Institucional de Autorización**.
@@ -257,27 +262,30 @@ Abre tu navegador en: **[http://localhost:3000](http://localhost:3000)**.
 | `GET` | `/api/metricas/rango` | `?desde=...&hasta=...` | Métricas agregadas para un rango personalizado de fechas. |
 | `GET` | `/api/metricas/tendencia`| `?limite=30` | Serie de tiempo histórica para gráficos de evolución. |
 | `POST`| `/api/ingest/upload` | `archivo`, `X-Ingesta-Auth` | Carga e inserción masiva protegida con clave de autorización. |
+| `POST`| `/api/telegram/enviar` | `fecha` o `desde`/`hasta` | Envío manual de informe oficial al bot/canal de Telegram institucional. |
+| `POST`| `/api/security/cifrar` | `archivo` (.xlsx) | Cifrado web con AES-256-GCM y descarga de archivo blindado `.enc`. |
+| `POST`| `/api/security/descifrar`| `archivo` (.enc) | Descifrado web con validación de Auth Tag y descarga de `.xlsx`. |
 | `GET` | `/api/export/excel` | `?fecha=...` o `?desde=...&hasta=...` | Descarga de informe oficial formateado en **Microsoft Excel (.xlsx)**. |
 | `GET` | `/api/export/word` | `?fecha=...` o `?desde=...&hasta=...` | Descarga de informe oficial en **Microsoft Word (.docx)**. |
 | `GET` | `/api/export/csv` | `?fecha=...` o `?desde=...&hasta=...` | Descarga de reporte en **CSV Oficial con BOM UTF-8**. |
 
 ---
 
-## 🔐 Herramientas CLI Criptográficas
+## 🔐 Herramientas Criptográficas (Web y CLI)
 
-El sistema incluye comandos directos en consola para blindar y auditar archivos antes de su traslado:
+El sistema ofrece doble modalidad para blindar y auditar archivos:
 
-### Cifrar un Archivo Excel (`.xlsx` ➔ `.enc`):
+### 1. Vía Navegador Web (Recomendada para Operadores)
+Directamente desde la pestaña **"Criptografía & Auditoría"** en la aplicación web, arrastrando el archivo y pulsando un botón sin requerir comandos de consola.
+
+### 2. Vía Consola CLI (Avanzada para Servidores Headless)
 ```bash
+# Cifrar un archivo de enrolamiento a formato protegido .enc:
 npm run security:cifrar "New_Enrolados Abis.xlsx"
-```
-*Genera un archivo sellado `.enc` cifrado con AES-256-GCM y muestra su etiqueta de autenticación y huella SHA-256.*
 
-### Descifrar y Validar Integridad (`.enc` ➔ `.xlsx`):
-```bash
+# Descifrar y validar la integridad criptográfica del archivo:
 npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
 ```
-*Verifica que no haya alteración de bits y recupera el archivo plano original.*
 
 ---
 
@@ -289,9 +297,9 @@ El proyecto cuenta con una cobertura integral de pruebas de integración y E2E m
 npx playwright test
 ```
 
-### Resultados de la Suite (13/13 Aprobadas):
+### Resultados de la Suite (15/15 Aprobadas):
 ```
-Running 13 tests using 1 worker
+Running 15 tests using 1 worker
 
   ✓ 1 GET /health returns ok and db connected
   ✓ 2 GET /reporte-diario without fecha returns most recent data
@@ -306,8 +314,10 @@ Running 13 tests using 1 worker
   ✓ 11 GET /api/export/excel generates formatted official PDI Excel (.xlsx) document
   ✓ 12 GET /api/export/excel with date range returns formatted Excel document
   ✓ 13 GET /api/export/csv generates formal PDI institutional CSV with UTF-8 BOM
+  ✓ 14 POST /api/telegram/enviar sends operational report to Telegram channel
+  ✓ 15 POST /api/security/cifrar and /api/security/descifrar roundtrip protects and recovers file
 
-  13 passed (100% éxito)
+  15 passed (100% éxito)
 ```
 
 ---

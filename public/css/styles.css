@@ -878,6 +878,25 @@ body {
   stroke: #ffffff !important;
 }
 
+/* 5. Botón Telegram: Celeste Telegram Oficial */
+.btn-telegram, #btn-export-telegram {
+  background: #229ed9 !important;
+  border: 1px solid #1a87ba !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(34, 158, 217, 0.3) !important;
+}
+.btn-telegram:hover, #btn-export-telegram:hover {
+  background: #1a87ba !important;
+  border-color: #146e99 !important;
+  color: #ffffff !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(34, 158, 217, 0.4) !important;
+}
+.btn-telegram .svg-icon, #btn-export-telegram .svg-icon {
+  stroke: #ffffff !important;
+  fill: none;
+}
+
 .btn-gold {
   background: linear-gradient(135deg, var(--pdi-gold-light), var(--pdi-gold));
   color: #001f35;
@@ -1678,4 +1697,116 @@ body {
     max-width: 100%;
     padding: 0;
   }
+}
+
+/* ==========================================================================
+   HERRAMIENTAS CRIPTOGRÁFICAS WEB (SIN TERMINAL)
+   ========================================================================== */
+.crypto-web-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 24px;
+}
+
+.crypto-tool-card {
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+}
+
+.crypto-tool-card:hover {
+  border-color: var(--pdi-navy);
+  box-shadow: 0 6px 18px rgba(0, 43, 73, 0.08);
+}
+
+.crypto-tool-header h4 {
+  font-size: 1rem;
+  color: var(--pdi-navy);
+  margin: 8px 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crypto-tool-header p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.crypto-tool-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-encrypt {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-decrypt {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.crypto-file-dropzone {
+  border: 2px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 22px 14px;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.crypto-file-dropzone:hover, .crypto-file-dropzone.dragover {
+  border-color: var(--pdi-navy);
+  background: #f0f7ff;
+}
+
+.crypto-file-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.crypto-feedback-box {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.crypto-feedback-box.success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.crypto-feedback-box.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
 }

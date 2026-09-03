@@ -169,11 +169,19 @@ function setupEventListeners() {
     btnExportCsv.addEventListener("click", exportCurrentReportCsv);
   }
 
+  const btnExportTelegram = document.getElementById("btn-export-telegram");
+  if (btnExportTelegram) {
+    btnExportTelegram.addEventListener("click", sendReportToTelegram);
+  }
+
   // Botón de imprimir informe
   const btnPrint = document.getElementById("btn-print");
   if (btnPrint) {
     btnPrint.addEventListener("click", () => window.print());
   }
+
+  // Inicializar herramientas web criptográficas (Sin terminal)
+  setupCryptoWebTools();
 }
 
 // Verifica el estado del backend y la base de datos
@@ -1239,4 +1247,239 @@ function exportCurrentReportCsv() {
   document.body.appendChild(a);
   a.click();
   a.remove();
+}
+
+// Envío manual del reporte activo al bot de Telegram institucional
+async function sendReportToTelegram() {
+  const btn = document.getElementById("btn-export-telegram");
+  if (!btn) return;
+  const originalHtml = btn.innerHTML;
+  try {
+    btn.disabled = true;
+    btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;">Enviando...</span>`;
+
+    const payload = {};
+    if (state.filterMode === "range" && state.dateFrom && state.dateTo) {
+      payload.desde = state.dateFrom;
+      payload.hasta = state.dateTo;
+    } else if (state.currentDate) {
+      payload.fecha = state.currentDate;
+    }
+
+    const res = await fetch("/api/telegram/enviar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Error en el despacho del mensaje.");
+    }
+
+    alert(`✅ ${data.mensaje}`);
+  } catch (err) {
+    console.error("Error enviando reporte a Telegram:", err);
+    alert(`❌ No se pudo enviar el reporte a Telegram: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+}
+
+// Configuración de herramientas interactivas web de cifrado y descifrado (Sin Terminal)
+function setupCryptoWebTools() {
+  // 1. Cifrado Web (.xlsx -> .enc)
+  const dropzoneEncrypt = document.getElementById("dropzone-encrypt");
+  const fileInputEncrypt = document.getElementById("crypto-encrypt-file-input");
+  const filenameEncrypt = document.getElementById("encrypt-selected-filename");
+  const btnRunEncrypt = document.getElementById("btn-run-encrypt");
+  const feedbackEncrypt = document.getElementById("encrypt-feedback");
+
+  let selectedEncryptFile = null;
+
+  if (dropzoneEncrypt && fileInputEncrypt) {
+    dropzoneEncrypt.addEventListener("click", () => fileInputEncrypt.click());
+    dropzoneEncrypt.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzoneEncrypt.classList.add("dragover");
+    });
+    dropzoneEncrypt.addEventListener("dragleave", () => dropzoneEncrypt.classList.remove("dragover"));
+    dropzoneEncrypt.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzoneEncrypt.classList.remove("dragover");
+      if (e.dataTransfer.files.length) {
+        setEncryptFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInputEncrypt.addEventListener("change", (e) => {
+      if (e.target.files.length) {
+        setEncryptFile(e.target.files[0]);
+      }
+    });
+  }
+
+  function setEncryptFile(file) {
+    if (!file.name.endsWith(".xlsx")) {
+      alert("Por favor selecciona un archivo de hoja de cálculo válido (.xlsx)");
+      return;
+    }
+    selectedEncryptFile = file;
+    filenameEncrypt.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+    btnRunEncrypt.disabled = false;
+    feedbackEncrypt.style.display = "none";
+  }
+
+  if (btnRunEncrypt) {
+    btnRunEncrypt.addEventListener("click", async () => {
+      if (!selectedEncryptFile) return;
+      const originalText = btnRunEncrypt.innerHTML;
+      try {
+        btnRunEncrypt.disabled = true;
+        btnRunEncrypt.innerHTML = `<span>Cifrando con AES-256-GCM...</span>`;
+        feedbackEncrypt.style.display = "none";
+
+        const formData = new FormData();
+        formData.append("archivo", selectedEncryptFile);
+
+        const res = await fetch("/api/security/cifrar", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Fallo en el cifrado del archivo.");
+        }
+
+        const hashOriginal = res.headers.get("X-Hash-Original") || "N/D";
+        const hashCifrado = res.headers.get("X-Hash-Cifrado") || "N/D";
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedEncryptFile.name}.enc`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        feedbackEncrypt.className = "crypto-feedback-box success";
+        feedbackEncrypt.style.display = "block";
+        feedbackEncrypt.innerHTML = `
+          <strong>🛡️ Archivo Blindado con Éxito</strong><br>
+          Se descargó <code>${selectedEncryptFile.name}.enc</code>.<br>
+          <small>• Huella SHA-256 Original: <code>${hashOriginal.substring(0, 16)}...</code><br>
+          • Huella SHA-256 Cifrada: <code>${hashCifrado.substring(0, 16)}...</code><br>
+          • Algoritmo: AES-256-GCM (Auth Tag 128-bit)</small>
+        `;
+      } catch (err) {
+        console.error("Error cifrando archivo web:", err);
+        feedbackEncrypt.className = "crypto-feedback-box error";
+        feedbackEncrypt.style.display = "block";
+        feedbackEncrypt.innerHTML = `<strong>❌ Error al cifrar:</strong> ${err.message}`;
+      } finally {
+        btnRunEncrypt.disabled = false;
+        btnRunEncrypt.innerHTML = originalText;
+      }
+    });
+  }
+
+  // 2. Descifrado Web (.enc -> .xlsx)
+  const dropzoneDecrypt = document.getElementById("dropzone-decrypt");
+  const fileInputDecrypt = document.getElementById("crypto-decrypt-file-input");
+  const filenameDecrypt = document.getElementById("decrypt-selected-filename");
+  const btnRunDecrypt = document.getElementById("btn-run-decrypt");
+  const feedbackDecrypt = document.getElementById("decrypt-feedback");
+
+  let selectedDecryptFile = null;
+
+  if (dropzoneDecrypt && fileInputDecrypt) {
+    dropzoneDecrypt.addEventListener("click", () => fileInputDecrypt.click());
+    dropzoneDecrypt.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzoneDecrypt.classList.add("dragover");
+    });
+    dropzoneDecrypt.addEventListener("dragleave", () => dropzoneDecrypt.classList.remove("dragover"));
+    dropzoneDecrypt.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzoneDecrypt.classList.remove("dragover");
+      if (e.dataTransfer.files.length) {
+        setDecryptFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInputDecrypt.addEventListener("change", (e) => {
+      if (e.target.files.length) {
+        setDecryptFile(e.target.files[0]);
+      }
+    });
+  }
+
+  function setDecryptFile(file) {
+    if (!file.name.endsWith(".enc")) {
+      alert("Por favor selecciona un archivo protegido válido (.enc)");
+      return;
+    }
+    selectedDecryptFile = file;
+    filenameDecrypt.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+    btnRunDecrypt.disabled = false;
+    feedbackDecrypt.style.display = "none";
+  }
+
+  if (btnRunDecrypt) {
+    btnRunDecrypt.addEventListener("click", async () => {
+      if (!selectedDecryptFile) return;
+      const originalText = btnRunDecrypt.innerHTML;
+      try {
+        btnRunDecrypt.disabled = true;
+        btnRunDecrypt.innerHTML = `<span>Descifrando y validando...</span>`;
+        feedbackDecrypt.style.display = "none";
+
+        const formData = new FormData();
+        formData.append("archivo", selectedDecryptFile);
+
+        const res = await fetch("/api/security/descifrar", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Fallo en el descifrado: integridad inválida.");
+        }
+
+        const hashDescifrado = res.headers.get("X-Hash-Descifrado") || "N/D";
+        const downloadName = selectedDecryptFile.name.replace(/\.enc$/i, "") || "archivo_descifrado.xlsx";
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = downloadName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        feedbackDecrypt.className = "crypto-feedback-box success";
+        feedbackDecrypt.style.display = "block";
+        feedbackDecrypt.innerHTML = `
+          <strong>🔓 Integridad Validada & Descifrado Correcto</strong><br>
+          Se descargó el archivo original <code>${downloadName}</code>.<br>
+          <small>• Verificación de Integridad: <strong>VÁLIDA (100% inalterado)</strong><br>
+          • Huella SHA-256 Descifrada: <code>${hashDescifrado.substring(0, 16)}...</code><br>
+          • Autenticación AEAD: Exitosa (Clave PDI verificada)</small>
+        `;
+      } catch (err) {
+        console.error("Error descifrando archivo web:", err);
+        feedbackDecrypt.className = "crypto-feedback-box error";
+        feedbackDecrypt.style.display = "block";
+        feedbackDecrypt.innerHTML = `<strong>❌ Error de Descifrado:</strong> ${err.message}`;
+      } finally {
+        btnRunDecrypt.disabled = false;
+        btnRunDecrypt.innerHTML = originalText;
+      }
+    });
+  }
 }

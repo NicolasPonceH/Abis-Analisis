@@ -10,7 +10,13 @@ const {
   obtenerFechasDisponibles,
 } = require("./reportes/reporteRango");
 const { runEtl } = require("./etl");
-const { generarHashSHA256, esBufferCifrado } = require("./security/crypto");
+const {
+  generarHashSHA256,
+  esBufferCifrado,
+  cifrarBuffer,
+  descifrarBuffer,
+} = require("./security/crypto");
+const telegramClient = require("./telegram/telegramClient");
 const { generarReporteWord } = require("./reportes/wordReportService");
 const { generarReporteExcel } = require("./reportes/excelReportService");
 
@@ -348,6 +354,126 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
   } catch (err) {
     console.error("[UPLOAD ERROR]", err);
     res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Disparo manual de reporte hacia el canal de Telegram institucional
+app.post("/api/telegram/enviar", async (req, res) => {
+  try {
+    let { fecha, desde, hasta } = req.body || {};
+    let reporte;
+
+    if (desde && hasta && FECHA_VALIDA.test(desde) && FECHA_VALIDA.test(hasta)) {
+      reporte = await obtenerReporteRango(pool, desde, hasta);
+    } else {
+      if (!fecha || !FECHA_VALIDA.test(fecha)) {
+        const { rows } = await pool.query(
+          "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS fecha FROM registro_enrolamiento"
+        );
+        fecha = rows[0]?.fecha;
+      }
+      if (!fecha) {
+        return res.status(404).json({ ok: false, error: "No hay registros disponibles para el reporte" });
+      }
+      reporte = await obtenerReporteDiario(pool, fecha);
+    }
+
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+
+    if (!token || !chatId) {
+      return res.status(500).json({ ok: false, error: "Token o Chat ID de Telegram no configurados en el archivo .env" });
+    }
+
+    const exec = reporte.resumenEjecutivo || {};
+    const total = reporte.total || 0;
+    const periodo = desde && hasta ? `${desde} al ${hasta}` : (reporte.fecha || fecha);
+
+    let texto = `🏛 <b>POLICÍA DE INVESTIGACIONES DE CHILE</b>\n`;
+    texto += `<b>Jefatura Nacional de Migraciones y Policía Internacional</b>\n`;
+    texto += `📊 <i>Reporte Operativo ABIS de Enrolamiento Biométrico</i>\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `🗓 <b>Período:</b> <code>${periodo}</code>\n`;
+    texto += `👥 <b>Total Enrolamientos:</b> <b>${total.toLocaleString()}</b>\n`;
+    texto += `✅ <b>SLA Sincronización PDI:</b> <b>${exec.tasaSincronizacion || 100}%</b> (${exec.estadoSLA || 'Óptimo'})\n`;
+    texto += `🪪 <b>Registro Biométrico ABIS:</b> <b>${exec.tasaRegistroBiometrico || 0}%</b>\n`;
+    texto += `⚠️ <b>Inconsistencias / Errores:</b> <b>${exec.tasaError || 0}%</b>\n`;
+    if (exec.cuartelLider) {
+      texto += `🏢 <b>Puesto Mayor Carga:</b> ${exec.cuartelLider.nombre} (${exec.cuartelLider.porcentaje}%)\n`;
+    }
+    if (exec.nacionalidadLider) {
+      texto += `🌎 <b>Flujo Migratorio:</b> ${exec.nacionalidadLider.nombre} (${exec.nacionalidadLider.porcentaje}%)\n`;
+    }
+    texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `🔐 <i>Seguridad Criptográfica: AES-256-GCM / SHA-256</i>\n`;
+    texto += `📡 <i>Notificación enviada a solicitud del operador desde el Dashboard Web</i>`;
+
+    const envio = await telegramClient.enviarMensaje({ token, chatId, texto });
+
+    res.json({
+      ok: true,
+      mensaje: `Reporte del período ${periodo} enviado exitosamente al canal de Telegram institucional`,
+      messageId: envio.message_id,
+    });
+  } catch (err) {
+    console.error("[TELEGRAM ENVIAR ERROR]", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Herramienta Web: Cifrar archivo Excel a formato protegido .enc (AES-256-GCM)
+app.post("/api/security/cifrar", upload.single("archivo"), async (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ ok: false, error: "No se ha seleccionado ningún archivo para cifrar." });
+    }
+    const bufferOriginal = req.file.buffer;
+    const nombreOriginal = req.file.originalname || "archivo.xlsx";
+    const hashOriginal = generarHashSHA256(bufferOriginal);
+
+    const bufferCifrado = cifrarBuffer(bufferOriginal);
+    const hashCifrado = generarHashSHA256(bufferCifrado);
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${nombreOriginal}.enc"`);
+    res.setHeader("Access-Control-Expose-Headers", "X-Hash-Original, X-Hash-Cifrado");
+    res.setHeader("X-Hash-Original", hashOriginal);
+    res.setHeader("X-Hash-Cifrado", hashCifrado);
+    res.send(bufferCifrado);
+  } catch (err) {
+    console.error("[CIFRAR WEB ERROR]", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Herramienta Web: Descifrar y validar integridad de archivo .enc (retorna .xlsx)
+app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ ok: false, error: "No se ha seleccionado ningún archivo para descifrar." });
+    }
+    const bufferCifrado = req.file.buffer;
+    const nombreOriginal = req.file.originalname || "archivo.enc";
+
+    if (!esBufferCifrado(bufferCifrado)) {
+      return res.status(400).json({
+        ok: false,
+        error: "El archivo no posee la cabecera mágica de cifrado ABIS (ABIS_ENC_V1) o no fue cifrado con el sistema.",
+      });
+    }
+
+    const bufferDescifrado = descifrarBuffer(bufferCifrado);
+    const nombreDescifrado = nombreOriginal.replace(/\.enc$/i, "") || "archivo_descifrado.xlsx";
+    const hashDescifrado = generarHashSHA256(bufferDescifrado);
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${nombreDescifrado}"`);
+    res.setHeader("Access-Control-Expose-Headers", "X-Hash-Descifrado");
+    res.setHeader("X-Hash-Descifrado", hashDescifrado);
+    res.send(bufferDescifrado);
+  } catch (err) {
+    console.error("[DESCIFRAR WEB ERROR]", err);
+    res.status(500).json({ ok: false, error: "Fallo en el descifrado: la clave maestra no coincide o el archivo fue manipulado/corrompido." });
   }
 });
 
