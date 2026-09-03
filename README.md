@@ -97,17 +97,20 @@ El sistema resuelve el ciclo completo de vida del dato:
   * **Sincronizados con PDI:** Fondo suave blanco menta (`#edfdf5`) con acento verde esmeralda.
   * **Registro Biométrico ABIS:** Fondo suave blanco celeste (`#f0f9ff`) con acento azul cielo.
   * **Inconsistencias / Errores:** Fondo suave blanco rosáceo (`#fef2f2`) con acento rojo carmesí.
-* **5 Gráficos Analíticos Dinámicos (Estética bklit-ui / shadcn)**:
+* **8 Gráficos Analíticos Dinámicos (Estética bklit-ui / shadcn)**:
   * **Barras con curvatura suave (`borderRadius: 8px`)** sin bordes duros rectangulares.
   * **Donuts Flotantes con Espaciado (`spacing: 5px`) y gran radio interior (`cutout: 76%`)**.
   * **Cuadrículas minimalistas punteadas (`borderDash: [5, 5]`)** con reducción total de ruido visual.
   * **Tooltips Flotantes Tipo Card**: Tarjeta blanca estilizada con punto de color, sombra suave y bordes translúcidos.
   * **Gradientes Canvas en Series Temporales**: Relleno degradado que se desvanece suavemente a transparente.
-  1. Rendimiento por Cuartel Fronterizo (Exitosos vs Errores).
-  2. Top Nacionalidades de Enrolados (Barras horizontales píldora).
-  3. Proporción de Sincronización PDI (Doughnut Flotante).
-  4. Pirámide Demográfica Cruzada (Adultos vs N.N.A. por Género).
-  5. Distribución por Rangos Etarios (Doughnut Flotante).
+  1. **Rendimiento por Cuartel Fronterizo**: Sincronizados vs Con Error por puesto de control.
+  2. **Top Nacionalidades de Enrolados**: Barras horizontales redondeadas de flujos migratorios.
+  3. **Proporción de Sincronización PDI**: Donut flotante de efectividad operativa.
+  4. **Composición Demográfica Cruzada**: Adultos vs Menores N.N.A. por Género (Masc/Fem).
+  5. **Rango Etario**: Donut flotante de distribución Mayor de Edad vs Menor de Edad.
+  6. **Dispositivos de Captura (Terreno vs Fija)**: Donut flotante de movilidad (Tablet en patrullaje vs PC en complejo).
+  7. **Despliegue Macro-Zonal por Región**: Barras horizontales de concentración territorial (Arica, Tarapacá, etc.).
+  8. **Histograma de Tramos Etarios & Protección NNA**: Desglose humanitario en 6 tramos etarios con detección prioritaria de 0-5 (1ª Infancia), 6-12 (Niñez) y 13-17 (Adolescentes).
 * **Matriz Operativa Detallada**: Tabla institucional paginada con buscador en vivo de cuarteles y unidades policiales.
 
 ### 2. Filtros Reactivos Instantáneos

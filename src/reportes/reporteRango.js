@@ -47,6 +47,9 @@ async function obtenerReporteRango(pool, desde, hasta) {
     edad,
     demografiaCruzada,
     rendimientoCuarteles,
+    dispositivos,
+    regiones,
+    tramosEtarios,
   ] = await Promise.all([
     pool.query(
       `SELECT ep.descripcion, count(*) AS total
@@ -143,6 +146,44 @@ async function obtenerReporteRango(pool, desde, hasta) {
        ORDER BY total DESC`,
       [desde, hasta]
     ),
+    pool.query(
+      `SELECT eq.tipo_equipo AS dispositivo, count(*)::int AS total
+       FROM registro_enrolamiento r
+       JOIN equipo eq ON eq.id_equipo = r.id_equipo
+       WHERE r.fecha_enrolamiento >= $1 AND r.fecha_enrolamiento <= $2
+       GROUP BY eq.tipo_equipo
+       ORDER BY total DESC`,
+      [desde, hasta]
+    ),
+    pool.query(
+      `SELECT reg.nombre_region AS region, count(*)::int AS total
+       FROM registro_enrolamiento r
+       JOIN cuartel c ON c.id_cuartel = r.id_cuartel
+       JOIN unidad u ON u.id_unidad = c.id_unidad
+       JOIN region reg ON reg.id_region = u.id_region
+       WHERE r.fecha_enrolamiento >= $1 AND r.fecha_enrolamiento <= $2
+       GROUP BY reg.nombre_region
+       ORDER BY total DESC`,
+      [desde, hasta]
+    ),
+    pool.query(
+      `SELECT 
+         CASE 
+           WHEN r.edad_exacta BETWEEN 0 AND 5 THEN '0-5 (1ª Infancia)'
+           WHEN r.edad_exacta BETWEEN 6 AND 12 THEN '6-12 (Niñez)'
+           WHEN r.edad_exacta BETWEEN 13 AND 17 THEN '13-17 (Adolescentes NNA)'
+           WHEN r.edad_exacta BETWEEN 18 AND 29 THEN '18-29 (Jóvenes)'
+           WHEN r.edad_exacta BETWEEN 30 AND 49 THEN '30-49 (Adultos)'
+           WHEN r.edad_exacta >= 50 THEN '50+ (Adultos Mayores)'
+           ELSE 'Sin Datos'
+         END AS tramo,
+         count(*)::int AS total
+       FROM registro_enrolamiento r
+       WHERE r.fecha_enrolamiento >= $1 AND r.fecha_enrolamiento <= $2
+       GROUP BY 1
+       ORDER BY min(COALESCE(r.edad_exacta, 999)) ASC`,
+      [desde, hasta]
+    ),
   ]);
 
   const sincData = conPorcentaje(sincronizacion.rows, total);
@@ -185,6 +226,9 @@ async function obtenerReporteRango(pool, desde, hasta) {
     unidadesActivas: conPorcentaje(unidades.rows, total),
     genero: conPorcentaje(genero.rows, total),
     edad: conPorcentaje(edad.rows, total),
+    dispositivos: conPorcentaje(dispositivos.rows, total),
+    regiones: conPorcentaje(regiones.rows, total),
+    tramosEtarios: conPorcentaje(tramosEtarios.rows, total),
     demografiaCruzada: demografiaCruzada.rows.map(d => ({
       genero: d.genero,
       esMayorEdad: d.es_mayor_edad,

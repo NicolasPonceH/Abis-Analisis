@@ -502,6 +502,15 @@ function renderCharts(data) {
 
   // 5. Gráfico de Edad / N.N.A. (Donut flotante)
   renderEdadChart("chart-edad", data.edad || []);
+
+  // 6. Gráfico de Dispositivos (Tablet vs PC)
+  renderDispositivosChart(data.dispositivos || []);
+
+  // 7. Gráfico de Regiones Policiales (Despliegue Macro-Zonal)
+  renderRegionesChart(data.regiones || []);
+
+  // 8. Gráfico de Tramos Etarios & Protección NNA
+  renderTramosEtariosChart(data.tramosEtarios || []);
 }
 
 function destroyChart(name) {
@@ -822,6 +831,205 @@ function renderEdadChart(canvasId, items) {
           },
         },
         tooltip: BKLIT_TOOLTIP,
+      },
+    },
+  });
+}
+
+// Gráfico 6: Dispositivos de Captura (Tablet en terreno vs PC en estación fija)
+function renderDispositivosChart(items) {
+  destroyChart("chart-dispositivos");
+  const ctx = document.getElementById("chart-dispositivos")?.getContext("2d");
+  if (!ctx) return;
+
+  const validItems = Array.isArray(items) && items.length > 0 ? items : [
+    { dispositivo: "TABLET", total: 0, porcentaje: 0 },
+    { dispositivo: "PC DE ESCRITORIO", total: 0, porcentaje: 0 }
+  ];
+
+  const labels = validItems.map((i) => i.dispositivo);
+  const values = validItems.map((i) => i.total);
+  const colors = [CHART_PALETTE.cyan, CHART_PALETTE.blue];
+
+  state.charts["chart-dispositivos"] = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors.slice(0, validItems.length),
+        borderWidth: 0,
+        borderRadius: 8,
+        spacing: 5,
+        hoverOffset: 6,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "76%",
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 14,
+            color: "#334155",
+            font: { weight: "600", size: 11.5 },
+          },
+        },
+        tooltip: {
+          ...BKLIT_TOOLTIP,
+          callbacks: {
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+          },
+        },
+      },
+    },
+  });
+}
+
+// Gráfico 7: Despliegue Territorial por Región Policial (Barras Horizontales)
+function renderRegionesChart(items) {
+  destroyChart("chart-regiones");
+  const ctx = document.getElementById("chart-regiones")?.getContext("2d");
+  if (!ctx) return;
+
+  const validItems = Array.isArray(items) && items.length > 0 ? items.slice(0, 6) : [
+    { region: "Sin Registros", total: 0, porcentaje: 0 }
+  ];
+
+  const labels = validItems.map((i) => i.region);
+  const values = validItems.map((i) => i.total);
+
+  state.charts["chart-regiones"] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Enrolamientos",
+        data: values,
+        backgroundColor: "#0ea5e9",
+        hoverBackgroundColor: "#0284c7",
+        borderRadius: 7,
+        borderSkipped: false,
+        maxBarThickness: 20,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      barPercentage: 0.65,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...BKLIT_TOOLTIP,
+          callbacks: {
+            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
+        },
+        y: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "#1e293b", font: { weight: "600" } },
+        },
+      },
+    },
+  });
+}
+
+// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Barras Verticales Suaves)
+function renderTramosEtariosChart(items) {
+  destroyChart("chart-tramos-etarios");
+  const ctx = document.getElementById("chart-tramos-etarios")?.getContext("2d");
+  if (!ctx) return;
+
+  const validItems = Array.isArray(items) && items.length > 0 ? items : [
+    { tramo: "Sin Registros", total: 0, porcentaje: 0 }
+  ];
+
+  const labels = validItems.map((i) => i.tramo);
+  const values = validItems.map((i) => i.total);
+
+  // Colores diferenciados: Ámbar cálido para menores NNA (vulnerabilidad), Azul real para adultos
+  const backgroundColors = validItems.map((i) => {
+    const t = String(i.tramo || "").toUpperCase();
+    if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA") || t.includes("ADOLESCENTES")) {
+      return CHART_PALETTE.amber;
+    }
+    return CHART_PALETTE.blue;
+  });
+
+  const hoverColors = validItems.map((i) => {
+    const t = String(i.tramo || "").toUpperCase();
+    if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA") || t.includes("ADOLESCENTES")) {
+      return "#d97706";
+    }
+    return "#1d4ed8";
+  });
+
+  state.charts["chart-tramos-etarios"] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Personas",
+        data: values,
+        backgroundColor: backgroundColors,
+        hoverBackgroundColor: hoverColors,
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 28,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      barPercentage: 0.65,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...BKLIT_TOOLTIP,
+          callbacks: {
+            label: (ctx) => ` Cantidad: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            afterLabel: (ctx) => {
+              const t = String(validItems[ctx.dataIndex]?.tramo || "").toUpperCase();
+              if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA")) {
+                return "⚠️ Atención prioritaria: Menor de edad (NNA)";
+              }
+              return "";
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: {
+            color: "#64748b",
+            font: { weight: "600", size: 10 },
+            maxRotation: 35,
+            minRotation: 15,
+          },
+        },
+        y: {
+          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          border: { display: false },
+          ticks: { color: "#64748b" },
+          beginAtZero: true,
+        },
       },
     },
   });
