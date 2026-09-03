@@ -272,7 +272,8 @@ Abre tu navegador en: **[http://localhost:3000](http://localhost:3000)**.
 
 | Método | Endpoint | Parámetros | Descripción |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/health` | — | Estado del servicio y total de registros en PostgreSQL. |
+| `GET` | `/health` | — | Estado del servicio, diagnóstico del Connection Pool y total de registros. |
+| `GET` | `/api/db/pool` | — | Métricas en vivo del Connection Pool (conexiones activas, libres, límites). |
 | `GET` | `/reporte-diario` | `?fecha=YYYY-MM-DD` | Métricas operativas consolidadas para una jornada específica. |
 | `GET` | `/api/fechas` | — | Lista ordenada de todas las fechas con datos registrados. |
 | `GET` | `/api/metricas/rango` | `?desde=...&hasta=...` | Métricas agregadas para un rango personalizado de fechas. |

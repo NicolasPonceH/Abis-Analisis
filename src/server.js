@@ -44,11 +44,21 @@ app.get("/health", async (req, res) => {
       status: "ok",
       db: "connected",
       totalRegistros: Number(rows[0].total),
+      pool: pool.getPoolStatus(),
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
-    res.status(500).json({ status: "error", db: "disconnected", message: err.message });
+    res.status(500).json({ status: "error", db: "disconnected", message: err.message, pool: pool.getPoolStatus ? pool.getPoolStatus() : null });
   }
+});
+
+// Diagnóstico en vivo del Connection Pool de PostgreSQL
+app.get("/api/db/pool", (req, res) => {
+  res.json({
+    ok: true,
+    pool: pool.getPoolStatus(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Obtiene todas las fechas con datos para poblar selectores/calendarios en la UI

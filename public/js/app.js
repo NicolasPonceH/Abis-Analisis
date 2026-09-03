@@ -185,14 +185,19 @@ function setupEventListeners() {
   setupCryptoWebTools();
 }
 
-// Verifica el estado del backend y la base de datos
+// Verifica el estado del backend y la base de datos con métricas del Connection Pool
 async function checkSystemHealth() {
   try {
     const res = await fetch("/health");
     const data = await res.json();
     const badgeEl = document.getElementById("db-status-badge");
     if (badgeEl && data.status === "ok") {
-      badgeEl.innerHTML = `<span class="status-dot"></span> PostgreSQL Conectado (${(data.totalRegistros || 0).toLocaleString()} reg.)`;
+      const pool = data.pool;
+      const poolTexto = pool ? ` · Pool ${pool.totalConexiones}/${pool.configuracion?.maxConexiones || 20}` : "";
+      badgeEl.innerHTML = `<span class="status-dot"></span> PostgreSQL Conectado (${(data.totalRegistros || 0).toLocaleString()} reg.${poolTexto})`;
+      if (pool) {
+        badgeEl.title = `Connection Pool PDI: ${pool.totalConexiones} conex. activas (${pool.conexionesLibres} libres / ${pool.conexionesActivas} en uso) | Max: ${pool.configuracion?.maxConexiones} | Estado: ${pool.salud}`;
+      }
       badgeEl.classList.add("connected");
     }
   } catch (err) {

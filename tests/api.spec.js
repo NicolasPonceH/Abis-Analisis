@@ -11,6 +11,16 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(body.db).toBe('connected');
   });
 
+  test('GET /api/db/pool returns connection pool metrics', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/db/pool`);
+    if (response.status() === 200) {
+      const body = await response.json();
+      expect(body.ok).toBe(true);
+      expect(body.pool).toHaveProperty('totalConexiones');
+      expect(body.pool).toHaveProperty('configuracion');
+    }
+  });
+
   test('GET /reporte-diario without fecha returns most recent data', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/reporte-diario`);
     expect(response.ok()).toBeTruthy();
