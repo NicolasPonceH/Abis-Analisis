@@ -878,14 +878,19 @@ function setupDragAndDrop() {
   setupAuthModalEvents();
 }
 
-// Variable para retener el archivo en espera de autorización
-let pendingUploadFile = null;
+// Variable para retener el archivo y tipo de acción en espera de autorización
+let pendingAuthFile = null;
+let pendingAuthAction = "ingesta"; // "ingesta", "cifrar", "descifrar"
 
 // Abre el modal de seguridad solicitando clave institucional
-function promptAuthModal(file) {
-  pendingUploadFile = file;
+function promptAuthModal(file, actionType = "ingesta") {
+  pendingAuthFile = file;
+  pendingAuthAction = actionType;
 
   const modal = document.getElementById("modal-auth-ingesta");
+  const titleEl = document.getElementById("modal-title-text");
+  const subtitleEl = document.getElementById("modal-subtitle-text");
+  const warningEl = document.getElementById("modal-warning-text");
   const fileNameEl = document.getElementById("modal-file-name");
   const fileDetailsEl = document.getElementById("modal-file-details");
   const claveInput = document.getElementById("input-auth-clave");
@@ -893,6 +898,47 @@ function promptAuthModal(file) {
   const confirmBtn = document.getElementById("btn-modal-auth-confirm");
 
   if (!modal) return;
+
+  if (actionType === "cifrar") {
+    if (titleEl) titleEl.textContent = "Autorización de Cifrado Institucional";
+    if (subtitleEl) subtitleEl.textContent = "Blindaje Criptográfico de Archivo (AES-256-GCM)";
+    if (warningEl) warningEl.textContent = "Para blindar y generar el archivo protegido .enc se requiere verificar su credencial policial autorizada.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Autorizar y Cifrar Archivo</span>
+      `;
+    }
+  } else if (actionType === "descifrar") {
+    if (titleEl) titleEl.textContent = "Autorización de Descifrado y Auditoría";
+    if (subtitleEl) subtitleEl.textContent = "Apertura y Verificación de Archivo Protegido";
+    if (warningEl) warningEl.textContent = "Para descifrar y recuperar la planilla original se requiere verificar su credencial policial autorizada.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>Autorizar y Descifrar Archivo</span>
+      `;
+    }
+  } else {
+    // Ingesta por defecto
+    if (titleEl) titleEl.textContent = "Autorización de Seguridad";
+    if (subtitleEl) subtitleEl.textContent = "Control de Acceso para Ingesta y Poblado de Base de Datos";
+    if (warningEl) warningEl.textContent = "Para poblar la base de datos se requiere verificar su credencial policial de operador autorizado.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <span>Autorizar y Poblar BD</span>
+      `;
+    }
+  }
 
   if (fileNameEl) fileNameEl.textContent = file.name;
   if (fileDetailsEl) {
@@ -908,15 +954,7 @@ function promptAuthModal(file) {
     claveInput.type = "password";
   }
   if (errorMsg) errorMsg.style.display = "none";
-  if (confirmBtn) {
-    confirmBtn.disabled = false;
-    confirmBtn.innerHTML = `
-      <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-      </svg>
-      <span>Autorizar y Poblar BD</span>
-    `;
-  }
+  if (confirmBtn) confirmBtn.disabled = false;
 
   modal.style.display = "flex";
   setTimeout(() => {
@@ -928,7 +966,7 @@ function promptAuthModal(file) {
 function closeAuthModal() {
   const modal = document.getElementById("modal-auth-ingesta");
   if (modal) modal.style.display = "none";
-  pendingUploadFile = null;
+  pendingAuthFile = null;
   const fileInput = document.getElementById("file-input");
   if (fileInput) fileInput.value = "";
 }
@@ -982,9 +1020,9 @@ function setupAuthModalEvents() {
   }
 }
 
-// Procesa la confirmación de autorización
+// Procesa la confirmación de autorización según la acción solicitada
 async function confirmAuthorizedUpload() {
-  if (!pendingUploadFile) {
+  if (!pendingAuthFile) {
     closeAuthModal();
     return;
   }
@@ -992,7 +1030,6 @@ async function confirmAuthorizedUpload() {
   const claveInput = document.getElementById("input-auth-clave");
   const errorMsg = document.getElementById("modal-auth-error");
   const confirmBtn = document.getElementById("btn-modal-auth-confirm");
-  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
 
   const clave = claveInput?.value?.trim();
 
@@ -1012,7 +1049,13 @@ async function confirmAuthorizedUpload() {
   }
   if (errorMsg) errorMsg.style.display = "none";
 
-  await handleFileUpload(pendingUploadFile, clave);
+  if (pendingAuthAction === "cifrar") {
+    await executeWebEncrypt(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "descifrar") {
+    await executeWebDecrypt(pendingAuthFile, clave);
+  } else {
+    await handleFileUpload(pendingAuthFile, clave);
+  }
 }
 
 // Envío y procesamiento seguro del archivo al backend con clave de autorización
@@ -1329,59 +1372,14 @@ function setupCryptoWebTools() {
     filenameEncrypt.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
     btnRunEncrypt.disabled = false;
     feedbackEncrypt.style.display = "none";
+    // Solicitar autorización policial inmediata
+    promptAuthModal(file, "cifrar");
   }
 
   if (btnRunEncrypt) {
-    btnRunEncrypt.addEventListener("click", async () => {
-      if (!selectedEncryptFile) return;
-      const originalText = btnRunEncrypt.innerHTML;
-      try {
-        btnRunEncrypt.disabled = true;
-        btnRunEncrypt.innerHTML = `<span>Cifrando con AES-256-GCM...</span>`;
-        feedbackEncrypt.style.display = "none";
-
-        const formData = new FormData();
-        formData.append("archivo", selectedEncryptFile);
-
-        const res = await fetch("/api/security/cifrar", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Fallo en el cifrado del archivo.");
-        }
-
-        const hashOriginal = res.headers.get("X-Hash-Original") || "N/D";
-        const hashCifrado = res.headers.get("X-Hash-Cifrado") || "N/D";
-
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${selectedEncryptFile.name}.enc`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        feedbackEncrypt.className = "crypto-feedback-box success";
-        feedbackEncrypt.style.display = "block";
-        feedbackEncrypt.innerHTML = `
-          <strong>🛡️ Archivo Blindado con Éxito</strong><br>
-          Se descargó <code>${selectedEncryptFile.name}.enc</code>.<br>
-          <small>• Huella SHA-256 Original: <code>${hashOriginal.substring(0, 16)}...</code><br>
-          • Huella SHA-256 Cifrada: <code>${hashCifrado.substring(0, 16)}...</code><br>
-          • Algoritmo: AES-256-GCM (Auth Tag 128-bit)</small>
-        `;
-      } catch (err) {
-        console.error("Error cifrando archivo web:", err);
-        feedbackEncrypt.className = "crypto-feedback-box error";
-        feedbackEncrypt.style.display = "block";
-        feedbackEncrypt.innerHTML = `<strong>❌ Error al cifrar:</strong> ${err.message}`;
-      } finally {
-        btnRunEncrypt.disabled = false;
-        btnRunEncrypt.innerHTML = originalText;
+    btnRunEncrypt.addEventListener("click", () => {
+      if (selectedEncryptFile) {
+        promptAuthModal(selectedEncryptFile, "cifrar");
       }
     });
   }
@@ -1426,60 +1424,177 @@ function setupCryptoWebTools() {
     filenameDecrypt.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
     btnRunDecrypt.disabled = false;
     feedbackDecrypt.style.display = "none";
+    // Solicitar autorización policial inmediata
+    promptAuthModal(file, "descifrar");
   }
 
   if (btnRunDecrypt) {
-    btnRunDecrypt.addEventListener("click", async () => {
-      if (!selectedDecryptFile) return;
-      const originalText = btnRunDecrypt.innerHTML;
-      try {
-        btnRunDecrypt.disabled = true;
-        btnRunDecrypt.innerHTML = `<span>Descifrando y validando...</span>`;
-        feedbackDecrypt.style.display = "none";
-
-        const formData = new FormData();
-        formData.append("archivo", selectedDecryptFile);
-
-        const res = await fetch("/api/security/descifrar", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Fallo en el descifrado: integridad inválida.");
-        }
-
-        const hashDescifrado = res.headers.get("X-Hash-Descifrado") || "N/D";
-        const downloadName = selectedDecryptFile.name.replace(/\.enc$/i, "") || "archivo_descifrado.xlsx";
-
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = downloadName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        feedbackDecrypt.className = "crypto-feedback-box success";
-        feedbackDecrypt.style.display = "block";
-        feedbackDecrypt.innerHTML = `
-          <strong>🔓 Integridad Validada & Descifrado Correcto</strong><br>
-          Se descargó el archivo original <code>${downloadName}</code>.<br>
-          <small>• Verificación de Integridad: <strong>VÁLIDA (100% inalterado)</strong><br>
-          • Huella SHA-256 Descifrada: <code>${hashDescifrado.substring(0, 16)}...</code><br>
-          • Autenticación AEAD: Exitosa (Clave PDI verificada)</small>
-        `;
-      } catch (err) {
-        console.error("Error descifrando archivo web:", err);
-        feedbackDecrypt.className = "crypto-feedback-box error";
-        feedbackDecrypt.style.display = "block";
-        feedbackDecrypt.innerHTML = `<strong>❌ Error de Descifrado:</strong> ${err.message}`;
-      } finally {
-        btnRunDecrypt.disabled = false;
-        btnRunDecrypt.innerHTML = originalText;
+    btnRunDecrypt.addEventListener("click", () => {
+      if (selectedDecryptFile) {
+        promptAuthModal(selectedDecryptFile, "descifrar");
       }
     });
+  }
+}
+
+// Ejecuta el cifrado web tras verificar la clave de autorización
+async function executeWebEncrypt(file, clave) {
+  const modal = document.getElementById("modal-auth-ingesta");
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const feedbackEncrypt = document.getElementById("encrypt-feedback");
+
+  const formData = new FormData();
+  formData.append("archivo", file);
+
+  try {
+    const res = await fetch("/api/security/cifrar", {
+      method: "POST",
+      headers: { "X-Ingesta-Auth": clave },
+      body: formData,
+    });
+
+    if (res.status === 401) {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Clave de autorización incorrecta o no autorizada`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
+      }
+      if (claveInput) {
+        claveInput.value = "";
+        claveInput.focus();
+      }
+      return;
+    }
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Fallo en el cifrado del archivo.");
+    }
+
+    const hashOriginal = res.headers.get("X-Hash-Original") || "N/D";
+    const hashCifrado = res.headers.get("X-Hash-Cifrado") || "N/D";
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${file.name}.enc`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    closeAuthModal();
+
+    if (feedbackEncrypt) {
+      feedbackEncrypt.className = "crypto-feedback-box success";
+      feedbackEncrypt.style.display = "block";
+      feedbackEncrypt.innerHTML = `
+        <strong>🛡️ Archivo Blindado con Éxito (Operación Autorizada)</strong><br>
+        Se descargó <code>${file.name}.enc</code> tras validar la credencial de operador.<br>
+        <small>• Huella SHA-256 Original: <code>${hashOriginal.substring(0, 16)}...</code><br>
+        • Huella SHA-256 Cifrada: <code>${hashCifrado.substring(0, 16)}...</code><br>
+        • Algoritmo: AES-256-GCM (Auth Tag 128-bit) &bull; Registrado en Bitácora de Auditoría</small>
+      `;
+    }
+  } catch (err) {
+    console.error("Error cifrando archivo web:", err);
+    closeAuthModal();
+    if (feedbackEncrypt) {
+      feedbackEncrypt.className = "crypto-feedback-box error";
+      feedbackEncrypt.style.display = "block";
+      feedbackEncrypt.innerHTML = `<strong>❌ Error al cifrar:</strong> ${err.message}`;
+    }
+  }
+}
+
+// Ejecuta el descifrado web tras verificar la clave de autorización
+async function executeWebDecrypt(file, clave) {
+  const modal = document.getElementById("modal-auth-ingesta");
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const feedbackDecrypt = document.getElementById("decrypt-feedback");
+
+  const formData = new FormData();
+  formData.append("archivo", file);
+
+  try {
+    const res = await fetch("/api/security/descifrar", {
+      method: "POST",
+      headers: { "X-Ingesta-Auth": clave },
+      body: formData,
+    });
+
+    if (res.status === 401) {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Clave de autorización incorrecta o no autorizada`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
+      }
+      if (claveInput) {
+        claveInput.value = "";
+        claveInput.focus();
+      }
+      return;
+    }
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Fallo en el descifrado: integridad inválida.");
+    }
+
+    const hashDescifrado = res.headers.get("X-Hash-Descifrado") || "N/D";
+    const downloadName = file.name.replace(/\.enc$/i, "") || "archivo_descifrado.xlsx";
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = downloadName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    closeAuthModal();
+
+    if (feedbackDecrypt) {
+      feedbackDecrypt.className = "crypto-feedback-box success";
+      feedbackDecrypt.style.display = "block";
+      feedbackDecrypt.innerHTML = `
+        <strong>🔓 Integridad Validada & Descifrado Correcto (Operación Autorizada)</strong><br>
+        Se descargó el archivo original <code>${downloadName}</code> tras validar su credencial.<br>
+        <small>• Verificación de Integridad: <strong>VÁLIDA (100% inalterado)</strong><br>
+        • Huella SHA-256 Descifrada: <code>${hashDescifrado.substring(0, 16)}...</code><br>
+        • Autenticación AEAD: Exitosa &bull; Registrado en Bitácora de Auditoría</small>
+      `;
+    }
+  } catch (err) {
+    console.error("Error descifrando archivo web:", err);
+    closeAuthModal();
+    if (feedbackDecrypt) {
+      feedbackDecrypt.className = "crypto-feedback-box error";
+      feedbackDecrypt.style.display = "block";
+      feedbackDecrypt.innerHTML = `<strong>❌ Error de Descifrado:</strong> ${err.message}`;
+    }
   }
 }

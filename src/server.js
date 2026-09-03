@@ -424,6 +424,19 @@ app.post("/api/telegram/enviar", async (req, res) => {
 // Herramienta Web: Cifrar archivo Excel a formato protegido .enc (AES-256-GCM)
 app.post("/api/security/cifrar", upload.single("archivo"), async (req, res) => {
   try {
+    // Verificación de clave de autorización policial
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      console.warn(`[SEGURIDAD] Intento de cifrado rechazado: Clave de autorización no válida o ausente.`);
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
     if (!req.file || !req.file.buffer) {
       return res.status(400).json({ ok: false, error: "No se ha seleccionado ningún archivo para cifrar." });
     }
@@ -433,6 +446,18 @@ app.post("/api/security/cifrar", upload.single("archivo"), async (req, res) => {
 
     const bufferCifrado = cifrarBuffer(bufferOriginal);
     const hashCifrado = generarHashSHA256(bufferCifrado);
+
+    // Registro de auditoría inmutable
+    try {
+      await pool.query(
+        `INSERT INTO registro_auditoria_cifrada 
+         (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
+         VALUES (NOW(), 'CIFRADO_WEB_AUTORIZADO', $1, $2, $3, 'Operador Criptográfico Web')`,
+        [nombreOriginal, hashCifrado, `Original: ${hashOriginal}`]
+      );
+    } catch (auditErr) {
+      console.warn("[AUDITORÍA] Advertencia al registrar en bitácora:", auditErr.message);
+    }
 
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Disposition", `attachment; filename="${nombreOriginal}.enc"`);
@@ -449,6 +474,19 @@ app.post("/api/security/cifrar", upload.single("archivo"), async (req, res) => {
 // Herramienta Web: Descifrar y validar integridad de archivo .enc (retorna .xlsx)
 app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) => {
   try {
+    // Verificación de clave de autorización policial
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      console.warn(`[SEGURIDAD] Intento de descifrado rechazado: Clave de autorización no válida o ausente.`);
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
     if (!req.file || !req.file.buffer) {
       return res.status(400).json({ ok: false, error: "No se ha seleccionado ningún archivo para descifrar." });
     }
@@ -465,6 +503,18 @@ app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) =
     const bufferDescifrado = descifrarBuffer(bufferCifrado);
     const nombreDescifrado = nombreOriginal.replace(/\.enc$/i, "") || "archivo_descifrado.xlsx";
     const hashDescifrado = generarHashSHA256(bufferDescifrado);
+
+    // Registro de auditoría inmutable
+    try {
+      await pool.query(
+        `INSERT INTO registro_auditoria_cifrada 
+         (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
+         VALUES (NOW(), 'DESCIFRADO_WEB_AUTORIZADO', $1, $2, $3, 'Operador Criptográfico Web')`,
+        [nombreOriginal, hashDescifrado, `Descifrado a: ${nombreDescifrado}`]
+      );
+    } catch (auditErr) {
+      console.warn("[AUDITORÍA] Advertencia al registrar en bitácora:", auditErr.message);
+    }
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader("Content-Disposition", `attachment; filename="${nombreDescifrado}"`);

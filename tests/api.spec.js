@@ -147,12 +147,26 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(data.messageId).toBeDefined();
   });
 
-  test('POST /api/security/cifrar and /api/security/descifrar roundtrip protects and recovers file', async ({ request }) => {
+  test('POST /api/security/cifrar rejects unauthorized requests (HTTP 401)', async ({ request }) => {
+    const encRes = await request.post(`${BASE_URL}/api/security/cifrar`, {
+      multipart: {
+        archivo: {
+          name: 'prueba.xlsx',
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          buffer: Buffer.from('test', 'utf8'),
+        }
+      }
+    });
+    expect(encRes.status()).toBe(401);
+  });
+
+  test('POST /api/security/cifrar and /api/security/descifrar roundtrip with valid password protects and recovers file', async ({ request }) => {
     const sampleText = 'PRUEBA_INTEGRIDAD_PDI_2026';
     const sampleBuffer = Buffer.from(sampleText, 'utf8');
 
-    // Cifrar
+    // Cifrar con cabecera de autorización policial
     const encRes = await request.post(`${BASE_URL}/api/security/cifrar`, {
+      headers: { 'X-Ingesta-Auth': 'pdi2026' },
       multipart: {
         archivo: {
           name: 'prueba.xlsx',
@@ -168,8 +182,9 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     // Cabecera mágica ABIS_ENC_V1
     expect(encBuffer.toString('utf8', 0, 11)).toBe('ABIS_ENC_V1');
 
-    // Descifrar
+    // Descifrar con cabecera de autorización policial
     const decRes = await request.post(`${BASE_URL}/api/security/descifrar`, {
+      headers: { 'X-Ingesta-Auth': 'pdi2026' },
       multipart: {
         archivo: {
           name: 'prueba.xlsx.enc',

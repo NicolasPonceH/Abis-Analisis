@@ -10,7 +10,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B%203NF-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![AES-256-GCM](https://img.shields.io/badge/Criptograf%C3%ADa-AES--256--GCM-002B49?style=for-the-badge&logo=security&logoColor=white)]()
-[![Playwright](https://img.shields.io/badge/Pruebas-15%2F15%20Aprobadas-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Playwright](https://img.shields.io/badge/Pruebas-16%2F16%20Aprobadas-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
 [![Status](https://img.shields.io/badge/Estado-Producci%C3%B3n%20Ready-blue?style=for-the-badge)]()
 
 <br>
@@ -30,7 +30,7 @@
    - [Filtros Reactivos Instantáneos](#2-filtros-reactivos-instantáneos)
    - [Centro de Exportación Oficial & Disparo a Telegram](#3-centro-de-exportación-oficial--disparo-a-telegram)
    - [Suite Criptográfica Web y Terminal](#4-suite-criptográfica-web-y-auditoría)
-   - [Autorización Policial para Ingesta](#5-autorización-policial-para-ingesta-de-archivos)
+   - [Autorización Policial Transversal (Ingesta y Criptografía)](#5-autorización-policial-transversal-ingesta-y-criptografía)
    - [Bot Interactivo de Telegram](#6-bot-interactivo-de-telegram)
 4. [Estructura del Proyecto](#-estructura-del-proyecto)
 5. [Instalación y Puesta en Marcha](#-instalación-y-puesta-en-marcha)
@@ -135,10 +135,11 @@ Los botones de la barra de acciones cuentan con identidad cromática institucion
 * **Bitácora de Auditoría en Base de Datos**: La tabla `registro_auditoria_cifrada` almacena fecha, tipo de evento, archivo, hash y detalles de cada operación.
 * **Consola CLI (Opcional)**: Comandos de terminal disponibles como alternativa avanzada para administradores en servidores headless.
 
-### 5. Autorización Policial para Ingesta de Archivos
-* Al arrastrar o examinar una planilla en la pestaña **"Ingesta de Datos (Oracle ABIS)"**, el sistema despliega un **Modal Institucional de Autorización**.
-* Requiere la **Clave de Autorización Policial** (`INGESTA_PASSWORD`, por defecto `pdi2026`) para proceder con la inserción en la base de datos.
-* Cuenta con animación visual de sacudida (*shake*) y mensaje de alerta si la credencial es incorrecta, protegiendo la base de datos contra alteraciones accidentales o no autorizadas.
+### 5. Autorización Policial Transversal (Ingesta y Criptografía)
+* Al arrastrar o examinar una planilla en **Ingesta** o en la suite de **Criptografía (Cifrar / Descifrar)**, el sistema despliega el **Modal Institucional de Autorización**.
+* Requiere la **Clave de Autorización Policial** (`INGESTA_PASSWORD`, por defecto `pdi2026`) tanto para poblar la base de datos como para blindar o descifrar archivos.
+* Cuenta con animación visual de sacudida (*shake*) y mensaje de alerta si la credencial es incorrecta, protegiendo todas las operaciones críticas.
+* Toda operación autorizada queda auditada en PostgreSQL con su huella SHA-256 respectiva.
 
 ### 6. Bot Interactivo de Telegram
 * Conectado mediante Long Polling seguro para consultas móviles de la jefatura.

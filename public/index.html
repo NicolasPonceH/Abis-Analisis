@@ -600,8 +600,8 @@ npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
             </svg>
           </div>
           <div>
-            <h3>Autorización de Seguridad</h3>
-            <p>Control de Acceso para Ingesta y Poblado de Base de Datos</p>
+            <h3 id="modal-title-text">Autorización de Seguridad</h3>
+            <p id="modal-subtitle-text">Control de Acceso para Ingesta y Poblado de Base de Datos</p>
           </div>
         </div>
         <button type="button" class="modal-close" id="btn-modal-auth-close" title="Cerrar">&times;</button>
@@ -627,7 +627,7 @@ npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          <span>Para poblar la base de datos se requiere verificar su credencial policial de operador autorizado.</span>
+          <span id="modal-warning-text">Para realizar esta operación se requiere verificar su credencial policial de operador autorizado.</span>
         </div>
 
         <div class="auth-input-group">
