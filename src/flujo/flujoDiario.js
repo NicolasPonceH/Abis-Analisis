@@ -4,6 +4,7 @@ const { runEtl } = require("../etl");
 const { obtenerReporteDiario } = require("../reportes/reporteDiario");
 const { formatearReporte, formatearAlerta, formatearAvisoFilasOmitidas } = require("../telegram/formatearReporte");
 const { enviarMensaje } = require("../telegram/telegramClient");
+const { crearBotonesDescarga } = require("../telegram/botService");
 
 function guardarUltimoEtl(filePath, resultadoEtl) {
   try {
@@ -36,18 +37,18 @@ function credencialesTelegram() {
   return { token, chatId };
 }
 
-async function notificar(texto) {
+async function notificar(texto, replyMarkup = null) {
   const { token, chatId } = credencialesTelegram();
-  await enviarMensaje({ token, chatId, texto });
+  await enviarMensaje({ token, chatId, texto, replyMarkup });
 }
 
 // Envuelve notificar() para que una falla de Telegram (token invalido, sin internet, API caida)
 // nunca tape el error original que se estaba intentando reportar (bug encontrado en QA, Sprint 8:
 // antes, si notificar() fallaba dentro de un catch, esa falla reemplazaba silenciosamente al
 // error real). Devuelve si la notificacion salio bien, y deja un log en consola si no.
-async function notificarSinFallar(texto) {
+async function notificarSinFallar(texto, replyMarkup = null) {
   try {
-    await notificar(texto);
+    await notificar(texto, replyMarkup);
     return true;
   } catch (err) {
     console.error("No se pudo notificar por Telegram:", err.message);
@@ -102,10 +103,8 @@ async function ejecutarFlujoDiario(filePath, pool) {
     texto += `\n\n${formatearAvisoFilasOmitidas(resultadoEtl.errors)}`;
   }
 
-  // Si Telegram falla aca, la carga en si igual fue exitosa (los datos ya estan en la BD) —
-  // no tiene sentido tratarlo como una falla del flujo completo, pero si hay que dejarlo
-  // reflejado en el resultado para que quien llame (o los logs de la tarea programada) se entere.
-  const notificado = await notificarSinFallar(texto);
+  const replyMarkup = crearBotonesDescarga({ fecha });
+  const notificado = await notificarSinFallar(texto, replyMarkup);
   return { ...resultadoEtl, reporte, notificado: notificado ? "reporte" : "reporte_sin_notificar" };
 }
 
