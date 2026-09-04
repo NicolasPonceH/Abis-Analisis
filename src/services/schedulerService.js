@@ -157,9 +157,13 @@ function getNextExecution(config) {
 async function triggerScheduledReport({ pool, isTest = false, customChatId = null }) {
   const config = getConfig();
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = customChatId || config.telegramChatId || process.env.TELEGRAM_CHAT_ID;
+  const rawChatId = customChatId || config.telegramChatId || process.env.TELEGRAM_CHAT_ID || "";
+  const chatIds = String(rawChatId)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
-  if (!token || !chatId) {
+  if (!token || chatIds.length === 0) {
     throw new Error("Token o Chat ID de Telegram no configurados en .env ni en ajustes.");
   }
 
@@ -181,9 +185,20 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     ? formatearReporte(reporte, { fecha, origen })
     : formatearReporteExtenso(reporte, { fecha, origen });
 
-  // 4. Enviar vía Telegram Client con botones interactivos de descarga (.xlsx y .docx)
+  // 4. Enviar vía Telegram Client con botones interactivos de descarga (.xlsx y .docx) a todos los canales configurados
   const replyMarkup = crearBotonesDescarga({ fecha });
-  const envio = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+  let envio = null;
+  for (const cid of chatIds) {
+    try {
+      envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto, replyMarkup });
+    } catch (sendErr) {
+      console.warn(`[SCHEDULER] Advertencia al enviar reporte a chat ${cid}:`, sendErr.message);
+    }
+  }
+
+  if (!envio) {
+    throw new Error("No se pudo entregar el reporte a los canales de Telegram configurados.");
+  }
 
   // 5. Registrar en historial local
   const horaChile = obtenerHoraChile();
@@ -196,7 +211,7 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     slaPDI: reporte.resumenEjecutivo?.tasaSincronizacion || 100,
     tipo: isTest ? "PRUEBA_MANUAL" : "AUTOMATICO_PROGRAMADO",
     canal: "Telegram Oficial PDI",
-    chatId: String(chatId).slice(0, 4) + "***" + String(chatId).slice(-3),
+    chatId: chatIds.map((c) => String(c).slice(0, 4) + "***" + String(c).slice(-3)).join(", "),
     estado: "EXITO",
     messageId: envio.message_id,
   };

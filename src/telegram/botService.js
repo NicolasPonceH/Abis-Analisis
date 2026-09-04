@@ -13,6 +13,15 @@ function escaparHtml(texto) {
   return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function esChatAutorizado(chatId, authorizedConfig) {
+  if (!authorizedConfig) return true;
+  const lista = String(authorizedConfig)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return lista.length === 0 || lista.includes(String(chatId));
+}
+
 function leerUltimoEtl() {
   const ruta = path.resolve(__dirname, "../../logs/ultimo-etl.json");
   if (!fs.existsSync(ruta)) return null;
@@ -404,7 +413,7 @@ async function procesarCallbackQuery({ callbackQuery, token, authorizedChatId, p
   const queryId = callbackQuery.id;
   const data = callbackQuery.data || "";
 
-  if (authorizedChatId && String(authorizedChatId) !== chatId) {
+  if (!esChatAutorizado(chatId, authorizedChatId)) {
     return telegramClient.responderCallback({
       token,
       callbackQueryId: queryId,
@@ -500,8 +509,8 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
     });
   }
 
-  // Si se definió TELEGRAM_CHAT_ID, restringir el acceso a ese chat por seguridad
-  if (authorizedChatId && String(authorizedChatId) !== chatId) {
+  // Si se definió TELEGRAM_CHAT_ID, restringir el acceso a los chats autorizados por seguridad
+  if (!esChatAutorizado(chatId, authorizedChatId)) {
     console.warn(`Mensaje recibido de chat no autorizado: ${chatId}`);
     return telegramClient.enviarMensaje({
       token,
