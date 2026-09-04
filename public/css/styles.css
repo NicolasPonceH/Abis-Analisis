@@ -210,32 +210,32 @@ h1, h2, h3, h4, h5, h6,
   max-width: 1800px;
   margin: 0 auto;
   padding: 0 24px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   position: relative;
   width: 100%;
   min-height: 64px;
-  gap: 20px;
+  gap: 16px;
 }
 
 .brand-section {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   white-space: nowrap;
-  z-index: 2;
+  justify-self: start;
 }
 
 .logo-pdi {
-  height: 42px;
+  height: 38px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
   background: #ffffff;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: var(--radius-sm);
-  border: 2px solid var(--pdi-gold);
+  border: 1.5px solid var(--pdi-gold);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: transform var(--transition);
   flex-shrink: 0;
@@ -260,9 +260,9 @@ h1, h2, h3, h4, h5, h6,
 
 .brand-title {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #ffffff;
   text-transform: uppercase;
   display: flex;
@@ -279,10 +279,10 @@ h1, h2, h3, h4, h5, h6,
 
 .brand-subtitle {
   font-family: var(--font-heading);
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   color: var(--pdi-gold);
   font-weight: 600;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -450,19 +450,25 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* ==========================================================================
-   BARRA DE NAVEGACIÓN SUPERIOR (NAVBAR TABS INSTITUCIONAL - UNIFICADA)
+   BARRA DE NAVEGACIÓN SUPERIOR (NAVBAR TABS INSTITUCIONAL - CENTRADA Y UNIFICADA)
    ========================================================================== */
 .tabs-nav.navbar-top {
   display: flex;
   align-items: center;
+  justify-content: center;
+  justify-self: center;
   gap: 6px;
   height: 64px;
-  margin: 0;
-  margin-left: auto;
+  margin: 0 auto;
   padding: 0;
   border-bottom: none;
   box-sizing: border-box;
   white-space: nowrap;
+}
+
+.header-right-spacer {
+  justify-self: end;
+  width: 100%;
 }
 
 .tabs-nav.navbar-top::-webkit-scrollbar {
@@ -471,8 +477,8 @@ h1, h2, h3, h4, h5, h6,
 
 /* Iconos vectoriales SVG limpios */
 .nav-svg-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke-width: 2.2;
   stroke: currentColor;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.25s ease, filter 0.25s ease;
@@ -486,16 +492,16 @@ h1, h2, h3, h4, h5, h6,
   border: none;
   color: #e2e8f0;
   font-family: var(--font-heading);
-  font-size: 0.86rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.1px;
   text-transform: uppercase;
-  padding: 8px 14px;
+  padding: 8px 9px;
   border-radius: 4px 4px 0 0;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   white-space: nowrap;
@@ -551,10 +557,14 @@ h1, h2, h3, h4, h5, h6,
     padding: 8px 14px 0;
   }
   .header-inner {
+    display: flex;
     flex-direction: column;
     align-items: center;
     height: auto;
     gap: 8px;
+  }
+  .header-right-spacer {
+    display: none;
   }
   .tabs-nav.navbar-top {
     position: static;
