@@ -38,10 +38,10 @@ function crearBotonesDescarga({ fecha, desde, hasta }) {
 
 async function manejarComandoAyuda({ token, chatId }) {
   const texto = [
-    `<b>SISTEMA ABIS - GUÍA DE COMANDOS</b>`,
+    `🤖 <b>SISTEMA ABIS - GUÍA DE COMANDOS</b>`,
     `━━━━━━━━━━━━━━━━━━━━`,
     ``,
-    `<b>Reportes Analíticos:</b>`,
+    `📊 <b>Reportes Analíticos:</b>`,
     `• <code>/reporte</code> o <code>/hoy</code>`,
     `  ↳ Genera el reporte diario del día más reciente con botones de descarga directa.`,
     ``,
@@ -57,7 +57,7 @@ async function manejarComandoAyuda({ token, chatId }) {
     `• <code>/errores</code> o <code>/errores YYYY-MM-DD</code>`,
     `  ↳ Muestra qué cuarteles y unidades tuvieron inconsistencias (ej: <code>/errores 2026-08-22</code>).`,
     ``,
-    `<b>Estado y Auditoría del Sistema:</b>`,
+    `⚙️ <b>Estado y Auditoría del Sistema:</b>`,
     `• <code>/estado</code>`,
     `  ↳ Muestra la salud de la BD, conexión y el total histórico acumulado de registros.`,
     ``,
@@ -157,11 +157,11 @@ async function manejarComandoDetalleErrores({ token, chatId, pool, args }) {
 
   if (totalErrores === 0) {
     const texto = [
-      `[AUDITORÍA] <b>DETALLE DE CONSISTENCIA</b>`,
+      `🔍 <b>DETALLE DE CONSISTENCIA</b>`,
       `<i>${fechaFmt}</i>`,
       `━━━━━━━━━━━━━━━━━━━━`,
       ``,
-      `<b>¡Cero inconsistencias registradas en esta fecha!</b>`,
+      `✅ <b>¡Cero inconsistencias registradas en esta fecha!</b>`,
       `De los <b>${totalDia.toLocaleString("es-CL")}</b> enrolamientos realizados, el 100% se completó con éxito.`,
       ``,
       `<i>Para ver el reporte completo escribe <code>/reporte ${fecha}</code></i>`,
@@ -172,7 +172,7 @@ async function manejarComandoDetalleErrores({ token, chatId, pool, args }) {
   const pctErrores = totalDia > 0 ? ((totalErrores / totalDia) * 100).toFixed(1) : "0";
 
   const lineas = [
-    `[AUDITORÍA] <b>DIAGNÓSTICO DE INCONSISTENCIAS</b>`,
+    `⚠️ <b>DIAGNÓSTICO DE INCONSISTENCIAS</b>`,
     `<i>${fechaFmt}</i>`,
     `━━━━━━━━━━━━━━━━━━━━`,
     ``,
@@ -372,16 +372,16 @@ async function manejarComandoEstado({ token, chatId, pool }) {
     const ultimoEtl = leerUltimoEtl();
 
     const lineas = [
-      `<b>ESTADO DEL SISTEMA ABIS</b>`,
+      `🏛 <b>ESTADO DEL SISTEMA ABIS</b>`,
       `━━━━━━━━━━━━━━━━━━━━`,
-      `Base de Datos: <b>Conectada [OK]</b>`,
-      `Total registros históricos: <code>${total.toLocaleString("es-CL")}</code>`,
-      `Rango de fechas: <code>${primera || "N/A"}</code> al <code>${ultima || "N/A"}</code>`,
+      `🟢 Base de Datos: <b>Conectada (PostgreSQL)</b>`,
+      `👥 Total registros históricos: <code>${total.toLocaleString("es-CL")}</code>`,
+      `📅 Rango de fechas: <code>${primera || "N/A"}</code> al <code>${ultima || "N/A"}</code>`,
     ];
 
     if (ultimoEtl) {
       lineas.push(
-        `Último archivo ETL: <code>${escaparHtml(ultimoEtl.archivo)}</code> (${Number(ultimoEtl.totalInsertadas).toLocaleString("es-CL")} insertadas, ${ultimoEtl.errores.length} omitidas)`
+        `📂 <b>Último archivo ETL:</b> <code>${escaparHtml(ultimoEtl.archivo)}</code> (${Number(ultimoEtl.totalInsertadas).toLocaleString("es-CL")} insertadas, ${ultimoEtl.errores.length} omitidas)`
       );
     }
 
@@ -390,7 +390,7 @@ async function manejarComandoEstado({ token, chatId, pool }) {
     await telegramClient.enviarMensaje({
       token,
       chatId,
-      texto: `[ERROR] <b>Base de datos inaccesible:</b> (${escaparHtml(err.message)})`,
+      texto: `🔴 <b>Error de Estado:</b> Base de datos inaccesible (${escaparHtml(err.message)})`,
     });
   }
 }
@@ -478,7 +478,7 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
     return telegramClient.enviarMensaje({
       token,
       chatId,
-      texto: `[SEGURIDAD] <b>Acceso no autorizado</b>\nEste canal es de uso exclusivo del Sistema ABIS PDI.`,
+      texto: `⛔ <b>Acceso no autorizado</b>\nEste canal es de uso exclusivo del Sistema ABIS PDI.`,
     });
   }
 
@@ -526,9 +526,9 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
         token,
         chatId,
         texto: [
-          `<b>No se reconoció ${comandoTexto}.</b>`,
+          `❓ <b>No entendí ${comandoTexto}.</b>`,
           ``,
-          `Comandos disponibles en el Sistema ABIS:`,
+          `💡 Escribe <code>/ayuda</code> para ver todos los comandos disponibles en el Sistema ABIS:`,
           `• <code>/reporte [YYYY-MM-DD]</code> - Ver reporte con botones de descarga`,
           `• <code>/excel [YYYY-MM-DD]</code> - Descargar planilla Excel (.xlsx)`,
           `• <code>/word [YYYY-MM-DD]</code> - Descargar informe Word (.docx)`,
