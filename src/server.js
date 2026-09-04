@@ -392,11 +392,13 @@ app.post("/api/telegram/enviar", async (req, res) => {
     }
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    const rawChatId = process.env.TELEGRAM_CHAT_ID;
 
-    if (!token || !chatId) {
+    if (!token || !rawChatId) {
       return res.status(500).json({ ok: false, error: "Token o Chat ID de Telegram no configurados en el archivo .env" });
     }
+
+    const chatIds = String(rawChatId).split(",").map(s => s.trim()).filter(Boolean);
 
     const periodo = desde && hasta ? `${desde} al ${hasta}` : (reporte.fecha || fecha);
     const texto = formatearReporteExtenso(reporte, {
@@ -407,7 +409,18 @@ app.post("/api/telegram/enviar", async (req, res) => {
     });
 
     const replyMarkup = crearBotonesDescarga({ fecha: reporte.fecha || fecha, desde, hasta });
-    const envio = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+    let envio = null;
+    for (const cid of chatIds) {
+      try {
+        envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto, replyMarkup });
+      } catch (errSend) {
+        console.warn(`[TELEGRAM ENVIAR] Error enviando a chat ${cid}:`, errSend.message);
+      }
+    }
+
+    if (!envio) {
+      return res.status(500).json({ ok: false, error: "No se pudo entregar el reporte a los canales de Telegram configurados" });
+    }
 
     res.json({
       ok: true,
@@ -544,7 +557,11 @@ app.get("/api/settings/schedule", (req, res) => {
       horaChile,
       telegramConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
       defaultChatId: process.env.TELEGRAM_CHAT_ID
-        ? String(process.env.TELEGRAM_CHAT_ID).slice(0, 4) + "***" + String(process.env.TELEGRAM_CHAT_ID).slice(-3)
+        ? String(process.env.TELEGRAM_CHAT_ID)
+            .split(",")
+            .map((c) => c.trim())
+            .map((c) => (c.length > 6 ? c.slice(0, 4) + "***" + c.slice(-3) : c))
+            .join(", ")
         : null,
     });
   } catch (err) {

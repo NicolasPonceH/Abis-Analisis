@@ -24,8 +24,11 @@ async function main() {
   console.log(texto);
   console.log("------------------------");
 
-  await enviarMensaje({ token, chatId, texto });
-  console.log("Mensaje enviado correctamente.");
+  const chatIds = String(chatId).split(",").map((s) => s.trim()).filter(Boolean);
+  for (const cid of chatIds) {
+    await enviarMensaje({ token, chatId: cid, texto });
+    console.log(`Mensaje enviado correctamente a: ${cid}`);
+  }
 }
 
 main()

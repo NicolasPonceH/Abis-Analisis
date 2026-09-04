@@ -39,7 +39,14 @@ function credencialesTelegram() {
 
 async function notificar(texto, replyMarkup = null) {
   const { token, chatId } = credencialesTelegram();
-  await enviarMensaje({ token, chatId, texto, replyMarkup });
+  const chatIds = String(chatId).split(",").map((s) => s.trim()).filter(Boolean);
+  for (const cid of chatIds) {
+    try {
+      await enviarMensaje({ token, chatId: cid, texto, replyMarkup });
+    } catch (err) {
+      console.warn(`[FLUJO DIARIO] Advertencia al notificar a chat ${cid}:`, err.message);
+    }
+  }
 }
 
 // Envuelve notificar() para que una falla de Telegram (token invalido, sin internet, API caida)
