@@ -64,6 +64,9 @@ async function manejarComandoAyuda({ token, chatId }) {
     `• <code>/logs</code>`,
     `  ↳ Detalle técnico del último archivo procesado en la ingesta ETL.`,
     ``,
+    `• <code>/id</code>`,
+    `  ↳ Muestra el identificador único (Chat ID) de este grupo o conversación.`,
+    ``,
     `• <code>/ayuda</code>`,
     `  ↳ Muestra esta lista de comandos disponibles.`,
   ].join("\n");
@@ -472,19 +475,46 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
   const chatId = String(mensaje.chat.id);
   const texto = (mensaje.text || "").trim();
 
+  const partes = texto.split(/\s+/);
+  const comando = partes[0].toLowerCase().split("@")[0];
+  const args = partes.slice(1);
+
+  // Comando especial /id o /chatid: siempre responde para que el usuario conozca el ID de su chat/grupo
+  if (comando === "/id" || comando === "/chatid" || comando === "/miid") {
+    const tipoChat =
+      mensaje.chat.type === "group" || mensaje.chat.type === "supergroup"
+        ? `Grupo (${escaparHtml(mensaje.chat.title || "Sin título")})`
+        : `Chat privado (${escaparHtml(mensaje.from?.first_name || "Usuario")})`;
+
+    return telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto: [
+        `🆔 <b>IDENTIFICADOR DE TELEGRAM (CHAT ID)</b>`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `• <b>Tipo:</b> ${tipoChat}`,
+        `• <b>Chat ID:</b> <code>${chatId}</code>`,
+        ``,
+        `💡 <i>Para recibir los reportes automáticos en este grupo/chat, copia este código y configúralo en tu archivo <code>.env</code> (TELEGRAM_CHAT_ID) o en los Ajustes del Sistema ABIS.</i>`,
+      ].join("\n"),
+    });
+  }
+
   // Si se definió TELEGRAM_CHAT_ID, restringir el acceso a ese chat por seguridad
   if (authorizedChatId && String(authorizedChatId) !== chatId) {
     console.warn(`Mensaje recibido de chat no autorizado: ${chatId}`);
     return telegramClient.enviarMensaje({
       token,
       chatId,
-      texto: `⛔ <b>Acceso no autorizado</b>\nEste canal es de uso exclusivo del Sistema ABIS PDI.`,
+      texto: [
+        `⛔ <b>Acceso no autorizado</b>`,
+        `Este canal o grupo no está configurado para operar el Sistema ABIS PDI.`,
+        ``,
+        `🆔 <b>Chat ID de este grupo:</b> <code>${chatId}</code>`,
+        `💡 <i>Para autorizarlo, actualiza <code>TELEGRAM_CHAT_ID=${chatId}</code> en tu archivo .env o en los Ajustes Web.</i>`,
+      ].join("\n"),
     });
   }
-
-  const partes = texto.split(/\s+/);
-  const comando = partes[0].toLowerCase().split("@")[0];
-  const args = partes.slice(1);
 
   switch (comando) {
     case "/start":
