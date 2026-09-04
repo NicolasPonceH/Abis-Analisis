@@ -185,11 +185,12 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     ? formatearReporte(reporte, { fecha, origen })
     : formatearReporteExtenso(reporte, { fecha, origen });
 
-  // 4. Enviar vía Telegram Client a todos los canales configurados (sin botones de descarga)
+  // 4. Enviar vía Telegram Client con botones interactivos de descarga (.xlsx y .docx) a todos los canales configurados
+  const replyMarkup = crearBotonesDescarga({ fecha });
   let envio = null;
   for (const cid of chatIds) {
     try {
-      envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto });
+      envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto, replyMarkup });
     } catch (sendErr) {
       console.warn(`[SCHEDULER] Advertencia al enviar reporte a chat ${cid}:`, sendErr.message);
     }

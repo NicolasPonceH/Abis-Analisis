@@ -39,14 +39,7 @@ function credencialesTelegram() {
 
 async function notificar(texto, replyMarkup = null) {
   const { token, chatId } = credencialesTelegram();
-  const chatIds = String(chatId).split(",").map((s) => s.trim()).filter(Boolean);
-  for (const cid of chatIds) {
-    try {
-      await enviarMensaje({ token, chatId: cid, texto, replyMarkup });
-    } catch (err) {
-      console.warn(`[FLUJO DIARIO] Advertencia al notificar a chat ${cid}:`, err.message);
-    }
-  }
+  await enviarMensaje({ token, chatId, texto, replyMarkup });
 }
 
 // Envuelve notificar() para que una falla de Telegram (token invalido, sin internet, API caida)
@@ -110,7 +103,8 @@ async function ejecutarFlujoDiario(filePath, pool) {
     texto += `\n\n${formatearAvisoFilasOmitidas(resultadoEtl.errors)}`;
   }
 
-  const notificado = await notificarSinFallar(texto);
+  const replyMarkup = crearBotonesDescarga({ fecha });
+  const notificado = await notificarSinFallar(texto, replyMarkup);
 
   // Registrar en historial del scheduler para evitar reportes duplicados si coinciden a la misma hora
   try {

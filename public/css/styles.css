@@ -1,10 +1,10 @@
 /* ==========================================================================
    SISTEMA ABIS - ESTILOS EJECUTIVOS INSTITUCIONALES (PDI CHILE)
-   Paleta Clara, Limpia, Ejecutiva y de Alto Contraste Profesional
+   Alineación Oficial con la Identidad Visual de pdichile.cl
    ========================================================================== */
 
 :root {
-  /* Fondo y Superficies Claras */
+  /* Fondo y Superficies Claras (Portal Oficial PDI Chile) */
   --bg-app: #f4f6f9;
   --bg-surface: #ffffff;
   --bg-surface-subtle: #f8fafc;
@@ -13,19 +13,24 @@
   /* Bordes y Divisiones */
   --border-subtle: #e2e8f0;
   --border-medium: #cbd5e1;
-  --border-focus: #2563eb;
+  --border-focus: #00234c;
   
-  /* Identidad Institucional PDI */
-  --pdi-navy-dark: #001f35;
-  --pdi-navy: #002b49;
-  --pdi-navy-light: #0d4169;
-  --pdi-gold: #c69214;
-  --pdi-gold-light: #d4af37;
-  --pdi-gold-subtle: #fef9c3;
-  --pdi-blue-accent: #0284c7;
+  /* Identidad Institucional Oficial PDI Chile (pdichile.cl) */
+  --pdi-navy-dark: #001733;
+  --pdi-navy: #00234c;
+  --pdi-navy-light: #0d3866;
+  --pdi-gold: #ffd100;
+  --pdi-gold-dark: #e6bc00;
+  --pdi-gold-light: #ffe566;
+  --pdi-gold-subtle: #fffbeb;
+  --pdi-blue-accent: #0f69b4;
+
+  /* Tipografía Oficial PDI (Oswald para impacto y títulos, Open Sans para lectura) */
+  --font-heading: 'Oswald', 'Segoe UI', sans-serif;
+  --font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Tipografía y Textos */
-  --text-primary: #0f172a;
+  --text-primary: #00234c;
   --text-secondary: #334155;
   --text-muted: #64748b;
   --text-light: #94a3b8;
@@ -44,8 +49,8 @@
   --status-danger-bg: #fef2f2;
   --status-danger-border: #fecaca;
   
-  --status-info: #0284c7;
-  --status-info-bg: #f0f9ff;
+  --status-info: #0f69b4;
+  --status-info-bg: #f0f7ff;
   --status-info-border: #bae6fd;
 
   --status-purple: #7c3aed;
@@ -53,10 +58,10 @@
   --status-purple-border: #ddd6fe;
 
   /* Sombras y Elevación */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 35, 76, 0.04);
+  --shadow-sm: 0 2px 4px 0 rgba(0, 35, 76, 0.06);
+  --shadow-md: 0 4px 12px -1px rgba(0, 35, 76, 0.08);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 35, 76, 0.12);
   
   /* Radios */
   --radius-sm: 6px;
@@ -118,14 +123,34 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-body);
   background-color: var(--bg-app);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand-title,
+.tab-button,
+.kpi-val,
+.kpi-value,
+.chart-title,
+.filters-title,
+.table-title,
+.modal-title h3,
+.status-pill,
+.badge,
+.btn,
+.preset-btn,
+.data-table th,
+.exec-stat-label,
+.exec-stat-val {
+  font-family: var(--font-heading);
+  letter-spacing: 0.4px;
 }
 
 /* Scrollbar Profesional */
@@ -161,29 +186,63 @@ body {
 }
 
 /* ==========================================================================
-   HEADER INSTITUCIONAL PDI
+   HEADER INSTITUCIONAL PDI (ESTILO OFICIAL PDICHILE.CL)
    ========================================================================== */
+.header-top-bar {
+  background: var(--pdi-navy-dark);
+  border-bottom: 1px solid rgba(255, 209, 0, 0.25);
+  padding: 6px 24px;
+  font-size: 0.72rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.header-top-inner {
+  max-width: 1800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.header-top-inner .gov-text {
+  color: var(--pdi-gold);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-top-inner .sub-dept-text {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
 .header-institutional {
-  background: linear-gradient(135deg, var(--pdi-navy) 0%, #061c30 100%);
-  border-bottom: 3px solid var(--pdi-gold);
-  padding: 0 24px;
+  background: var(--pdi-navy);
+  border-bottom: 3.5px solid var(--pdi-gold);
+  padding: 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4px 14px rgba(0, 31, 53, 0.25);
+  box-shadow: 0 4px 18px rgba(0, 23, 51, 0.3);
   width: 100%;
   box-sizing: border-box;
 }
 
 @media (max-width: 1200px) {
   .header-institutional {
-    padding: 10px 14px 0;
+    padding: 0;
   }
 }
 
 .header-inner {
   max-width: 1800px;
   margin: 0 auto;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   position: relative;
@@ -194,29 +253,33 @@ body {
 .brand-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   white-space: nowrap;
   z-index: 2;
 }
 
 .logo-pdi {
-  height: 38px;
+  height: 42px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
   background: #ffffff;
-  padding: 3px 6px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
-  border: 1.5px solid var(--pdi-gold);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border: 2px solid var(--pdi-gold);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: transform var(--transition);
   flex-shrink: 0;
+}
+
+.logo-pdi:hover {
+  transform: scale(1.05);
 }
 
 @media (max-width: 640px) {
   .logo-pdi {
     height: 38px;
-    padding: 3px 8px;
+    padding: 3px 6px;
   }
 }
 
@@ -227,10 +290,12 @@ body {
 }
 
 .brand-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: var(--text-on-dark);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -244,9 +309,12 @@ body {
 }
 
 .brand-subtitle {
+  font-family: var(--font-heading);
   font-size: 0.72rem;
-  color: #cbd5e1;
-  font-weight: 400;
+  color: var(--pdi-gold);
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -450,15 +518,18 @@ body {
 .tabs-nav.navbar-top .tab-button {
   background: transparent;
   border: none;
-  color: #cbd5e1;
-  font-size: 0.83rem;
+  color: #e2e8f0;
+  font-family: var(--font-heading);
+  font-size: 0.86rem;
   font-weight: 600;
-  padding: 7px 11px;
-  border-radius: 6px 6px 0 0;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 4px 4px 0 0;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   white-space: nowrap;
@@ -475,40 +546,37 @@ body {
 }
 
 .tabs-nav.navbar-top .tab-button:hover .nav-svg-icon {
-  transform: scale(1.15) rotate(-3deg);
-  stroke: var(--pdi-gold-light);
-  filter: drop-shadow(0 2px 5px rgba(212, 175, 55, 0.5));
+  transform: scale(1.12);
+  stroke: var(--pdi-gold);
+  filter: drop-shadow(0 0 6px rgba(255, 209, 0, 0.6));
 }
 
 /* Animación Active */
 .tabs-nav.navbar-top .tab-button.active {
   color: #ffffff;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 209, 0, 0.12);
   border: none;
-  box-shadow: inset 0 -3px 0 0 var(--pdi-gold), 0 2px 10px rgba(198, 146, 20, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  margin-bottom: 0;
+  box-shadow: inset 0 -3.5px 0 0 var(--pdi-gold);
 }
 
 .tabs-nav.navbar-top .tab-button.active .nav-svg-icon {
   stroke: var(--pdi-gold);
-  transform: scale(1.08);
-  filter: drop-shadow(0 1px 4px rgba(198, 146, 20, 0.6));
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(255, 209, 0, 0.8));
 }
 
 .tabs-nav.navbar-top .tab-button.active::after {
   content: "";
   position: absolute;
   bottom: 0;
-  left: 8px;
-  right: 8px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--pdi-gold-light), var(--pdi-gold), var(--pdi-gold-light));
+  left: 6px;
+  right: 6px;
+  height: 3.5px;
+  background: var(--pdi-gold);
   border-radius: 3px 3px 0 0;
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
-  animation: navbarSlideIndicator 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 0 10px rgba(255, 209, 0, 0.9);
+  animation: navbarSlideIndicator 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Responsive para pantallas medianas / móviles */
@@ -578,6 +646,7 @@ body {
 .filters-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--pdi-navy);
   border-radius: var(--radius-lg);
   padding: 20px 24px;
   margin-bottom: 24px;
@@ -667,9 +736,9 @@ body {
 
 .preset-btn.active {
   background: var(--pdi-navy);
-  color: #ffffff;
-  border-color: var(--pdi-navy);
-  box-shadow: 0 2px 6px rgba(0, 43, 73, 0.2);
+  color: var(--pdi-gold);
+  border-color: var(--pdi-gold);
+  box-shadow: 0 2px 6px rgba(0, 35, 76, 0.25);
 }
 
 .filters-grid {
@@ -847,25 +916,49 @@ select.form-control {
 .btn-primary {
   background: var(--pdi-navy);
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 43, 73, 0.25);
+  border: 1px solid rgba(255, 209, 0, 0.35);
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 35, 76, 0.25);
 }
 
 .btn-primary:hover {
   background: var(--pdi-navy-light);
+  border-color: var(--pdi-gold);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 43, 73, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 35, 76, 0.35);
 }
 
 .btn-secondary {
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
-  color: var(--text-secondary);
+  color: var(--pdi-navy);
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
 }
 
 .btn-secondary:hover {
   background: var(--bg-surface-hover);
-  color: var(--text-primary);
-  border-color: #94a3b8;
+  color: var(--pdi-navy);
+  border-color: var(--pdi-navy);
+}
+
+.btn-gold {
+  background: var(--pdi-gold);
+  color: var(--pdi-navy-dark);
+  border: 1px solid var(--pdi-gold-dark);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(255, 209, 0, 0.35);
+}
+
+.btn-gold:hover {
+  background: var(--pdi-gold-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 209, 0, 0.45);
 }
 
 /* ==========================================================================
@@ -1129,10 +1222,11 @@ select.form-control {
 .kpi-card.danger .kpi-pill  { background: var(--status-danger-bg); color: var(--status-danger); }
 
 .kpi-value {
-  font-size: 2.1rem;
-  font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.8px;
+  letter-spacing: -0.5px;
   line-height: 1.1;
   margin-bottom: 6px;
 }
@@ -1173,7 +1267,8 @@ select.form-control {
 
 .chart-card {
   background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-top: 3px solid var(--pdi-navy);
   border-radius: var(--radius-lg);
   padding: 22px;
   box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
@@ -1185,8 +1280,9 @@ select.form-control {
 }
 
 .chart-card:hover {
-  border-color: rgba(203, 213, 225, 0.95);
-  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.07), 0 8px 12px -6px rgba(15, 23, 42, 0.04);
+  border-top-color: var(--pdi-gold);
+  border-color: var(--border-medium);
+  box-shadow: 0 12px 28px -6px rgba(0, 35, 76, 0.09), 0 8px 12px -6px rgba(0, 35, 76, 0.05);
 }
 
 .chart-card.col-12 { grid-column: span 12; }
@@ -1294,14 +1390,15 @@ select.form-control {
 }
 
 .data-table th {
-  background: #f8fafc;
-  color: var(--text-secondary);
-  font-weight: 700;
+  background: var(--pdi-navy);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.75rem;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--border-medium);
+  letter-spacing: 0.6px;
+  font-size: 0.78rem;
+  padding: 13px 18px;
+  border-bottom: 2.5px solid var(--pdi-gold);
 }
 
 .data-table td {
@@ -1310,9 +1407,13 @@ select.form-control {
   color: var(--text-secondary);
 }
 
+.data-table tbody tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
 .data-table tr:hover td {
-  background: #f8fafc;
-  color: var(--text-primary);
+  background: #f1f5f9;
+  color: var(--pdi-navy);
 }
 
 .data-table tr:last-child td {
@@ -1745,13 +1846,21 @@ select.form-control {
    ========================================================================== */
 .footer {
   margin-top: auto;
-  border-top: 1px solid var(--border-subtle);
-  background: #ffffff;
-  padding: 18px 28px;
+  background: var(--pdi-navy-dark);
+  border-top: 3.5px solid var(--pdi-gold);
+  padding: 22px 28px;
   text-align: center;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.03);
+  font-size: 0.84rem;
+  color: #94a3b8;
+  box-shadow: 0 -4px 18px rgba(0, 23, 51, 0.25);
+}
+
+.footer strong {
+  color: var(--pdi-gold);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 /* Modo Impresión Formal PDI */
@@ -2056,16 +2165,17 @@ select.form-control {
 
 /* Banner de Estado del Reloj y Automatización */
 .schedule-status-banner {
-  background: linear-gradient(135deg, #002b49 0%, #001f35 100%);
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, var(--pdi-navy) 0%, var(--pdi-navy-dark) 100%);
+  border: 1px solid rgba(255, 209, 0, 0.4);
+  border-left: 5px solid var(--pdi-gold);
   border-radius: var(--radius-lg);
-  padding: 16px 22px;
+  padding: 18px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 31, 53, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 35, 76, 0.25);
   flex-wrap: wrap;
   gap: 14px;
 }
@@ -2079,16 +2189,16 @@ select.form-control {
 .schedule-clock-icon {
   width: 42px;
   height: 42px;
-  background: rgba(212, 175, 55, 0.18);
+  background: rgba(255, 209, 0, 0.15);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(212, 175, 55, 0.45);
+  border: 1px solid var(--pdi-gold);
 }
 
 .schedule-clock-icon .svg-icon {
-  stroke: #fef08a !important;
+  stroke: var(--pdi-gold) !important;
 }
 
 .schedule-clock-title {
