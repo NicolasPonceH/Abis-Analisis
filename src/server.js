@@ -408,11 +408,10 @@ app.post("/api/telegram/enviar", async (req, res) => {
       origen: "Dashboard Web PDI",
     });
 
-    const replyMarkup = crearBotonesDescarga({ fecha: reporte.fecha || fecha, desde, hasta });
     let envio = null;
     for (const cid of chatIds) {
       try {
-        envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto, replyMarkup });
+        envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto });
       } catch (errSend) {
         console.warn(`[TELEGRAM ENVIAR] Error enviando a chat ${cid}:`, errSend.message);
       }

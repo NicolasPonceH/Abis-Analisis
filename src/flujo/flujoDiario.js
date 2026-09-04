@@ -110,8 +110,7 @@ async function ejecutarFlujoDiario(filePath, pool) {
     texto += `\n\n${formatearAvisoFilasOmitidas(resultadoEtl.errors)}`;
   }
 
-  const replyMarkup = crearBotonesDescarga({ fecha });
-  const notificado = await notificarSinFallar(texto, replyMarkup);
+  const notificado = await notificarSinFallar(texto);
 
   // Registrar en historial del scheduler para evitar reportes duplicados si coinciden a la misma hora
   try {

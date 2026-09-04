@@ -52,7 +52,7 @@ async function manejarComandoAyuda({ token, chatId }) {
     ``,
     `📊 <b>Reportes Analíticos:</b>`,
     `• <code>/reporte</code> o <code>/hoy</code>`,
-    `  ↳ Genera el reporte diario del día más reciente con botones de descarga directa.`,
+    `  ↳ Genera el reporte operativo consolidado del día más reciente.`,
     ``,
     `• <code>/reporte YYYY-MM-DD</code>`,
     `  ↳ Genera el reporte completo de una fecha específica (ej: <code>/reporte 2026-08-22</code>).`,
@@ -365,8 +365,7 @@ async function manejarComandoReporte({ token, chatId, pool, args }) {
 
   const reporte = await obtenerReporteDiario(pool, fecha);
   const texto = formatearReporteExtenso(reporte, { fecha, origen: "Bot Telegram PDI" });
-  const replyMarkup = crearBotonesDescarga({ fecha });
-  await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+  await telegramClient.enviarMensaje({ token, chatId, texto });
 }
 
 async function manejarComandoEstado({ token, chatId, pool }) {
@@ -568,7 +567,7 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
           `❓ <b>No entendí ${comandoTexto}.</b>`,
           ``,
           `💡 Escribe <code>/ayuda</code> para ver todos los comandos disponibles en el Sistema ABIS:`,
-          `• <code>/reporte [YYYY-MM-DD]</code> - Ver reporte con botones de descarga`,
+          `• <code>/reporte [YYYY-MM-DD]</code> - Ver reporte operativo consolidado`,
           `• <code>/excel [YYYY-MM-DD]</code> - Descargar planilla Excel (.xlsx)`,
           `• <code>/word [YYYY-MM-DD]</code> - Descargar informe Word (.docx)`,
           `• <code>/errores [YYYY-MM-DD]</code> - Ver detalle de fallas por cuartel`,
