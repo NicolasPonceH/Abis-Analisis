@@ -1884,6 +1884,7 @@ function promptAuthModal(file, actionType = "ingesta") {
   const warningEl = document.getElementById("modal-warning-text");
   const fileNameEl = document.getElementById("modal-file-name");
   const fileDetailsEl = document.getElementById("modal-file-details");
+  const summaryIconEl = document.getElementById("modal-summary-icon");
   const claveInput = document.getElementById("input-auth-clave");
   const errorMsg = document.getElementById("modal-auth-error");
   const confirmBtn = document.getElementById("btn-modal-auth-confirm");
@@ -1891,6 +1892,14 @@ function promptAuthModal(file, actionType = "ingesta") {
   if (!modal) return;
 
   if (actionType === "cifrar") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      `;
+    }
     if (titleEl) titleEl.textContent = "Autorización de Cifrado Institucional";
     if (subtitleEl) subtitleEl.textContent = "Blindaje Criptográfico de Archivo (AES-256-GCM)";
     if (warningEl) warningEl.textContent = "Para blindar y generar el archivo protegido .enc se requiere verificar su credencial policial autorizada.";
@@ -1903,7 +1912,23 @@ function promptAuthModal(file, actionType = "ingesta") {
         <span>Autorizar y Cifrar Archivo</span>
       `;
     }
+    if (fileNameEl) fileNameEl.textContent = file.name;
+    if (fileDetailsEl) {
+      const sizeMb = (file.size / 1024 / 1024).toFixed(2);
+      const tipoDesc = file.name.toLowerCase().endsWith(".enc")
+        ? "Archivo Cifrado AES-256-GCM"
+        : "Planilla Excel (Oracle ABIS)";
+      fileDetailsEl.textContent = `${sizeMb} MB • ${tipoDesc}`;
+    }
   } else if (actionType === "descifrar") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      `;
+    }
     if (titleEl) titleEl.textContent = "Autorización de Descifrado y Auditoría";
     if (subtitleEl) subtitleEl.textContent = "Apertura y Verificación de Archivo Protegido";
     if (warningEl) warningEl.textContent = "Para descifrar y recuperar la planilla original se requiere verificar su credencial policial autorizada.";
@@ -1916,8 +1941,53 @@ function promptAuthModal(file, actionType = "ingesta") {
         <span>Autorizar y Descifrar Archivo</span>
       `;
     }
+    if (fileNameEl) fileNameEl.textContent = file.name;
+    if (fileDetailsEl) {
+      const sizeMb = (file.size / 1024 / 1024).toFixed(2);
+      const tipoDesc = file.name.toLowerCase().endsWith(".enc")
+        ? "Archivo Cifrado AES-256-GCM"
+        : "Planilla Excel (Oracle ABIS)";
+      fileDetailsEl.textContent = `${sizeMb} MB • ${tipoDesc}`;
+    }
+  } else if (actionType === "programacion") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      `;
+    }
+    if (titleEl) titleEl.textContent = "Autorización de Seguridad Policial";
+    if (subtitleEl) subtitleEl.textContent = "Control de Acceso para Guardar Programación de Reportes";
+    if (warningEl) warningEl.textContent = "Para modificar y guardar los horarios de despacho automático a Telegram se requiere verificar su credencial policial autorizada.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        <span>Autorizar y Guardar Ajustes</span>
+      `;
+    }
+    if (fileNameEl) {
+      fileNameEl.textContent = `Horarios: ${file.times.join(", ")} hrs (${file.times.length} ${file.times.length === 1 ? 'despacho' : 'despachos'} al día)`;
+    }
+    if (fileDetailsEl) {
+      const tipo = file.reportType === "extenso" ? "Reporte Extenso Oficial PDI" : "Resumen Ejecutivo";
+      fileDetailsEl.textContent = `${file.days.length} días activos por semana • ${tipo}`;
+    }
   } else {
     // Ingesta por defecto
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      `;
+    }
     if (titleEl) titleEl.textContent = "Autorización de Seguridad";
     if (subtitleEl) subtitleEl.textContent = "Control de Acceso para Ingesta y Poblado de Base de Datos";
     if (warningEl) warningEl.textContent = "Para poblar la base de datos se requiere verificar su credencial policial de operador autorizado.";
@@ -1929,15 +1999,14 @@ function promptAuthModal(file, actionType = "ingesta") {
         <span>Autorizar y Poblar BD</span>
       `;
     }
-  }
-
-  if (fileNameEl) fileNameEl.textContent = file.name;
-  if (fileDetailsEl) {
-    const sizeMb = (file.size / 1024 / 1024).toFixed(2);
-    const tipoDesc = file.name.toLowerCase().endsWith(".enc")
-      ? "Archivo Cifrado AES-256-GCM"
-      : "Planilla Excel (Oracle ABIS)";
-    fileDetailsEl.textContent = `${sizeMb} MB • ${tipoDesc}`;
+    if (fileNameEl) fileNameEl.textContent = file.name;
+    if (fileDetailsEl) {
+      const sizeMb = (file.size / 1024 / 1024).toFixed(2);
+      const tipoDesc = file.name.toLowerCase().endsWith(".enc")
+        ? "Archivo Cifrado AES-256-GCM"
+        : "Planilla Excel (Oracle ABIS)";
+      fileDetailsEl.textContent = `${sizeMb} MB • ${tipoDesc}`;
+    }
   }
 
   if (claveInput) {
@@ -2044,8 +2113,117 @@ async function confirmAuthorizedUpload() {
     await executeWebEncrypt(pendingAuthFile, clave);
   } else if (pendingAuthAction === "descifrar") {
     await executeWebDecrypt(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "programacion") {
+    await executeSaveScheduleAuthorized(pendingAuthFile, clave);
   } else {
     await handleFileUpload(pendingAuthFile, clave);
+  }
+}
+
+// Ejecuta el guardado de configuración de programación tras verificar la clave de autorización
+async function executeSaveScheduleAuthorized(scheduleData, clave) {
+  const modal = document.getElementById("modal-auth-ingesta");
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const saveFeedback = document.getElementById("schedule-save-feedback");
+
+  try {
+    const res = await fetch("/api/settings/schedule", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({
+        ...scheduleData,
+        clave,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401 || data.codigo === "AUTH_REQUIRED") {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Clave de autorización no válida. Verifique su credencial policial.`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          <span>Autorizar y Guardar Ajustes</span>
+        `;
+      }
+      if (claveInput) {
+        claveInput.select();
+        claveInput.focus();
+      }
+      return;
+    }
+
+    if (!data.ok) throw new Error(data.error || "Fallo al guardar.");
+
+    // Autorización exitosa: cerrar modal
+    closeAuthModal();
+
+    if (saveFeedback) {
+      saveFeedback.className = "crypto-feedback-box success";
+      saveFeedback.style.display = "block";
+      saveFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Ajustes Guardados y Autorizados Exitosamente</span>
+        </div>
+        • Horarios activos: <strong>${data.config.times.join(", ")} hrs</strong><br>
+        • Próxima ejecución: <strong>${data.next?.text || 'Calculando...'}</strong><br>
+        • Frecuencia: <strong>${data.config.times.length} despachos diarios programados</strong>
+      `;
+      setTimeout(() => {
+        saveFeedback.style.display = "none";
+      }, 6000);
+    }
+
+    // Actualizar badge de próximo envío
+    const nextBadge = document.getElementById("schedule-next-text");
+    if (nextBadge && data.next) {
+      nextBadge.textContent = `Próximo Envío: ${data.next.text}`;
+    }
+
+    // Actualizar frecuencia en el cuadro lateral
+    const freqSummary = document.getElementById("schedule-freq-summary");
+    if (freqSummary && data.config?.times) {
+      freqSummary.textContent = `${data.config.times.length} ${data.config.times.length === 1 ? 'envío' : 'envíos'} al día (${data.config.times.join(', ')} hrs)`;
+    }
+
+    // Actualizar historial de envíos si la función existe
+    if (typeof cargarHistorialDespachos === "function") {
+      cargarHistorialDespachos();
+    }
+
+  } catch (err) {
+    closeAuthModal();
+    if (saveFeedback) {
+      saveFeedback.className = "crypto-feedback-box error";
+      saveFeedback.style.display = "block";
+      saveFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error al Guardar Ajustes</span>
+        </div>
+        ${err.message}
+      `;
+    }
   }
 }
 
@@ -2843,15 +3021,12 @@ function setupScheduleEvents() {
     });
   }
 
-  // Guardar Ajustes de Programación
+  // Guardar Ajustes de Programación (Exige Clave Institucional Policial)
   const btnSaveSchedule = document.getElementById("btn-save-schedule");
   const saveFeedback = document.getElementById("schedule-save-feedback");
   if (btnSaveSchedule) {
-    btnSaveSchedule.addEventListener("click", async () => {
+    btnSaveSchedule.addEventListener("click", () => {
       try {
-        btnSaveSchedule.disabled = true;
-        btnSaveSchedule.innerHTML = `<span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Guardando ajustes...`;
-
         const enabled = document.getElementById("schedule-enabled-toggle")?.checked ?? true;
         const reportType = document.getElementById("schedule-report-type")?.value || "extenso";
 
@@ -2868,61 +3043,31 @@ function setupScheduleEvents() {
           throw new Error("Debes seleccionar al menos un día de la semana para el despacho.");
         }
 
-        const res = await fetch("/api/settings/schedule", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            enabled,
-            times: state.currentScheduleTimes,
-            days,
-            reportType,
-          }),
-        });
+        const schedulePayload = {
+          enabled,
+          times: [...state.currentScheduleTimes],
+          days,
+          reportType,
+        };
 
-        const data = await res.json();
-        if (!data.ok) throw new Error(data.error || "Fallo al guardar.");
-
-        if (saveFeedback) {
-          saveFeedback.className = "crypto-feedback-box success";
-          saveFeedback.style.display = "block";
-          saveFeedback.innerHTML = `
-            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Configuración Guardada Exitosamente</span>
-            </div>
-            • Horarios activos: <strong>${data.config.times.join(", ")} hrs</strong><br>
-            • Próxima ejecución: <strong>${data.next?.text || 'Calculando...'}</strong><br>
-            • Frecuencia: <strong>${data.config.times.length} despachos diarios programados</strong>
-          `;
-          setTimeout(() => {
-            saveFeedback.style.display = "none";
-          }, 6000);
-        }
-
-        // Actualizar badge de próximo envío
-        const nextBadge = document.getElementById("schedule-next-text");
-        if (nextBadge && data.next) {
-          nextBadge.textContent = `Próximo Envío: ${data.next.text}`;
-        }
+        // Solicitar clave institucional mediante el modal de seguridad policial
+        promptAuthModal(schedulePayload, "programacion");
 
       } catch (err) {
         if (saveFeedback) {
           saveFeedback.className = "crypto-feedback-box error";
           saveFeedback.style.display = "block";
           saveFeedback.innerHTML = `
-            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
+            <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
               <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              <span>Error:</span>
+              <span>Error de Validación</span>
             </div>
             ${err.message}
           `;
+          setTimeout(() => {
+            saveFeedback.style.display = "none";
+          }, 4000);
         }
-      } finally {
-        btnSaveSchedule.disabled = false;
-        btnSaveSchedule.innerHTML = `
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          <span>Guardar Ajustes de Programación</span>
-        `;
       }
     });
   }

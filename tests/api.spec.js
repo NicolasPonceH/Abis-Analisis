@@ -220,11 +220,29 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(data.next).toBeDefined();
   });
 
-  test('POST /api/settings/schedule updates schedule times and options', async ({ request }) => {
+  test('POST /api/settings/schedule rejects unauthorized requests (HTTP 401)', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/api/settings/schedule`, {
       data: {
         enabled: true,
-        times: ['08:30', '14:00', '19:00'],
+        times: ['08:30'],
+        days: [1, 2, 3, 4, 5],
+        reportType: 'extenso',
+      }
+    });
+    expect(res.status()).toBe(401);
+    const data = await res.json();
+    expect(data.ok).toBe(false);
+    expect(data.codigo).toBe('AUTH_REQUIRED');
+  });
+
+  test('POST /api/settings/schedule updates schedule times with valid authorization', async ({ request }) => {
+    const res = await request.post(`${BASE_URL}/api/settings/schedule`, {
+      headers: {
+        'X-Ingesta-Auth': 'pdi2026',
+      },
+      data: {
+        enabled: true,
+        times: ['08:30'],
         days: [1, 2, 3, 4, 5],
         reportType: 'extenso',
       }
@@ -232,7 +250,7 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
     expect(data.ok).toBe(true);
-    expect(data.config.times).toEqual(['08:30', '14:00', '19:00']);
+    expect(data.config.times).toEqual(['08:30']);
     expect(data.config.days).toEqual([1, 2, 3, 4, 5]);
     expect(data.next).toBeDefined();
   });

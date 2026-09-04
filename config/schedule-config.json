@@ -14,9 +14,9 @@
   "targetChannel": "telegram",
   "telegramChatId": "",
   "lastSent": {
-    "id": "disp_1788534941714",
-    "timestamp": "2026-09-04T15:15:41.714Z",
-    "horaChile": "2026-09-04 11:15",
+    "id": "disp_1788535713743",
+    "timestamp": "2026-09-04T15:28:33.743Z",
+    "horaChile": "2026-09-04 11:28",
     "fechaReportada": "2026-08-22",
     "totalEnrolados": 3,
     "slaPDI": 100,
@@ -24,9 +24,35 @@
     "canal": "Telegram Oficial PDI",
     "chatId": "1466***122",
     "estado": "EXITO",
-    "messageId": 260
+    "messageId": 264
   },
   "history": [
+    {
+      "id": "disp_1788535713743",
+      "timestamp": "2026-09-04T15:28:33.743Z",
+      "horaChile": "2026-09-04 11:28",
+      "fechaReportada": "2026-08-22",
+      "totalEnrolados": 3,
+      "slaPDI": 100,
+      "tipo": "PRUEBA_MANUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "1466***122",
+      "estado": "EXITO",
+      "messageId": 264
+    },
+    {
+      "id": "disp_1788535531339",
+      "timestamp": "2026-09-04T15:25:31.339Z",
+      "horaChile": "2026-09-04 11:25",
+      "fechaReportada": "2026-08-22",
+      "totalEnrolados": 3,
+      "slaPDI": 100,
+      "tipo": "PRUEBA_MANUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "1466***122",
+      "estado": "EXITO",
+      "messageId": 262
+    },
     {
       "id": "disp_1788534941714",
       "timestamp": "2026-09-04T15:15:41.714Z",

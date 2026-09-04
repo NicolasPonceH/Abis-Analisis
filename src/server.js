@@ -552,9 +552,22 @@ app.get("/api/settings/schedule", (req, res) => {
   }
 });
 
-// Guarda la configuración actualizada de horarios de reporte
-app.post("/api/settings/schedule", (req, res) => {
+// Guarda la configuración actualizada de horarios de reporte (Protegido con Clave de Autorización)
+app.post("/api/settings/schedule", async (req, res) => {
   try {
+    // 1. Verificación estricta de la clave de autorización policial
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      console.warn(`[SEGURIDAD] Intento de modificación de programación rechazado: Clave de autorización no válida o ausente.`);
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada para modificar los ajustes de programación.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
     const { enabled, times, days, reportType, telegramChatId } = req.body || {};
     const updated = schedulerService.saveConfig({
       enabled: enabled !== undefined ? Boolean(enabled) : undefined,
@@ -564,6 +577,21 @@ app.post("/api/settings/schedule", (req, res) => {
       telegramChatId,
     });
     const next = schedulerService.getNextExecution(updated);
+
+    // Registro de auditoría inmutable
+    try {
+      await pool.query(
+        `INSERT INTO registro_auditoria_cifrada 
+         (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
+         VALUES (NOW(), 'MODIFICACION_PROGRAMACION_AUTORIZADA', 'schedule-config.json', $1, $2, 'Operador Administrador Web')`,
+        [
+          generarHashSHA256(Buffer.from(JSON.stringify(updated))),
+          `Horarios: ${(updated.times || []).join(", ")} hrs | Días: ${(updated.days || []).join(",")} | Reporte: ${updated.reportType}`
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("[AUDITORÍA] Advertencia al registrar modificación de programación en bitácora:", auditErr.message);
+    }
 
     res.json({
       ok: true,
