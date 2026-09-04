@@ -13,19 +13,32 @@
   "reportType": "extenso",
   "targetChannel": "telegram",
   "lastSent": {
-    "id": "disp_1788526001352",
-    "timestamp": "2026-09-04T12:46:41.352Z",
-    "horaChile": "2026-09-04 08:46",
-    "fechaReportada": "2026-08-26",
-    "totalEnrolados": 41,
-    "slaPDI": 97.6,
+    "id": "disp_1788526653228",
+    "timestamp": "2026-09-04T12:57:33.228Z",
+    "horaChile": "2026-09-04 08:57",
+    "fechaReportada": "2026-08-22",
+    "totalEnrolados": 3,
+    "slaPDI": 100,
     "tipo": "PRUEBA_MANUAL",
     "canal": "Telegram Oficial PDI",
     "chatId": "1466***122",
     "estado": "EXITO",
-    "messageId": 248
+    "messageId": 250
   },
   "history": [
+    {
+      "id": "disp_1788526653228",
+      "timestamp": "2026-09-04T12:57:33.228Z",
+      "horaChile": "2026-09-04 08:57",
+      "fechaReportada": "2026-08-22",
+      "totalEnrolados": 3,
+      "slaPDI": 100,
+      "tipo": "PRUEBA_MANUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "1466***122",
+      "estado": "EXITO",
+      "messageId": 250
+    },
     {
       "id": "disp_1788526001352",
       "timestamp": "2026-09-04T12:46:41.352Z",
