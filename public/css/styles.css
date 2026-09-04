@@ -673,9 +673,9 @@ body {
 }
 
 .filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
   align-items: flex-end;
   width: 100%;
 }
@@ -685,6 +685,22 @@ body {
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+}
+
+#group-filter-mode {
+  flex: 0 0 310px;
+  min-width: 290px;
+}
+
+#group-date-single {
+  flex: 1 1 360px;
+  min-width: 320px;
+}
+
+#group-date-from,
+#group-date-to {
+  flex: 1 1 200px;
+  min-width: 180px;
 }
 
 .filter-label {
@@ -708,6 +724,19 @@ body {
   box-sizing: border-box;
 }
 
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+  padding-right: 38px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .form-control:focus {
   background: #ffffff;
   border-color: var(--border-focus);
@@ -715,7 +744,8 @@ body {
 }
 
 .actions-group {
-  grid-column: 1 / -1;
+  flex: 1 1 100%;
+  width: 100%;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -726,8 +756,12 @@ body {
 }
 
 @media (max-width: 768px) {
-  .filters-grid {
-    grid-template-columns: 1fr;
+  #group-filter-mode,
+  #group-date-single,
+  #group-date-from,
+  #group-date-to {
+    flex: 1 1 100%;
+    min-width: 100%;
   }
   .actions-group {
     display: grid;
