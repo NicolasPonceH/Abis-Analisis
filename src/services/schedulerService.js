@@ -251,6 +251,15 @@ function iniciarScheduler({ pool, logger = console }) {
       const esDiaHabilitado = config.days.includes(dayOfWeek);
       const esHoraCoincidente = config.times.includes(timeStr);
 
+      // Evitar duplicar si la tarea de flujo diario ETL ya envió un reporte hace menos de 3 minutos
+      if (config.lastSent && config.lastSent.timestamp) {
+        const diffMs = Date.now() - new Date(config.lastSent.timestamp).getTime();
+        if (diffMs < 3 * 60 * 1000) {
+          lastFiredMinuteKey = currentMinuteKey;
+          return;
+        }
+      }
+
       if (esDiaHabilitado && esHoraCoincidente) {
         lastFiredMinuteKey = currentMinuteKey;
         logger.log(`[HORARIO COINCIDENTE] Disparando reporte automático de las ${timeStr} hrs (${dateStr})...`);

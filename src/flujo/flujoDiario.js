@@ -105,6 +105,29 @@ async function ejecutarFlujoDiario(filePath, pool) {
 
   const replyMarkup = crearBotonesDescarga({ fecha });
   const notificado = await notificarSinFallar(texto, replyMarkup);
+
+  // Registrar en historial del scheduler para evitar reportes duplicados si coinciden a la misma hora
+  try {
+    const schedulerService = require("../services/schedulerService");
+    const horaChile = schedulerService.obtenerHoraChile();
+    const entry = {
+      id: `disp_etl_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      horaChile: horaChile.full,
+      fechaReportada: fecha,
+      totalEnrolados: reporte.total || 0,
+      slaPDI: reporte.resumenEjecutivo?.tasaSincronizacion || 100,
+      tipo: "FLUJO_DIARIO_ETL",
+      canal: "Telegram Oficial PDI",
+      estado: notificado ? "EXITO" : "FALLO",
+    };
+    const currentConfig = schedulerService.getConfig();
+    const history = [entry, ...(currentConfig.history || [])].slice(0, 25);
+    schedulerService.saveConfig({ lastSent: entry, history });
+  } catch (err) {
+    // Si falla el guardado de historial, no afecta el resultado del ETL
+  }
+
   return { ...resultadoEtl, reporte, notificado: notificado ? "reporte" : "reporte_sin_notificar" };
 }
 
