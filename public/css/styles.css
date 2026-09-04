@@ -780,7 +780,6 @@ select.form-control {
   padding: 10px 16px;
   background: #f0f7ff;
   border: 1px solid #bae6fd;
-  border-left: 3.5px solid var(--pdi-navy);
   border-radius: var(--radius-md);
   font-size: 0.88rem;
   color: var(--pdi-navy);
@@ -2059,7 +2058,6 @@ select.form-control {
 .schedule-status-banner {
   background: linear-gradient(135deg, #002b49 0%, #001f35 100%);
   border: 1px solid rgba(212, 175, 55, 0.4);
-  border-left: 4px solid var(--pdi-gold);
   border-radius: var(--radius-lg);
   padding: 16px 22px;
   display: flex;

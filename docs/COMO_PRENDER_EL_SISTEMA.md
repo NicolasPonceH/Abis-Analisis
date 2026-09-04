@@ -42,14 +42,17 @@ npm run db:poblar
 ```
 
 > **Resultado esperado:**
+>
 > - Procesa la hoja `ENROLADOS` de `New_Enrolados Abis.xlsx`.
 > - Inserta los 95.474 registros en 20 lotes transaccionales (~20 segundos).
 > - Rango de fechas cargadas: `2023-06-01` al `2026-08-22`.
 
 ### Validar Integridad de la Base de Datos:
+
 ```powershell
 npm run validar-integridad
 ```
+
 *Confirma que existan 0 nulos en campos obligatorios, 0 inconsistencias lógicas de edad y verifica el uso óptimo de índices en consultas analíticas (< 1 ms).*
 
 ---
@@ -63,10 +66,12 @@ npm start
 ```
 
 > **Salida esperada:**
+>
 > ```text
 > Sistema ABIS escuchando en http://localhost:3000
 > 🤖 Bot de Telegram interactivo iniciado (Long Polling activo)...
 > ```
+
 *Deja esta terminal abierta para mantener los servicios activos.*
 
 ---
@@ -75,8 +80,7 @@ npm start
 
 En tu navegador o desde otra terminal:
 
-- **Salud del Sistema:** [http://localhost:3000/health](http://localhost:3000/health)  
-  *Respuesta:* `{"status":"ok","db":"connected"}`
+- **Salud del Sistema:** [http://localhost:3000/health](http://localhost:3000/health)*Respuesta:* `{"status":"ok","db":"connected"}`
 - **Reporte Diario (JSON estructurado del último día):** [http://localhost:3000/reporte-diario](http://localhost:3000/reporte-diario)
 - **Reporte de Fecha Específica:** [http://localhost:3000/reporte-diario?fecha=2024-11-15](http://localhost:3000/reporte-diario?fecha=2024-11-15)
 
@@ -86,14 +90,14 @@ En tu navegador o desde otra terminal:
 
 Abre la aplicación de **Telegram**, entra al chat con tu bot (`@AbisSystemBot`) y utiliza los siguientes comandos:
 
-| Comando | Descripción | Ejemplo de Uso |
-| :--- | :--- | :--- |
-| `/reporte` o `/hoy` | Genera el reporte consolidado del día más reciente con datos (`22/08/2026`). | `/reporte` |
-| `/reporte YYYY-MM-DD` | Genera el reporte analítico oficial de cualquier fecha histórica. | `/reporte 2024-11-15` *(4.305 enrolamientos)*<br>`/reporte 2023-08-08` *(178 enrolamientos)*<br>`/reporte 2025-01-09` *(52 enrolamientos)* |
-| `/errores [YYYY-MM-DD]` o `/detalle` | Diagnóstico técnico detallado: desglose de **Falla Biométrica** (lector Suprema / cámara Canon) vs **Validación General**, dispositivos (Tablet/PC), cuarteles y nacionalidades afectadas. | `/errores 2024-11-15`<br>`/errores 2025-01-09` |
-| `/estado` | Muestra el estado del servidor, conexión a PostgreSQL y el **total histórico acumulado (95.474 registros)**. | `/estado` |
-| `/logs` | Muestra el informe técnico de la última ingesta del ETL (`New_Enrolados Abis.xlsx`, 95.474 insertadas, 0 rechazadas). | `/logs` |
-| `/ayuda` | Despliega la guía interactiva de todos los comandos disponibles. | `/ayuda` |
+| Comando                                  | Descripción                                                                                                                                                                                               | Ejemplo de Uso                                                                                                                                 |
+| :--------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/reporte` o `/hoy`                  | Genera el reporte consolidado del día más reciente con datos (`22/08/2026`).                                                                                                                           | `/reporte`                                                                                                                                   |
+| `/reporte YYYY-MM-DD`                  | Genera el reporte analítico oficial de cualquier fecha histórica.                                                                                                                                        | `/reporte 2024-11-15` *(4.305 enrolamientos)*`/reporte 2023-08-08` *(178 enrolamientos)*`/reporte 2025-01-09` *(52 enrolamientos)* |
+| `/errores [YYYY-MM-DD]` o `/detalle` | Diagnóstico técnico detallado: desglose de**Falla Biométrica** (lector Suprema / cámara Canon) vs **Validación General**, dispositivos (Tablet/PC), cuarteles y nacionalidades afectadas. | `/errores 2024-11-15/errores 2025-01-09`                                                                                                     |
+| `/estado`                              | Muestra el estado del servidor, conexión a PostgreSQL y el**total histórico acumulado (95.474 registros)**.                                                                                        | `/estado`                                                                                                                                    |
+| `/logs`                                | Muestra el informe técnico de la última ingesta del ETL (`New_Enrolados Abis.xlsx`, 95.474 insertadas, 0 rechazadas).                                                                                  | `/logs`                                                                                                                                      |
+| `/ayuda`                               | Despliega la guía interactiva de todos los comandos disponibles.                                                                                                                                          | `/ayuda`                                                                                                                                     |
 
 ---
 
@@ -123,6 +127,7 @@ Todos los comandos están configurados para usar por defecto `New_Enrolados Abis
 ## 8. Seguridad, Privacidad y Cifrado
 
 El Sistema ABIS implementa las siguientes capas de seguridad:
+
 1. **Privacidad por Diseño (Privacy by Design):** La base de datos `registro_enrolamiento` almacena exclusivamente datos demográficos y métricas normalizadas referenciadas por ID de catálogo. **No se almacenan nombres ni números de RUT en texto plano**.
 2. **Cifrado en Tránsito:** Todas las notificaciones y mensajes con Telegram viajan cifrados mediante **HTTPS / TLS 1.3**. Las conexiones a PostgreSQL soportan SSL/TLS.
 3. **Aislamiento de Credenciales:** Variables de entorno sensibles (tokens del bot, credenciales de BD) residen en `.env` protegido y excluido del control de versiones.

@@ -5,9 +5,10 @@ Documento consolidado con todos los cambios, optimizaciones, módulos de segurid
 ---
 
 ## 📋 Índice
+
 1. [Integración Oficial de Datos Reales (`New_Enrolados Abis.xlsx`)](#1-integración-oficial-de-datos-reales-new_enrolados-abisxlsx)
 2. [Bot de Telegram Interactivo y Diagnóstico Detallado](#2-bot-de-telegram-interactivo-y-diagnóstico-detallado)
-3. [Sistema Integral de Cifrado (AES-256-GCM & `pgcrypto`)](#3-sistema-integral-de-cifrado-aes-256-gcm--pgcrypto)
+3. [Sistema Integral de Cifrado (AES-256-GCM &amp; `pgcrypto`)](#3-sistema-integral-de-cifrado-aes-256-gcm--pgcrypto)
 4. [Limpieza y Depuración de Scripts Obsoletos](#4-limpieza-y-depuración-de-scripts-obsoletos)
 5. [Actualización de la Documentación Oficial](#5-actualización-de-la-documentación-oficial)
 6. [Resumen Técnico del Stack](#6-resumen-técnico-del-stack)
@@ -83,6 +84,7 @@ Se implementó una arquitectura de cifrado de extremo a extremo (E2EE) con está
 Se eliminaron los scripts y documentos temporales que generaban datos ficticios o simulados:
 
 ### 🗑️ Archivos Eliminados:
+
 1. `scripts/carga-historica-sintetica.js` *(Eliminado)*
 2. `scripts/generar-datos-reporte-prueba.js` *(Eliminado)*
 3. `scripts/fuente-setup.js` *(Eliminado)*
