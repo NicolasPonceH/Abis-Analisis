@@ -542,6 +542,7 @@ app.get("/api/settings/schedule", (req, res) => {
       config,
       next,
       horaChile,
+      serverTimestamp: Date.now(),
       telegramConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
       defaultChatId: process.env.TELEGRAM_CHAT_ID
         ? String(process.env.TELEGRAM_CHAT_ID).slice(0, 4) + "***" + String(process.env.TELEGRAM_CHAT_ID).slice(-3)

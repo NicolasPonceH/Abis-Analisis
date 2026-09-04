@@ -2133,8 +2133,7 @@ select.form-control {
 /* Banner de Estado del Reloj y Automatización */
 .schedule-status-banner {
   background: linear-gradient(135deg, var(--pdi-navy) 0%, var(--pdi-navy-dark) 100%);
-  border: 1px solid rgba(255, 209, 0, 0.4);
-  border-left: 5px solid var(--pdi-gold);
+  border: none;
   border-radius: var(--radius-lg);
   padding: 18px 24px;
   display: flex;
@@ -2145,6 +2144,12 @@ select.form-control {
   box-shadow: 0 4px 14px rgba(0, 35, 76, 0.25);
   flex-wrap: wrap;
   gap: 14px;
+}
+
+.live-clock-digits {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .schedule-status-left {

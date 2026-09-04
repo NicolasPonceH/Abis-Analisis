@@ -2792,6 +2792,45 @@ async function executeWebDecrypt(file, clave) {
 
 state.scheduleConfig = null;
 state.currentScheduleTimes = ["08:30", "19:00"];
+state.serverTimeOffset = 0;
+let liveClockInterval = null;
+
+// Actualiza el reloj institucional en pantalla segundo a segundo ("hora corriendo")
+function updateLiveClockDisplay() {
+  const clockDisplay = document.getElementById("schedule-clock-display");
+  if (!clockDisplay) return;
+
+  const now = new Date(Date.now() + (state.serverTimeOffset || 0));
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Santiago",
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  const parts = dtf.formatToParts(now);
+  const map = {};
+  parts.forEach((p) => (map[p.type] = p.value));
+
+  const hh = map.hour === "24" ? "00" : map.hour.padStart(2, "0");
+  const mm = map.minute.padStart(2, "0");
+  const ss = (map.second || "00").padStart(2, "0");
+  const dateStr = `${map.year}-${map.month}-${map.day}`;
+
+  clockDisplay.innerHTML = `Zona Horaria Oficial: <strong>America/Santiago (Chile)</strong> &bull; Hora Servidor: <strong class="live-clock-digits">${hh}:${mm}:${ss} hrs</strong> (${dateStr})`;
+}
+
+function startLiveClock() {
+  if (liveClockInterval) {
+    clearInterval(liveClockInterval);
+  }
+  updateLiveClockDisplay();
+  liveClockInterval = setInterval(updateLiveClockDisplay, 1000);
+}
 
 // Carga la configuración actual de horarios desde la API
 async function loadScheduleSettings() {
@@ -2803,11 +2842,11 @@ async function loadScheduleSettings() {
     state.scheduleConfig = data.config;
     state.currentScheduleTimes = Array.isArray(data.config.times) ? [...data.config.times] : ["08:30", "19:00"];
 
-    // 1. Reloj del Servidor & Próximo Envío
-    const clockDisplay = document.getElementById("schedule-clock-display");
-    if (clockDisplay && data.horaChile) {
-      clockDisplay.innerHTML = `Zona Horaria Oficial: <strong>America/Santiago (Chile)</strong> &bull; Hora Servidor: <strong>${data.horaChile.timeStr} hrs</strong> (${data.horaChile.dateStr})`;
+    // 1. Sincronizar Reloj del Servidor & Próximo Envío
+    if (data.serverTimestamp) {
+      state.serverTimeOffset = data.serverTimestamp - Date.now();
     }
+    startLiveClock();
 
     const nextBadge = document.getElementById("schedule-next-text");
     if (nextBadge && data.next) {

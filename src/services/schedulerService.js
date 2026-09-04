@@ -97,6 +97,7 @@ function obtenerHoraChile() {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     weekday: "short",
   });
 
@@ -106,13 +107,15 @@ function obtenerHoraChile() {
 
   const hh = map.hour === "24" ? "00" : map.hour.padStart(2, "0");
   const mm = map.minute.padStart(2, "0");
+  const ss = (map.second || "00").padStart(2, "0");
   const timeStr = `${hh}:${mm}`;
+  const timeWithSeconds = `${hh}:${mm}:${ss}`;
   const dateStr = `${map.year}-${map.month}-${map.day}`;
 
   const dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
   const dayOfWeek = dayMap[map.weekday] !== undefined ? dayMap[map.weekday] : now.getDay();
 
-  return { timeStr, dateStr, dayOfWeek, full: `${dateStr} ${timeStr}` };
+  return { timeStr, timeWithSeconds, dateStr, dayOfWeek, full: `${dateStr} ${timeStr}`, timestamp: now.getTime() };
 }
 
 // Calcula la próxima ejecución programada según los horarios y días configurados
