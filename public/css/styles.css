@@ -36,24 +36,24 @@
   --text-light: #94a3b8;
   --text-on-dark: #ffffff;
 
-  /* Colores de Estado Semánticos */
-  --status-success: #059669;
+  /* Colores de Estado Semánticos (Optimizados para Contraste WCAG AAA > 7:1) */
+  --status-success: #065f46;
   --status-success-bg: #ecfdf5;
   --status-success-border: #a7f3d0;
   
-  --status-warning: #d97706;
+  --status-warning: #92400e;
   --status-warning-bg: #fffbeb;
   --status-warning-border: #fde68a;
   
-  --status-danger: #dc2626;
+  --status-danger: #991b1b;
   --status-danger-bg: #fef2f2;
   --status-danger-border: #fecaca;
   
-  --status-info: #0f69b4;
+  --status-info: #075985;
   --status-info-bg: #f0f7ff;
   --status-info-border: #bae6fd;
 
-  --status-purple: #7c3aed;
+  --status-purple: #5b21b6;
   --status-purple-bg: #f5f3ff;
   --status-purple-border: #ddd6fe;
 
@@ -622,7 +622,6 @@ h1, h2, h3, h4, h5, h6,
 .filters-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--pdi-navy);
   border-radius: var(--radius-lg);
   padding: 20px 24px;
   margin-bottom: 24px;
@@ -1014,19 +1013,20 @@ select.form-control {
   stroke: #ffffff !important;
 }
 
-/* 5. Botón Telegram: Celeste Telegram Oficial */
+/* 5. Botón Telegram: Azul Cyan Oscuro Institucional (Contraste WCAG AA > 5.1:1 con texto blanco) */
 .btn-telegram, #btn-export-telegram {
-  background: #229ed9 !important;
-  border: 1px solid #1a87ba !important;
+  background: #0369a1 !important;
+  border: 1px solid #0284c7 !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(34, 158, 217, 0.3) !important;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(3, 105, 161, 0.35) !important;
 }
 .btn-telegram:hover, #btn-export-telegram:hover {
-  background: #1a87ba !important;
-  border-color: #146e99 !important;
+  background: #075985 !important;
+  border-color: #0369a1 !important;
   color: #ffffff !important;
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 12px rgba(34, 158, 217, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(3, 105, 161, 0.45) !important;
 }
 .btn-telegram .svg-icon, #btn-export-telegram .svg-icon {
   stroke: #ffffff !important;
@@ -1408,6 +1408,7 @@ select.form-control {
   letter-spacing: 0.3px;
 }
 
+.badge-primary { background: var(--pdi-navy); color: #ffffff; border: 1px solid var(--pdi-navy-light); }
 .badge-success { background: var(--status-success-bg); color: var(--status-success); border: 1px solid var(--status-success-border); }
 .badge-warning { background: var(--status-warning-bg); color: var(--status-warning); border: 1px solid var(--status-warning-border); }
 .badge-danger  { background: var(--status-danger-bg);  color: var(--status-danger);  border: 1px solid var(--status-danger-border); }
@@ -1667,19 +1668,34 @@ select.form-control {
   margin: 2px 0 0;
 }
 
-.modal-close {
-  background: transparent;
-  border: none;
+.modal-close,
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-sm);
   color: #94a3b8;
-  font-size: 1.6rem;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  line-height: 1;
-  padding: 0 4px;
-  transition: color var(--transition);
+  padding: 0;
+  transition: all var(--transition);
 }
 
-.modal-close:hover {
-  color: #ffffff;
+.modal-close:hover,
+.modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #ef4444;
+  transform: scale(1.06);
+}
+
+.modal-close .svg-icon,
+.modal-close-btn .svg-icon {
+  stroke: currentColor;
+  margin: 0;
 }
 
 .modal-body {

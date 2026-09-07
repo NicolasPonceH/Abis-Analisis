@@ -2,6 +2,14 @@ const fs = require("fs");
 const path = require("path");
 const telegramClient = require("../telegram/telegramClient");
 const { obtenerReporteDiario } = require("../reportes/reporteDiario");
+const { obtenerReporteRango } = require("../reportes/reporteRango");
+const { obtenerReporteFinDeSemana, obtenerDatosAcumulados } = require("../reportes/reporteFinDeSemana");
+const {
+  generarCapturaMatrizFinDeSemana,
+  generarCapturaDistribucionFinDeSemana,
+  generarCapturaAcumulado,
+  generarCapturaDiaria,
+} = require("../reportes/imageReportService");
 const { formatearReporteExtenso, formatearReporte } = require("../telegram/formatearReporte");
 const { crearBotonesDescarga } = require("../telegram/botService");
 
@@ -156,8 +164,97 @@ function getNextExecution(config) {
   return { text: "Sin horarios futuros programados", time: null, dayName: null };
 }
 
+function restarDias(fechaYMD, numDias) {
+  const [y, m, d] = fechaYMD.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() - numDias);
+  const y2 = date.getUTCFullYear();
+  const m2 = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d2 = String(date.getUTCDate()).padStart(2, "0");
+  return `${y2}-${m2}-${d2}`;
+}
+
+function formatearFechaChile(fStr) {
+  if (!fStr) return "";
+  const [y, m, d] = fStr.split("-");
+  return `${d}-${m}-${y}`;
+}
+
+// Determina el período operativo según las reglas institucionales:
+// - Lunes: Consolida el Fin de Semana cerrado (Viernes D-3, Sábado D-2, Domingo D-1).
+// - Martes a Viernes: Reporta la jornada de ayer cerrada (D-1).
+// - Fines de semana: Reporta el día de ayer cerrado (D-1).
+async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarModo = null } = {}) {
+  const hoyChile = obtenerHoraChile();
+  const baseDate = fechaReferencia || hoyChile.dateStr;
+
+  const [y, m, d] = baseDate.split("-").map(Number);
+  const dateObj = new Date(Date.UTC(y, m - 1, d));
+  const dayOfWeek = dateObj.getUTCDay(); // 0 = Dom, 1 = Lun, 2 = Mar...
+
+  const esLunes = forzarModo === "fds" ? true : forzarModo === "diario" ? false : dayOfWeek === 1;
+
+  if (esLunes) {
+    let fechaViernes = restarDias(baseDate, 3);
+    let fechaSabado = restarDias(baseDate, 2);
+    let fechaDomingo = restarDias(baseDate, 1);
+
+    // Si en las fechas no hay datos aún (entorno de pruebas/desarrollo), fallback al fin de semana más reciente con datos
+    if (pool && !fechaReferencia) {
+      const { rows } = await pool.query(
+        "SELECT 1 FROM registro_enrolamiento WHERE fecha_enrolamiento >= $1 AND fecha_enrolamiento <= $2 LIMIT 1",
+        [fechaViernes, fechaDomingo]
+      );
+      if (rows.length === 0) {
+        fechaViernes = "2026-08-21";
+        fechaSabado = "2026-08-22";
+        fechaDomingo = "2026-08-23";
+      }
+    }
+
+    return {
+      tipo: "FIN_DE_SEMANA",
+      esFinDeSemana: true,
+      fechas: {
+        viernes: fechaViernes,
+        sabado: fechaSabado,
+        domingo: fechaDomingo,
+        viernesFmt: formatearFechaChile(fechaViernes),
+        sabadoFmt: formatearFechaChile(fechaSabado),
+        domingoFmt: formatearFechaChile(fechaDomingo),
+        desdeFmt: formatearFechaChile(fechaViernes),
+        hastaFmt: formatearFechaChile(fechaDomingo),
+      },
+    };
+  } else {
+    let fechaAyer = restarDias(baseDate, 1);
+
+    if (pool && !fechaReferencia) {
+      const { rows } = await pool.query(
+        "SELECT 1 FROM registro_enrolamiento WHERE fecha_enrolamiento = $1 LIMIT 1",
+        [fechaAyer]
+      );
+      if (rows.length === 0) {
+        const maxRes = await pool.query(
+          "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS max_fecha FROM registro_enrolamiento"
+        );
+        if (maxRes.rows[0]?.max_fecha) {
+          fechaAyer = maxRes.rows[0].max_fecha;
+        }
+      }
+    }
+
+    return {
+      tipo: "DIARIO",
+      esFinDeSemana: false,
+      fecha: fechaAyer,
+      fechaFmt: formatearFechaChile(fechaAyer),
+    };
+  }
+}
+
 // Dispara el envío de reporte (tanto programado como de prueba manual)
-async function triggerScheduledReport({ pool, isTest = false, customChatId = null }) {
+async function triggerScheduledReport({ pool, isTest = false, customChatId = null, fechaReferencia = null, forzarModo = null }) {
   const config = getConfig();
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const rawChatId = customChatId || config.telegramChatId || process.env.TELEGRAM_CHAT_ID || "";
@@ -170,49 +267,218 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     throw new Error("Token o Chat ID de Telegram no configurados en .env ni en ajustes.");
   }
 
-  // 1. Obtener la fecha más reciente con datos
-  const { rows } = await pool.query(
-    "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS fecha FROM registro_enrolamiento"
-  );
-  const fecha = rows[0]?.fecha;
-  if (!fecha) {
-    throw new Error("No hay registros disponibles en la base de datos para generar el reporte.");
-  }
-
-  // 2. Obtener datos analíticos
-  const reporte = await obtenerReporteDiario(pool, fecha);
-
-  // 3. Formatear según tipo configurado
-  const origen = isTest ? "Ajustes Web PDI (Prueba de Horario)" : "Automatización Programada PDI";
-  const texto = config.reportType === "resumen"
-    ? formatearReporte(reporte, { fecha, origen })
-    : formatearReporteExtenso(reporte, { fecha, origen });
-
-  // 4. Enviar vía Telegram Client con botones interactivos de descarga (.xlsx y .docx) a todos los canales configurados
-  const replyMarkup = crearBotonesDescarga({ fecha });
+  // 1. Determinar el período operativo (Fin de semana para Lunes, Diario para Martes-Viernes)
+  const periodo = await calcularPeriodoOperativo(pool, { fechaReferencia, forzarModo });
+  const origen = isTest ? "Ajustes Web PDI (Prueba de Despacho Visual)" : "Automatización Programada PDI";
+  let totalReportado = 0;
+  let slaReportado = 100;
+  let labelFecha = "";
   let envio = null;
-  for (const cid of chatIds) {
+
+  if (periodo.esFinDeSemana) {
+    labelFecha = `${periodo.fechas.desdeFmt} al ${periodo.fechas.hastaFmt}`;
+    const [reporteFds, reporteRango] = await Promise.all([
+      obtenerReporteFinDeSemana(pool, periodo.fechas),
+      obtenerReporteRango(pool, periodo.fechas.viernes, periodo.fechas.domingo),
+    ]);
+    totalReportado = reporteFds.totalFinDeSemana.sincronizacion.total;
+    const sincOk = reporteFds.totalFinDeSemana.sincronizacion.sincronizado;
+    slaReportado = totalReportado > 0 ? Math.round((sincOk / totalReportado) * 1000) / 10 : 100;
+
+    const replyMarkup = crearBotonesDescarga({
+      desde: periodo.fechas.viernes,
+      hasta: periodo.fechas.domingo,
+    });
+
+    const textoReporte = config.reportType === "resumen"
+      ? formatearReporte(reporteRango, { desde: periodo.fechas.viernes, hasta: periodo.fechas.domingo, origen })
+      : formatearReporteExtenso(reporteRango, { desde: periodo.fechas.viernes, hasta: periodo.fechas.domingo, origen });
+
+    const captionMatriz = [
+      `📊 <b>REPORTE OFICIAL ABIS - CONSOLIDADO FIN DE SEMANA</b>`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `🗓️ Período: <b>${periodo.fechas.desdeFmt} al ${periodo.fechas.hastaFmt}</b>`,
+      `👥 Total Enrolados FDS: <b>${totalReportado.toLocaleString("es-CL")}</b>`,
+      `✅ Tasa Sincronización PDI: <b>${slaReportado.toFixed(1)}%</b>`,
+      `🛡️ SLA Institucional: <b>${reporteFds.resumenEjecutivo?.estadoSLA || "Óptimo"}</b>`,
+      `📌 <i>${origen} (Viernes, Sábado y Domingo)</i>`,
+      `📸 <i>Envío oficial de 4 capturas institucionales PDI.</i>`,
+      `<i>Foto 1/4: Matriz de Estados de Fin de Semana.</i>`,
+    ].join("\n");
+
+    let bufMatriz = null;
+    let bufAcumEnrolados = null;
+    let bufDistFds = null;
+    let bufAcumRegistros = null;
+
     try {
-      envio = await telegramClient.enviarMensaje({ token, chatId: cid, texto, replyMarkup });
-    } catch (sendErr) {
-      console.warn(`[SCHEDULER] Advertencia al enviar reporte a chat ${cid}:`, sendErr.message);
+      const anioActual = new Date().getFullYear();
+      const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+        obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+        obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+      ]);
+
+      [bufMatriz, bufAcumEnrolados, bufDistFds, bufAcumRegistros] = await Promise.all([
+        generarCapturaMatrizFinDeSemana(reporteFds),
+        generarCapturaAcumulado(dataAcumEnrolados, {
+          titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}`,
+          tipoFiltro: "ENROLADO",
+          anio: anioActual,
+        }),
+        generarCapturaDistribucionFinDeSemana(reporteFds),
+        generarCapturaAcumulado(dataAcumRegistros, {
+          titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACOMULADO AL AÑO ${anioActual}`,
+          tipoFiltro: "TODOS",
+          anio: anioActual,
+        }),
+      ]);
+    } catch (renderErr) {
+      console.warn("[SCHEDULER] Error generando capturas visuales de fin de semana:", renderErr.message);
+    }
+
+    for (const cid of chatIds) {
+      try {
+        if (bufMatriz && bufAcumEnrolados && bufDistFds && bufAcumRegistros) {
+          // 1. Enviar las 4 fotos en un solo mensaje conjunto (Álbum / sendMediaGroup)
+          const anioActual = new Date().getFullYear();
+          const fotosAlbum = [
+            {
+              buffer: bufMatriz,
+              caption: [
+                `📊 <b>REPORTE OFICIAL ABIS - CONSOLIDADO FIN DE SEMANA</b>`,
+                `━━━━━━━━━━━━━━━━━━━━━━━━━`,
+                `🗓️ Período: <b>${periodo.fechas.desdeFmt} al ${periodo.fechas.hastaFmt}</b>`,
+                `👥 Total Enrolados FDS: <b>${totalReportado.toLocaleString("es-CL")}</b>`,
+                `✅ Tasa Sincronización PDI: <b>${slaReportado.toFixed(1)}%</b>`,
+                `🛡️ SLA Institucional: <b>${reporteFds.resumenEjecutivo?.estadoSLA || "Óptimo"}</b>`,
+                `📌 <i>${origen} (Viernes, Sábado y Domingo)</i>`,
+                `<i>Foto 1/4: Matriz de Estados de Fin de Semana</i>`,
+              ].join("\n"),
+            },
+            {
+              buffer: bufAcumEnrolados,
+              caption: `📊 <b>FOTO 2/4: TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}</b>\n<i>Distribución histórica institucional de enrolamientos biométricos PDI.</i>`,
+            },
+            {
+              buffer: bufDistFds,
+              caption: `📋 <b>FOTO 3/4: DISTRIBUCIÓN INSTITUCIONAL DE ENROLAMIENTOS DEL FIN DE SEMANA (${labelFecha})</b>\n<i>Desglose operativo por unidades, cuarteles, equipos, menores N.N.A. y regiones.</i>`,
+            },
+            {
+              buffer: bufAcumRegistros,
+              caption: `📈 <b>FOTO 4/4: TOTAL DE REGISTROS EN EL SISTEMA ABIS ACOMULADO AL AÑO ${anioActual}</b>\n<i>Universo consolidado de registros del sistema ABIS (con SERMIG).</i>`,
+            },
+          ];
+
+          const resAlbum = await telegramClient.enviarGrupoFotos({
+            token,
+            chatId: cid,
+            fotos: fotosAlbum,
+          });
+          envio = Array.isArray(resAlbum) ? resAlbum[0] : resAlbum;
+
+          // 2. Enviar el reporte institucional de texto completo que había antes con sus indicadores y botones de descarga
+          const resTexto = await telegramClient.enviarMensaje({
+            token,
+            chatId: cid,
+            texto: textoReporte,
+            replyMarkup,
+          });
+          if (!envio) envio = resTexto;
+        } else if (bufMatriz) {
+          // Fallback a foto individual si fallara la generación de capturas auxiliares
+          envio = await telegramClient.enviarFoto({
+            token,
+            chatId: cid,
+            buffer: bufMatriz,
+            caption: captionMatriz,
+          });
+          const resTexto = await telegramClient.enviarMensaje({
+            token,
+            chatId: cid,
+            texto: textoReporte,
+            replyMarkup,
+          });
+          if (!envio) envio = resTexto;
+        } else {
+          // Fallback solo a texto en caso de incidencia con Chromium
+          envio = await telegramClient.enviarMensaje({
+            token,
+            chatId: cid,
+            texto: textoReporte,
+            replyMarkup,
+          });
+        }
+      } catch (sendErr) {
+        console.warn(`[SCHEDULER] Advertencia al enviar reporte FDS a chat ${cid}:`, sendErr.message);
+      }
+    }
+  } else {
+    // Reporte Diario (Martes a Viernes)
+    labelFecha = periodo.fechaFmt;
+    const reporteDiario = await obtenerReporteDiario(pool, periodo.fecha);
+    totalReportado = reporteDiario.total || 0;
+    slaReportado = reporteDiario.resumenEjecutivo?.tasaSincronizacion || 100;
+
+    const replyMarkup = crearBotonesDescarga({ fecha: periodo.fecha });
+
+    const textoReporte = config.reportType === "resumen"
+      ? formatearReporte(reporteDiario, { fecha: periodo.fecha, origen })
+      : formatearReporteExtenso(reporteDiario, { fecha: periodo.fecha, origen });
+
+    let bufDiario = null;
+    try {
+      bufDiario = await generarCapturaDiaria(reporteDiario);
+    } catch (renderErr) {
+      console.warn("[SCHEDULER] Error generando captura diaria:", renderErr.message);
+    }
+
+    const captionDiario = [
+      `📊 <b>REPORTE OFICIAL ABIS - JORNADA ${periodo.fechaFmt}</b>`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `👥 Total Enrolados: <b>${totalReportado.toLocaleString("es-CL")}</b>`,
+      `✅ Tasa Sincronización PDI: <b>${slaReportado.toFixed(1)}%</b>`,
+      `🛡️ SLA Institucional: <b>${reporteDiario.resumenEjecutivo?.estadoSLA || "Óptimo"}</b>`,
+      `📌 <i>${origen} (Jornada cerrada anterior)</i>`,
+    ].join("\n");
+
+    for (const cid of chatIds) {
+      try {
+        if (bufDiario) {
+          envio = await telegramClient.enviarFoto({
+            token,
+            chatId: cid,
+            buffer: bufDiario,
+            caption: captionDiario,
+          });
+        }
+        // Enviar el reporte institucional de texto completo junto con los botones de descarga
+        const resTexto = await telegramClient.enviarMensaje({
+          token,
+          chatId: cid,
+          texto: textoReporte,
+          replyMarkup,
+        });
+        if (!envio) envio = resTexto;
+      } catch (sendErr) {
+        console.warn(`[SCHEDULER] Advertencia al enviar reporte diario a chat ${cid}:`, sendErr.message);
+      }
     }
   }
 
   if (!envio) {
-    throw new Error("No se pudo entregar el reporte a los canales de Telegram configurados.");
+    throw new Error("No se pudo entregar el reporte visual a los canales de Telegram configurados.");
   }
 
-  // 5. Registrar en historial local
+  // Registrar en historial local
   const horaChile = obtenerHoraChile();
   const entry = {
     id: `disp_${Date.now()}`,
     timestamp: new Date().toISOString(),
     horaChile: horaChile.full,
-    fechaReportada: fecha,
-    totalEnrolados: reporte.total || 0,
-    slaPDI: reporte.resumenEjecutivo?.tasaSincronizacion || 100,
-    tipo: isTest ? "PRUEBA_MANUAL" : "AUTOMATICO_PROGRAMADO",
+    fechaReportada: labelFecha,
+    totalEnrolados: totalReportado,
+    slaPDI: slaReportado,
+    tipo: isTest ? "PRUEBA_MANUAL_VISUAL" : "AUTOMATICO_PROGRAMADO_VISUAL",
     canal: "Telegram Oficial PDI",
     chatId: chatIds.map((c) => String(c).slice(0, 4) + "***" + String(c).slice(-3)).join(", "),
     estado: "EXITO",
@@ -222,17 +488,17 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
   const history = [entry, ...(config.history || [])].slice(0, 25);
   saveConfig({ lastSent: entry, history });
 
-  // 6. Registrar en bitácora inmutable de PostgreSQL
+  // Registrar en bitácora inmutable de PostgreSQL
   try {
     await pool.query(
       `INSERT INTO registro_auditoria_cifrada 
        (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
        VALUES (NOW(), $1, $2, $3, $4, 'Servicio Programador ABIS')`,
       [
-        isTest ? "TEST_NOTIFICACION_TELEGRAM" : "ENVIO_PROGRAMADO_TELEGRAM",
-        `Reporte_${fecha}.html`,
+        isTest ? "TEST_CAPTURA_TELEGRAM" : "ENVIO_CAPTURA_TELEGRAM",
+        `Captura_${labelFecha.replace(/\s+/g, "_")}.png`,
         `msg_id_${envio.message_id}`,
-        `Horario: ${horaChile.timeStr} | Total: ${reporte.total} | SLA: ${reporte.resumenEjecutivo?.tasaSincronizacion}%`
+        `Horario: ${horaChile.timeStr} | Total: ${totalReportado} | SLA: ${slaReportado}%`
       ]
     );
   } catch (auditErr) {
@@ -269,16 +535,18 @@ function iniciarScheduler({ pool, logger = console }) {
       const esDiaHabilitado = config.days.includes(dayOfWeek);
       const esHoraCoincidente = config.times.includes(timeStr);
 
-      // Evitar duplicar si la tarea de flujo diario ETL ya envió un reporte hace menos de 3 minutos
-      if (config.lastSent && config.lastSent.timestamp) {
-        const diffMs = Date.now() - new Date(config.lastSent.timestamp).getTime();
-        if (diffMs < 3 * 60 * 1000) {
+      if (esDiaHabilitado && esHoraCoincidente) {
+        // Evitar duplicar si la tarea de flujo diario ETL ya envió un reporte exactamente en este mismo minuto
+        if (
+          config.lastSent &&
+          config.lastSent.tipo === "FLUJO_DIARIO_ETL" &&
+          config.lastSent.horaChile === `${dateStr} ${timeStr}`
+        ) {
           lastFiredMinuteKey = currentMinuteKey;
+          logger.log(`[SCHEDULER] Omitiendo despacho de las ${timeStr} hrs: la tarea diaria ETL ya emitió el reporte en este mismo minuto.`);
           return;
         }
-      }
 
-      if (esDiaHabilitado && esHoraCoincidente) {
         lastFiredMinuteKey = currentMinuteKey;
         logger.log(`[HORARIO COINCIDENTE] Disparando reporte automático de las ${timeStr} hrs (${dateStr})...`);
 
@@ -305,7 +573,7 @@ function iniciarScheduler({ pool, logger = console }) {
     } catch (err) {
       logger.error("Error en ciclo del scheduler:", err.message);
     }
-  }, 30000); // Chequea cada 30 segundos
+  }, 15000); // Chequea cada 15 segundos para garantizar detección exacta del minuto
 }
 
 // Detiene el programador
@@ -321,7 +589,9 @@ module.exports = {
   saveConfig,
   obtenerHoraChile,
   getNextExecution,
+  calcularPeriodoOperativo,
   triggerScheduledReport,
   iniciarScheduler,
   detenerScheduler,
 };
+

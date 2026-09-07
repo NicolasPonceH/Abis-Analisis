@@ -64,6 +64,49 @@ async function enviarDocumento({ token, chatId, buffer, nombreArchivo, caption, 
   return data.result;
 }
 
+// Envía una fotografía o captura visual (Buffer PNG/JPG) a Telegram
+async function enviarFoto({ token, chatId, buffer, caption, replyMarkup }) {
+  const url = `${TELEGRAM_API}/bot${token}/sendPhoto`;
+
+  const formData = new FormData();
+  formData.append("chat_id", String(chatId));
+  formData.append("photo", new Blob([buffer], { type: "image/png" }), "reporte.png");
+  if (caption) {
+    formData.append("caption", caption.slice(0, 1024));
+    formData.append("parse_mode", "HTML");
+  }
+  if (replyMarkup) {
+    formData.append("reply_markup", JSON.stringify(replyMarkup));
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  let data = await response.json();
+  if (!data.ok && data.description && data.description.includes("can't parse entities")) {
+    const retryFormData = new FormData();
+    retryFormData.append("chat_id", String(chatId));
+    retryFormData.append("photo", new Blob([buffer], { type: "image/png" }), "reporte.png");
+    if (caption) {
+      // Eliminar etiquetas HTML para envío en texto plano seguro
+      const plainCaption = caption.replace(/<[^>]*>/g, "").slice(0, 1000);
+      retryFormData.append("caption", plainCaption);
+    }
+    if (replyMarkup) {
+      retryFormData.append("reply_markup", JSON.stringify(replyMarkup));
+    }
+    const retryRes = await fetch(url, { method: "POST", body: retryFormData });
+    data = await retryRes.json();
+  }
+
+  if (!data.ok) {
+    throw new Error(`Telegram API sendPhoto: ${data.description || "error desconocido"}`);
+  }
+  return data.result;
+}
+
 // Responde a un callback query de botón interactivo (muestra toast al usuario en Telegram)
 async function responderCallback({ token, callbackQueryId, text, showAlert = false }) {
   const url = `${TELEGRAM_API}/bot${token}/answerCallbackQuery`;
@@ -95,9 +138,69 @@ async function obtenerActualizaciones({ token, offset, timeout = 25 }) {
   return data.result;
 }
 
+// Envía un grupo o álbum de fotos en un mismo mensaje (sendMediaGroup)
+async function enviarGrupoFotos({ token, chatId, fotos }) {
+  const url = `${TELEGRAM_API}/bot${token}/sendMediaGroup`;
+
+  const media = [];
+  const formData = new FormData();
+  formData.append("chat_id", String(chatId));
+
+  fotos.forEach((f, idx) => {
+    const attachName = `foto_${idx}`;
+    formData.append(attachName, new Blob([f.buffer], { type: "image/png" }), `${attachName}.png`);
+
+    const item = {
+      type: "photo",
+      media: `attach://${attachName}`,
+    };
+    if (f.caption) {
+      item.caption = f.caption.slice(0, 1024);
+      item.parse_mode = "HTML";
+    }
+    media.push(item);
+  });
+
+  formData.append("media", JSON.stringify(media));
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  let data = await response.json();
+  if (!data.ok && data.description && data.description.includes("can't parse entities")) {
+    const retryMedia = media.map((m) => {
+      const copy = { ...m };
+      if (copy.caption) {
+        copy.caption = copy.caption.replace(/<[^>]*>/g, "");
+      }
+      delete copy.parse_mode;
+      return copy;
+    });
+    const retryFormData = new FormData();
+    retryFormData.append("chat_id", String(chatId));
+    fotos.forEach((f, idx) => {
+      const attachName = `foto_${idx}`;
+      retryFormData.append(attachName, new Blob([f.buffer], { type: "image/png" }), `${attachName}.png`);
+    });
+    retryFormData.append("media", JSON.stringify(retryMedia));
+    const retryRes = await fetch(url, { method: "POST", body: retryFormData });
+    data = await retryRes.json();
+  }
+
+  if (!data.ok) {
+    throw new Error(`Telegram API sendMediaGroup: ${data.description || "error desconocido"}`);
+  }
+  return data.result;
+}
+
 module.exports = {
   enviarMensaje,
+  enviarFoto,
+  enviarGrupoFotos,
   enviarDocumento,
   responderCallback,
   obtenerActualizaciones,
 };
+

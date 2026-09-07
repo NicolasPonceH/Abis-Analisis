@@ -407,11 +407,47 @@ app.post("/api/telegram/enviar", async (req, res) => {
     });
 
     const replyMarkup = crearBotonesDescarga({ fecha: reporte.fecha || fecha, desde, hasta });
-    const envio = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+    let envio = null;
+
+    // Generar captura visual dinámica según la fecha o rango seleccionado en la web
+    try {
+      if (desde && hasta) {
+        const { obtenerReporteFinDeSemana } = require("./reportes/reporteFinDeSemana");
+        const { generarCapturaMatrizFinDeSemana } = require("./reportes/imageReportService");
+        const repFds = await obtenerReporteFinDeSemana(pool, { viernes: desde, sabado: desde, domingo: hasta });
+        const buffer = await generarCapturaMatrizFinDeSemana(repFds);
+        envio = await telegramClient.enviarFoto({
+          token,
+          chatId,
+          buffer,
+          caption: `📊 <b>REPORTE OFICIAL ABIS - PERÍODO ${periodo}</b>\n👥 Total Enrolados: <b>${(reporte.total || 0).toLocaleString("es-CL")}</b>`,
+        });
+      } else {
+        const { generarCapturaDiaria } = require("./reportes/imageReportService");
+        const buffer = await generarCapturaDiaria(reporte);
+        envio = await telegramClient.enviarFoto({
+          token,
+          chatId,
+          buffer,
+          caption: `📊 <b>REPORTE OFICIAL ABIS - ${fecha}</b>\n👥 Total Enrolados: <b>${(reporte.total || 0).toLocaleString("es-CL")}</b>`,
+        });
+      }
+      // Enviar además el reporte institucional de texto completo con los botones interactivos
+      const resTexto = await telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto,
+        replyMarkup,
+      });
+      if (!envio) envio = resTexto;
+    } catch (imgErr) {
+      console.warn("[TELEGRAM ENVIAR] Fallback a mensaje de texto:", imgErr.message);
+      envio = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+    }
 
     res.json({
       ok: true,
-      mensaje: `Reporte del período ${periodo} enviado exitosamente al canal de Telegram institucional`,
+      mensaje: `Reporte visual del período ${periodo} enviado exitosamente al canal de Telegram institucional`,
       messageId: envio.message_id,
     });
   } catch (err) {
@@ -605,23 +641,84 @@ app.post("/api/settings/schedule", async (req, res) => {
   }
 });
 
-// Disparo de prueba manual de notificación programada
+// Disparo de prueba manual de notificación programada con capturas visuales
 app.post("/api/settings/schedule/test", async (req, res) => {
   try {
-    const { chatId } = req.body || {};
+    const { chatId, fecha, modo } = req.body || {};
     const resultado = await schedulerService.triggerScheduledReport({
       pool,
       isTest: true,
       customChatId: chatId,
+      fechaReferencia: fecha || null,
+      forzarModo: modo || null,
     });
 
     res.json({
       ok: true,
-      mensaje: "Reporte de prueba enviado exitosamente al canal de Telegram.",
+      mensaje: "Reporte con capturas visuales enviado exitosamente al canal de Telegram.",
       resultado,
     });
   } catch (err) {
     console.error("[SCHEDULE TEST ERROR]", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Previsualización directa en el navegador de la captura institucional oficial (PNG)
+app.get("/api/reportes/captura-preview", async (req, res) => {
+  try {
+    const { tipo = "fds_matriz", fecha = null } = req.query;
+    const {
+      generarCapturaMatrizFinDeSemana,
+      generarCapturaDistribucionFinDeSemana,
+      generarCapturaDiaria,
+    } = require("./reportes/imageReportService");
+    const { obtenerReporteFinDeSemana } = require("./reportes/reporteFinDeSemana");
+    const { obtenerReporteDiario } = require("./reportes/reporteDiario");
+
+    const periodo = await schedulerService.calcularPeriodoOperativo(pool, {
+      fechaReferencia: fecha,
+      forzarModo: tipo.startsWith("fds") ? "fds" : tipo === "diario" ? "diario" : null,
+    });
+
+    let buffer;
+    if (tipo === "fds_distribucion") {
+      const rep = await obtenerReporteFinDeSemana(pool, periodo.fechas);
+      buffer = await generarCapturaDistribucionFinDeSemana(rep);
+    } else if (tipo === "fds_enrolados") {
+      const { obtenerDatosAcumulados } = require("./reportes/reporteFinDeSemana");
+      const { generarCapturaAcumulado } = require("./reportes/imageReportService");
+      const anioActual = new Date().getFullYear();
+      const dataAcum = await obtenerDatosAcumulados(pool, { soloEnrolados: true });
+      buffer = await generarCapturaAcumulado(dataAcum, {
+        titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}`,
+        tipoFiltro: "ENROLADO",
+        anio: anioActual,
+      });
+    } else if (tipo === "fds_registros") {
+      const { obtenerDatosAcumulados } = require("./reportes/reporteFinDeSemana");
+      const { generarCapturaAcumulado } = require("./reportes/imageReportService");
+      const anioActual = new Date().getFullYear();
+      const dataAcum = await obtenerDatosAcumulados(pool, { soloEnrolados: false });
+      buffer = await generarCapturaAcumulado(dataAcum, {
+        titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACOMULADO AL AÑO ${anioActual}`,
+        tipoFiltro: "TODOS",
+        anio: anioActual,
+      });
+    } else if (tipo === "diario") {
+      const rep = await obtenerReporteDiario(pool, periodo.fecha);
+      buffer = await generarCapturaDiaria(rep);
+    } else {
+      // Por defecto fds_matriz (Matriz comparativa de estados del fin de semana)
+      const rep = await obtenerReporteFinDeSemana(pool, periodo.fechas);
+      buffer = await generarCapturaMatrizFinDeSemana(rep);
+    }
+
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Content-Disposition", `inline; filename="captura_${tipo}.png"`);
+    res.send(buffer);
+  } catch (err) {
+    console.error("[CAPTURA PREVIEW ERROR]", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 });

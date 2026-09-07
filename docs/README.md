@@ -13,6 +13,7 @@ docs/
 
 - [`GUIA_RAPIDA.md`](GUIA_RAPIDA.md) — comandos para encender el entorno y probar cada sprint,
   organizados por sprint (índice rápido; el detalle completo está en cada `AVANCE_SPRINT{N}.md`).
+- [`DIAGRAMAS_BASE_DE_DATOS.md`](DIAGRAMAS_BASE_DE_DATOS.md) — **Guía y diagramas completos de la base de datos** (ERD 3NF, Modelo Estrella, Jerarquía PDI, Vistas SQL e Índices).
 - [`informe-requerimientos.md`](informe-requerimientos.md) — informe de requerimientos original
   (funcionales, no funcionales, integración con Telegram), transcrito al repo.
 - [`diagramas/casos-de-uso.md`](diagramas/casos-de-uso.md) — actores y casos de uso, vista de

@@ -19,6 +19,9 @@ const state = {
   charts: {},
 };
 
+// Variable global para el reloj en vivo de ajustes
+var liveClockInterval = null;
+
 // Paleta de colores ejecutiva institucional para Chart.js (Fondo claro / Alto contraste)
 // Paleta de colores ejecutiva inspirada en la estética bklit-ui / shadcn
 const CHART_PALETTE = {
@@ -2793,7 +2796,6 @@ async function executeWebDecrypt(file, clave) {
 state.scheduleConfig = null;
 state.currentScheduleTimes = ["08:30", "19:00"];
 state.serverTimeOffset = 0;
-let liveClockInterval = null;
 
 // Actualiza el reloj institucional en pantalla segundo a segundo ("hora corriendo")
 function updateLiveClockDisplay() {
@@ -2913,7 +2915,9 @@ function renderTimeChips(times) {
     <div class="time-chip">
       <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: #0284c7;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>${time} hrs</span>
-      <button type="button" class="time-chip-del" onclick="eliminarHorario('${time}')" title="Quitar este horario">&times;</button>
+      <button type="button" class="time-chip-del" onclick="eliminarHorario('${time}')" title="Quitar este horario" aria-label="Quitar">
+        <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
   `).join("");
 

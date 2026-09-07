@@ -56,6 +56,15 @@ erDiagram
         int id_estado_registro FK
         int id_estado_general FK
     }
+    REGISTRO_AUDITORIA_CIFRADA {
+        bigint id_auditoria PK
+        timestamp fecha_evento
+        varchar tipo_evento
+        varchar archivo_procesado
+        varchar hash_sha256
+        text detalles_cifrados
+        varchar usuario_o_proceso
+    }
 ```
 
 ## Notas de diseño
@@ -70,8 +79,7 @@ erDiagram
   `equipo`.
 - Índices (Sprint 1 y 4) sobre `fecha_enrolamiento`, `id_cuartel`, `id_nacionalidad`,
   `id_estado_sincronizacion`, `id_estado_registro` e `id_estado_general` — pensados para las
-  agrupaciones del reporte diario y el dashboard de estadísticas, verificados con `EXPLAIN
-  ANALYZE` sobre 95k+ registros en [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
+  agrupaciones del reporte diario y el dashboard de estadísticas, verificados con `EXPLAIN ANALYZE` sobre 95k+ registros en [`AVANCE_SPRINT4.md`](../sprints/AVANCE_SPRINT4.md).
 - `db/views.sql` (Sprint 5) define 7 vistas de solo lectura sobre `registro_enrolamiento` para
   facilitar reportes (resumen por estado, nacionalidad, cuartel, unidad, género, edad y total
   diario) — no son parte del modelo de datos en sí, no se muestran en el diagrama ER. Ver

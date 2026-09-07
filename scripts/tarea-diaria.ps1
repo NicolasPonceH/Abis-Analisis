@@ -29,13 +29,9 @@ if (Test-Path $carpetaLlegada) {
     if ($reciente) { $excelDiario = $reciente.FullName }
 }
 if (-not $excelDiario) {
-    $excelReal = Join-Path $proyecto "New_Enrolados Abis.xlsx"
-    if (Test-Path $excelReal) {
-        $excelDiario = $excelReal
-    } else {
-        $excelDiario = Join-Path $carpetaLlegada "enrolamiento_pendiente.xlsx"
-        "Aviso: no hay Excel en $carpetaLlegada ni archivo principal; se procesara ruta inexistente." | Add-Content -Path $log
-    }
+    "Aviso: no hay un archivo diario nuevo en $carpetaLlegada. Se omite la ejecucion para proteger la base de datos de duplicaciones." | Add-Content -Path $log
+    "=== Fin tarea diaria: $(Get-Date -Format o) (sin archivos nuevos) ===" | Add-Content -Path $log
+    exit 0
 }
 
 "=== Inicio tarea diaria: $(Get-Date -Format o) ===" | Add-Content -Path $log

@@ -366,7 +366,26 @@ async function manejarComandoReporte({ token, chatId, pool, args }) {
   const reporte = await obtenerReporteDiario(pool, fecha);
   const texto = formatearReporteExtenso(reporte, { fecha, origen: "Bot Telegram PDI" });
   const replyMarkup = crearBotonesDescarga({ fecha });
-  await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+
+  try {
+    const { generarCapturaDiaria } = require("../reportes/imageReportService");
+    const buffer = await generarCapturaDiaria(reporte);
+    await telegramClient.enviarFoto({
+      token,
+      chatId,
+      buffer,
+      caption: `📊 <b>REPORTE OFICIAL ABIS - ${fecha}</b>\n👥 Total Enrolados: <b>${(reporte.total || 0).toLocaleString("es-CL")}</b>`,
+    });
+    await telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto,
+      replyMarkup,
+    });
+  } catch (imgErr) {
+    console.warn("[BOT REPORTE] Fallback a mensaje de texto:", imgErr.message);
+    await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+  }
 }
 
 async function manejarComandoEstado({ token, chatId, pool }) {
