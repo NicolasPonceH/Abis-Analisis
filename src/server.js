@@ -412,10 +412,8 @@ app.post("/api/telegram/enviar", async (req, res) => {
     // Generar captura visual dinámica según la fecha o rango seleccionado en la web
     try {
       if (desde && hasta) {
-        const { obtenerReporteFinDeSemana } = require("./reportes/reporteFinDeSemana");
-        const { generarCapturaMatrizFinDeSemana } = require("./reportes/imageReportService");
-        const repFds = await obtenerReporteFinDeSemana(pool, { viernes: desde, sabado: desde, domingo: hasta });
-        const buffer = await generarCapturaMatrizFinDeSemana(repFds);
+        const { generarCapturaDiaria } = require("./reportes/imageReportService");
+        const buffer = await generarCapturaDiaria(reporte);
         envio = await telegramClient.enviarFoto({
           token,
           chatId,

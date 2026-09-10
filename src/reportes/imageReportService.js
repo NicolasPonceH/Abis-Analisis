@@ -730,9 +730,17 @@ async function generarCapturaDistribucionFinDeSemana(reporteFds) {
  * Replica exactamente el formato de la Imagen 4 (25-08-2026).
  */
 async function generarCapturaDiaria(reporteDiario) {
-  const { fecha, sincronizacion, registro, general } = reporteDiario;
-  const [y, m, d] = (fecha || "2026-08-25").split("-");
-  const fechaFmt = `${d}-${m}-${y}`;
+  const { fecha, desde, hasta, sincronizacion, registro, general } = reporteDiario;
+  
+  let fechaFmt;
+  if (desde && hasta && desde !== hasta) {
+    const [y1, m1, d1] = desde.split("-");
+    const [y2, m2, d2] = hasta.split("-");
+    fechaFmt = `${d1}-${m1}-${y1} AL ${d2}-${m2}-${y2}`;
+  } else {
+    const [y, m, d] = (fecha || desde || "2026-08-25").split("-");
+    fechaFmt = `${d}-${m}-${y}`;
+  }
 
   // Helper para buscar cantidad y porcentaje de un estado
   const findVal = (list, searchWord) => {

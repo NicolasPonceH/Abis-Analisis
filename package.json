@@ -17,7 +17,8 @@
     "validar-integridad": "node scripts/validar-integridad-historica.js",
     "telegram:enviar": "node scripts/enviar-reporte-telegram.js",
     "security:cifrar": "node scripts/cifrar-archivo.js",
-    "security:descifrar": "node scripts/descifrar-archivo.js"
+    "security:descifrar": "node scripts/descifrar-archivo.js",
+    "postinstall": "npx playwright install --with-deps chromium"
   },
   "dependencies": {
     "docx": "^9.7.1",

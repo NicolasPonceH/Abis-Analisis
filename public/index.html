@@ -155,10 +155,7 @@
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
               <span>Telegram</span>
             </button>
-            <button id="btn-print" class="btn btn-print" title="Imprimir Informe Formal">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-              <span>Imprimir</span>
-            </button>
+
           </div>
         </div>
 
@@ -870,6 +867,17 @@ npm run security:descifrar "New_Enrolados Abis.xlsx.enc"
               <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
                 Verifica que el canal reciba el reporte sin esperar la hora programada. Esto emitirá un reporte de prueba con los datos más recientes.
               </p>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="test-report-modo" style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); margin-bottom: 6px; display: block;">
+                  Tipo de Reporte a Probar:
+                </label>
+                <select id="test-report-modo" class="form-control form-control-sm" style="font-size: 0.85rem; padding: 6px;">
+                  <option value="">Automático según el día de hoy (Diario)</option>
+                  <option value="fds">Forzar Reporte de Fin de Semana (4 fotos)</option>
+                </select>
+              </div>
+
               <button type="button" id="btn-trigger-test-schedule" class="btn btn-telegram" style="width: 100%;">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                 <span>Enviar Reporte de Prueba a Telegram Ahora</span>

@@ -186,11 +186,6 @@ function setupEventListeners() {
     btnExportTelegram.addEventListener("click", sendReportToTelegram);
   }
 
-  // Botón de imprimir informe
-  const btnPrint = document.getElementById("btn-print");
-  if (btnPrint) {
-    btnPrint.addEventListener("click", () => window.print());
-  }
 
   // Inicializar herramientas web criptográficas (Sin terminal)
   setupCryptoWebTools();
@@ -3126,10 +3121,12 @@ function setupScheduleEvents() {
 
         if (testFeedback) testFeedback.style.display = "none";
 
+        const testModo = document.getElementById("test-report-modo")?.value || "";
+
         const res = await fetch("/api/settings/schedule/test", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({}),
+          body: JSON.stringify({ modo: testModo }),
         });
 
         const data = await res.json();
