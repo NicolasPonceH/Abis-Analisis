@@ -642,13 +642,14 @@ app.post("/api/settings/schedule", async (req, res) => {
 // Disparo de prueba manual de notificación programada con capturas visuales
 app.post("/api/settings/schedule/test", async (req, res) => {
   try {
-    const { chatId, fecha, modo } = req.body || {};
+    const { chatId, fecha, modo, incluirAdjuntos } = req.body || {};
     const resultado = await schedulerService.triggerScheduledReport({
       pool,
       isTest: true,
       customChatId: chatId,
       fechaReferencia: fecha || null,
       forzarModo: modo || null,
+      incluirAdjuntos: incluirAdjuntos !== undefined ? incluirAdjuntos : true,
     });
 
     res.json({

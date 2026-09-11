@@ -254,7 +254,7 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
 }
 
 // Dispara el envío de reporte (tanto programado como de prueba manual)
-async function triggerScheduledReport({ pool, isTest = false, customChatId = null, fechaReferencia = null, forzarModo = null }) {
+async function triggerScheduledReport({ pool, isTest = false, customChatId = null, fechaReferencia = null, forzarModo = null, incluirAdjuntos = true }) {
   const config = getConfig();
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const rawChatId = customChatId || config.telegramChatId || process.env.TELEGRAM_CHAT_ID || "";
@@ -285,10 +285,10 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     const sincOk = reporteFds.totalFinDeSemana.sincronizacion.sincronizado;
     slaReportado = totalReportado > 0 ? Math.round((sincOk / totalReportado) * 1000) / 10 : 100;
 
-    const replyMarkup = crearBotonesDescarga({
+    const replyMarkup = incluirAdjuntos ? crearBotonesDescarga({
       desde: periodo.fechas.viernes,
       hasta: periodo.fechas.domingo,
-    });
+    }) : undefined;
 
     const textoReporte = config.reportType === "resumen"
       ? formatearReporte(reporteRango, { desde: periodo.fechas.viernes, hasta: periodo.fechas.domingo, origen })
@@ -419,7 +419,7 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     totalReportado = reporteDiario.total || 0;
     slaReportado = reporteDiario.resumenEjecutivo?.tasaSincronizacion || 100;
 
-    const replyMarkup = crearBotonesDescarga({ fecha: periodo.fecha });
+    const replyMarkup = incluirAdjuntos ? crearBotonesDescarga({ fecha: periodo.fecha }) : undefined;
 
     const textoReporte = config.reportType === "resumen"
       ? formatearReporte(reporteDiario, { fecha: periodo.fecha, origen })

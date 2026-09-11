@@ -3122,11 +3122,12 @@ function setupScheduleEvents() {
         if (testFeedback) testFeedback.style.display = "none";
 
         const testModo = document.getElementById("test-report-modo")?.value || "";
+        const testAdjuntos = document.getElementById("test-report-adjuntos")?.checked ?? true;
 
         const res = await fetch("/api/settings/schedule/test", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ modo: testModo }),
+          body: JSON.stringify({ modo: testModo, incluirAdjuntos: testAdjuntos }),
         });
 
         const data = await res.json();
