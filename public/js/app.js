@@ -1396,11 +1396,17 @@ function updateTrendView() {
     badgeTrend.textContent = `${displayItems.length} ${state.trendGranularity === 'month' ? 'Meses' : 'Días'} · ${sumTotal.toLocaleString("es-CL")} Enrolamientos (${pct}% SLA)`;
   }
 
+  // Configurar los límites del calendario (min y max) y datalist de fechas disponibles
+  configureTrendCalendar();
+
   // Renderizar gráfico de tendencia principal
   renderTrendChart(displayItems, "chart-tendencia-historica");
 
-  // Renderizar tabla detallada día a día
-  renderTrendTable(filteredItems);
+  // Renderizar tabla detallada día a día (respetando si hay un filtro de fecha activo en el calendario)
+  const calendarPicker = document.getElementById("trend-calendar-picker");
+  if (!calendarPicker || !calendarPicker.value) {
+    renderTrendTable(filteredItems);
+  }
 
   // Si el modal está abierto, renderizar gráfico en modal
   const modal = document.getElementById("modal-trend-fullscreen");
@@ -1605,6 +1611,16 @@ function renderTrendTable(items) {
   }).join("");
 }
 
+// Configura límites min/max para el selector de calendario de la matriz histórica
+function configureTrendCalendar() {
+  const cal = document.getElementById("trend-calendar-picker");
+  if (!cal || !state.trendData || state.trendData.length === 0) return;
+
+  const fechas = state.trendData.map((d) => d.fecha).sort();
+  cal.min = fechas[0];
+  cal.max = fechas[fechas.length - 1];
+}
+
 // Configuración de eventos de la pestaña de Evolución y Tendencias
 function setupTrendControls() {
   // Presets de rango temporal de tendencia
@@ -1613,6 +1629,11 @@ function setupTrendControls() {
       document.querySelectorAll("#trend-period-presets .preset-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       state.trendRange = btn.getAttribute("data-trend-range");
+      // Limpiar filtro de fecha en calendario
+      const cal = document.getElementById("trend-calendar-picker");
+      if (cal) cal.value = "";
+      const btnClearCal = document.getElementById("btn-clear-trend-calendar");
+      if (btnClearCal) btnClearCal.style.display = "none";
       updateTrendView();
     });
   });
@@ -1693,16 +1714,98 @@ function setupTrendControls() {
     }
   });
 
-  // Búsqueda en la matriz detallada de tendencias
+  // Selector de Fecha mediante Calendario Nativo
+  const calendarBox = document.getElementById("trend-calendar-box");
+  const calendarPicker = document.getElementById("trend-calendar-picker");
+  const btnClearCalendar = document.getElementById("btn-clear-trend-calendar");
+  const countEl = document.getElementById("trend-matrix-count");
   const searchInput = document.getElementById("trend-search-input");
+
+  // Abrir de inmediato el calendario visual al hacer clic en cualquier parte de la caja
+  if (calendarBox && calendarPicker) {
+    calendarBox.addEventListener("click", (e) => {
+      if (e.target === btnClearCalendar || btnClearCalendar?.contains(e.target)) return;
+      try {
+        calendarPicker.showPicker();
+      } catch (err) {
+        calendarPicker.focus();
+      }
+    });
+  }
+
+  if (calendarPicker) {
+    calendarPicker.addEventListener("change", (e) => {
+      const selectedDate = e.target.value;
+      if (!selectedDate) {
+        if (btnClearCalendar) btnClearCalendar.style.display = "none";
+        updateTrendView();
+        return;
+      }
+
+      if (searchInput) searchInput.value = "";
+      if (btnClearCalendar) btnClearCalendar.style.display = "inline-flex";
+
+      const match = (state.trendData || []).find((d) => d.fecha === selectedDate);
+      if (match) {
+        renderTrendTable([match]);
+        if (countEl) countEl.textContent = `1 jornada operativa (${selectedDate})`;
+      } else {
+        const tbody = document.getElementById("trend-table-body");
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" style="text-align:center; padding: 28px; color: var(--text-muted);">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--text-muted);"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  <span>No se registraron enrolamientos en el sistema el día <strong>${selectedDate}</strong>.</span>
+                  <button type="button" id="btn-reset-trend-calendar" class="btn btn-secondary btn-sm" style="margin-top:6px;">
+                    Restablecer y ver todas las jornadas
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+          document.getElementById("btn-reset-trend-calendar")?.addEventListener("click", () => {
+            calendarPicker.value = "";
+            if (btnClearCalendar) btnClearCalendar.style.display = "none";
+            updateTrendView();
+          });
+        }
+        if (countEl) countEl.textContent = `0 jornadas (${selectedDate})`;
+      }
+    });
+  }
+
+  if (btnClearCalendar) {
+    btnClearCalendar.addEventListener("click", () => {
+      if (calendarPicker) calendarPicker.value = "";
+      btnClearCalendar.style.display = "none";
+      updateTrendView();
+    });
+  }
+
+  // Búsqueda en la matriz detallada de tendencias
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
+      if (calendarPicker && calendarPicker.value) {
+        calendarPicker.value = "";
+        if (btnClearCalendar) btnClearCalendar.style.display = "none";
+      }
       const term = e.target.value.toLowerCase().trim();
       const rows = document.querySelectorAll("#trend-table-body tr");
+      let visible = 0;
       rows.forEach((tr) => {
         const text = tr.textContent.toLowerCase();
-        tr.style.display = text.includes(term) ? "" : "none";
+        const match = text.includes(term);
+        tr.style.display = match ? "" : "none";
+        if (match) visible++;
       });
+      if (countEl && term) {
+        countEl.textContent = `${visible} ${visible === 1 ? 'jornada encontrada' : 'jornadas encontradas'}`;
+      } else if (countEl) {
+        const rawItems = state.trendData || [];
+        countEl.textContent = `${rows.length} jornadas operativas`;
+      }
     });
   }
 

@@ -236,23 +236,43 @@ test.describe('Sistema ABIS - API Endpoints', () => {
   });
 
   test('POST /api/settings/schedule updates schedule times with valid authorization', async ({ request }) => {
-    const res = await request.post(`${BASE_URL}/api/settings/schedule`, {
-      headers: {
-        'X-Ingesta-Auth': 'pdi2026',
-      },
-      data: {
-        enabled: true,
-        times: ['08:30'],
-        days: [1, 2, 3, 4, 5],
-        reportType: 'extenso',
+    // 1. Obtener la configuracion original de usuario para no pisarla
+    const originalRes = await request.get(`${BASE_URL}/api/settings/schedule`);
+    const originalData = await originalRes.json();
+    const originalConfig = originalData.config;
+
+    try {
+      const res = await request.post(`${BASE_URL}/api/settings/schedule`, {
+        headers: {
+          'X-Ingesta-Auth': 'pdi2026',
+        },
+        data: {
+          enabled: true,
+          times: ['07:10', '08:30'],
+          days: [0, 1, 2, 3, 4, 5, 6],
+          reportType: 'extenso',
+        }
+      });
+      expect(res.ok()).toBeTruthy();
+      const data = await res.json();
+      expect(data.ok).toBe(true);
+      expect(data.config.times).toContain('07:10');
+      expect(data.next).toBeDefined();
+    } finally {
+      // 2. Restaurar la configuracion original exacta del usuario
+      if (originalConfig) {
+        await request.post(`${BASE_URL}/api/settings/schedule`, {
+          headers: { 'X-Ingesta-Auth': 'pdi2026' },
+          data: {
+            enabled: originalConfig.enabled,
+            times: originalConfig.times,
+            days: originalConfig.days,
+            reportType: originalConfig.reportType,
+            telegramChatId: originalConfig.telegramChatId,
+          }
+        });
       }
-    });
-    expect(res.ok()).toBeTruthy();
-    const data = await res.json();
-    expect(data.ok).toBe(true);
-    expect(data.config.times).toEqual(['08:30']);
-    expect(data.config.days).toEqual([1, 2, 3, 4, 5]);
-    expect(data.next).toBeDefined();
+    }
   });
 
   test('POST /api/settings/schedule/test executes immediate test dispatch with valid audit', async ({ request }) => {

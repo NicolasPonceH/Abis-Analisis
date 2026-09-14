@@ -1352,6 +1352,62 @@ select.form-control {
   max-width: 340px;
 }
 
+.trend-calendar-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface-subtle, #f8fafc);
+  border: 1px solid var(--border-medium, #cbd5e1);
+  border-radius: var(--radius-md, 6px);
+  padding: 4px 10px;
+  height: 38px;
+  box-sizing: border-box;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.trend-calendar-box:hover {
+  border-color: var(--border-focus, #2563eb);
+  background: #ffffff;
+}
+
+.trend-calendar-box:focus-within {
+  background: #ffffff;
+  border-color: var(--border-focus, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.trend-calendar-input {
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #0f172a);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  width: 135px;
+}
+
+.btn-clear-date {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted, #64748b);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.btn-clear-date:hover {
+  color: var(--status-danger, #dc2626);
+  background: rgba(220, 38, 38, 0.1);
+}
+
 .table-container {
   overflow-x: auto;
   border-radius: var(--radius-md);

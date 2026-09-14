@@ -18,7 +18,7 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "schedule-config.json");
 
 const DEFAULT_CONFIG = {
   enabled: true,
-  times: ["08:30", "19:00"], // 08:30 AM (inicio de jornada) y 19:00 hrs (cierre operativo)
+  times: ["07:10", "08:30", "08:49", "09:00"], // 07:10 AM permanente y jornadas operativas
   days: [1, 2, 3, 4, 5, 6, 0], // Lunes a Domingo (0 = Domingo, 1 = Lunes, ...)
   reportType: "extenso", // "extenso" | "resumen"
   targetChannel: "telegram",
