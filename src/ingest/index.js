@@ -1,13 +1,37 @@
 const { readExcelFile } = require("./excelReader");
 const { validateHeaders } = require("./headerValidator");
 const { loadCatalogs, mapRow } = require("./catalogMapper");
-const { EXPECTED_COLUMNS, findMatchingHeader } = require("./headerSchema");
+const { EXPECTED_COLUMNS, findMatchingHeader, normalizeHeaderName } = require("./headerSchema");
 
 function toFieldKeyedRow(rawRow, actualHeaders) {
   const row = {};
   for (const column of EXPECTED_COLUMNS) {
-    const matched = findMatchingHeader(column, actualHeaders);
-    row[column.field] = matched !== undefined ? rawRow[matched] : undefined;
+    const allAliases = [column.header, ...(column.aliases || [])];
+    let matchedKey = undefined;
+    let chosenVal = undefined;
+
+    for (const alias of allAliases) {
+      const normAlias = normalizeHeaderName(alias);
+      const found = actualHeaders.find((h) => normalizeHeaderName(h) === normAlias);
+      if (found !== undefined && rawRow[found] !== undefined) {
+        if (matchedKey === undefined) {
+          matchedKey = found;
+          chosenVal = rawRow[found];
+        }
+        const strVal = String(rawRow[found] || "").trim();
+        // Si el valor actual es no-nulo y no es 'NEC', mientras que el anterior era nulo o 'NEC', preferir el valor con contenido
+        if (
+          strVal &&
+          strVal !== "NEC" &&
+          (chosenVal === undefined || !String(chosenVal).trim() || String(chosenVal).trim() === "NEC")
+        ) {
+          matchedKey = found;
+          chosenVal = rawRow[found];
+          break;
+        }
+      }
+    }
+    row[column.field] = chosenVal !== undefined ? chosenVal : (matchedKey ? rawRow[matchedKey] : undefined);
   }
   return row;
 }
@@ -38,5 +62,35 @@ async function processExcelFile(filePath, pool, options = {}) {
   return { headerValidation, rows: mappedRows, errors: rowErrors, sheetName };
 }
 
-module.exports = { processExcelFile };
+// Procesa filas provenientes directamente del portapapeles o de una cuadrícula de hoja de cálculo
+async function processSheetRows(headers, rows, pool) {
+  const headerValidation = validateHeaders(headers);
+  if (!headerValidation.ok) {
+    return { headerValidation, rows: [], errors: [] };
+  }
+
+  const catalogs = await loadCatalogs(pool);
+
+  const mappedRows = [];
+  const rowErrors = [];
+  rows.forEach((rawRow, index) => {
+    let rowObj = rawRow;
+    if (Array.isArray(rawRow)) {
+      rowObj = {};
+      headers.forEach((h, i) => {
+        rowObj[h] = rawRow[i];
+      });
+    }
+    const { mapped, errors } = mapRow(toFieldKeyedRow(rowObj, headers), catalogs);
+    if (errors.length > 0) {
+      rowErrors.push({ fila: index + 1, errors, datos: rowObj });
+    } else {
+      mappedRows.push(mapped);
+    }
+  });
+
+  return { headerValidation, rows: mappedRows, errors: rowErrors };
+}
+
+module.exports = { processExcelFile, processSheetRows, toFieldKeyedRow };
 

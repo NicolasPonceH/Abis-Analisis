@@ -12,6 +12,7 @@ const {
 } = require("../reportes/imageReportService");
 const { formatearReporteExtenso, formatearReporte } = require("../telegram/formatearReporte");
 const { crearBotonesDescarga } = require("../telegram/botService");
+const { obtenerChatIdsActivos } = require("../telegram/recipientService");
 
 const CONFIG_DIR = path.resolve(__dirname, "../../config");
 const CONFIG_FILE = path.join(CONFIG_DIR, "schedule-config.json");
@@ -257,14 +258,29 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
 async function triggerScheduledReport({ pool, isTest = false, customChatId = null, fechaReferencia = null, forzarModo = null, incluirAdjuntos = true }) {
   const config = getConfig();
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const rawChatId = customChatId || config.telegramChatId || process.env.TELEGRAM_CHAT_ID || "";
-  const chatIds = String(rawChatId)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+
+  let chatIds = [];
+  if (customChatId) {
+    chatIds = String(customChatId)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  } else {
+    // 1. Consultar destinatarios activos registrados en PostgreSQL
+    chatIds = await obtenerChatIdsActivos(pool);
+
+    // 2. Si no hay ninguno registrado aún en BD, usar fallback de config o .env
+    if (chatIds.length === 0) {
+      const rawChatId = config.telegramChatId || process.env.TELEGRAM_CHAT_ID || "";
+      chatIds = String(rawChatId)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+  }
 
   if (!token || chatIds.length === 0) {
-    throw new Error("Token o Chat ID de Telegram no configurados en .env ni en ajustes.");
+    throw new Error("Token o Chat ID de Telegram no configurados en destinatarios de base de datos ni en .env.");
   }
 
   // 1. Determinar el período operativo (Fin de semana para Lunes, Diario para Martes-Viernes)
@@ -467,6 +483,26 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
 
   if (!envio) {
     throw new Error("No se pudo entregar el reporte visual a los canales de Telegram configurados.");
+  }
+
+  // Alerta Inteligente de SLA: Si la tasa de éxito es menor al 90%, notificar urgencia operativa
+  if (slaReportado < 90) {
+    const totalErrores = totalReportado > 0 ? Math.round(totalReportado * (100 - slaReportado) / 100) : 0;
+    const textoAlerta = [
+      `⚠️ <b>ALERTA OPERATIVA - SLA CRÍTICO</b>`,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      `La tasa de sincronización de enrolamientos biométricos cayó al <b>${slaReportado.toFixed(1)}%</b>.`,
+      `Se estiman <b>${totalErrores.toLocaleString("es-CL")}</b> registros con inconsistencias.`,
+      ``,
+      `💡 <i>Recomendación: Utilice el botón "⚠️ Ver Errores" o envíe <code>/errores</code> para focalizar las unidades afectadas.</i>`,
+    ].join("\n");
+    for (const cid of chatIds) {
+      try {
+        await telegramClient.enviarMensaje({ token, chatId: cid, texto: textoAlerta });
+      } catch (err) {
+        console.warn(`[SCHEDULER] Error al enviar alerta SLA a ${cid}:`, err.message);
+      }
+    }
   }
 
   // Registrar en historial local

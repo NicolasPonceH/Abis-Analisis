@@ -6,6 +6,7 @@ const { obtenerReporteRango } = require("../reportes/reporteRango");
 const { formatearReporte, formatearReporteExtenso } = require("./formatearReporte");
 const { generarReporteWord } = require("../reportes/wordReportService");
 const { generarReporteExcel } = require("../reportes/excelReportService");
+const { generarHashSHA256 } = require("../security/crypto");
 
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -13,13 +14,50 @@ function escaparHtml(texto) {
   return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function esChatAutorizado(chatId, authorizedConfig) {
-  if (!authorizedConfig) return true;
-  const lista = String(authorizedConfig)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return lista.length === 0 || lista.includes(String(chatId));
+async function obtenerDestinatarioAutorizado(chatId, authorizedConfig, pool) {
+  const cid = String(chatId).trim();
+  const hash = generarHashSHA256(cid);
+
+  // 1. Revisar si está registrado en la base de datos PostgreSQL (búsqueda instantánea por hash SHA-256)
+  if (pool) {
+    try {
+      const { rows } = await pool.query(
+        "SELECT id, nombre, rol_unidad, activo FROM destinatarios_telegram WHERE chat_id_hash = $1 OR chat_id = $2 LIMIT 1",
+        [hash, cid]
+      );
+      if (rows.length > 0) {
+        return {
+          autorizado: Boolean(rows[0].activo),
+          destinatario: rows[0],
+          motivo: rows[0].activo ? "OK" : "PAUSADO",
+        };
+      }
+    } catch (err) {
+      console.warn("[BOT AUTH] Error consultando destinatario en BD:", err.message);
+    }
+  }
+
+  // 2. Revisar si coincide con la variable estática de entorno (.env)
+  if (authorizedConfig) {
+    const lista = String(authorizedConfig)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (lista.includes(cid)) {
+      return {
+        autorizado: true,
+        destinatario: { nombre: "Oficial Autorizado (.env)", chat_id: cid, activo: true },
+        motivo: "OK",
+      };
+    }
+  }
+
+  return { autorizado: false, destinatario: null, motivo: "NO_REGISTRADO" };
+}
+
+async function esChatAutorizado(chatId, authorizedConfig, pool) {
+  const auth = await obtenerDestinatarioAutorizado(chatId, authorizedConfig, pool);
+  return auth.autorizado;
 }
 
 function leerUltimoEtl() {
@@ -40,6 +78,10 @@ function crearBotonesDescarga({ fecha, desde, hasta }) {
       [
         { text: "🟩 [XLSX] Descargar Planilla Excel", callback_data: `dl_excel:${param}` },
         { text: "🟦 [DOCX] Descargar Informe Word", callback_data: `dl_word:${param}` },
+      ],
+      [
+        { text: "🌎 Ver Nacionalidades", callback_data: `info_nac:${param}` },
+        { text: "⚠️ Ver Errores", callback_data: `info_err:${param}` },
       ],
     ],
   };
@@ -426,13 +468,26 @@ async function manejarComandoEstado({ token, chatId, pool }) {
   }
 }
 
+// Extrae fecha/desde/hasta a partir del payload de un callback_data de botón inline
+function parsearPayloadFecha(payload) {
+  let desde = null, hasta = null, fecha = null;
+  if (payload.startsWith("range:")) {
+    const partes = payload.split(":");
+    desde = partes[1];
+    hasta = partes[2];
+  } else {
+    fecha = payload.replace(/^date:/, "");
+  }
+  return { fecha, desde, hasta };
+}
+
 // Procesa clics en botones inline interactivos de Telegram para generar y despachar archivos
 async function procesarCallbackQuery({ callbackQuery, token, authorizedChatId, pool }) {
   const chatId = String(callbackQuery.message?.chat?.id || callbackQuery.from?.id);
   const queryId = callbackQuery.id;
   const data = callbackQuery.data || "";
 
-  if (!esChatAutorizado(chatId, authorizedChatId)) {
+  if (!(await esChatAutorizado(chatId, authorizedChatId, pool))) {
     return telegramClient.responderCallback({
       token,
       callbackQueryId: queryId,
@@ -441,9 +496,125 @@ async function procesarCallbackQuery({ callbackQuery, token, authorizedChatId, p
     });
   }
 
+  // ── Botón: Ver Nacionalidades ──────────────────────────────────
+  if (data.startsWith("info_nac:")) {
+    const payload = data.replace(/^info_nac:/, "");
+    const { fecha, desde, hasta } = parsearPayloadFecha(payload);
+
+    await telegramClient.responderCallback({ token, callbackQueryId: queryId, text: "Consultando nacionalidades..." });
+
+    const whereClause = desde && hasta
+      ? "r.fecha_enrolamiento >= $1 AND r.fecha_enrolamiento <= $2"
+      : "r.fecha_enrolamiento = $1";
+    const params = desde && hasta ? [desde, hasta] : [fecha];
+
+    const [nacRes, totalRes] = await Promise.all([
+      pool.query(
+        `SELECT n.descripcion AS nacionalidad, n.codigo_iso, count(*)::int AS total
+         FROM registro_enrolamiento r
+         JOIN nacionalidad n ON n.id_nacionalidad = r.id_nacionalidad
+         WHERE ${whereClause}
+         GROUP BY n.descripcion, n.codigo_iso
+         ORDER BY total DESC LIMIT 15`,
+        params
+      ),
+      pool.query(
+        `SELECT count(*)::int AS total FROM registro_enrolamiento r WHERE ${whereClause}`,
+        params
+      ),
+    ]);
+
+    const totalGeneral = totalRes.rows[0]?.total || 0;
+    const periodoLabel = desde && hasta ? `${desde} al ${hasta}` : fecha;
+    const lineas = [
+      `🌎 <b>DISTRIBUCIÓN POR NACIONALIDAD</b>`,
+      `<i>${periodoLabel}</i>`,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      `👥 Total Enrolados: <b>${totalGeneral.toLocaleString("es-CL")}</b>`,
+      ``,
+    ];
+
+    if (nacRes.rows.length === 0) {
+      lineas.push(`<i>No hay datos de nacionalidad para este período.</i>`);
+    } else {
+      const FLAG_MAP = { CHL: "🇨🇱", PER: "🇵🇪", BOL: "🇧🇴", COL: "🇨🇴", VEN: "🇻🇪", HTI: "🇭🇹", ARG: "🇦🇷", ECU: "🇪🇨", BRA: "🇧🇷", DOM: "🇩🇴" };
+      nacRes.rows.forEach((r, i) => {
+        const pct = totalGeneral > 0 ? ((r.total / totalGeneral) * 100).toFixed(1) : "0";
+        const flag = FLAG_MAP[r.codigo_iso] || "🏳️";
+        lineas.push(`${i + 1}. ${flag} <b>${escaparHtml(r.nacionalidad)}</b>: <code>${r.total.toLocaleString("es-CL")}</code> (${pct}%)`);
+      });
+    }
+
+    lineas.push(``, `<i>Datos generados por Sistema ABIS PDI.</i>`);
+    await telegramClient.enviarMensaje({ token, chatId, texto: lineas.join("\n") });
+    return;
+  }
+
+  // ── Botón: Ver Errores ──────────────────────────────────────────
+  if (data.startsWith("info_err:")) {
+    const payload = data.replace(/^info_err:/, "");
+    const { fecha, desde, hasta } = parsearPayloadFecha(payload);
+
+    await telegramClient.responderCallback({ token, callbackQueryId: queryId, text: "Consultando errores..." });
+
+    // Reutilizar el comando existente de detalle de errores para una fecha simple
+    if (fecha && !desde) {
+      await manejarComandoDetalleErrores({ token, chatId, pool, args: [fecha] });
+      return;
+    }
+
+    // Para rangos, hacer una consulta ad-hoc similar
+    const [totalRes, erroresRes] = await Promise.all([
+      pool.query(
+        `SELECT count(*)::int AS total FROM registro_enrolamiento WHERE fecha_enrolamiento >= $1 AND fecha_enrolamiento <= $2`,
+        [desde, hasta]
+      ),
+      pool.query(
+        `SELECT c.nombre_cuartel, u.nombre_unidad, count(*)::int AS total
+         FROM registro_enrolamiento r
+         JOIN cuartel c ON c.id_cuartel = r.id_cuartel
+         JOIN unidad u ON u.id_unidad = c.id_unidad
+         JOIN estado_proceso ep_reg ON ep_reg.id_estado = r.id_estado_registro
+         JOIN estado_proceso ep_gen ON ep_gen.id_estado = r.id_estado_general
+         WHERE r.fecha_enrolamiento >= $1 AND r.fecha_enrolamiento <= $2
+           AND (ep_reg.descripcion IN ('ERROR', 'CON_ERROR') OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))
+         GROUP BY c.nombre_cuartel, u.nombre_unidad
+         ORDER BY total DESC LIMIT 15`,
+        [desde, hasta]
+      ),
+    ]);
+
+    const totalDia = totalRes.rows[0]?.total || 0;
+    const totalErrores = erroresRes.rows.reduce((s, r) => s + r.total, 0);
+    const pctErr = totalDia > 0 ? ((totalErrores / totalDia) * 100).toFixed(1) : "0";
+
+    const lineas = [
+      `⚠️ <b>DIAGNÓSTICO DE INCONSISTENCIAS</b>`,
+      `<i>${desde} al ${hasta}</i>`,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `<b>Total con Falla:</b> <code>${totalErrores.toLocaleString("es-CL")}</code> de ${totalDia.toLocaleString("es-CL")} (${pctErr}%)`,
+    ];
+
+    if (totalErrores === 0) {
+      lineas.push(``, `✅ <b>¡Cero inconsistencias en el período!</b>`);
+    } else {
+      lineas.push(``, `<b>Cuarteles Afectados:</b>`);
+      erroresRes.rows.forEach((r) => {
+        lineas.push(`• <b>${escaparHtml(r.nombre_cuartel)}</b> [${escaparHtml(r.nombre_unidad)}]: <code>${r.total}</code>`);
+      });
+    }
+
+    lineas.push(``, `<i>Datos generados por Sistema ABIS PDI.</i>`);
+    await telegramClient.enviarMensaje({ token, chatId, texto: lineas.join("\n") });
+    return;
+  }
+
+  // ── Botón: Descargar Excel / Word ──────────────────────────────
   if (data.startsWith("dl_excel:") || data.startsWith("dl_word:")) {
     const tipo = data.startsWith("dl_excel:") ? "excel" : "word";
     const payload = data.replace(/^dl_(excel|word):/, "");
+    const { fecha, desde, hasta } = parsearPayloadFecha(payload);
 
     // Respuesta inmediata a Telegram para confirmar recepción del click
     await telegramClient.responderCallback({
@@ -453,17 +624,9 @@ async function procesarCallbackQuery({ callbackQuery, token, authorizedChatId, p
     });
 
     let reporte;
-    let desde = null;
-    let hasta = null;
-    let fecha = null;
-
-    if (payload.startsWith("range:")) {
-      const partes = payload.split(":");
-      desde = partes[1];
-      hasta = partes[2];
+    if (desde && hasta) {
       reporte = await obtenerReporteRango(pool, desde, hasta);
     } else {
-      fecha = payload.replace(/^date:/, "");
       reporte = await obtenerReporteDiario(pool, fecha);
     }
 
@@ -523,29 +686,84 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
         `• <b>Tipo:</b> ${tipoChat}`,
         `• <b>Chat ID:</b> <code>${chatId}</code>`,
         ``,
-        `💡 <i>Para recibir los reportes automáticos en este grupo/chat, copia este código y configúralo en tu archivo <code>.env</code> (TELEGRAM_CHAT_ID) o en los Ajustes del Sistema ABIS.</i>`,
+        `💡 <i>Para recibir los reportes automáticos en este grupo/chat, copia este código y regístralo en el Gestor de Destinatarios de Telegram en los Ajustes del Sistema ABIS.</i>`,
       ].join("\n"),
     });
   }
 
-  // Si se definió TELEGRAM_CHAT_ID, restringir el acceso a los chats autorizados por seguridad
-  if (!esChatAutorizado(chatId, authorizedChatId)) {
+  // Verificar autorización contra la base de datos PostgreSQL y la variable de entorno
+  const auth = await obtenerDestinatarioAutorizado(chatId, authorizedChatId, pool);
+
+  // Manejo de /start para brindar una respuesta institucional amigable
+  if (comando === "/start") {
+    if (auth.autorizado) {
+      const nombreOficial = auth.destinatario?.nombre || "Oficial";
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: [
+          `👮‍♂️ <b>SISTEMA ABIS PDI - BOT OFICIAL</b>`,
+          `━━━━━━━━━━━━━━━━━━━━`,
+          `¡Bienvenido(a) <b>${escaparHtml(nombreOficial)}</b>!`,
+          ``,
+          `✅ <b>Estado:</b> Conexión Verificada y Activa`,
+          `🆔 <b>Su Chat ID:</b> <code>${chatId}</code>`,
+          ``,
+          `Usted está habilitado para recibir los reportes institucionales programados e interactuar con el sistema.`,
+          ``,
+          `💡 Escriba <code>/reporte</code> para ver el informe más reciente o <code>/ayuda</code> para ver todos los comandos disponibles.`,
+        ].join("\n"),
+      });
+    } else if (auth.motivo === "PAUSADO") {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: [
+          `⚠️ <b>SISTEMA ABIS PDI - DESTINATARIO PAUSADO</b>`,
+          `━━━━━━━━━━━━━━━━━━━━`,
+          `Estimado(a) <b>${escaparHtml(auth.destinatario?.nombre || "Oficial")}</b>:`,
+          ``,
+          `Su Chat ID (<code>${chatId}</code>) está registrado en el sistema pero se encuentra temporalmente <b>en pausa</b>.`,
+          ``,
+          `💡 <i>Solicite al operador administrador reactivar su estado en el Gestor de Destinatarios de la web.</i>`,
+        ].join("\n"),
+      });
+    } else {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: [
+          `👮‍♂️ <b>SISTEMA ABIS PDI - IDENTIFICADOR DETECTADO</b>`,
+          `━━━━━━━━━━━━━━━━━━━━`,
+          `¡Hola! Bienvenido al canal interactivo del Sistema ABIS de la Policía de Investigaciones.`,
+          ``,
+          `🆔 <b>Su Chat ID es:</b> <code>${chatId}</code>`,
+          ``,
+          `⚠️ <b>Estado:</b> Pendiente de Asignación en el Panel Web.`,
+          ``,
+          `💡 <i>Para recibir los reportes automáticos, copie su Chat ID (<code>${chatId}</code>) y solicite al administrador registrarlo en el <b>Gestor de Destinatarios de Telegram</b> en los Ajustes Web del Sistema ABIS.</i>`,
+        ].join("\n"),
+      });
+    }
+  }
+
+  // Si no está autorizado, restringir el acceso para el resto de comandos por seguridad
+  if (!auth.autorizado) {
     console.warn(`Mensaje recibido de chat no autorizado: ${chatId}`);
     return telegramClient.enviarMensaje({
       token,
       chatId,
       texto: [
         `⛔ <b>Acceso no autorizado</b>`,
-        `Este canal o grupo no está configurado para operar el Sistema ABIS PDI.`,
+        `Este canal o usuario no está autorizado para operar el Sistema ABIS PDI.`,
         ``,
-        `🆔 <b>Chat ID de este grupo:</b> <code>${chatId}</code>`,
-        `💡 <i>Para autorizarlo, actualiza <code>TELEGRAM_CHAT_ID=${chatId}</code> en tu archivo .env o en los Ajustes Web.</i>`,
+        `🆔 <b>Chat ID:</b> <code>${chatId}</code>`,
+        `💡 <i>Para autorizarlo, regístrelo en el <b>Gestor de Destinatarios de Telegram</b> en los Ajustes Web del Sistema ABIS.</i>`,
       ].join("\n"),
     });
   }
 
   switch (comando) {
-    case "/start":
     case "/ayuda":
     case "/help":
       await manejarComandoAyuda({ token, chatId });

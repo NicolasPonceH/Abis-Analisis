@@ -98,8 +98,12 @@ function normalizeHeaderName(h) {
 
 function findMatchingHeader(columnDef, actualHeaders) {
   const allAliases = [columnDef.header, ...(columnDef.aliases || [])];
-  const normalizedAliases = allAliases.map(normalizeHeaderName);
-  return actualHeaders.find((h) => normalizedAliases.includes(normalizeHeaderName(h)));
+  for (const alias of allAliases) {
+    const normAlias = normalizeHeaderName(alias);
+    const found = actualHeaders.find((h) => normalizeHeaderName(h) === normAlias);
+    if (found !== undefined) return found;
+  }
+  return undefined;
 }
 
 module.exports = { EXPECTED_COLUMNS, normalizeHeaderName, findMatchingHeader };

@@ -11,8 +11,600 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css?v=20">
+  <style>
+    /* ==========================================================================
+       GLASSMORPHISM OVERHAUL EN LÍNEA (INMUNIDAD A CACHÉ DE NAVEGADOR)
+       ========================================================================== */
+    body {
+      background: 
+        radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%),
+        radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%),
+        linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%) !important;
+      background-attachment: fixed !important;
+    }
+
+    .executive-banner, .kpi-card, .dashboard-card, .chart-card, .filters-card, .table-card, 
+    .trend-toolbar-card, .modal-content, .sheet-workflow-card, .sheet-preview-card, .upload-info-card {
+      background: rgba(255, 255, 255, 0.58) !important;
+      backdrop-filter: blur(24px) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.8) !important;
+      box-shadow: 0 8px 32px rgba(0, 35, 76, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+      border-radius: 14px !important;
+    }
+
+    .header-institutional {
+      background: rgba(0, 35, 76, 0.85) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-bottom: 3.5px solid rgba(255, 209, 0, 0.95) !important;
+      box-shadow: 0 4px 24px rgba(0, 15, 33, 0.4) !important;
+    }
+
+    .tabs-nav .tab-button {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+    .tabs-nav .tab-button:hover {
+      background: rgba(255, 255, 255, 0.15) !important;
+      color: #fff !important;
+    }
+    .tabs-nav .tab-button.active {
+      background: rgba(255, 255, 255, 0.25) !important;
+      border-color: rgba(255, 209, 0, 0.7) !important;
+      color: #fff !important;
+    }
+    .demo-block {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .demo-block:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 35, 76, 0.1) !important;
+    }
+
+    /* ==========================================================================
+       ESTILOS DEL MÓDULO DE HOJA DE CÁLCULO / PORTAPAPELES (INLINE ANTICACHÉ)
+       ========================================================================== */
+    .ingesta-mode-selector-card {
+      margin-bottom: 22px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .ingesta-mode-selector {
+      display: inline-flex !important;
+      gap: 8px !important;
+      background: rgba(255, 255, 255, 0.65) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      padding: 6px !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 255, 255, 0.85) !important;
+      box-shadow: 0 4px 20px rgba(0, 35, 76, 0.05) !important;
+      flex-wrap: wrap !important;
+    }
+
+    .ingesta-mode-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      padding: 10px 18px !important;
+      border-radius: 9px !important;
+      border: 1px solid transparent !important;
+      background: transparent !important;
+      color: #475569 !important;
+      font-weight: 600 !important;
+      font-size: 0.88rem !important;
+      cursor: pointer !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      font-family: inherit !important;
+    }
+
+    .ingesta-mode-btn:hover {
+      color: #00234c !important;
+      background: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    .ingesta-mode-btn.active {
+      background: #ffffff !important;
+      color: #00234c !important;
+      border-color: rgba(0, 35, 76, 0.12) !important;
+      box-shadow: 0 4px 14px rgba(0, 35, 76, 0.08) !important;
+      font-weight: 700 !important;
+    }
+
+    .mode-badge-pill {
+      font-size: 0.68rem !important;
+      padding: 3px 8px !important;
+      border-radius: 9999px !important;
+      background: rgba(16, 185, 129, 0.15) !important;
+      color: #047857 !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.4px !important;
+      text-transform: uppercase !important;
+    }
+
+    .sheet-workflow-card {
+      padding: 22px 26px !important;
+      margin-bottom: 20px !important;
+    }
+
+    .sheet-workflow-header {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: 16px !important;
+      margin-bottom: 18px !important;
+    }
+
+    .sheet-workflow-title {
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+    }
+
+    .sheet-icon-wrapper {
+      width: 46px !important;
+      height: 46px !important;
+      border-radius: 12px !important;
+      background: rgba(0, 35, 76, 0.07) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      border: 1px solid rgba(0, 35, 76, 0.1) !important;
+    }
+
+    .sheet-icon-wrapper svg {
+      width: 24px !important;
+      height: 24px !important;
+      stroke: #00234c !important;
+    }
+
+    .sheet-actions-group {
+      display: flex !important;
+      gap: 10px !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+    }
+
+    .sheet-status-bar {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+      gap: 12px !important;
+      padding-top: 16px !important;
+      border-top: 1px solid rgba(0, 35, 76, 0.08) !important;
+      align-items: center !important;
+    }
+
+    .sheet-stat-pill {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      background: rgba(255, 255, 255, 0.72) !important;
+      padding: 10px 14px !important;
+      border-radius: 10px !important;
+      font-size: 0.84rem !important;
+      border: 1px solid rgba(0, 35, 76, 0.07) !important;
+      box-shadow: 0 2px 6px rgba(0, 35, 76, 0.02) !important;
+    }
+
+    .sheet-stat-label {
+      color: #64748b !important;
+      font-size: 0.8rem !important;
+    }
+
+    .sheet-stat-num {
+      color: #00234c !important;
+      font-size: 1rem !important;
+      font-weight: 700 !important;
+    }
+
+    .sheet-paste-zone {
+      background: rgba(255, 255, 255, 0.55) !important;
+      backdrop-filter: blur(24px) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      border: 2px dashed rgba(0, 35, 76, 0.22) !important;
+      border-radius: 16px !important;
+      padding: 36px 24px !important;
+      text-align: center !important;
+      cursor: pointer !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      box-shadow: 0 8px 32px rgba(0, 35, 76, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .sheet-paste-zone:hover, .sheet-paste-zone:focus-within {
+      border-color: #0284c7 !important;
+      background: rgba(240, 248, 255, 0.75) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 12px 32px rgba(2, 132, 199, 0.1) !important;
+    }
+
+    .paste-zone-icon {
+      width: 58px !important;
+      height: 58px !important;
+      margin: 0 auto 14px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 16px !important;
+      background: rgba(0, 35, 76, 0.06) !important;
+      border: 1px solid rgba(0, 35, 76, 0.1) !important;
+    }
+
+    .paste-zone-icon svg {
+      width: 30px !important;
+      height: 30px !important;
+      stroke: #00234c !important;
+    }
+
+    .paste-zone-title {
+      font-size: 1.2rem !important;
+      font-weight: 700 !important;
+      color: #00234c !important;
+      margin: 0 0 8px !important;
+    }
+
+    .paste-zone-desc {
+      font-size: 0.9rem !important;
+      color: #64748b !important;
+      max-width: 580px !important;
+      margin: 0 auto 16px !important;
+      line-height: 1.5 !important;
+    }
+
+    .paste-zone-shortcuts {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 10px !important;
+      flex-wrap: wrap !important;
+      margin-bottom: 18px !important;
+    }
+
+    .shortcut-chip {
+      background: #ffffff !important;
+      padding: 7px 14px !important;
+      border-radius: 8px !important;
+      font-size: 0.82rem !important;
+      font-weight: 600 !important;
+      color: #00234c !important;
+      border: 1px solid rgba(0, 35, 76, 0.08) !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .shortcut-arrow {
+      color: #94a3b8 !important;
+      font-weight: bold !important;
+    }
+
+    .kbd-badge {
+      display: inline-block !important;
+      padding: 2px 7px !important;
+      font-size: 0.78rem !important;
+      font-family: monospace !important;
+      font-weight: 700 !important;
+      background: #f1f5f9 !important;
+      color: #00234c !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 5px !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .sheet-paste-textarea {
+      width: 100% !important;
+      max-width: 620px !important;
+      height: 64px !important;
+      margin: 8px auto 0 !important;
+      display: block !important;
+      padding: 10px 14px !important;
+      border-radius: 10px !important;
+      border: 1.5px solid rgba(0, 35, 76, 0.15) !important;
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(10px) !important;
+      font-family: inherit !important;
+      font-size: 0.84rem !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03) !important;
+      resize: none !important;
+      outline: none !important;
+      transition: all 0.2s ease !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+    }
+
+    .sheet-paste-textarea:focus {
+      border-color: #0284c7 !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    /* Vista Previa de Tabla de Hoja de Cálculo */
+    .sheet-preview-card {
+      padding: 22px !important;
+      margin-top: 18px !important;
+    }
+
+    .sheet-preview-header {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      margin-bottom: 14px !important;
+      flex-wrap: wrap !important;
+      gap: 12px !important;
+    }
+
+    .sheet-column-mapping-bar {
+      display: flex !important;
+      gap: 8px !important;
+      flex-wrap: wrap !important;
+      margin-bottom: 14px !important;
+      padding: 12px 14px !important;
+      background: rgba(248, 250, 252, 0.85) !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(0, 35, 76, 0.06) !important;
+    }
+
+    .col-map-chip {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      padding: 5px 10px !important;
+      border-radius: 6px !important;
+      font-size: 0.76rem !important;
+      font-weight: 600 !important;
+      border: 1px solid transparent !important;
+    }
+
+    .col-map-chip.matched {
+      background: rgba(16, 185, 129, 0.12) !important;
+      color: #065f46 !important;
+      border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+
+    .col-map-chip.optional {
+      background: rgba(59, 130, 246, 0.1) !important;
+      color: #1d4ed8 !important;
+      border-color: rgba(59, 130, 246, 0.25) !important;
+    }
+
+    .col-map-chip.missing {
+      background: rgba(239, 68, 68, 0.1) !important;
+      color: #b91c1c !important;
+      border-color: rgba(239, 68, 68, 0.25) !important;
+    }
+
+    .col-map-chip.extra {
+      background: rgba(100, 116, 139, 0.1) !important;
+      color: #475569 !important;
+      border-color: rgba(100, 116, 139, 0.2) !important;
+    }
+
+    .sheet-table-scroll-container {
+      max-height: 480px !important;
+      overflow: auto !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(0, 35, 76, 0.12) !important;
+      background: #ffffff !important;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .sheet-table {
+      width: 100% !important;
+      border-collapse: separate !important;
+      border-spacing: 0 !important;
+      font-size: 0.82rem !important;
+    }
+
+    .sheet-table th {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 10 !important;
+      background: #00234c !important;
+      color: #ffffff !important;
+      padding: 10px 14px !important;
+      text-align: left !important;
+      font-weight: 700 !important;
+      font-size: 0.78rem !important;
+      letter-spacing: 0.3px !important;
+      border-bottom: 2.5px solid #ffd100 !important;
+      white-space: nowrap !important;
+    }
+
+    .sheet-table th.col-index {
+      width: 44px !important;
+      text-align: center !important;
+      background: #001938 !important;
+    }
+
+    .sheet-table th.col-action {
+      width: 44px !important;
+      text-align: center !important;
+    }
+
+    .sheet-table td {
+      padding: 8px 12px !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      border-right: 1px solid #f8fafc !important;
+      white-space: nowrap !important;
+      color: #1e293b !important;
+      max-width: 240px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .sheet-table tr:hover td {
+      background: #f0f7ff !important;
+    }
+
+    .sheet-table td.cell-index {
+      text-align: center !important;
+      font-weight: 700 !important;
+      color: #64748b !important;
+      background: #f8fafc !important;
+      user-select: none !important;
+    }
+
+    .sheet-table td.cell-editable {
+      outline: none !important;
+      cursor: cell !important;
+    }
+
+    .sheet-table td.cell-editable:hover {
+      background: #eff6ff !important;
+    }
+
+    .sheet-table td.cell-editable:focus {
+      background: #ffffff !important;
+      box-shadow: inset 0 0 0 2px #0284c7 !important;
+      z-index: 2 !important;
+    }
+
+    .btn-cell-delete {
+      background: transparent !important;
+      border: none !important;
+      color: #94a3b8 !important;
+      cursor: pointer !important;
+      padding: 4px 6px !important;
+      border-radius: 4px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: all 0.15s !important;
+    }
+
+    .btn-cell-delete:hover {
+      color: #dc2626 !important;
+      background: #fee2e2 !important;
+    }
+
+    .sheet-preview-footer {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding-top: 16px !important;
+      margin-top: 14px !important;
+      border-top: 1px solid rgba(0, 35, 76, 0.08) !important;
+      flex-wrap: wrap !important;
+      gap: 14px !important;
+    }
+
+    .sheet-footer-info {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      color: #64748b !important;
+      font-size: 0.82rem !important;
+      max-width: 600px !important;
+    }
+
+    /* Botones y Badges Globales en Línea (Anticaché) */
+    .btn {
+      padding: 9px 16px !important;
+      border-radius: 8px !important;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 7px !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      border: 1px solid transparent !important;
+      white-space: nowrap !important;
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      text-decoration: none !important;
+    }
+
+    .btn-primary {
+      background: #00234c !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 209, 0, 0.45) !important;
+      box-shadow: 0 4px 14px rgba(0, 35, 76, 0.25) !important;
+    }
+    .btn-primary:hover {
+      background: #00387a !important;
+      border-color: #ffd100 !important;
+      transform: translateY(-1.5px) !important;
+      box-shadow: 0 6px 20px rgba(0, 35, 76, 0.35) !important;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.85) !important;
+      border: 1.5px solid rgba(0, 35, 76, 0.18) !important;
+      color: #00234c !important;
+      box-shadow: 0 2px 8px rgba(0, 35, 76, 0.04) !important;
+    }
+    .btn-secondary:hover {
+      background: #ffffff !important;
+      border-color: #00234c !important;
+      transform: translateY(-1.5px) !important;
+      box-shadow: 0 4px 14px rgba(0, 35, 76, 0.12) !important;
+    }
+
+    .svg-icon {
+      width: 18px !important;
+      height: 18px !important;
+      stroke-width: 2 !important;
+      stroke: currentColor !important;
+      fill: none !important;
+      vertical-align: middle !important;
+      display: inline-block !important;
+      flex-shrink: 0 !important;
+    }
+    .svg-icon-xs {
+      width: 14px !important;
+      height: 14px !important;
+    }
+    .svg-icon-sm {
+      width: 16px !important;
+      height: 16px !important;
+    }
+    .svg-icon-md {
+      width: 22px !important;
+      height: 22px !important;
+    }
+    .svg-icon-xl {
+      width: 36px !important;
+      height: 36px !important;
+    }
+
+    .badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      padding: 3px 8px !important;
+      border-radius: 6px !important;
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+    }
+    .badge-default {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    .badge-info {
+      background: rgba(2, 132, 199, 0.12) !important;
+      color: #0284c7 !important;
+      border: 1px solid rgba(2, 132, 199, 0.25) !important;
+    }
+    .badge-success {
+      background: rgba(16, 185, 129, 0.12) !important;
+      color: #059669 !important;
+      border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    }
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.12) !important;
+      color: #d97706 !important;
+      border: 1px solid rgba(245, 158, 11, 0.25) !important;
+    }
+  </style>
   
   <!-- Chart.js CDN Oficial -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -58,12 +650,15 @@
           </svg>
           <span>Evolución & Tendencias</span>
         </button>
-        <button class="tab-button" data-tab="seguridad">
+        <button class="tab-button" data-tab="auditoria">
           <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-            <path d="m9 12 2 2 4-4"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          <span>Criptografía & Auditoría</span>
+          <span>Bitácora & Auditoría</span>
         </button>
         <button class="tab-button" data-tab="ajustes">
           <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -137,25 +732,24 @@
             <input type="date" id="filter-date-to" class="form-control">
           </div>
 
-          <!-- Acciones -->
-          <div class="actions-group">
-            <button id="btn-apply-filter" class="btn btn-primary" style="flex:1;">
+          <!-- Grupo de Acciones (Botones unificados) -->
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto;">
+            <button id="btn-apply-filter" class="btn btn-primary" style="height: 38px;">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               <span>Actualizar Analítica</span>
             </button>
-            <button id="btn-export-word" class="btn btn-word" title="Descargar Informe Oficial en Microsoft Word (.docx)">
+            <button id="btn-export-word" class="btn btn-word" style="height: 38px;" title="Descargar Informe Oficial en Microsoft Word (.docx)">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
               <span>Word (.docx)</span>
             </button>
-            <button id="btn-export-excel" class="btn btn-excel" title="Descargar Informe Oficial Formateado en Microsoft Excel (.xlsx)">
+            <button id="btn-export-excel" class="btn btn-excel" style="height: 38px;" title="Descargar Informe Oficial Formateado en Microsoft Excel (.xlsx)">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 13 8 4"/><path d="m16 13-8 4"/></svg>
               <span>Excel (.xlsx)</span>
             </button>
-            <button id="btn-export-telegram" class="btn btn-telegram" title="Enviar reporte del período actual por Telegram al canal institucional">
+            <button id="btn-export-telegram" class="btn btn-telegram" style="height: 38px;" title="Enviar reporte del período actual por Telegram al canal institucional">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
               <span>Telegram</span>
             </button>
-
           </div>
         </div>
 
@@ -175,7 +769,16 @@
         <!-- KPI 1: Total Enrolamientos -->
         <div class="kpi-card blue">
           <div class="kpi-top">
-            <span class="kpi-title">Total de Enrolamientos</span>
+            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+              Total de Enrolamientos
+            </span>
             <span class="kpi-pill">Volumen Bruto</span>
           </div>
           <div class="kpi-value" id="kpi-total-enrolados">0</div>
@@ -188,7 +791,12 @@
         <!-- KPI 2: Sincronización PDI -->
         <div class="kpi-card success">
           <div class="kpi-top">
-            <span class="kpi-title">Sincronizados con PDI</span>
+            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-12.28l5.07 5.07"/>
+              </svg>
+              Sincronizados con PDI
+            </span>
             <span class="kpi-pill" id="kpi-sinc-tag">Conforme</span>
           </div>
           <div class="kpi-value" id="kpi-sincronizados">0</div>
@@ -201,7 +809,19 @@
         <!-- KPI 3: Registrados Biométricos -->
         <div class="kpi-card info">
           <div class="kpi-top">
-            <span class="kpi-title">Registro Biométrico ABIS</span>
+            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+                <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+                <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
+                <path d="M2 12a10 10 0 0 1 18-6"/>
+                <path d="M2 16h.01"/>
+                <path d="M21.8 16c.2-2 .13-4-.01-5.3"/>
+                <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .14-1.26"/>
+                <path d="M8.65 22c.21-.66.45-1.32.57-2"/>
+              </svg>
+              Registro Biométrico ABIS
+            </span>
             <span class="kpi-pill">Captura OK</span>
           </div>
           <div class="kpi-value" id="kpi-registrados">0</div>
@@ -214,7 +834,14 @@
         <!-- KPI 4: Con Error / Incidentes -->
         <div class="kpi-card danger">
           <div class="kpi-top">
-            <span class="kpi-title">Inconsistencias / Errores</span>
+            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Inconsistencias
+            </span>
             <span class="kpi-pill" id="kpi-err-tag">Sin Alerta</span>
           </div>
           <div class="kpi-value" id="kpi-errores">0</div>
@@ -270,31 +897,130 @@
           </div>
         </div>
 
-        <!-- Gráfico 4: Demografía Cruzada (Pirámide Género x Grupo Etario) -->
-        <div class="chart-card col-5">
+        <!-- Gráfico 4: Demografía Cruzada y Rango Etario (FUSIONADO) -->
+        <div class="chart-card col-8">
           <div class="chart-header">
             <div class="chart-title">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>Composición Demográfica Cruzada</span>
+              <span>Análisis Demográfico y Rango Etario</span>
             </div>
-            <span class="chart-badge" id="badge-chart-demografia-cruzada">Adultos vs N.N.A. por Sexo</span>
+            <span class="chart-badge" id="badge-chart-demografia-cruzada" style="background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; font-weight:600;">0 Hombres · 0 Mujeres</span>
           </div>
-          <div class="chart-body">
-            <canvas id="chart-demografia-cruzada"></canvas>
-          </div>
-        </div>
+          <div class="chart-body" style="padding-top:16px;">
+            <div class="demografia-widget" style="width: 100%;">
+              <!-- 4 Tarjetas de Resumen: Hombres, Mujeres, Adultos, NNA -->
+              <div class="demo-blocks" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px;">
+                <!-- Hombres -->
+                <div class="demo-block demo-block-m" style="background:rgba(37,99,235,0.06); border:1px solid rgba(37,99,235,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(37,99,235,0.06); backdrop-filter:blur(10px);">
+                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(37,99,235,0.35); flex-shrink:0;">
+                    <i class="fa-solid fa-mars" style="font-size:20px;"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:0.72rem; color:#1e40af; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Hombres (M)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-m-total" style="color:#2563eb;">0</span> <span id="demo-m-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                  </div>
+                </div>
+                <!-- Mujeres -->
+                <div class="demo-block demo-block-f" style="background:rgba(225,29,72,0.06); border:1px solid rgba(225,29,72,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(225,29,72,0.06); backdrop-filter:blur(10px);">
+                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #e11d48 0%, #be123c 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(225,29,72,0.35); flex-shrink:0;">
+                    <i class="fa-solid fa-venus" style="font-size:20px;"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:0.72rem; color:#9f1239; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Mujeres (F)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-f-total" style="color:#e11d48;">0</span> <span id="demo-f-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                  </div>
+                </div>
+                <!-- Adultos -->
+                <div class="demo-block demo-block-adult" style="background:rgba(15,23,42,0.05); border:1px solid rgba(15,23,42,0.18); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(15,23,42,0.05); backdrop-filter:blur(10px);">
+                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(15,23,42,0.35); flex-shrink:0;">
+                    <i class="fa-solid fa-user-check" style="font-size:18px;"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:0.72rem; color:#334155; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Adultos (≥18)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-adult-total" style="color:#1e293b;">0</span> <span id="demo-adult-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                  </div>
+                </div>
+                <!-- NNA (Menores) -->
+                <div class="demo-block demo-block-x" style="background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(124,58,237,0.06); backdrop-filter:blur(10px);">
+                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(124,58,237,0.35); flex-shrink:0;">
+                    <i class="fa-solid fa-child-reaching" style="font-size:20px;"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:0.72rem; color:#6d28d9; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">NNA (&lt;18)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-x-total" style="color:#7c3aed;">0</span> <span id="demo-x-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                  </div>
+                </div>
+              </div>
 
-        <!-- Gráfico 5: Resumen de Protección de Menores N.N.A. -->
-        <div class="chart-card col-3">
-          <div class="chart-header">
-            <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>Rango Etario</span>
+              <!-- Barras de Proporción Visual (Género y Rango Etario) -->
+              <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; background: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <!-- Proporción Género -->
+                <div style="flex: 1 1 240px;">
+                  <div style="display:flex; justify-content:space-between; font-size:0.74rem; font-weight:700; color:#475569; margin-bottom:6px;">
+                    <span><i class="fa-solid fa-venus-mars" style="color:#64748b; margin-right:4px;"></i> DISTRIBUCIÓN POR GÉNERO</span>
+                    <span id="demo-bar-gender-text" style="color:#1e293b;">0% M · 0% F</span>
+                  </div>
+                  <div style="height:9px; border-radius:6px; background:#e2e8f0; display:flex; overflow:hidden;">
+                    <div id="demo-bar-m" style="width:50%; background:linear-gradient(90deg, #2563eb, #3b82f6); transition:width 0.4s ease;"></div>
+                    <div id="demo-bar-f" style="width:50%; background:linear-gradient(90deg, #e11d48, #f43f5e); transition:width 0.4s ease;"></div>
+                  </div>
+                </div>
+                <!-- Proporción Etaria -->
+                <div style="flex: 1 1 240px;">
+                  <div style="display:flex; justify-content:space-between; font-size:0.74rem; font-weight:700; color:#475569; margin-bottom:6px;">
+                    <span><i class="fa-solid fa-users-between-lines" style="color:#64748b; margin-right:4px;"></i> PROPORCIÓN ETARIA (ADULTOS VS NNA)</span>
+                    <span id="demo-bar-age-text" style="color:#1e293b;">0% Adultos · 0% NNA</span>
+                  </div>
+                  <div style="height:9px; border-radius:6px; background:#e2e8f0; display:flex; overflow:hidden;">
+                    <div id="demo-bar-adult" style="width:50%; background:linear-gradient(90deg, #1e293b, #334155); transition:width 0.4s ease;"></div>
+                    <div id="demo-bar-nna" style="width:50%; background:linear-gradient(90deg, #8b5cf6, #a855f7); transition:width 0.4s ease;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabla Cruzada Demográfica -->
+              <div style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                <table class="demo-table" style="width:100%; border-collapse:collapse; font-size:0.86rem; text-align:center;">
+                  <thead>
+                    <tr style="background:#f8fafc; color:#475569; font-weight:700;">
+                      <th style="padding:10px 16px; text-align:left; border-bottom:1px solid #e2e8f0;">GÉNERO</th>
+                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;"><i class="fa-solid fa-user-check" style="font-size:12px; margin-right:4px; color:#1e293b;"></i> ADULTOS (≥ 18)</th>
+                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;"><i class="fa-solid fa-child-reaching" style="font-size:12px; margin-right:4px; color:#7c3aed;"></i> NNA (&lt; 18)</th>
+                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;">SUBTOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding:12px 16px; text-align:left; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(37,99,235,0.12); color:#2563eb; border-radius:6px; font-size:13px;"><i class="fa-solid fa-mars"></i></span>
+                        Hombres
+                      </td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-m-adult">0</td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-m-nna">0</td>
+                      <td style="padding:12px 16px; font-weight:800; color:#2563eb; border-bottom:1px solid #f1f5f9;" id="demo-m-subtot">0</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:12px 16px; text-align:left; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(225,29,72,0.12); color:#e11d48; border-radius:6px; font-size:13px;"><i class="fa-solid fa-venus"></i></span>
+                        Mujeres
+                      </td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-f-adult">0</td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-f-nna">0</td>
+                      <td style="padding:12px 16px; font-weight:800; color:#e11d48; border-bottom:1px solid #f1f5f9;" id="demo-f-subtot">0</td>
+                    </tr>
+                    <tr style="background:#f8fafc;">
+                      <td style="padding:12px 16px; text-align:left; font-weight:800; color:#0f172a; display: flex; align-items: center; gap: 10px;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(15,23,42,0.08); color:#0f172a; border-radius:6px; font-size:13px;"><i class="fa-solid fa-users"></i></span>
+                        Total Enrolados
+                      </td>
+                      <td style="padding:12px 16px; font-weight:800; color:#1e293b;" id="demo-tot-adult">0</td>
+                      <td style="padding:12px 16px; font-weight:800; color:#7c3aed;" id="demo-tot-nna">0</td>
+                      <td style="padding:12px 16px; font-weight:900; color:#0f172a;" id="demo-tot-global">0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <span class="chart-badge" id="badge-chart-edad">Mayores vs Menores</span>
-          </div>
-          <div class="chart-body">
-            <canvas id="chart-edad"></canvas>
           </div>
         </div>
 
@@ -377,72 +1103,262 @@
     </section>
 
     <!-- ========================================== -->
-    <!-- TAB 2: INGESTA DE DATOS (UPLOAD ETL) -->
+    <!-- TAB 2: INGESTA DE DATOS (HOJA DE CÁLCULO / UPLOAD) -->
     <!-- ========================================== -->
     <section id="tab-ingesta" class="tab-content" style="display: none;">
       
-      <div class="upload-wrapper">
-        
-        <!-- Zona Dropzone -->
-        <div class="dropzone" id="upload-dropzone">
-          <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
-          <div class="dropzone-icon">
-            <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
-          </div>
-          <div class="dropzone-title">Carga Directa de Archivo Excel ABIS (Oracle)</div>
-          <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic para examinar</div>
-          <button type="button" id="btn-select-file" class="btn btn-primary">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
-            <span>Seleccionar Archivo desde el Equipo</span>
+      <!-- Selector de Modalidad de Ingesta -->
+      <div class="ingesta-mode-selector-card">
+        <div class="ingesta-mode-selector">
+          <button type="button" class="ingesta-mode-btn active" id="btn-mode-sheet" data-ingest-mode="sheet">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="3" y1="15" x2="21" y2="15"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+              <line x1="15" y1="3" x2="15" y2="21"/>
+            </svg>
+            <span>Hoja de Cálculo / Portapapeles (Oracle DB / Excel)</span>
+            <span class="mode-badge-pill">Directo DB</span>
           </button>
-          <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
-            Formatos admitidos: <strong>.xlsx</strong> nativo o archivo protegido <strong>.enc</strong> (AES-256-GCM)
+
+          <button type="button" class="ingesta-mode-btn" id="btn-mode-file" data-ingest-mode="file">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Carga de Archivo (.xlsx / .enc)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VISTA 1: HOJA DE CÁLCULO / COPIAR Y PEGAR -->
+      <!-- ========================================== -->
+      <div id="ingesta-view-sheet" class="ingesta-view-pane" style="display: block;">
+        
+        <!-- Tarjeta de Instrucciones y Controles de Hoja de Cálculo -->
+        <div class="sheet-workflow-card">
+          <div class="sheet-workflow-header">
+            <div class="sheet-workflow-title">
+              <div class="sheet-icon-wrapper">
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <line x1="3" y1="15" x2="21" y2="15"/>
+                  <line x1="9" y1="3" x2="9" y2="21"/>
+                  <line x1="15" y1="3" x2="15" y2="21"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.08rem; color: var(--pdi-navy); font-weight: 700;">Ingesta Rápida desde Portapapeles (Oracle DB / Hoja de Cálculo)</h3>
+                <p style="margin: 3px 0 0; font-size: 0.83rem; color: var(--text-muted); line-height: 1.4;">
+                  Copia las celdas desde tu consulta SQL (Oracle SQL Developer, Toad, DBeaver) o desde Microsoft Excel y pégalas directamente con <kbd class="kbd-badge">Ctrl + V</kbd>. No requiere guardar un archivo intermedio.
+                </p>
+              </div>
+            </div>
+
+            <div class="sheet-actions-group">
+              <button type="button" id="btn-paste-clipboard" class="btn btn-primary" title="Pegar contenido del portapapeles del sistema">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                </svg>
+                <span>Pegar Portapapeles</span>
+              </button>
+              <button type="button" id="btn-load-sample-sheet" class="btn btn-secondary" title="Cargar datos de ejemplo de Oracle para probar el flujo">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                <span>Cargar Ejemplo Oracle</span>
+              </button>
+              <button type="button" id="btn-clear-sheet" class="btn btn-secondary" title="Limpiar datos de la tabla" style="display: none;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>Limpiar Hoja</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Métricas de estado de la hoja de cálculo -->
+          <div class="sheet-status-bar" id="sheet-status-bar">
+            <div class="sheet-stat-pill">
+              <span class="sheet-stat-label">Filas Detectadas:</span>
+              <strong id="sheet-stat-rows" class="sheet-stat-num">0</strong>
+            </div>
+            <div class="sheet-stat-pill">
+              <span class="sheet-stat-label">Columnas Mapeadas:</span>
+              <strong id="sheet-stat-cols" class="sheet-stat-num">0 / 12</strong>
+            </div>
+            <div class="sheet-stat-pill">
+              <span class="sheet-stat-label">Estado de Validación:</span>
+              <span id="sheet-stat-status" class="badge badge-default">Esperando datos</span>
+            </div>
+            <div class="sheet-stat-pill sheet-stat-pill-right">
+              <span class="sheet-stat-label">Destino:</span>
+              <span class="badge badge-info">PostgreSQL 3NF (Transaccional)</span>
+            </div>
           </div>
         </div>
 
-        <!-- Tarjeta de Instrucciones de Seguridad -->
-        <div class="upload-info-card">
-          <h3 style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-            <span>Protocolo de Seguridad e Integridad ETL</span>
-          </h3>
+        <!-- Área de Pegado y Captura interactiva (visible cuando no hay filas) -->
+        <div id="sheet-paste-dropzone" class="sheet-paste-zone">
+          <div class="paste-zone-icon">
+            <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="3" y1="15" x2="21" y2="15"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+              <line x1="15" y1="3" x2="15" y2="21"/>
+            </svg>
+          </div>
+          <h4 class="paste-zone-title">Área de Captura de Hoja de Cálculo</h4>
+          <p class="paste-zone-desc">
+            Haz clic aquí y presiona <kbd class="kbd-badge">Ctrl + V</kbd> para volcar las celdas copiadas directamente de la base de datos Oracle o Excel.
+          </p>
+          <div class="paste-zone-shortcuts">
+            <span class="shortcut-chip">📋 Copiar en Oracle (Ctrl + C)</span>
+            <span class="shortcut-arrow">➔</span>
+            <span class="shortcut-chip">⚡ Pegar Aquí (Ctrl + V)</span>
+            <span class="shortcut-arrow">➔</span>
+            <span class="shortcut-chip">🔒 Validar e Ingestar en BD</span>
+          </div>
+          <textarea id="sheet-hidden-paste-area" class="sheet-paste-textarea" placeholder="O si lo prefieres, pega el texto tabulado aquí manualmente..."></textarea>
+        </div>
 
-          <div class="info-item">
-            <div class="info-item-icon">
-              <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <!-- Vista Previa de Hoja de Cálculo (visible tras pegar datos) -->
+        <div id="sheet-preview-card" class="sheet-preview-card" style="display: none;">
+          <div class="sheet-preview-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                <path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/>
+              </svg>
+              <strong style="font-size: 0.95rem; color: var(--text-primary);">Hoja de Cálculo Interactiva (Previsualización)</strong>
+              <span id="sheet-preview-count-badge" class="badge badge-info">0 filas</span>
             </div>
-            <div class="info-item-content">
-              <h4>Descifrado Exclusivo en Memoria RAM</h4>
-              <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil del servidor sin escribir datos planos temporales en el disco.</p>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" id="btn-sheet-add-row" class="btn btn-secondary" style="font-size:0.82rem; height:34px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>+ Fila</span>
+              </button>
+              <button type="button" id="btn-sheet-submit" class="btn btn-primary" style="height:36px; font-weight:700;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="m9 12 2 2 4-4"/>
+                </svg>
+                <span>Validar e Ingestar en BD</span>
+              </button>
             </div>
           </div>
 
-          <div class="info-item">
-            <div class="info-item-icon">
-              <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
-            </div>
-            <div class="info-item-content">
-              <h4>Normalización y Tolerancia a Errores Tipográficos</h4>
-              <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y nacionalidades) hacia el modelo relacional 3NF.</p>
-            </div>
+          <!-- Mapeo de Columnas Detectadas -->
+          <div id="sheet-column-mapping-chips" class="sheet-column-mapping-bar"></div>
+
+          <!-- Tabla de Datos con cabecera sticky y celdas editables -->
+          <div class="sheet-table-scroll-container">
+            <table class="data-table sheet-table" id="sheet-preview-table">
+              <thead id="sheet-table-head"></thead>
+              <tbody id="sheet-table-body"></tbody>
+            </table>
           </div>
 
-          <div class="info-item">
-            <div class="info-item-icon">
-              <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <!-- Pie de Hoja de Cálculo con confirmación -->
+          <div class="sheet-preview-footer">
+            <div class="sheet-footer-info">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--pdi-navy); flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span>Puedes editar o corregir cualquier celda directamente haciendo doble clic antes de poblar la base de datos PostgreSQL.</span>
             </div>
-            <div class="info-item-content">
-              <h4>Inserción Atómica y Trazabilidad Criptográfica</h4>
-              <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de la información procesada.</p>
-            </div>
+            <button type="button" id="btn-sheet-submit-bottom" class="btn btn-primary" style="font-weight:700;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              <span>Autorizar e Ingestar Registros en BD</span>
+            </button>
           </div>
         </div>
+
+        <!-- Feedback de Ingesta desde Hoja de Cálculo -->
+        <div id="sheet-ingest-feedback" class="upload-results" style="display:none; margin-top:20px;"></div>
 
       </div>
 
-      <!-- Resultados de la subida -->
-      <div class="upload-results" id="upload-results">
-        <div id="upload-status"></div>
+      <!-- ========================================== -->
+      <!-- VISTA 2: CARGA TRADICIONAL DE ARCHIVO (.XLSX / .ENC) -->
+      <!-- ========================================== -->
+      <div id="ingesta-view-file" class="ingesta-view-pane" style="display: none;">
+        
+        <div class="upload-wrapper">
+          
+          <!-- Zona Dropzone -->
+          <div class="dropzone" id="upload-dropzone">
+            <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
+            <div class="dropzone-icon">
+              <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+            </div>
+            <div class="dropzone-title">Carga Directa de Archivo Excel ABIS (Oracle)</div>
+            <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic para examinar</div>
+            <button type="button" id="btn-select-file" class="btn btn-primary">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+              <span>Seleccionar Archivo desde el Equipo</span>
+            </button>
+            <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
+              Formatos admitidos: <strong>.xlsx</strong> nativo o archivo protegido <strong>.enc</strong> (AES-256-GCM)
+            </div>
+          </div>
+
+          <!-- Tarjeta de Instrucciones de Seguridad -->
+          <div class="upload-info-card">
+            <h3 style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Protocolo de Seguridad e Integridad ETL</span>
+            </h3>
+
+            <div class="info-item">
+              <div class="info-item-icon">
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div class="info-item-content">
+                <h4>Descifrado Exclusivo en Memoria RAM</h4>
+                <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil del servidor sin escribir datos planos temporales en el disco.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item-icon">
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+              </div>
+              <div class="info-item-content">
+                <h4>Normalización y Tolerancia a Errores Tipográficos</h4>
+                <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y nacionalidades) hacia el modelo relacional 3NF.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item-icon">
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="info-item-content">
+                <h4>Inserción Atómica y Trazabilidad Criptográfica</h4>
+                <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de la información procesada.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Resultados de la subida -->
+        <div class="upload-results" id="upload-results">
+          <div id="upload-status"></div>
+        </div>
+
       </div>
 
     </section>
@@ -452,6 +1368,54 @@
     <!-- ========================================== -->
     <section id="tab-tendencias" class="tab-content" style="display: none;">
       
+      <!-- Comparador de Períodos (Benchmarking) -->
+      <div class="trend-toolbar-card" style="margin-bottom: 20px;">
+        <div class="trend-toolbar-left">
+          <div class="trend-toolbar-group">
+            <span class="trend-toolbar-label">Comparativa Operativa (Benchmarking):</span>
+            <div class="filter-presets">
+              <button class="preset-btn active" id="btn-comp-semana">📊 Semana vs Anterior</button>
+              <button class="preset-btn" id="btn-comp-mes">📊 Mes vs Anterior</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-kpi-grid" style="margin-bottom: 24px;" id="benchmarking-cards">
+        <div class="trend-kpi-card default comparison-card">
+          <span class="trend-kpi-label">Volumen Operativo</span>
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span class="trend-kpi-val" id="comp-kpi-total">0</span>
+            <span class="delta-badge" id="comp-delta-total">0%</span>
+          </div>
+          <span class="trend-kpi-sub" id="comp-sub-total">Cargando...</span>
+        </div>
+        <div class="trend-kpi-card success comparison-card" style="display: none;">
+          <span class="trend-kpi-label">Sincronización Exitosa</span>
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span class="trend-kpi-val" id="comp-kpi-sinc">0</span>
+            <span class="delta-badge" id="comp-delta-sinc">0%</span>
+          </div>
+          <span class="trend-kpi-sub" id="comp-sub-sinc">Cargando...</span>
+        </div>
+        <div class="trend-kpi-card info comparison-card">
+          <span class="trend-kpi-label">SLA Medio</span>
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span class="trend-kpi-val" id="comp-kpi-sla">0%</span>
+            <span class="delta-badge" id="comp-delta-sla">0%</span>
+          </div>
+          <span class="trend-kpi-sub" id="comp-sub-sla">Cargando...</span>
+        </div>
+        <div class="trend-kpi-card peak comparison-card">
+          <span class="trend-kpi-label">Inconsistencias (Errores)</span>
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span class="trend-kpi-val" id="comp-kpi-err">0</span>
+            <span class="delta-badge" id="comp-delta-err">0%</span>
+          </div>
+          <span class="trend-kpi-sub" id="comp-sub-err">Cargando...</span>
+        </div>
+      </div>
+
       <!-- KPIs Resumen de Tendencias -->
       <div class="trend-kpi-grid">
         <div class="trend-kpi-card blue">
@@ -459,7 +1423,7 @@
           <span class="trend-kpi-val" id="trend-kpi-total">0</span>
           <span class="trend-kpi-sub">Total serie histórica analizada</span>
         </div>
-        <div class="trend-kpi-card info">
+        <div class="trend-kpi-card info" style="display: none;">
           <span class="trend-kpi-label">Jornadas Operativas</span>
           <span class="trend-kpi-val" id="trend-kpi-days">0</span>
           <span class="trend-kpi-sub">Días con registros activos</span>
@@ -474,7 +1438,7 @@
           <span class="trend-kpi-val" id="trend-kpi-peak">0</span>
           <span class="trend-kpi-sub" id="trend-kpi-peak-date">Cargando afluencia líder...</span>
         </div>
-        <div class="trend-kpi-card success">
+        <div class="trend-kpi-card success" style="display: none;">
           <span class="trend-kpi-label">SLA Global Histórico</span>
           <span class="trend-kpi-val" id="trend-kpi-sla">100%</span>
           <span class="trend-kpi-sub">Tasa media de sincronización PDI</span>
@@ -607,76 +1571,56 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 4: CRIPTOGRAFÍA & AUDITORÍA -->
+    <!-- TAB 4: BITÁCORA Y AUDITORÍA -->
     <!-- ========================================== -->
-    <section id="tab-seguridad" class="tab-content" style="display: none;">
-      
-      <div class="filters-card">
-        <h3 style="font-size: 1.15rem; color: var(--pdi-navy); margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
-          <span>Estándar de Seguridad Criptográfica Institucional</span>
-        </h3>
-        <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 20px;">
-          El sistema implementa el algoritmo <strong>AES-256-GCM</strong> (Galois/Counter Mode), esquema AEAD recomendado por el NIST que garantiza confidencialidad absoluta, autenticación e integridad para la base de datos de identificación biométrica.
-        </p>
-
-        <!-- Módulo de Utilidades Criptográficas Web Interactivas -->
-        <div class="crypto-web-tools-grid">
-          
-          <!-- Herramienta 1: Cifrador Web (.xlsx -> .enc) -->
-          <div class="crypto-tool-card">
-            <div class="crypto-tool-header">
-              <span class="crypto-tool-badge badge-encrypt">Cifrador Web AES-256-GCM</span>
-              <h4>
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #107c41;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span>Blindar Archivo Excel (.xlsx &rarr; .enc)</span>
-              </h4>
-              <p>Selecciona una planilla para cifrarla con grado militar AES-256-GCM. El archivo blindado se descargará directamente en tu equipo.</p>
-            </div>
-            <div class="crypto-tool-body">
-              <input type="file" id="crypto-encrypt-file-input" accept=".xlsx" style="display: none;" />
-              <div class="crypto-file-dropzone" id="dropzone-encrypt">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
-                <div class="crypto-file-name" id="encrypt-selected-filename">Haz clic o arrastra un archivo .xlsx aquí</div>
-              </div>
-              <button type="button" id="btn-run-encrypt" class="btn btn-excel" style="width: 100%; margin-top: 12px;" disabled>
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span>Cifrar y Descargar Archivo .enc</span>
-              </button>
-              <div id="encrypt-feedback" class="crypto-feedback-box" style="display: none;"></div>
-            </div>
+    <section id="tab-auditoria" class="tab-content" style="display: none;">
+      <div class="filters-card" style="margin-bottom: 24px;">
+        <div class="filters-header">
+          <div class="filters-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>Bitácora de Eventos y Trazabilidad (Inmutable)</span>
           </div>
-
-          <!-- Herramienta 2: Descifrador Web (.enc -> .xlsx) -->
-          <div class="crypto-tool-card">
-            <div class="crypto-tool-header">
-              <span class="crypto-tool-badge badge-decrypt">Descifrador & Auditoría</span>
-              <h4>
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #185abd;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-                <span>Descifrar y Validar Integridad (.enc &rarr; .xlsx)</span>
-              </h4>
-              <p>Verifica que el archivo no haya sido manipulado, autentica la etiqueta Auth Tag y recupera el archivo Excel original.</p>
-            </div>
-            <div class="crypto-tool-body">
-              <input type="file" id="crypto-decrypt-file-input" accept=".enc" style="display: none;" />
-              <div class="crypto-file-dropzone" id="dropzone-decrypt">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #185abd;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect width="8" height="5" x="8" y="11" rx="1"/><path d="M10 11V9a2 2 0 1 1 4 0v2"/></svg>
-                <div class="crypto-file-name" id="decrypt-selected-filename">Haz clic o arrastra un archivo .enc aquí</div>
-              </div>
-              <button type="button" id="btn-run-decrypt" class="btn btn-word" style="width: 100%; margin-top: 12px;" disabled>
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                <span>Descifrar y Descargar Excel Original</span>
-              </button>
-              <div id="decrypt-feedback" class="crypto-feedback-box" style="display: none;"></div>
-            </div>
+          <div style="display: flex; gap: 10px;">
+            <select id="audit-filter-tipo" class="form-control" style="width: auto;">
+              <option value="">-- Todos los Eventos --</option>
+              <option value="INGESTA_EXCEL_AUTORIZADA">Carga de Datos (Ingesta)</option>
+              <option value="ENVIO_CAPTURA_TELEGRAM">Despacho Telegram (Automático)</option>
+              <option value="TEST_CAPTURA_TELEGRAM">Prueba de Envío (Manual)</option>
+              <option value="SEGURIDAD_CIFRADO">Cifrado de Archivos</option>
+              <option value="SEGURIDAD_DESCIFRADO">Descifrado de Archivos</option>
+            </select>
+            <input type="date" id="audit-filter-desde" class="form-control" style="width: 140px;">
+            <input type="date" id="audit-filter-hasta" class="form-control" style="width: 140px;">
+            <button class="btn btn-primary btn-sm" id="btn-audit-search">Filtrar</button>
           </div>
-
         </div>
-
-
-
       </div>
 
+      <div class="table-card">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 160px;">Fecha y Hora</th>
+                <th style="width: 220px;">Tipo de Evento</th>
+                <th>Archivo o Recurso</th>
+                <th>Operador / Proceso</th>
+                <th>Detalle y Observaciones</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body">
+              <tr><td colspan="5" style="text-align:center; padding: 24px;">Cargando bitácora inmutable...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination-footer" style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color);">
+          <span id="audit-page-info" style="font-size: 0.9rem; color: var(--text-muted);">Página 1</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-audit-prev" disabled>Anterior</button>
+            <button class="btn btn-secondary btn-sm" id="btn-audit-next">Siguiente</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ========================================== -->
@@ -900,6 +1844,87 @@
 
       </div>
 
+      <!-- Tarjeta: Gestión de Destinatarios y Oficiales de Telegram (Almacenamiento Seguro PostgreSQL) -->
+      <div class="table-card" style="margin-top: 24px;" id="card-destinatarios-telegram">
+        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Gestor de Destinatarios de Telegram (Oficiales y Jefaturas)</span>
+            <span class="badge badge-primary" id="destinatarios-count-badge" style="margin-left: 8px;">0 destinatarios</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Botón Copiar Enlace Directo al Bot -->
+            <button type="button" id="btn-copiar-link-bot" class="btn btn-secondary btn-sm" title="Copiar enlace directo para enrolar nuevos oficiales">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span id="text-copiar-link-bot">Copiar Enlace al Bot</span>
+            </button>
+            <button type="button" id="btn-refresh-destinatarios" class="btn btn-secondary btn-sm" title="Actualizar lista de destinatarios">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+              <span>Actualizar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner Informativo con Instrucciones y Enlace Directo -->
+        <div style="padding: 14px 20px; background: #f0f9ff; border-bottom: 1px solid #bae6fd; font-size: 0.84rem; color: #0369a1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>
+              <strong>Regla de Conexión Telegram:</strong> Todo oficial debe pulsar <strong>/start</strong> en el bot una sola vez antes de poder recibir mensajes. Las IDs quedan alojadas en PostgreSQL y <strong>nunca</strong> se suben al repositorio Git.
+            </span>
+          </div>
+          <a id="link-directo-bot" href="#" target="_blank" rel="noopener" class="badge badge-info" style="font-size: 0.8rem; text-decoration: none; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+            <span id="label-link-bot">Abrir Bot en Telegram</span> &rarr;
+          </a>
+        </div>
+
+        <!-- Formulario para Registrar / Asignar Nuevo Destinatario -->
+        <div style="padding: 16px 20px; background: #fafbfc; border-bottom: 1px solid var(--border-color);">
+          <form id="form-nuevo-destinatario" style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto; gap: 12px; align-items: end;">
+            <div class="form-group" style="margin: 0;">
+              <label for="dest-nombre" class="filter-label" style="margin-bottom: 4px;">Nombre / Oficial / Unidad:</label>
+              <input type="text" id="dest-nombre" class="form-control" placeholder="Ej: Comisario Morales / Chacalluta" required>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="dest-chat-id" class="filter-label" style="margin-bottom: 4px;">Chat ID de Telegram:</label>
+              <input type="text" id="dest-chat-id" class="form-control" placeholder="Ej: 7961617813 ó -1004420809456" required>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="dest-rol" class="filter-label" style="margin-bottom: 4px;">Rol / Unidad Destino:</label>
+              <input type="text" id="dest-rol" class="form-control" placeholder="Ej: Operaciones / Enrolamiento" value="Operativo">
+            </div>
+            <button type="submit" id="btn-agregar-destinatario" class="btn btn-primary" style="height: 38px; white-space: nowrap;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ Asignar ID</span>
+            </button>
+          </form>
+          <div id="dest-feedback" class="crypto-feedback-box" style="display: none; margin-top: 10px;"></div>
+        </div>
+
+        <!-- Tabla de Destinatarios Asignados -->
+        <div class="table-container" style="max-height: 420px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Oficial / Destinatario</th>
+                <th>Chat ID Telegram</th>
+                <th>Rol / Unidad</th>
+                <th>Estado</th>
+                <th>Fecha Registro</th>
+                <th style="text-align: center;">Acciones Operativas</th>
+              </tr>
+            </thead>
+            <tbody id="destinatarios-table-body">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                  Cargando destinatarios autorizados...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Tarjeta 3: Bitácora de Envíos y Auditoría de Notificaciones -->
       <div class="table-card" style="margin-top: 24px;">
         <div class="table-header-bar">
@@ -1035,6 +2060,6 @@
   </footer>
 
   <!-- Script Principal -->
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>

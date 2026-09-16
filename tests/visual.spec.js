@@ -22,14 +22,9 @@ test.describe('Visual Inspection - PDI Chile Styling', () => {
     await page.waitForTimeout(600);
     await page.screenshot({ path: path.join(outDir, '03_tab_tendencias.png'), fullPage: true });
 
-    // Tab 4: Seguridad
-    await page.click('button[data-tab="seguridad"]');
-    await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '04_tab_seguridad.png'), fullPage: true });
-
-    // Tab 5: Ajustes
+    // Tab 4: Ajustes
     await page.click('button[data-tab="ajustes"]');
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '05_tab_ajustes.png'), fullPage: true });
+    await page.screenshot({ path: path.join(outDir, '04_tab_ajustes.png'), fullPage: true });
   });
 });

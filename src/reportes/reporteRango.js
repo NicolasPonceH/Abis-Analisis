@@ -285,8 +285,84 @@ async function obtenerFechasDisponibles(pool) {
   return rows.map(r => ({ fecha: r.fecha, total: Number(r.total) }));
 }
 
+/**
+ * Calcula métricas comparativas entre dos períodos (Semana vs Anterior o Mes vs Anterior)
+ * @param {import('pg').Pool} pool 
+ * @param {string} tipo "semana" o "mes"
+ */
+async function obtenerComparacionPeriodos(pool, tipo) {
+  const dias = tipo === "semana" ? 7 : 30;
+
+  // 1. Obtener la última fecha registrada en la base de datos como pivote
+  const { rows: maxRows } = await pool.query(
+    "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS max_fecha FROM registro_enrolamiento"
+  );
+  
+  if (!maxRows[0]?.max_fecha) {
+    throw new Error("No hay registros en la base de datos para comparar.");
+  }
+
+  const fechaPivote = maxRows[0].max_fecha;
+
+  const queryStats = `
+    SELECT 
+      count(*)::int AS total,
+      count(*) FILTER (WHERE id_estado_sincronizacion = 1)::int AS sincronizados,
+      count(*) FILTER (WHERE ep_reg.descripcion IN ('ERROR', 'CON_ERROR') OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))::int AS errores,
+      min(fecha_enrolamiento) AS desde,
+      max(fecha_enrolamiento) AS hasta
+    FROM registro_enrolamiento r
+    JOIN estado_proceso ep_reg ON ep_reg.id_estado = r.id_estado_registro
+    JOIN estado_proceso ep_gen ON ep_gen.id_estado = r.id_estado_general
+    WHERE fecha_enrolamiento >= ($1::date - $2::interval) AND fecha_enrolamiento <= $1::date
+  `;
+
+  const pivoteDate = new Date(`${fechaPivote}T00:00:00`);
+  pivoteDate.setDate(pivoteDate.getDate() - dias);
+  const fechaAnterior = pivoteDate.toISOString().split('T')[0];
+
+  const [actualRes, anteriorRes] = await Promise.all([
+    pool.query(queryStats, [fechaPivote, `${dias - 1} days`]),
+    pool.query(queryStats, [fechaAnterior, `${dias - 1} days`])
+  ]);
+
+  const act = actualRes.rows[0] || { total: 0, sincronizados: 0, errores: 0 };
+  const ant = anteriorRes.rows[0] || { total: 0, sincronizados: 0, errores: 0 };
+
+  const slaActual = act.total > 0 ? (act.sincronizados / act.total) * 100 : 100;
+  const slaAnterior = ant.total > 0 ? (ant.sincronizados / ant.total) * 100 : 100;
+
+  const calcVariacion = (vAct, vAnt) => vAnt === 0 ? (vAct > 0 ? 100 : 0) : ((vAct - vAnt) / vAnt) * 100;
+
+  return {
+    actual: {
+      total: act.total,
+      sincronizados: act.sincronizados,
+      errores: act.errores,
+      sla: slaActual,
+      desde: act.desde,
+      hasta: act.hasta
+    },
+    anterior: {
+      total: ant.total,
+      sincronizados: ant.sincronizados,
+      errores: ant.errores,
+      sla: slaAnterior,
+      desde: ant.desde,
+      hasta: ant.hasta
+    },
+    variacion: {
+      total: calcVariacion(act.total, ant.total),
+      sincronizados: calcVariacion(act.sincronizados, ant.sincronizados),
+      errores: calcVariacion(act.errores, ant.errores),
+      sla: slaActual - slaAnterior // Delta absoluto para SLA
+    }
+  };
+}
+
 module.exports = {
   obtenerReporteRango,
   obtenerTendenciaHistorica,
   obtenerFechasDisponibles,
+  obtenerComparacionPeriodos,
 };

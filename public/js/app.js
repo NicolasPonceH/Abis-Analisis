@@ -58,11 +58,14 @@ const CHART_PALETTE = {
 document.addEventListener("DOMContentLoaded", async () => {
   setupEventListeners();
   setupDragAndDrop();
+  initSpreadsheetIngest();
   await checkSystemHealth();
   await loadAvailableDates();
   await loadMetrics();
   await loadTrendData();
   await loadScheduleSettings();
+  await cargarComparacionPeriodos("semana");
+  await cargarBitacoraAuditoria();
 });
 
 // Configuración de escuchadores de eventos
@@ -82,6 +85,10 @@ function setupEventListeners() {
 
       if (tabTarget === "tendencias" && !state.trendData) {
         loadTrendData();
+      }
+
+      if (tabTarget === "auditoria") {
+        cargarBitacoraAuditoria();
       }
 
       if (tabTarget === "ajustes") {
@@ -186,9 +193,6 @@ function setupEventListeners() {
     btnExportTelegram.addEventListener("click", sendReportToTelegram);
   }
 
-
-  // Inicializar herramientas web criptográficas (Sin terminal)
-  setupCryptoWebTools();
 
   // Inicializar controles interactivos de Tendencias y Evolución
   setupTrendControls();
@@ -473,26 +477,61 @@ function animateValue(id, endValue) {
   window.requestAnimationFrame(step);
 }
 
-// Configuración de Tooltip estilo bklit-ui / shadcn (Card flotante clara, sombra suave, punto de color)
+// Helpers para diseño de gráficos amigables, legibles y modernos
+function formatChartLabel(str, maxLen = 14) {
+  if (!str) return "";
+  const clean = String(str).trim();
+  if (clean.length <= maxLen) return clean;
+  const words = clean.split(" ");
+  if (words.length === 1) return clean.length > maxLen ? clean.substring(0, maxLen - 1) + "…" : clean;
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    if ((cur + " " + w).trim().length <= maxLen) {
+      cur = (cur + " " + w).trim();
+    } else {
+      if (cur) lines.push(cur);
+      cur = w;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.length > 2 ? [lines[0], lines.slice(1).join(" ")] : lines;
+}
+
+function getVerticalGradient(ctx, colorTop, colorBottom, height = 280) {
+  const g = ctx.createLinearGradient(0, 0, 0, height);
+  g.addColorStop(0, colorTop);
+  g.addColorStop(1, colorBottom);
+  return g;
+}
+
+function getHorizontalGradient(ctx, colorLeft, colorRight, width = 360) {
+  const g = ctx.createLinearGradient(0, 0, width, 0);
+  g.addColorStop(0, colorLeft);
+  g.addColorStop(1, colorRight);
+  return g;
+}
+
+// Configuración de Tooltip amigable, moderno y de alto contraste (Dark Card translúcida)
 const BKLIT_TOOLTIP = {
-  backgroundColor: "rgba(255, 255, 255, 0.98)",
-  titleColor: "#0f172a",
-  bodyColor: "#334155",
-  borderColor: "rgba(226, 232, 240, 0.95)",
+  backgroundColor: "rgba(15, 23, 42, 0.94)",
+  titleColor: "#ffffff",
+  bodyColor: "#f1f5f9",
+  borderColor: "rgba(255, 255, 255, 0.12)",
   borderWidth: 1,
-  padding: { top: 9, bottom: 9, left: 13, right: 13 },
+  padding: { top: 10, bottom: 10, left: 14, right: 14 },
   boxPadding: 6,
   usePointStyle: true,
-  boxWidth: 7,
-  boxHeight: 7,
+  boxWidth: 8,
+  boxHeight: 8,
   cornerRadius: 10,
-  titleFont: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size: 12, weight: "700" },
-  bodyFont: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size: 12, weight: "500" },
-  footerFont: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size: 11, weight: "600" },
-  footerColor: "#0284c7",
+  titleFont: { family: "'Open Sans', sans-serif", size: 12.5, weight: "700" },
+  bodyFont: { family: "'Open Sans', sans-serif", size: 12, weight: "500" },
+  footerFont: { family: "'Open Sans', sans-serif", size: 11.5, weight: "600" },
+  footerColor: "#38bdf8",
 };
 
-// Plugin de etiquetas numéricas directas y métricas visuales estilo bklit-ui
+// Plugin de etiquetas numéricas directas y métricas visuales estilo amigable y limpio
 const bklitDataLabelsPlugin = {
   id: "bklitDataLabels",
   afterDatasetsDraw(chart, args, options) {
@@ -503,7 +542,7 @@ const bklitDataLabelsPlugin = {
     const isHorizontal = chart.options.indexAxis === "y";
     const isDoughnut = chart.config.type === "doughnut";
 
-    // 1. Centro del Doughnut: Métricas destacadas en el hueco central
+    // 1. Centro del Doughnut: Métrica principal grande y subtítulo claro
     if (isDoughnut) {
       if (options.centerText) {
         const meta = chart.getDatasetMeta(0);
@@ -514,14 +553,14 @@ const bklitDataLabelsPlugin = {
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
 
-          ctx.font = "800 21px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.font = "800 23px 'Open Sans', sans-serif";
           ctx.fillStyle = options.centerTextColor || "#0f172a";
-          ctx.fillText(options.centerText, centerX, centerY - 9);
+          ctx.fillText(options.centerText, centerX, centerY - 8);
 
           if (options.centerSubtext) {
-            ctx.font = "600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            ctx.font = "600 11.5px 'Open Sans', sans-serif";
             ctx.fillStyle = "#64748b";
-            ctx.fillText(options.centerSubtext, centerX, centerY + 13);
+            ctx.fillText(options.centerSubtext, centerX, centerY + 14);
           }
         }
       }
@@ -529,7 +568,7 @@ const bklitDataLabelsPlugin = {
       return;
     }
 
-    // 2. Gráficos de Barras: Etiquetas numéricas impresas sobre o junto a las barras
+    // 2. Gráficos de Barras: Cifras impresas con tipografía limpia y separadores de miles
     chart.data.datasets.forEach((dataset, datasetIdx) => {
       const meta = chart.getDatasetMeta(datasetIdx);
       if (meta.hidden) return;
@@ -538,27 +577,27 @@ const bklitDataLabelsPlugin = {
         const val = dataset.data[index];
         if (val === null || val === undefined || (options.hideZero && val === 0)) return;
 
-        ctx.font = "700 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        ctx.fillStyle = options.color || "#334155";
+        ctx.font = "700 11px 'Open Sans', sans-serif";
+        ctx.fillStyle = options.color || "#1e293b";
 
         const formattedVal = Number(val).toLocaleString("es-CL");
 
         if (isHorizontal) {
           ctx.textAlign = "left";
           ctx.textBaseline = "middle";
-          const x = element.x + 6;
+          const x = element.x + 8;
           const y = element.y;
 
           let text = formattedVal;
           if (options.percentages && options.percentages[index] !== undefined) {
-            text += ` (${options.percentages[index]}%)`;
+            text += ` · ${options.percentages[index]}%`;
           }
           ctx.fillText(text, x, y);
         } else {
           ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
           const x = element.x;
-          const y = element.y - 3;
+          const y = element.y - 4;
           ctx.fillText(formattedVal, x, y);
         }
       });
@@ -703,14 +742,15 @@ function destroyChart(name) {
   }
 }
 
-// Gráfico 1: Rendimiento por Cuartel (Con números directos sobre barras)
+// Gráfico 1: Rendimiento por Cuartel (Con barras con gradiente suave, etiquetas legibles y números directos)
 function renderCuartelesRendimientoChart(data) {
   destroyChart("chart-cuarteles");
   const ctx = document.getElementById("chart-cuarteles")?.getContext("2d");
   if (!ctx) return;
 
   const items = (data.rendimientoCuarteles || []).slice(0, 8);
-  const labels = items.map((i) => i.cuartel);
+  // Etiquetas horizontales multilínea amigables (evita rotaciones forzadas a 35°)
+  const labels = items.map((i) => formatChartLabel(i.cuartel, 14));
   const sincronizados = items.map((i) => i.sincronizados);
   const conError = items.map((i) => i.conError);
 
@@ -722,28 +762,44 @@ function renderCuartelesRendimientoChart(data) {
         {
           label: "Sincronizados PDI",
           data: sincronizados,
-          backgroundColor: CHART_PALETTE.emerald,
-          hoverBackgroundColor: "#059669",
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const { ctx: c, chartArea } = chart;
+            if (!chartArea) return "#10b981";
+            const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            g.addColorStop(0, "#34d399");
+            g.addColorStop(1, "#059669");
+            return g;
+          },
+          hoverBackgroundColor: "#047857",
           borderRadius: 8,
           borderSkipped: false,
-          maxBarThickness: 30,
+          maxBarThickness: 28,
         },
         {
           label: "Con Error",
           data: conError,
-          backgroundColor: CHART_PALETTE.crimson,
-          hoverBackgroundColor: "#e11d48",
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const { ctx: c, chartArea } = chart;
+            if (!chartArea) return "#f43f5e";
+            const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            g.addColorStop(0, "#fb7185");
+            g.addColorStop(1, "#e11d48");
+            return g;
+          },
+          hoverBackgroundColor: "#be123c",
           borderRadius: 8,
           borderSkipped: false,
-          maxBarThickness: 30,
+          maxBarThickness: 28,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 0.7,
-      categoryPercentage: 0.75,
+      barPercentage: 0.72,
+      categoryPercentage: 0.78,
       plugins: {
         legend: {
           position: "top",
@@ -751,11 +807,11 @@ function renderCuartelesRendimientoChart(data) {
           labels: {
             usePointStyle: true,
             pointStyle: "circle",
-            boxWidth: 7,
-            boxHeight: 7,
+            boxWidth: 8,
+            boxHeight: 8,
             padding: 16,
             color: "#334155",
-            font: { weight: "600", size: 12 },
+            font: { family: "'Open Sans', sans-serif", weight: "600", size: 12 },
           },
         },
         tooltip: {
@@ -765,35 +821,40 @@ function renderCuartelesRendimientoChart(data) {
               const idx = tooltipItems[0].dataIndex;
               const totalCuartel = items[idx]?.total || 0;
               const tasa = items[idx]?.tasaExito || 100;
-              return `Total: ${totalCuartel.toLocaleString()} (${tasa}% éxito)`;
+              return `Total: ${totalCuartel.toLocaleString("es-CL")} (${tasa}% tasa de éxito)`;
             },
           },
         },
         bklitDataLabels: {
           display: true,
           hideZero: true,
-          color: "#1e293b",
+          color: "#0f172a",
         },
       },
       scales: {
         x: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#64748b", font: { weight: "500" }, maxRotation: 35, minRotation: 0 },
+          ticks: {
+            color: "#475569",
+            font: { family: "'Open Sans', sans-serif", size: 11, weight: "600" },
+            maxRotation: 0,
+            minRotation: 0,
+          },
         },
         y: {
-          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 } },
           beginAtZero: true,
-          grace: "18%",
+          grace: "20%",
         },
       },
     },
   });
 }
 
-// Gráfico 2: Nacionalidades (Barra horizontal con números y porcentaje impresos)
+// Gráfico 2: Nacionalidades (Barras horizontales con gradientes armónicos y cifras holgadas)
 function renderHorizontalBarChart(canvasId, items) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
@@ -803,6 +864,18 @@ function renderHorizontalBarChart(canvasId, items) {
   const labels = topItems.map((i) => i.nacionalidad + (i.codigo_iso ? ` (${i.codigo_iso})` : ""));
   const values = topItems.map((i) => i.total);
 
+  // Paleta moderna y armónica con gradientes de izquierda a derecha
+  const nationPalette = [
+    ["#2563eb", "#60a5fa"], // 1. Azul Zafiro
+    ["#4f46e5", "#818cf8"], // 2. Índigo Suave
+    ["#0284c7", "#38bdf8"], // 3. Celeste Oceánico
+    ["#0d9488", "#2dd4bf"], // 4. Turquesa / Teal
+    ["#059669", "#34d399"], // 5. Verde Esmeralda
+    ["#d97706", "#fbbf24"], // 6. Ámbar Cálido
+    ["#7c3aed", "#c084fc"], // 7. Violeta
+    ["#475569", "#94a3b8"], // 8. Gris Pizarra
+  ];
+
   state.charts[canvasId] = new Chart(ctx, {
     type: "bar",
     data: {
@@ -810,8 +883,17 @@ function renderHorizontalBarChart(canvasId, items) {
       datasets: [{
         label: "Enrolamientos",
         data: values,
-        backgroundColor: CHART_PALETTE.nations.slice(0, topItems.length),
-        borderRadius: 7,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx: c, chartArea } = chart;
+          if (!chartArea) return "#2563eb";
+          const pair = nationPalette[context.dataIndex % nationPalette.length];
+          const g = c.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+          g.addColorStop(0, pair[0]);
+          g.addColorStop(1, pair[1]);
+          return g;
+        },
+        borderRadius: 8,
         borderSkipped: false,
         maxBarThickness: 22,
       }],
@@ -820,13 +902,13 @@ function renderHorizontalBarChart(canvasId, items) {
       indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 0.68,
+      barPercentage: 0.7,
       plugins: {
         legend: { display: false },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${topItems[ctx.dataIndex]?.porcentaje}%)`,
+            label: (ctx) => ` Total: ${Number(ctx.raw).toLocaleString("es-CL")} · ${topItems[ctx.dataIndex]?.porcentaje}% del total`,
           },
         },
         bklitDataLabels: {
@@ -837,22 +919,22 @@ function renderHorizontalBarChart(canvasId, items) {
       },
       scales: {
         x: {
-          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
           border: { display: false },
-          ticks: { color: "#64748b" },
-          grace: "25%",
+          ticks: { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 } },
+          grace: "35%", // Amplitud generosa para evitar colisiones con las etiquetas
         },
         y: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#1e293b", font: { weight: "600" } },
+          ticks: { color: "#1e293b", font: { family: "'Open Sans', sans-serif", weight: "600", size: 11.5 } },
         },
       },
     },
   });
 }
 
-// Gráfico 3: Sincronización Donut Flotante (Con cifra central y conteo en leyendas)
+// Gráfico 3: Sincronización Donut Amigable (Con anillo suave y cifra central nítida)
 function renderDoughnutChart(canvasId, items, colors) {
   destroyChart(canvasId);
   const ctx = document.getElementById(canvasId)?.getContext("2d");
@@ -865,13 +947,21 @@ function renderDoughnutChart(canvasId, items, colors) {
   const sincOk = items.find((i) => String(i.descripcion).toUpperCase().includes("SINCRONIZADO"))?.total || 0;
   const pctSinc = total > 0 ? ((sincOk / total) * 100).toFixed(1) : "100";
 
+  // Colores visualmente amigables y balanceados
+  const friendlyDoughnutColors = [
+    "#10b981", // Sincronizado OK (Esmeralda)
+    "#f43f5e", // Con Error (Rosa suave)
+    "#f59e0b", // Pendiente (Ámbar)
+    "#06b6d4"  // En Proceso (Cyan)
+  ];
+
   state.charts[canvasId] = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: colors.slice(0, items.length),
+        backgroundColor: friendlyDoughnutColors.slice(0, items.length),
         borderWidth: 0,
         borderRadius: 8,
         spacing: 5,
@@ -881,18 +971,18 @@ function renderDoughnutChart(canvasId, items, colors) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "76%",
+      cutout: "68%", // Anillo más suave, grueso y amigable
       plugins: {
         legend: {
           position: "bottom",
           labels: {
             usePointStyle: true,
             pointStyle: "circle",
-            boxWidth: 7,
-            boxHeight: 7,
+            boxWidth: 8,
+            boxHeight: 8,
             padding: 14,
             color: "#334155",
-            font: { weight: "600", size: 11.5 },
+            font: { family: "'Open Sans', sans-serif", weight: "600", size: 11.5 },
             generateLabels: (chart) => {
               const orig = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
               orig.forEach((l, idx) => {
@@ -908,13 +998,13 @@ function renderDoughnutChart(canvasId, items, colors) {
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${items[ctx.dataIndex]?.porcentaje}%)`,
+            label: (ctx) => ` ${ctx.label}: ${Number(ctx.raw).toLocaleString("es-CL")} (${items[ctx.dataIndex]?.porcentaje}%)`,
           },
         },
         bklitDataLabels: {
           display: true,
           centerText: `${pctSinc}%`,
-          centerSubtext: "Sincronizados",
+          centerSubtext: "Sincronizados PDI",
           centerTextColor: "#059669",
         },
       },
@@ -922,94 +1012,89 @@ function renderDoughnutChart(canvasId, items, colors) {
   });
 }
 
-// Gráfico 4: Demografía Cruzada (Números sobre cada barra)
+// Gráfico 4: Demografía Cruzada (Widget HTML Custom)
 function renderDemografiaCruzadaChart(demografia, generoFallback) {
-  destroyChart("chart-demografia-cruzada");
-  const ctx = document.getElementById("chart-demografia-cruzada")?.getContext("2d");
-  if (!ctx) return;
-
   let mascAdultos = 0, mascMenores = 0;
   let femAdultos = 0, femMenores = 0;
+  let xTotal = 0;
 
   if (demografia.length > 0) {
     demografia.forEach(d => {
+      const isMenor = !d.esMayorEdad;
       if (d.genero === "M") {
-        if (d.esMayorEdad) mascAdultos += d.total;
-        else mascMenores += d.total;
+        if (!isMenor) mascAdultos += Number(d.total);
+        else mascMenores += Number(d.total);
       } else if (d.genero === "F") {
-        if (d.esMayorEdad) femAdultos += d.total;
-        else femMenores += d.total;
+        if (!isMenor) femAdultos += Number(d.total);
+        else femMenores += Number(d.total);
+      } else {
+        xTotal += Number(d.total);
       }
     });
   }
 
-  state.charts["chart-demografia-cruzada"] = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Hombres (M)", "Mujeres (F)"],
-      datasets: [
-        {
-          label: "Adultos (≥ 18)",
-          data: [mascAdultos, femAdultos],
-          backgroundColor: CHART_PALETTE.blue,
-          hoverBackgroundColor: "#1d4ed8",
-          borderRadius: 8,
-          borderSkipped: false,
-          maxBarThickness: 34,
-        },
-        {
-          label: "Menores N.N.A. (0-17)",
-          data: [mascMenores, femMenores],
-          backgroundColor: CHART_PALETTE.amber,
-          hoverBackgroundColor: "#d97706",
-          borderRadius: 8,
-          borderSkipped: false,
-          maxBarThickness: 34,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      barPercentage: 0.65,
-      categoryPercentage: 0.7,
-      plugins: {
-        legend: {
-          position: "top",
-          align: "end",
-          labels: {
-            usePointStyle: true,
-            pointStyle: "circle",
-            boxWidth: 7,
-            boxHeight: 7,
-            padding: 16,
-            color: "#334155",
-            font: { weight: "600", size: 12 },
-          },
-        },
-        tooltip: BKLIT_TOOLTIP,
-        bklitDataLabels: {
-          display: true,
-          hideZero: true,
-          color: "#1e293b",
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          border: { display: false },
-          ticks: { color: "#1e293b", font: { weight: "600" } },
-        },
-        y: {
-          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
-          border: { display: false },
-          ticks: { color: "#64748b" },
-          beginAtZero: true,
-          grace: "18%",
-        },
-      },
-    },
-  });
+  const mascTot = mascAdultos + mascMenores;
+  const femTot = femAdultos + femMenores;
+  const totGen = mascTot + femTot + xTotal;
+
+  const pctM = totGen > 0 ? ((mascTot / totGen) * 100).toFixed(1) : "0.0";
+  const pctF = totGen > 0 ? ((femTot / totGen) * 100).toFixed(1) : "0.0";
+
+  const totAdult = mascAdultos + femAdultos;
+  const totNna = mascMenores + femMenores + xTotal;
+  const pctAdult = totGen > 0 ? ((totAdult / totGen) * 100).toFixed(1) : "0.0";
+  const pctNna = totGen > 0 ? ((totNna / totGen) * 100).toFixed(1) : "0.0";
+
+  const badge = document.getElementById("badge-chart-demografia-cruzada");
+  if (badge) badge.textContent = `${mascTot} Hombres · ${femTot} Mujeres · ${totAdult} Adultos · ${totNna} NNA`;
+
+  const safeSet = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  // Top blocks
+  safeSet("demo-m-total", Number(mascTot).toLocaleString("es-CL"));
+  safeSet("demo-m-pct", `(${pctM}%)`);
+  
+  safeSet("demo-f-total", Number(femTot).toLocaleString("es-CL"));
+  safeSet("demo-f-pct", `(${pctF}%)`);
+
+  safeSet("demo-adult-total", Number(totAdult).toLocaleString("es-CL"));
+  safeSet("demo-adult-pct", `(${pctAdult}%)`);
+
+  safeSet("demo-x-total", Number(totNna).toLocaleString("es-CL"));
+  safeSet("demo-x-pct", `(${pctNna}%)`);
+
+  // Progress Bars
+  const elBarM = document.getElementById("demo-bar-m");
+  const elBarF = document.getElementById("demo-bar-f");
+  if (elBarM && elBarF) {
+    elBarM.style.width = `${pctM}%`;
+    elBarF.style.width = `${pctF}%`;
+  }
+  safeSet("demo-bar-gender-text", `${pctM}% M · ${pctF}% F`);
+
+  const elBarAdult = document.getElementById("demo-bar-adult");
+  const elBarNna = document.getElementById("demo-bar-nna");
+  if (elBarAdult && elBarNna) {
+    elBarAdult.style.width = `${pctAdult}%`;
+    elBarNna.style.width = `${pctNna}%`;
+  }
+  safeSet("demo-bar-age-text", `${pctAdult}% Adultos · ${pctNna}% NNA`);
+
+  // Table
+  safeSet("demo-m-adult", Number(mascAdultos).toLocaleString("es-CL"));
+  safeSet("demo-m-nna", Number(mascMenores).toLocaleString("es-CL"));
+  safeSet("demo-m-subtot", Number(mascTot).toLocaleString("es-CL"));
+
+  safeSet("demo-f-adult", Number(femAdultos).toLocaleString("es-CL"));
+  safeSet("demo-f-nna", Number(femMenores).toLocaleString("es-CL"));
+  safeSet("demo-f-subtot", Number(femTot).toLocaleString("es-CL"));
+
+  safeSet("demo-tot-adult", Number(totAdult).toLocaleString("es-CL"));
+  safeSet("demo-tot-nna", Number(totNna).toLocaleString("es-CL"));
+  safeSet("demo-tot-global", Number(totGen).toLocaleString("es-CL"));
 }
 
 // Gráfico 5: Grupo Etario Donut Flotante (Con cifras en leyendas y centro)
@@ -1077,7 +1162,7 @@ function renderEdadChart(canvasId, items) {
   });
 }
 
-// Gráfico 6: Dispositivos de Captura (Tablet vs PC)
+// Gráfico 6: Dispositivos de Captura (Tablet vs PC con donut suave y balanceado)
 function renderDispositivosChart(items) {
   destroyChart("chart-dispositivos");
   const ctx = document.getElementById("chart-dispositivos")?.getContext("2d");
@@ -1090,7 +1175,8 @@ function renderDispositivosChart(items) {
 
   const labels = validItems.map((i) => i.dispositivo);
   const values = validItems.map((i) => i.total);
-  const colors = [CHART_PALETTE.cyan, CHART_PALETTE.blue];
+  // Colores modernos y contrastantes: Azul Zafiro para Tablet, Cyan para PC
+  const colors = ["#2563eb", "#06b6d4"];
 
   const total = validItems.reduce((acc, i) => acc + (Number(i.total) || 0), 0);
 
@@ -1110,18 +1196,18 @@ function renderDispositivosChart(items) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "76%",
+      cutout: "68%", // Grosor amigable y suave
       plugins: {
         legend: {
           position: "bottom",
           labels: {
             usePointStyle: true,
             pointStyle: "circle",
-            boxWidth: 7,
-            boxHeight: 7,
+            boxWidth: 8,
+            boxHeight: 8,
             padding: 14,
             color: "#334155",
-            font: { weight: "600", size: 11.5 },
+            font: { family: "'Open Sans', sans-serif", weight: "600", size: 11.5 },
             generateLabels: (chart) => {
               const orig = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
               orig.forEach((l, idx) => {
@@ -1137,13 +1223,13 @@ function renderDispositivosChart(items) {
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` ${ctx.label}: ${Number(ctx.raw).toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
           },
         },
         bklitDataLabels: {
           display: true,
           centerText: `${total.toLocaleString("es-CL")}`,
-          centerSubtext: "Dispositivos",
+          centerSubtext: "Dispositivos Activos",
           centerTextColor: "#0284c7",
         },
       },
@@ -1151,7 +1237,7 @@ function renderDispositivosChart(items) {
   });
 }
 
-// Gráfico 7: Despliegue Territorial por Región Policial (Con números en barras)
+// Gráfico 7: Despliegue Territorial por Región Policial (Barras con gradiente horizontal)
 function renderRegionesChart(items) {
   destroyChart("chart-regiones");
   const ctx = document.getElementById("chart-regiones")?.getContext("2d");
@@ -1171,24 +1257,32 @@ function renderRegionesChart(items) {
       datasets: [{
         label: "Enrolamientos",
         data: values,
-        backgroundColor: "#0ea5e9",
-        hoverBackgroundColor: "#0284c7",
-        borderRadius: 7,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx: c, chartArea } = chart;
+          if (!chartArea) return "#0284c7";
+          const g = c.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+          g.addColorStop(0, "#0284c7");
+          g.addColorStop(1, "#38bdf8");
+          return g;
+        },
+        hoverBackgroundColor: "#0369a1",
+        borderRadius: 8,
         borderSkipped: false,
-        maxBarThickness: 20,
+        maxBarThickness: 22,
       }],
     },
     options: {
       indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 0.65,
+      barPercentage: 0.68,
       plugins: {
         legend: { display: false },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Total: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Total: ${Number(ctx.raw).toLocaleString("es-CL")} · ${validItems[ctx.dataIndex]?.porcentaje || 0}% del despliegue`,
           },
         },
         bklitDataLabels: {
@@ -1199,22 +1293,22 @@ function renderRegionesChart(items) {
       },
       scales: {
         x: {
-          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
           border: { display: false },
-          ticks: { color: "#64748b" },
-          grace: "25%",
+          ticks: { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 } },
+          grace: "32%", // Amplitud generosa para etiquetas de valores
         },
         y: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#1e293b", font: { weight: "600" } },
+          ticks: { color: "#1e293b", font: { family: "'Open Sans', sans-serif", weight: "600", size: 11.5 } },
         },
       },
     },
   });
 }
 
-// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Con números sobre barras)
+// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Barras con gradientes verticales diferenciados)
 function renderTramosEtariosChart(items) {
   destroyChart("chart-tramos-etarios");
   const ctx = document.getElementById("chart-tramos-etarios")?.getContext("2d");
@@ -1224,25 +1318,9 @@ function renderTramosEtariosChart(items) {
     { tramo: "Sin Registros", total: 0, porcentaje: 0 }
   ];
 
-  const labels = validItems.map((i) => i.tramo);
+  // Etiquetas multilínea horizontales para evitar rotaciones oblicuas difíciles de leer
+  const labels = validItems.map((i) => formatChartLabel(i.tramo, 13));
   const values = validItems.map((i) => i.total);
-
-  // Colores diferenciados: Ámbar cálido para menores NNA (vulnerabilidad), Azul real para adultos
-  const backgroundColors = validItems.map((i) => {
-    const t = String(i.tramo || "").toUpperCase();
-    if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA") || t.includes("ADOLESCENTES")) {
-      return CHART_PALETTE.amber;
-    }
-    return CHART_PALETTE.blue;
-  });
-
-  const hoverColors = validItems.map((i) => {
-    const t = String(i.tramo || "").toUpperCase();
-    if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA") || t.includes("ADOLESCENTES")) {
-      return "#d97706";
-    }
-    return "#1d4ed8";
-  });
 
   state.charts["chart-tramos-etarios"] = new Chart(ctx, {
     type: "bar",
@@ -1251,8 +1329,28 @@ function renderTramosEtariosChart(items) {
       datasets: [{
         label: "Personas",
         data: values,
-        backgroundColor: backgroundColors,
-        hoverBackgroundColor: hoverColors,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx: c, chartArea } = chart;
+          const idx = context.dataIndex;
+          const t = String(validItems[idx]?.tramo || "").toUpperCase();
+          const isNna = t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA") || t.includes("ADOLESCENTES");
+          if (!chartArea) return isNna ? "#f59e0b" : "#2563eb";
+          const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          if (isNna) {
+            g.addColorStop(0, "#fbbf24");
+            g.addColorStop(1, "#d97706");
+          } else {
+            g.addColorStop(0, "#60a5fa");
+            g.addColorStop(1, "#1d4ed8");
+          }
+          return g;
+        },
+        hoverBackgroundColor: (context) => {
+          const idx = context.dataIndex;
+          const t = String(validItems[idx]?.tramo || "").toUpperCase();
+          return (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA")) ? "#b45309" : "#1e40af";
+        },
         borderRadius: 8,
         borderSkipped: false,
         maxBarThickness: 28,
@@ -1261,17 +1359,17 @@ function renderTramosEtariosChart(items) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      barPercentage: 0.65,
+      barPercentage: 0.68,
       plugins: {
         legend: { display: false },
         tooltip: {
           ...BKLIT_TOOLTIP,
           callbacks: {
-            label: (ctx) => ` Cantidad: ${ctx.raw.toLocaleString()} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
+            label: (ctx) => ` Cantidad: ${Number(ctx.raw).toLocaleString("es-CL")} (${validItems[ctx.dataIndex]?.porcentaje || 0}%)`,
             afterLabel: (ctx) => {
               const t = String(validItems[ctx.dataIndex]?.tramo || "").toUpperCase();
               if (t.includes("INFANCIA") || t.includes("NIÑEZ") || t.includes("NNA")) {
-                return "[!] Atención prioritaria: Menor de edad (NNA)";
+                return "[!] Atención prioritaria: Menor de edad (N.N.A.)";
               }
               return "";
             },
@@ -1288,18 +1386,18 @@ function renderTramosEtariosChart(items) {
           grid: { display: false },
           border: { display: false },
           ticks: {
-            color: "#64748b",
-            font: { weight: "600", size: 10 },
-            maxRotation: 35,
-            minRotation: 15,
+            color: "#475569",
+            font: { family: "'Open Sans', sans-serif", weight: "600", size: 10.5 },
+            maxRotation: 0,
+            minRotation: 0,
           },
         },
         y: {
-          grid: { color: "rgba(226, 232, 240, 0.75)", borderDash: [5, 5] },
+          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
           border: { display: false },
-          ticks: { color: "#64748b" },
+          ticks: { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 } },
           beginAtZero: true,
-          grace: "18%",
+          grace: "20%",
         },
       },
     },
@@ -1356,6 +1454,14 @@ function updateTrendView() {
   if (elPeak) elPeak.textContent = `${recordDia.total.toLocaleString("es-CL")}`;
   if (elPeakDate) elPeakDate.textContent = `Pico el ${recordDia.fecha}`;
   if (elSla) elSla.textContent = `${slaGlobal}%`;
+
+  // Integrar datos de las tarjetas ocultas
+  if (elTotal && elTotal.nextElementSibling) {
+    elTotal.nextElementSibling.textContent = `Total analizado en ${totalDias.toLocaleString("es-CL")} jornadas`;
+  }
+  if (elAvg && elAvg.nextElementSibling) {
+    elAvg.nextElementSibling.textContent = `SLA Global Histórico: ${slaGlobal}%`;
+  }
 
   // 2. Filtrar items según el rango temporal seleccionado
   let filteredItems = [...rawItems];
@@ -1992,65 +2098,7 @@ function promptAuthModal(file, actionType = "ingesta") {
 
   if (!modal) return;
 
-  if (actionType === "cifrar") {
-    if (summaryIconEl) {
-      summaryIconEl.innerHTML = `
-        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>
-      `;
-    }
-    if (titleEl) titleEl.textContent = "Autorización de Cifrado Institucional";
-    if (subtitleEl) subtitleEl.textContent = "Blindaje Criptográfico de Archivo (AES-256-GCM)";
-    if (warningEl) warningEl.textContent = "Para blindar y generar el archivo protegido .enc se requiere verificar su credencial policial autorizada.";
-    if (confirmBtn) {
-      confirmBtn.innerHTML = `
-        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span>Autorizar y Cifrar Archivo</span>
-      `;
-    }
-    if (fileNameEl) fileNameEl.textContent = file.name;
-    if (fileDetailsEl) {
-      const sizeMb = (file.size / 1024 / 1024).toFixed(2);
-      const tipoDesc = file.name.toLowerCase().endsWith(".enc")
-        ? "Archivo Cifrado AES-256-GCM"
-        : "Planilla Excel (Oracle ABIS)";
-      fileDetailsEl.textContent = `${sizeMb} MB • ${tipoDesc}`;
-    }
-  } else if (actionType === "descifrar") {
-    if (summaryIconEl) {
-      summaryIconEl.innerHTML = `
-        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>
-      `;
-    }
-    if (titleEl) titleEl.textContent = "Autorización de Descifrado y Auditoría";
-    if (subtitleEl) subtitleEl.textContent = "Apertura y Verificación de Archivo Protegido";
-    if (warningEl) warningEl.textContent = "Para descifrar y recuperar la planilla original se requiere verificar su credencial policial autorizada.";
-    if (confirmBtn) {
-      confirmBtn.innerHTML = `
-        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="m9 12 2 2 4-4"/>
-        </svg>
-        <span>Autorizar y Descifrar Archivo</span>
-      `;
-    }
-    if (fileNameEl) fileNameEl.textContent = file.name;
-    if (fileDetailsEl) {
-      const sizeMb = (file.size / 1024 / 1024).toFixed(2);
-      const tipoDesc = file.name.toLowerCase().endsWith(".enc")
-        ? "Archivo Cifrado AES-256-GCM"
-        : "Planilla Excel (Oracle ABIS)";
-      fileDetailsEl.textContent = `${sizeMb} MB • ${tipoDesc}`;
-    }
-  } else if (actionType === "programacion") {
+  if (actionType === "programacion") {
     if (summaryIconEl) {
       summaryIconEl.innerHTML = `
         <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
@@ -2078,6 +2126,96 @@ function promptAuthModal(file, actionType = "ingesta") {
     if (fileDetailsEl) {
       const tipo = file.reportType === "extenso" ? "Reporte Extenso Oficial PDI" : "Resumen Ejecutivo";
       fileDetailsEl.textContent = `${file.days.length} días activos por semana • ${tipo}`;
+    }
+  } else if (actionType === "destinatario_agregar") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #0284c7;">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <line x1="20" y1="8" x2="20" y2="14"/>
+          <line x1="23" y1="11" x2="17" y2="11"/>
+        </svg>
+      `;
+    }
+    if (titleEl) titleEl.textContent = "Autorización de Destinatario Policial";
+    if (subtitleEl) subtitleEl.textContent = "Asignación de Nuevo Oficial / Canal en Telegram";
+    if (warningEl) warningEl.textContent = "Para registrar y asignar una nueva ID de Telegram para recibir reportes se requiere verificar su credencial policial autorizada.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>Autorizar y Asignar ID</span>
+      `;
+    }
+    if (fileNameEl) fileNameEl.textContent = `${file.nombre} (Chat ID: ${file.chatId})`;
+    if (fileDetailsEl) fileDetailsEl.textContent = `Rol/Unidad: ${file.rolUnidad || 'Operativo'} • Almacenamiento Seguro PostgreSQL`;
+  } else if (actionType === "destinatario_toggle") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #0284c7;">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      `;
+    }
+    const accionTexto = file.nuevoEstado ? "Activar" : "Pausar";
+    if (titleEl) titleEl.textContent = `Autorización para ${accionTexto} Destinatario`;
+    if (subtitleEl) subtitleEl.textContent = "Modificación de Estado Operativo de Notificaciones";
+    if (warningEl) warningEl.textContent = `Para ${accionTexto.toLowerCase()} el envío de reportes a este oficial se requiere verificar su credencial policial autorizada.`;
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `<span>Autorizar y ${accionTexto}</span>`;
+    }
+    if (fileNameEl) fileNameEl.textContent = `${file.nombre} (Chat ID: ${file.chatId})`;
+    if (fileDetailsEl) fileDetailsEl.textContent = `Nuevo estado solicitado: ${file.nuevoEstado ? 'Activo (Recibirá Reportes)' : 'Pausado (Sin Envíos)'}`;
+  } else if (actionType === "destinatario_eliminar") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #dc2626;">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+      `;
+    }
+    if (titleEl) titleEl.textContent = "Autorización para Eliminar Destinatario";
+    if (subtitleEl) subtitleEl.textContent = "Revocación y Desvinculación de Oficial en Telegram";
+    if (warningEl) warningEl.textContent = "Esta acción eliminará de forma permanente al oficial de la lista de destinatarios. Se requiere credencial policial.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `<span>Autorizar y Eliminar</span>`;
+    }
+    if (fileNameEl) fileNameEl.textContent = `${file.nombre} (Chat ID: ${file.chatId})`;
+    if (fileDetailsEl) fileDetailsEl.textContent = `Acción: Eliminación de PostgreSQL`;
+  } else if (actionType === "sheet_ingest") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #10b981;">
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="3" y1="15" x2="21" y2="15"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+          <line x1="15" y1="3" x2="15" y2="21"/>
+        </svg>
+      `;
+    }
+    if (titleEl) titleEl.textContent = "Autorización de Ingesta desde Hoja de Cálculo";
+    if (subtitleEl) subtitleEl.textContent = "Control de Acceso para Inserción Directa en Base de Datos";
+    if (warningEl) warningEl.textContent = "Para insertar los registros copiados del portapapeles a PostgreSQL se requiere verificar su credencial policial de operador autorizado.";
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <span>Autorizar e Ingestar en BD</span>
+      `;
+    }
+    if (fileNameEl) {
+      fileNameEl.textContent = `Hoja de Cálculo / Portapapeles (${(file.rows ? file.rows.length : 0).toLocaleString()} filas)`;
+    }
+    if (fileDetailsEl) {
+      const colCount = file.headers ? file.headers.length : 0;
+      fileDetailsEl.textContent = `${colCount} columnas detectadas • Inserción Transaccional PostgreSQL`;
     }
   } else {
     // Ingesta por defecto
@@ -2210,12 +2348,16 @@ async function confirmAuthorizedUpload() {
   }
   if (errorMsg) errorMsg.style.display = "none";
 
-  if (pendingAuthAction === "cifrar") {
-    await executeWebEncrypt(pendingAuthFile, clave);
-  } else if (pendingAuthAction === "descifrar") {
-    await executeWebDecrypt(pendingAuthFile, clave);
-  } else if (pendingAuthAction === "programacion") {
+  if (pendingAuthAction === "programacion") {
     await executeSaveScheduleAuthorized(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "destinatario_agregar") {
+    await executeAgregarDestinatarioAuthorized(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "destinatario_toggle") {
+    await executeToggleDestinatarioAuthorized(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "destinatario_eliminar") {
+    await executeEliminarDestinatarioAuthorized(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "sheet_ingest") {
+    await executeSheetIngestAuthorized(pendingAuthFile, clave);
   } else {
     await handleFileUpload(pendingAuthFile, clave);
   }
@@ -2600,293 +2742,6 @@ async function sendReportToTelegram() {
   }
 }
 
-// Configuración de herramientas interactivas web de cifrado y descifrado (Sin Terminal)
-function setupCryptoWebTools() {
-  // 1. Cifrado Web (.xlsx -> .enc)
-  const dropzoneEncrypt = document.getElementById("dropzone-encrypt");
-  const fileInputEncrypt = document.getElementById("crypto-encrypt-file-input");
-  const filenameEncrypt = document.getElementById("encrypt-selected-filename");
-  const btnRunEncrypt = document.getElementById("btn-run-encrypt");
-  const feedbackEncrypt = document.getElementById("encrypt-feedback");
-
-  let selectedEncryptFile = null;
-
-  if (dropzoneEncrypt && fileInputEncrypt) {
-    dropzoneEncrypt.addEventListener("click", () => fileInputEncrypt.click());
-    dropzoneEncrypt.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzoneEncrypt.classList.add("dragover");
-    });
-    dropzoneEncrypt.addEventListener("dragleave", () => dropzoneEncrypt.classList.remove("dragover"));
-    dropzoneEncrypt.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzoneEncrypt.classList.remove("dragover");
-      if (e.dataTransfer.files.length) {
-        setEncryptFile(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInputEncrypt.addEventListener("change", (e) => {
-      if (e.target.files.length) {
-        setEncryptFile(e.target.files[0]);
-      }
-    });
-  }
-
-  function setEncryptFile(file) {
-    if (!file.name.endsWith(".xlsx")) {
-      alert("Por favor selecciona un archivo de hoja de cálculo válido (.xlsx)");
-      return;
-    }
-    selectedEncryptFile = file;
-    filenameEncrypt.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
-    btnRunEncrypt.disabled = false;
-    feedbackEncrypt.style.display = "none";
-    // Solicitar autorización policial inmediata
-    promptAuthModal(file, "cifrar");
-  }
-
-  if (btnRunEncrypt) {
-    btnRunEncrypt.addEventListener("click", () => {
-      if (selectedEncryptFile) {
-        promptAuthModal(selectedEncryptFile, "cifrar");
-      }
-    });
-  }
-
-  // 2. Descifrado Web (.enc -> .xlsx)
-  const dropzoneDecrypt = document.getElementById("dropzone-decrypt");
-  const fileInputDecrypt = document.getElementById("crypto-decrypt-file-input");
-  const filenameDecrypt = document.getElementById("decrypt-selected-filename");
-  const btnRunDecrypt = document.getElementById("btn-run-decrypt");
-  const feedbackDecrypt = document.getElementById("decrypt-feedback");
-
-  let selectedDecryptFile = null;
-
-  if (dropzoneDecrypt && fileInputDecrypt) {
-    dropzoneDecrypt.addEventListener("click", () => fileInputDecrypt.click());
-    dropzoneDecrypt.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzoneDecrypt.classList.add("dragover");
-    });
-    dropzoneDecrypt.addEventListener("dragleave", () => dropzoneDecrypt.classList.remove("dragover"));
-    dropzoneDecrypt.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzoneDecrypt.classList.remove("dragover");
-      if (e.dataTransfer.files.length) {
-        setDecryptFile(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInputDecrypt.addEventListener("change", (e) => {
-      if (e.target.files.length) {
-        setDecryptFile(e.target.files[0]);
-      }
-    });
-  }
-
-  function setDecryptFile(file) {
-    if (!file.name.endsWith(".enc")) {
-      alert("Por favor selecciona un archivo protegido válido (.enc)");
-      return;
-    }
-    selectedDecryptFile = file;
-    filenameDecrypt.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
-    btnRunDecrypt.disabled = false;
-    feedbackDecrypt.style.display = "none";
-    // Solicitar autorización policial inmediata
-    promptAuthModal(file, "descifrar");
-  }
-
-  if (btnRunDecrypt) {
-    btnRunDecrypt.addEventListener("click", () => {
-      if (selectedDecryptFile) {
-        promptAuthModal(selectedDecryptFile, "descifrar");
-      }
-    });
-  }
-}
-
-// Ejecuta el cifrado web tras verificar la clave de autorización
-async function executeWebEncrypt(file, clave) {
-  const modal = document.getElementById("modal-auth-ingesta");
-  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
-  const errorMsg = document.getElementById("modal-auth-error");
-  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
-  const claveInput = document.getElementById("input-auth-clave");
-  const feedbackEncrypt = document.getElementById("encrypt-feedback");
-
-  const formData = new FormData();
-  formData.append("archivo", file);
-
-  try {
-    const res = await fetch("/api/security/cifrar", {
-      method: "POST",
-      headers: { "X-Ingesta-Auth": clave },
-      body: formData,
-    });
-
-    if (res.status === 401) {
-      if (modalDialog) {
-        modalDialog.classList.remove("modal-shake");
-        void modalDialog.offsetWidth;
-        modalDialog.classList.add("modal-shake");
-      }
-      if (errorMsg) {
-        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Clave de autorización incorrecta o no autorizada`;
-        errorMsg.style.display = "flex";
-      }
-      if (confirmBtn) {
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
-      }
-      if (claveInput) {
-        claveInput.value = "";
-        claveInput.focus();
-      }
-      return;
-    }
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Fallo en el cifrado del archivo.");
-    }
-
-    const hashOriginal = res.headers.get("X-Hash-Original") || "N/D";
-    const hashCifrado = res.headers.get("X-Hash-Cifrado") || "N/D";
-
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${file.name}.enc`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    closeAuthModal();
-
-    if (feedbackEncrypt) {
-      feedbackEncrypt.className = "crypto-feedback-box success";
-      feedbackEncrypt.style.display = "block";
-      feedbackEncrypt.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-          <span>Archivo Blindado con Éxito (Operación Autorizada)</span>
-        </div>
-        Se descargó <code>${file.name}.enc</code> tras validar la credencial de operador.<br>
-        <small>• Huella SHA-256 Original: <code>${hashOriginal.substring(0, 16)}...</code><br>
-        • Huella SHA-256 Cifrada: <code>${hashCifrado.substring(0, 16)}...</code><br>
-        • Algoritmo: AES-256-GCM (Auth Tag 128-bit) &bull; Registrado en Bitácora de Auditoría</small>
-      `;
-    }
-  } catch (err) {
-    console.error("Error cifrando archivo web:", err);
-    closeAuthModal();
-    if (feedbackEncrypt) {
-      feedbackEncrypt.className = "crypto-feedback-box error";
-      feedbackEncrypt.style.display = "block";
-      feedbackEncrypt.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          <span>Error al cifrar:</span>
-        </div>
-        ${err.message}
-      `;
-    }
-  }
-}
-
-// Ejecuta el descifrado web tras verificar la clave de autorización
-async function executeWebDecrypt(file, clave) {
-  const modal = document.getElementById("modal-auth-ingesta");
-  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
-  const errorMsg = document.getElementById("modal-auth-error");
-  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
-  const claveInput = document.getElementById("input-auth-clave");
-  const feedbackDecrypt = document.getElementById("decrypt-feedback");
-
-  const formData = new FormData();
-  formData.append("archivo", file);
-
-  try {
-    const res = await fetch("/api/security/descifrar", {
-      method: "POST",
-      headers: { "X-Ingesta-Auth": clave },
-      body: formData,
-    });
-
-    if (res.status === 401) {
-      if (modalDialog) {
-        modalDialog.classList.remove("modal-shake");
-        void modalDialog.offsetWidth;
-        modalDialog.classList.add("modal-shake");
-      }
-      if (errorMsg) {
-        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Clave de autorización incorrecta o no autorizada`;
-        errorMsg.style.display = "flex";
-      }
-      if (confirmBtn) {
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
-      }
-      if (claveInput) {
-        claveInput.value = "";
-        claveInput.focus();
-      }
-      return;
-    }
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Fallo en el descifrado: integridad inválida.");
-    }
-
-    const hashDescifrado = res.headers.get("X-Hash-Descifrado") || "N/D";
-    const downloadName = file.name.replace(/\.enc$/i, "") || "archivo_descifrado.xlsx";
-
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = downloadName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    closeAuthModal();
-
-    if (feedbackDecrypt) {
-      feedbackDecrypt.className = "crypto-feedback-box success";
-      feedbackDecrypt.style.display = "block";
-      feedbackDecrypt.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-          <span>Integridad Validada & Descifrado Correcto (Operación Autorizada)</span>
-        </div>
-        Se descargó el archivo original <code>${downloadName}</code> tras validar su credencial.<br>
-        <small>• Verificación de Integridad: <strong>VÁLIDA (100% inalterado)</strong><br>
-        • Huella SHA-256 Descifrada: <code>${hashDescifrado.substring(0, 16)}...</code><br>
-        • Autenticación AEAD: Exitosa &bull; Registrado en Bitácora de Auditoría</small>
-      `;
-    }
-  } catch (err) {
-    console.error("Error descifrando archivo web:", err);
-    closeAuthModal();
-    if (feedbackDecrypt) {
-      feedbackDecrypt.className = "crypto-feedback-box error";
-      feedbackDecrypt.style.display = "block";
-      feedbackDecrypt.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          <span>Error de Descifrado:</span>
-        </div>
-        ${err.message}
-      `;
-    }
-  }
-}
-
 // ==========================================================================
 // MÓDULO DE AJUSTES: GESTIÓN DE HORARIOS DE REPORTE Y AUTOMATIZACIÓN
 // ==========================================================================
@@ -2989,6 +2844,9 @@ async function loadScheduleSettings() {
 
     // 7. Renderizar Historial de Despachos
     renderScheduleHistory(data.config.history || []);
+
+    // 8. Cargar Gestor de Destinatarios de Telegram (PostgreSQL)
+    cargarDestinatariosTelegram();
 
   } catch (err) {
     console.error("Error al cargar ajustes de horario:", err);
@@ -3282,5 +3140,1216 @@ function setupScheduleEvents() {
     btnRefreshHistory.addEventListener("click", () => {
       loadScheduleSettings();
     });
+  }
+
+  // Inicializar eventos del gestor de destinatarios
+  setupDestinatariosTelegramEvents();
+}
+
+// ==========================================================================
+// GESTOR DE DESTINATARIOS DE TELEGRAM (CLIENTE WEB)
+// ==========================================================================
+
+state.telegramDestinatarios = [];
+state.telegramBotLink = "https://t.me/AbisSystemBot";
+
+// Carga la lista de destinatarios desde el backend
+async function cargarDestinatariosTelegram() {
+  const tbody = document.getElementById("destinatarios-table-body");
+  try {
+    const res = await fetch("/api/telegram/destinatarios");
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Fallo al consultar destinatarios.");
+
+    state.telegramDestinatarios = data.destinatarios || [];
+
+    if (data.botInfo && data.botInfo.link) {
+      state.telegramBotLink = data.botInfo.link;
+      const linkDirecto = document.getElementById("link-directo-bot");
+      const labelLink = document.getElementById("label-link-bot");
+      if (linkDirecto) {
+        linkDirecto.href = data.botInfo.link;
+      }
+      if (labelLink) {
+        labelLink.textContent = `Abrir @${data.botInfo.username}`;
+      }
+    }
+
+    renderTablaDestinatarios(state.telegramDestinatarios);
+
+  } catch (err) {
+    console.error("Error al cargar destinatarios de Telegram:", err);
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center; color:#dc2626; padding:16px;">
+            Error cargando destinatarios: ${err.message}
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
+
+// Función auxiliar de sanitización para prevenir XSS en renderizado de texto
+function escaparHtml(texto) {
+  if (texto === null || texto === undefined) return "";
+  return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Renderiza la tabla de destinatarios con acciones operativas
+function renderTablaDestinatarios(destinatarios) {
+  const tbody = document.getElementById("destinatarios-table-body");
+  const countBadge = document.getElementById("destinatarios-count-badge");
+  if (!tbody) return;
+
+  if (countBadge) {
+    const total = (destinatarios || []).length;
+    const activos = (destinatarios || []).filter(d => d.activo).length;
+    countBadge.textContent = `${total} ${total === 1 ? 'destinatario' : 'destinatarios'} (${activos} activos)`;
+  }
+
+  if (!destinatarios || destinatarios.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:24px;">No hay destinatarios registrados aún. Asigne uno usando el formulario superior.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = destinatarios.map((d) => {
+    const estadoBadge = d.activo
+      ? `<span class="badge-active"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#15803d;"><polyline points="20 6 9 17 4 12"/></svg> Activo</span>`
+      : `<span class="badge-paused"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#64748b;"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg> Pausado</span>`;
+
+    const toggleText = d.activo ? "Pausar" : "Activar";
+    const toggleIcon = d.activo
+      ? `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>`
+      : `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    const testButtonHtml = d.activo
+      ? `<button type="button" class="btn-dest-action btn-dest-test" onclick="probarDestinatarioIndividual(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', this)" title="Enviar mensaje de prueba individual a este destinatario">
+           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+           <span>Probar</span>
+         </button>`
+      : `<button type="button" class="btn-dest-action btn-dest-test" disabled style="opacity: 0.45; cursor: not-allowed;" title="No es posible probar porque el oficial está pausado. Actívelo primero para enviar pruebas.">
+           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+           <span>Probar</span>
+         </button>`;
+
+    return `
+      <tr>
+        <td style="font-weight:600; color:var(--pdi-navy);">
+          ${escaparHtml(d.nombre)}
+        </td>
+        <td>
+          <code>${escaparHtml(d.chat_id)}</code>
+        </td>
+        <td>
+          <span class="badge badge-info">${escaparHtml(d.rol_unidad || "General")}</span>
+        </td>
+        <td>${estadoBadge}</td>
+        <td><small style="color:var(--text-muted);">${d.fecha_registro || '-'}</small></td>
+        <td style="text-align:center;">
+          <div class="dest-actions-group">
+            ${testButtonHtml}
+            <button type="button" class="btn-dest-action btn-dest-toggle" onclick="solicitarToggleDestinatario(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', '${d.chat_id}', ${d.activo})" title="${toggleText} envíos para este oficial">
+              ${toggleIcon}
+              <span>${toggleText}</span>
+            </button>
+            <button type="button" class="btn-dest-action btn-dest-delete" onclick="solicitarEliminarDestinatario(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', '${d.chat_id}')" title="Eliminar este oficial del sistema">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span>Eliminar</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// Configura eventos interactivos del Gestor de Destinatarios
+function setupDestinatariosTelegramEvents() {
+  // Formulario nuevo destinatario
+  const form = document.getElementById("form-nuevo-destinatario");
+  const destFeedback = document.getElementById("dest-feedback");
+
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById("dest-nombre")?.value?.trim();
+      const chatId = document.getElementById("dest-chat-id")?.value?.trim();
+      const rolUnidad = document.getElementById("dest-rol")?.value?.trim() || "Operativo";
+
+      if (!nombre) {
+        alert("Por favor ingrese el nombre u oficial.");
+        return;
+      }
+      if (!chatId || !/^-?\d+$/.test(chatId)) {
+        alert("El Chat ID debe ser un número entero válido de Telegram (ej: 7961617813).");
+        return;
+      }
+
+      promptAuthModal({ nombre, chatId, rolUnidad }, "destinatario_agregar");
+    });
+  }
+
+  // Botón Copiar Enlace Directo
+  const btnCopiar = document.getElementById("btn-copiar-link-bot");
+  if (btnCopiar) {
+    btnCopiar.addEventListener("click", () => {
+      const link = state.telegramBotLink || "https://t.me/AbisSystemBot";
+      navigator.clipboard.writeText(link).then(() => {
+        const textEl = document.getElementById("text-copiar-link-bot");
+        if (textEl) {
+          const prev = textEl.textContent;
+          textEl.textContent = "¡Enlace Copiado!";
+          setTimeout(() => { textEl.textContent = prev; }, 3000);
+        }
+      }).catch(() => {
+        prompt("Copie el enlace directo del bot para enviarlo al destinatario:", link);
+      });
+    });
+  }
+
+  // Botón Actualizar Lista
+  const btnRefresh = document.getElementById("btn-refresh-destinatarios");
+  if (btnRefresh) {
+    btnRefresh.addEventListener("click", () => {
+      cargarDestinatariosTelegram();
+    });
+  }
+}
+
+// Enviar prueba individual
+window.probarDestinatarioIndividual = async function(id, nombre, btn) {
+  const dest = (state.telegramDestinatarios || []).find((d) => d.id === id);
+  const feedback = document.getElementById("dest-feedback");
+
+  if (dest && !dest.activo) {
+    if (feedback) {
+      feedback.className = "crypto-feedback-box error";
+      feedback.style.display = "block";
+      feedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Destinatario Pausado</span>
+        </div>
+        No es posible enviar prueba a '${nombre}' porque está pausado. Debe activarlo primero.
+      `;
+      setTimeout(() => { feedback.style.display = "none"; }, 5000);
+    }
+    return;
+  }
+
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px; vertical-align:middle;"></span> Enviando...`;
+
+  try {
+    const res = await fetch(`/api/telegram/destinatarios/${id}/probar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "No se pudo enviar el mensaje.");
+    }
+
+    if (feedback) {
+      feedback.className = "crypto-feedback-box success";
+      feedback.style.display = "block";
+      feedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Mensaje de Verificación Enviado</span>
+        </div>
+        ${data.mensaje}
+      `;
+      setTimeout(() => { feedback.style.display = "none"; }, 6000);
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.className = "crypto-feedback-box error";
+      feedback.style.display = "block";
+      feedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error al Enviar Prueba a ${nombre}</span>
+        </div>
+        ${err.message}
+      `;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+};
+
+// Solicitar cambio de estado (Toggle)
+window.solicitarToggleDestinatario = function(id, nombre, chatId, estadoActual) {
+  const nuevoEstado = !estadoActual;
+  promptAuthModal({ id, nombre, chatId, nuevoEstado }, "destinatario_toggle");
+};
+
+// Solicitar eliminación de destinatario
+window.solicitarEliminarDestinatario = function(id, nombre, chatId) {
+  if (!confirm(`¿Está seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
+    return;
+  }
+  promptAuthModal({ id, nombre, chatId }, "destinatario_eliminar");
+};
+
+// Ejecución autorizada para agregar destinatario
+async function executeAgregarDestinatarioAuthorized(payload, clave) {
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const destFeedback = document.getElementById("dest-feedback");
+
+  try {
+    const res = await fetch("/api/telegram/destinatarios", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({
+        ...payload,
+        clave,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401 || data.codigo === "AUTH_REQUIRED") {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Clave no autorizada. Verifique su credencial.`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
+      }
+      if (claveInput) {
+        claveInput.select();
+        claveInput.focus();
+      }
+      return;
+    }
+
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo registrar el destinatario.");
+
+    closeAuthModal();
+
+    // Limpiar campos del formulario
+    const form = document.getElementById("form-nuevo-destinatario");
+    if (form) form.reset();
+    const destRol = document.getElementById("dest-rol");
+    if (destRol) destRol.value = "Operativo";
+
+    if (destFeedback) {
+      destFeedback.className = "crypto-feedback-box success";
+      destFeedback.style.display = "block";
+      destFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Oficial Asignado Exitosamente</span>
+        </div>
+        ${data.mensaje}
+      `;
+      setTimeout(() => { destFeedback.style.display = "none"; }, 5000);
+    }
+
+    await cargarDestinatariosTelegram();
+
+  } catch (err) {
+    closeAuthModal();
+    if (destFeedback) {
+      destFeedback.className = "crypto-feedback-box error";
+      destFeedback.style.display = "block";
+      destFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error al Asignar Destinatario</span>
+        </div>
+        ${err.message}
+      `;
+    }
+  }
+}
+
+// Ejecución autorizada para toggle estado destinatario
+async function executeToggleDestinatarioAuthorized(payload, clave) {
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const destFeedback = document.getElementById("dest-feedback");
+
+  try {
+    const res = await fetch(`/api/telegram/destinatarios/${payload.id}/toggle`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({
+        activo: payload.nuevoEstado,
+        clave,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401 || data.codigo === "AUTH_REQUIRED") {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Clave no autorizada. Verifique su credencial.`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
+      }
+      if (claveInput) {
+        claveInput.select();
+        claveInput.focus();
+      }
+      return;
+    }
+
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo actualizar el estado.");
+
+    closeAuthModal();
+
+    if (destFeedback) {
+      destFeedback.className = "crypto-feedback-box success";
+      destFeedback.style.display = "block";
+      destFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Estado Actualizado</span>
+        </div>
+        ${data.mensaje}
+      `;
+      setTimeout(() => { destFeedback.style.display = "none"; }, 4000);
+    }
+
+    await cargarDestinatariosTelegram();
+
+  } catch (err) {
+    closeAuthModal();
+    if (destFeedback) {
+      destFeedback.className = "crypto-feedback-box error";
+      destFeedback.style.display = "block";
+      destFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error de Actualización</span>
+        </div>
+        ${err.message}
+      `;
+    }
+  }
+}
+
+// Ejecución autorizada para eliminar destinatario
+async function executeEliminarDestinatarioAuthorized(payload, clave) {
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const destFeedback = document.getElementById("dest-feedback");
+
+  try {
+    const res = await fetch(`/api/telegram/destinatarios/${payload.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({ clave }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401 || data.codigo === "AUTH_REQUIRED") {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Clave no autorizada. Verifique su credencial.`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `<span>Reintentar Autorización</span>`;
+      }
+      if (claveInput) {
+        claveInput.select();
+        claveInput.focus();
+      }
+      return;
+    }
+
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo eliminar el destinatario.");
+
+    closeAuthModal();
+
+    if (destFeedback) {
+      destFeedback.className = "crypto-feedback-box success";
+      destFeedback.style.display = "block";
+      destFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Destinatario Eliminado</span>
+        </div>
+        ${data.mensaje}
+      `;
+      setTimeout(() => { destFeedback.style.display = "none"; }, 4000);
+    }
+
+    await cargarDestinatariosTelegram();
+
+  } catch (err) {
+    closeAuthModal();
+    if (destFeedback) {
+      destFeedback.className = "crypto-feedback-box error";
+      destFeedback.style.display = "block";
+      destFeedback.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>Error de Eliminación</span>
+        </div>
+        ${err.message}
+      `;
+    }
+  }
+}
+
+// ==========================================================================
+// MÓDULO: COMPARADOR DE PERÍODOS (BENCHMARKING)
+// ==========================================================================
+
+async function cargarComparacionPeriodos(tipo) {
+  try {
+    document.getElementById("btn-comp-semana").classList.toggle("active", tipo === "semana");
+    document.getElementById("btn-comp-mes").classList.toggle("active", tipo === "mes");
+    
+    document.getElementById("comp-sub-total").textContent = "Calculando...";
+    
+    const res = await fetch(`/api/metricas/comparar?tipo=${tipo}`);
+    if (!res.ok) throw new Error("Error en comparador");
+    
+    const data = await res.json();
+    
+    const fmt = n => Number(n).toLocaleString("es-CL");
+    const fmtPct = n => Number(n).toFixed(1) + "%";
+    
+    const updateCard = (prefix, valAct, valAnt, variacion, isInverted = false) => {
+      document.getElementById(`comp-kpi-${prefix}`).textContent = prefix === "sla" ? fmtPct(valAct) : fmt(valAct);
+      const deltaEl = document.getElementById(`comp-delta-${prefix}`);
+      
+      let sign = variacion > 0 ? "+" : (variacion < 0 ? "-" : "");
+      let absVar = Math.abs(variacion);
+      deltaEl.textContent = prefix === "sla" ? `${sign}${absVar.toFixed(1)} pp` : `${sign}${absVar.toFixed(1)}%`;
+      
+      deltaEl.className = "delta-badge";
+      if (variacion === 0) {
+        deltaEl.classList.add("delta-neutral");
+      } else if (variacion > 0) {
+        deltaEl.classList.add(isInverted ? "delta-negative" : "delta-positive");
+      } else {
+        deltaEl.classList.add(isInverted ? "delta-positive" : "delta-negative");
+      }
+      
+      document.getElementById(`comp-sub-${prefix}`).textContent = `Anterior: ${prefix === "sla" ? fmtPct(valAnt) : fmt(valAnt)}`;
+    };
+
+    updateCard("total", data.actual.total, data.anterior.total, data.variacion.total);
+    updateCard("sinc", data.actual.sincronizados, data.anterior.sincronizados, data.variacion.sincronizados);
+    updateCard("sla", data.actual.sla, data.anterior.sla, data.variacion.sla);
+    updateCard("err", data.actual.errores, data.anterior.errores, data.variacion.errores, true);
+
+    // Enriquecer el subtitulo del SLA Medio con la cantidad absoluta
+    const slaSub = document.getElementById("comp-sub-sla");
+    if (slaSub) {
+      slaSub.textContent = `(${fmt(data.actual.sincronizados)} regs) Anterior: ${fmtPct(data.anterior.sla)}`;
+    }
+
+  } catch (e) {
+    console.error("[BENCHMARKING ERROR]", e);
+    document.getElementById("comp-sub-total").textContent = "Error al cargar comparativa";
+  }
+}
+
+document.getElementById("btn-comp-semana")?.addEventListener("click", () => cargarComparacionPeriodos("semana"));
+document.getElementById("btn-comp-mes")?.addEventListener("click", () => cargarComparacionPeriodos("mes"));
+
+// ==========================================================================
+// MÓDULO: BITÁCORA Y AUDITORÍA
+// ==========================================================================
+
+let auditState = {
+  offset: 0,
+  limit: 25,
+  tipo: "",
+  desde: "",
+  hasta: ""
+};
+
+async function cargarBitacoraAuditoria(reset = false) {
+  if (reset) auditState.offset = 0;
+  
+  const tbody = document.getElementById("audit-table-body");
+  if (!tbody) return;
+  
+  if (reset) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px;">Consultando bitácora...</td></tr>`;
+
+  try {
+    const params = new URLSearchParams({
+      limit: auditState.limit,
+      offset: auditState.offset
+    });
+    if (auditState.tipo) params.append("tipo", auditState.tipo);
+    if (auditState.desde) params.append("desde", auditState.desde);
+    if (auditState.hasta) params.append("hasta", auditState.hasta);
+
+    const res = await fetch(`/api/auditoria?${params.toString()}`);
+    if (!res.ok) throw new Error("Error en auditoría");
+    
+    const rows = await res.json();
+    
+    if (rows.length === 0 && auditState.offset === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-muted);">No hay eventos registrados en la bitácora.</td></tr>`;
+    } else if (rows.length === 0) {
+      // no-op (no hay mas pags)
+    } else {
+      tbody.innerHTML = rows.map(r => {
+        const d = new Date(r.fecha_evento);
+        const fecha = d.toLocaleDateString("es-CL") + " " + d.toLocaleTimeString("es-CL");
+        
+        let badgeClass = "audit-badge-default";
+        if (r.tipo_evento.includes("INGESTA")) badgeClass = "audit-badge-ingesta";
+        if (r.tipo_evento.includes("TELEGRAM")) badgeClass = "audit-badge-telegram";
+        if (r.tipo_evento.includes("SEGURIDAD")) badgeClass = "audit-badge-seguridad";
+        
+        return `
+          <tr>
+            <td style="font-size: 0.82rem;">${fecha}</td>
+            <td><span class="audit-badge ${badgeClass}">${r.tipo_evento}</span></td>
+            <td style="font-family: monospace; font-size: 0.8rem; color: var(--pdi-navy);">${r.archivo_procesado || '-'}</td>
+            <td>${r.usuario_o_proceso || '-'}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px; white-space: normal;">${r.detalles_cifrados || '-'}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+    
+    document.getElementById("audit-page-info").textContent = `Página ${Math.floor(auditState.offset / auditState.limit) + 1}`;
+    document.getElementById("btn-audit-prev").disabled = auditState.offset === 0;
+    document.getElementById("btn-audit-next").disabled = rows.length < auditState.limit;
+
+  } catch (e) {
+    console.error("[AUDIT ERROR]", e);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: #dc2626;">Error al cargar bitácora.</td></tr>`;
+  }
+}
+
+document.getElementById("btn-audit-search")?.addEventListener("click", () => {
+  auditState.tipo = document.getElementById("audit-filter-tipo").value;
+  auditState.desde = document.getElementById("audit-filter-desde").value;
+  auditState.hasta = document.getElementById("audit-filter-hasta").value;
+  cargarBitacoraAuditoria(true);
+});
+
+document.getElementById("btn-audit-prev")?.addEventListener("click", () => {
+  if (auditState.offset > 0) {
+    auditState.offset -= auditState.limit;
+    cargarBitacoraAuditoria();
+  }
+});
+
+document.getElementById("btn-audit-next")?.addEventListener("click", () => {
+  auditState.offset += auditState.limit;
+  cargarBitacoraAuditoria();
+});
+
+// ==========================================================================
+// MÓDULO DE HOJA DE CÁLCULO / PORTAPAPELES DIRECTO (ORACLE & EXCEL)
+// ==========================================================================
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+const sheetState = {
+  headers: [],
+  rows: [],
+};
+
+const SHEET_SCHEMA = [
+  { field: "fechaEnrolamiento", label: "Fecha", required: true, aliases: ["fecha", "fecha_enrolamiento", "fecha enrolamiento"] },
+  { field: "nacionalidad", label: "Nacionalidad", required: true, aliases: ["nacionalidad", "documento_emitido", "emitido en", "documento_emitido_1"] },
+  { field: "region", label: "Región", required: false, aliases: ["region", "región", "region2"] },
+  { field: "unidad", label: "Unidad Policial", required: true, aliases: ["unidad"] },
+  { field: "cuartel", label: "Cuartel", required: true, aliases: ["cuartel", "cuartel_new", "cuartelnew"] },
+  { field: "equipo", label: "Equipo ABIS", required: true, aliases: ["equipo", "dispositivo"] },
+  { field: "genero", label: "Género", required: true, aliases: ["genero", "género"] },
+  { field: "mayorEdad", label: "Rango Etario", required: true, aliases: ["mayor de edad", "rango_etario", "edades", "mayor edad"] },
+  { field: "edadExacta", label: "Edad", required: false, aliases: ["edad", "edad exacta", "edad_1"] },
+  { field: "estadoSincronizacion", label: "Sincronización PDI", required: true, aliases: ["estado sincronizacion", "sincronización pdi", "sincronizacion_pdi", "sincronizacion pdi", "estado sincronización"] },
+  { field: "estadoRegistro", label: "Registración Biométrica", required: true, aliases: ["estado registro", "registración biométrica", "registracion_biometrica", "registracion biometrica"] },
+  { field: "estadoGeneral", label: "Estado General", required: true, aliases: ["estado general", "estado_general"] },
+];
+
+function initSpreadsheetIngest() {
+  const btnModeSheet = document.getElementById("btn-mode-sheet");
+  const btnModeFile = document.getElementById("btn-mode-file");
+  const viewSheet = document.getElementById("ingesta-view-sheet");
+  const viewFile = document.getElementById("ingesta-view-file");
+
+  if (btnModeSheet && btnModeFile) {
+    btnModeSheet.addEventListener("click", () => {
+      btnModeSheet.classList.add("active");
+      btnModeFile.classList.remove("active");
+      if (viewSheet) viewSheet.style.display = "block";
+      if (viewFile) viewFile.style.display = "none";
+    });
+
+    btnModeFile.addEventListener("click", () => {
+      btnModeFile.classList.add("active");
+      btnModeSheet.classList.remove("active");
+      if (viewFile) viewFile.style.display = "block";
+      if (viewSheet) viewSheet.style.display = "none";
+    });
+  }
+
+  // Captura global de evento 'paste' cuando se está en la pestaña de ingesta
+  document.addEventListener("paste", (e) => {
+    if (state.activeTab !== "ingesta") return;
+    const authModal = document.getElementById("modal-auth-ingesta");
+    if (authModal && authModal.style.display === "flex") return;
+
+    if (document.activeElement && document.activeElement.id === "sheet-hidden-paste-area") return;
+
+    const clipboardText = e.clipboardData ? e.clipboardData.getData("text") : "";
+    if (clipboardText && clipboardText.trim().length > 0) {
+      e.preventDefault();
+      handlePastedClipboardText(clipboardText);
+    }
+  });
+
+  const btnPasteClipboard = document.getElementById("btn-paste-clipboard");
+  if (btnPasteClipboard) {
+    btnPasteClipboard.addEventListener("click", async () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          if (text && text.trim().length > 0) {
+            handlePastedClipboardText(text);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Acceso directo a portapapeles restringido:", err.message);
+      }
+      const textarea = document.getElementById("sheet-hidden-paste-area");
+      if (textarea) {
+        textarea.focus();
+        textarea.placeholder = "Por favor pega aquí los datos con Ctrl + V...";
+      }
+    });
+  }
+
+  const dropzoneArea = document.getElementById("sheet-paste-dropzone");
+  if (dropzoneArea) {
+    dropzoneArea.addEventListener("click", (e) => {
+      if (e.target.id !== "sheet-hidden-paste-area") {
+        const textarea = document.getElementById("sheet-hidden-paste-area");
+        if (textarea) textarea.focus();
+      }
+    });
+  }
+
+  const hiddenTextarea = document.getElementById("sheet-hidden-paste-area");
+  if (hiddenTextarea) {
+    hiddenTextarea.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (val && val.trim().length > 0) {
+        handlePastedClipboardText(val);
+        e.target.value = "";
+      }
+    });
+  }
+
+  const btnLoadSample = document.getElementById("btn-load-sample-sheet");
+  if (btnLoadSample) {
+    btnLoadSample.addEventListener("click", () => {
+      loadSampleOracleData();
+    });
+  }
+
+  const btnClearSheet = document.getElementById("btn-clear-sheet");
+  if (btnClearSheet) {
+    btnClearSheet.addEventListener("click", () => {
+      clearSpreadsheetData();
+    });
+  }
+
+  const btnAddRow = document.getElementById("btn-sheet-add-row");
+  if (btnAddRow) {
+    btnAddRow.addEventListener("click", () => {
+      addEmptyRowToSpreadsheet();
+    });
+  }
+
+  const btnSubmit = document.getElementById("btn-sheet-submit");
+  const btnSubmitBottom = document.getElementById("btn-sheet-submit-bottom");
+  const submitHandler = () => {
+    submitSpreadsheetIngest();
+  };
+  if (btnSubmit) btnSubmit.addEventListener("click", submitHandler);
+  if (btnSubmitBottom) btnSubmitBottom.addEventListener("click", submitHandler);
+}
+
+function handlePastedClipboardText(rawText) {
+  const parsed = parseClipboardData(rawText);
+  if (!parsed.rows || parsed.rows.length === 0) {
+    alert("No se detectaron filas tabulares válidas en el contenido pegado.");
+    return;
+  }
+  sheetState.headers = parsed.headers;
+  sheetState.rows = parsed.rows;
+  renderSpreadsheetGrid();
+}
+
+function parseClipboardData(text) {
+  if (!text || typeof text !== "string") return { headers: [], rows: [] };
+
+  const lines = text
+    .split(/\r\n|\n|\r/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (lines.length === 0) return { headers: [], rows: [] };
+
+  const firstLine = lines[0];
+  let delim = "\t";
+  if (firstLine.includes("\t")) {
+    delim = "\t";
+  } else if (firstLine.includes(";")) {
+    delim = ";";
+  } else if (firstLine.includes(",")) {
+    delim = ",";
+  }
+
+  function splitLine(line, delimiter) {
+    if (delimiter === "\t") {
+      return line.split("\t").map((cell) => cell.trim().replace(/^["']|["']$/g, ""));
+    }
+    const result = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === delimiter && !inQuotes) {
+        result.push(cur.trim().replace(/^["']|["']$/g, ""));
+        cur = "";
+      } else {
+        cur += char;
+      }
+    }
+    result.push(cur.trim().replace(/^["']|["']$/g, ""));
+    return result;
+  }
+
+  const grid = lines.map((l) => splitLine(l, delim));
+  if (grid.length === 0) return { headers: [], rows: [] };
+
+  const firstRow = grid[0];
+  const knownKeywords = [
+    "fecha", "enrolamiento", "nacionalidad", "documento", "emitido",
+    "region", "unidad", "cuartel", "equipo", "genero", "edad",
+    "edades", "sincronizacion", "biometrica", "estado", "pdi"
+  ];
+
+  const hasHeaderKeywords = firstRow.some((cell) => {
+    const norm = String(cell).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return knownKeywords.some((kw) => norm.includes(kw));
+  });
+
+  let headers = [];
+  let dataRows = [];
+
+  if (hasHeaderKeywords) {
+    headers = firstRow.map((h) => String(h || "").trim());
+    dataRows = grid.slice(1);
+  } else {
+    headers = [
+      "FECHA_ENROLAMIENTO",
+      "DOCUMENTO_EMITIDO",
+      "REGION",
+      "UNIDAD",
+      "CUARTEL_NEW",
+      "EQUIPO",
+      "GENERO",
+      "EDADES",
+      "EDAD_1",
+      "SINCRONIZACION_PDI",
+      "REGISTRACION_BIOMETRICA",
+      "ESTADO_GENERAL"
+    ];
+    dataRows = grid;
+  }
+
+  return { headers, rows: dataRows };
+}
+
+function loadSampleOracleData() {
+  const hoy = new Date().toISOString().split("T")[0];
+  const sampleHeaders = [
+    "Acciones", "Fecha", "hora", "EQUIPO", "Usuario", "UNIDAD",
+    "Nombre Completo", "Tipo de Documento", "Documento", "Emitido En",
+    "Nacionalidad", "Sincronización PDI", "Registración Biométrica",
+    "Estado General", "CUARTEL", "REGION", "FECHA NACIMIENTO", "EDAD",
+    "RANGO_ETARIO", "UUII", "IP", "CUARTELNEW", "NOMBRE_FUNCIONARIO",
+    "REGION2", "GENERO", "TIPO REGISTRO"
+  ];
+  const sampleRows = [
+    ["", hoy, "08:15:00", "PC DE ESCRITORIO", "operador1", "PREPOLIN ARICA", "GOMEZ PEREZ JUAN", "DNI", "87654321", "VENEZUELA", "VENEZUELA", "SINCRONIZADO", "REGISTRADO", "REGISTRADO", "CHACALLUTA", "ARICA Y PARINACOTA", "1994-02-10", "32", "MAYOR DE EDAD", "U101", "10.20.1.15", "", "SUBCOMISARIO DIAZ", "", "HOMBRE", "ENROLADO"],
+    ["", hoy, "09:30:22", "TABLET", "operador2", "PREPOLIN ARICA", "SILVA MORA LAURA", "PASAPORTE", "PA123456", "COLOMBIA", "COLOMBIA", "SINCRONIZADO", "REGISTRADO", "REGISTRADO", "CHUNGARA", "ARICA Y PARINACOTA", "1998-07-25", "28", "MAYOR DE EDAD", "U102", "10.20.1.18", "", "INSPECTORA CASTRO", "", "MUJER", "ENROLADO"],
+    ["", hoy, "10:45:10", "PC DE ESCRITORIO", "operador3", "JENATID", "MAMANI CHOQUE CARLOS", "CEDULA", "65432198", "BOLIVIA", "BOLIVIA", "SINCRONIZADO", "REGISTRADO", "REGISTRADO", "COLCHANES", "TARAPACA", "2012-11-03", "14", "MENOR DE EDAD", "U103", "10.20.2.11", "", "COMISARIO ROJAS", "", "HOMBRE", "ENROLADO"],
+    ["", hoy, "11:20:05", "TABLET", "operador1", "PREPOLIN ARICA", "JEAN BAPTISTE MARIE", "PASAPORTE", "HT998877", "HAITI", "HAITI", "SINCRONIZADO", "REGISTRADO", "REGISTRADO", "BELEN", "ARICA Y PARINACOTA", "1985-04-12", "41", "MAYOR DE EDAD", "U104", "10.20.1.20", "", "SUBCOMISARIO DIAZ", "", "MUJER", "ENROLADO"],
+    ["", hoy, "12:05:40", "PC DE ESCRITORIO", "operador2", "PREPOLIN ARICA", "QUISPE MAMANI LUIS", "DNI", "45678912", "PERU", "PERU", "SINCRONIZADO", "REGISTRADO", "REGISTRADO", "CHACALLUTA", "ARICA Y PARINACOTA", "1987-09-30", "39", "MAYOR DE EDAD", "U105", "10.20.1.22", "", "INSPECTORA CASTRO", "", "HOMBRE", "ENROLADO"]
+  ];
+
+  const tsvText = [
+    sampleHeaders.join("\t"),
+    ...sampleRows.map(r => r.join("\t"))
+  ].join("\n");
+
+  handlePastedClipboardText(tsvText);
+}
+
+function renderSpreadsheetGrid() {
+  const dropzone = document.getElementById("sheet-paste-dropzone");
+  const previewCard = document.getElementById("sheet-preview-card");
+  const btnClear = document.getElementById("btn-clear-sheet");
+  const statRows = document.getElementById("sheet-stat-rows");
+  const statCols = document.getElementById("sheet-stat-cols");
+  const statStatus = document.getElementById("sheet-stat-status");
+  const countBadge = document.getElementById("sheet-preview-count-badge");
+  const mappingChips = document.getElementById("sheet-column-mapping-chips");
+  const thead = document.getElementById("sheet-table-head");
+  const tbody = document.getElementById("sheet-table-body");
+
+  if (!dropzone || !previewCard) return;
+
+  const rowCount = sheetState.rows.length;
+  const colCount = sheetState.headers.length;
+
+  if (rowCount === 0) {
+    dropzone.style.display = "block";
+    previewCard.style.display = "none";
+    if (btnClear) btnClear.style.display = "none";
+    if (statRows) statRows.textContent = "0";
+    if (statCols) statCols.textContent = "0 / 12";
+    if (statStatus) {
+      statStatus.className = "badge badge-default";
+      statStatus.textContent = "Esperando datos";
+    }
+    return;
+  }
+
+  dropzone.style.display = "none";
+  previewCard.style.display = "block";
+  if (btnClear) btnClear.style.display = "inline-flex";
+
+  if (statRows) statRows.textContent = rowCount.toLocaleString();
+  if (countBadge) countBadge.textContent = `${rowCount.toLocaleString()} filas`;
+
+  const mappedFieldKeys = new Set();
+  const chipsHtml = sheetState.headers.map((h, colIdx) => {
+    const normH = String(h || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const match = SHEET_SCHEMA.find(def => {
+      const defNorm = def.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return normH === defNorm || def.aliases.some(a => normH === a.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+    });
+
+    if (match) {
+      const isFirst = !mappedFieldKeys.has(match.field);
+      mappedFieldKeys.add(match.field);
+      const tagSuffix = isFirst ? `➔ <strong>${match.label}</strong>` : `(Alternativo ➔ ${match.label})`;
+      return `<span class="col-map-chip matched" title="Mapeada al modelo ABIS: ${match.label}">✓ ${escapeHtml(h)} ${tagSuffix}</span>`;
+    } else {
+      return `<span class="col-map-chip extra" title="Columna informativa / no modelada">Col ${colIdx + 1}: ${escapeHtml(h)}</span>`;
+    }
+  });
+
+  if (mappingChips) {
+    mappingChips.innerHTML = chipsHtml.join("");
+  }
+
+  const requiredDefs = SHEET_SCHEMA.filter(s => s.required);
+  const metRequiredCount = requiredDefs.filter(s => mappedFieldKeys.has(s.field)).length;
+
+  if (statCols) {
+    statCols.textContent = `${colCount} columnas (${metRequiredCount}/${requiredDefs.length} campos clave identificados)`;
+  }
+
+  if (statStatus) {
+    if (metRequiredCount >= requiredDefs.length) {
+      statStatus.className = "badge badge-success";
+      statStatus.textContent = "Listo para Ingesta (100% Claves OK)";
+    } else if (metRequiredCount >= 7) {
+      statStatus.className = "badge badge-warning";
+      statStatus.textContent = "Revisar Cabeceras Parciales";
+    } else {
+      statStatus.className = "badge badge-danger";
+      statStatus.textContent = "Faltan Campos Requeridos";
+    }
+  }
+
+  if (thead) {
+    let theadHtml = "<tr>";
+    theadHtml += `<th class="col-index">#</th>`;
+    sheetState.headers.forEach((h, colIdx) => {
+      theadHtml += `<th>${escapeHtml(h || `Columna ${colIdx + 1}`)}</th>`;
+    });
+    theadHtml += `<th class="col-action" title="Eliminar fila">✕</th>`;
+    theadHtml += "</tr>";
+    thead.innerHTML = theadHtml;
+  }
+
+  if (tbody) {
+    const maxVisual = Math.min(rowCount, 100);
+    let tbodyHtml = "";
+
+    for (let r = 0; r < maxVisual; r++) {
+      const row = sheetState.rows[r] || [];
+      tbodyHtml += `<tr data-row-idx="${r}">`;
+      tbodyHtml += `<td class="cell-index">${r + 1}</td>`;
+      for (let c = 0; c < colCount; c++) {
+        const val = row[c] !== undefined ? String(row[c]) : "";
+        tbodyHtml += `<td class="cell-editable" contenteditable="true" data-row="${r}" data-col="${c}" title="Doble clic para editar">${escapeHtml(val)}</td>`;
+      }
+      tbodyHtml += `
+        <td style="text-align: center;">
+          <button type="button" class="btn-cell-delete" data-delete-row="${r}" title="Eliminar esta fila">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </td>
+      `;
+      tbodyHtml += "</tr>";
+    }
+
+    if (rowCount > 100) {
+      tbodyHtml += `
+        <tr>
+          <td colspan="${colCount + 2}" style="text-align: center; color: var(--text-muted); padding: 12px; font-style: italic; background: #f8fafc;">
+            ... y ${(rowCount - 100).toLocaleString()} filas más que serán procesadas en su totalidad al ingestar.
+          </td>
+        </tr>
+      `;
+    }
+
+    tbody.innerHTML = tbodyHtml;
+
+    tbody.querySelectorAll("td.cell-editable").forEach((td) => {
+      td.addEventListener("blur", (e) => {
+        const r = parseInt(e.target.getAttribute("data-row"), 10);
+        const c = parseInt(e.target.getAttribute("data-col"), 10);
+        const val = e.target.innerText.trim();
+        if (sheetState.rows[r]) {
+          sheetState.rows[r][c] = val;
+        }
+      });
+    });
+
+    tbody.querySelectorAll("button[data-delete-row]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const r = parseInt(btn.getAttribute("data-delete-row"), 10);
+        if (!isNaN(r)) {
+          sheetState.rows.splice(r, 1);
+          renderSpreadsheetGrid();
+        }
+      });
+    });
+  }
+}
+
+function clearSpreadsheetData() {
+  sheetState.headers = [];
+  sheetState.rows = [];
+  const feedback = document.getElementById("sheet-ingest-feedback");
+  if (feedback) feedback.style.display = "none";
+  renderSpreadsheetGrid();
+}
+
+function addEmptyRowToSpreadsheet() {
+  if (sheetState.headers.length === 0) {
+    sheetState.headers = [
+      "FECHA_ENROLAMIENTO", "DOCUMENTO_EMITIDO", "REGION", "UNIDAD",
+      "CUARTEL_NEW", "EQUIPO", "GENERO", "EDADES",
+      "EDAD_1", "SINCRONIZACION_PDI", "REGISTRACION_BIOMETRICA", "ESTADO_GENERAL"
+    ];
+  }
+  const emptyRow = new Array(sheetState.headers.length).fill("");
+  sheetState.rows.unshift(emptyRow);
+  renderSpreadsheetGrid();
+}
+
+function submitSpreadsheetIngest() {
+  if (!sheetState.rows || sheetState.rows.length === 0) {
+    alert("No hay filas cargadas en la hoja de cálculo.");
+    return;
+  }
+  if (!sheetState.headers || sheetState.headers.length === 0) {
+    alert("No se han definido cabeceras válidas.");
+    return;
+  }
+
+  promptAuthModal({
+    headers: sheetState.headers,
+    rows: sheetState.rows
+  }, "sheet_ingest");
+}
+
+async function executeSheetIngestAuthorized(sheetData, clave) {
+  const modal = document.getElementById("modal-auth-ingesta");
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const claveInput = document.getElementById("input-auth-clave");
+  const feedbackDiv = document.getElementById("sheet-ingest-feedback");
+
+  try {
+    const res = await fetch("/api/ingest/sheet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({
+        headers: sheetData.headers,
+        rows: sheetData.rows,
+        clave,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401 || data.codigo === "AUTH_REQUIRED") {
+      if (modalDialog) {
+        modalDialog.classList.remove("modal-shake");
+        void modalDialog.offsetWidth;
+        modalDialog.classList.add("modal-shake");
+      }
+      if (errorMsg) {
+        errorMsg.innerHTML = `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Clave de autorización no válida. Verifique su credencial policial.`;
+        errorMsg.style.display = "flex";
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span>Autorizar e Ingestar en BD</span>
+        `;
+      }
+      if (claveInput) {
+        claveInput.select();
+        claveInput.focus();
+      }
+      return;
+    }
+
+    closeAuthModal();
+
+    if (feedbackDiv) feedbackDiv.style.display = "block";
+
+    if (res.ok && data.ok) {
+      if (feedbackDiv) {
+        feedbackDiv.innerHTML = `
+          <div class="alert alert-success">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--status-success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <strong style="font-size:1.02rem;">Ingesta desde Hoja de Cálculo Auditada e Insertada Exitosamente</strong>
+              </div>
+              <div style="margin-top:8px; line-height:1.65;">
+                &bull; <strong>Modo de Carga:</strong> <span class="badge badge-success">Portapapeles Directo Oracle DB / Excel</span><br>
+                &bull; <strong>Filas Procesadas:</strong> <strong>${(data.totalMapeadas || sheetData.rows.length).toLocaleString()}</strong> recibidas &bull; <strong>${(data.totalInsertadas || 0).toLocaleString()}</strong> insertadas en PostgreSQL<br>
+                &bull; <strong>Inconsistencias Registradas:</strong> ${data.erroresFilas || 0}<br>
+                &bull; <strong>Tiempo de Inserción:</strong> ${((data.duracionMs || 0) / 1000).toFixed(2)} segundos<br>
+                &bull; <strong>Huella Criptográfica SHA-256:</strong> <code>${data.hashSHA256}</code><br>
+                &bull; <strong>Auditoría:</strong> Evento <code>INGESTA_PORTAPAPELES_AUTORIZADA</code> registrado en la bitácora inmutable.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      clearSpreadsheetData();
+
+      await loadAvailableDates();
+      await loadMetrics();
+      await loadTrendData();
+      await checkSystemHealth();
+      if (typeof cargarBitacoraAuditoria === "function") {
+        cargarBitacoraAuditoria();
+      }
+    } else {
+      if (feedbackDiv) {
+        feedbackDiv.innerHTML = `
+          <div class="alert alert-error">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:#ef4444;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <strong>Error en la Ingesta de Hoja de Cálculo:</strong>
+            </div>
+            ${data.error || "Ocurrió un error al procesar las filas."}
+          </div>
+        `;
+      }
+    }
+  } catch (err) {
+    closeAuthModal();
+    if (feedbackDiv) {
+      feedbackDiv.style.display = "block";
+      feedbackDiv.innerHTML = `
+        <div class="alert alert-error">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:#ef4444;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <strong>Error de Conexión:</strong>
+          </div>
+          ${err.message}
+        </div>
+      `;
+    }
   }
 }

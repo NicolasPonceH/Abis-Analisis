@@ -286,4 +286,65 @@ test.describe('Sistema ABIS - API Endpoints', () => {
     expect(data.resultado.estado).toBe('EXITO');
     expect(data.resultado.canal).toBe('Telegram Oficial PDI');
   });
+
+  test('GET /api/telegram/destinatarios returns recipient list and bot info', async ({ request }) => {
+    const res = await request.get(`${BASE_URL}/api/telegram/destinatarios`);
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    expect(data.ok).toBe(true);
+    expect(Array.isArray(data.destinatarios)).toBe(true);
+    if (data.botInfo) {
+      expect(data.botInfo).toHaveProperty('link');
+    }
+  });
+
+  test('POST /api/telegram/destinatarios rejects unauthorized requests', async ({ request }) => {
+    const res = await request.post(`${BASE_URL}/api/telegram/destinatarios`, {
+      data: { nombre: 'Test Unauth', chatId: '123456789' }
+    });
+    expect(res.status()).toBe(401);
+  });
+
+  test('POST /api/telegram/destinatarios CRUD lifecycle with auth', async ({ request }) => {
+    const testChatId = '888777666';
+    // 1. Crear
+    const createRes = await request.post(`${BASE_URL}/api/telegram/destinatarios`, {
+      headers: { 'X-Ingesta-Auth': 'pdi2026' },
+      data: {
+        nombre: 'Oficial Test Playwright',
+        chatId: testChatId,
+        rolUnidad: 'Unidad Fronteriza',
+        activo: true
+      }
+    });
+    expect(createRes.ok()).toBeTruthy();
+    const createData = await createRes.json();
+    expect(createData.ok).toBe(true);
+    const destId = createData.destinatario.id;
+
+    try {
+      // 2. Toggle estado a pausado (activo: false)
+      const toggleRes = await request.patch(`${BASE_URL}/api/telegram/destinatarios/${destId}/toggle`, {
+        headers: { 'X-Ingesta-Auth': 'pdi2026' },
+        data: { activo: false }
+      });
+      expect(toggleRes.ok()).toBeTruthy();
+      const toggleData = await toggleRes.json();
+      expect(toggleData.ok).toBe(true);
+      expect(toggleData.destinatario.activo).toBe(false);
+
+      // 3. Verificar que NO se pueda probar mientras esté pausado
+      const testPingRes = await request.post(`${BASE_URL}/api/telegram/destinatarios/${destId}/probar`);
+      expect(testPingRes.status()).toBe(400);
+      const testPingData = await testPingRes.json();
+      expect(testPingData.ok).toBe(false);
+      expect(testPingData.error).toContain('pausado');
+    } finally {
+      // 4. Eliminar (limpieza garantizada)
+      const delRes = await request.delete(`${BASE_URL}/api/telegram/destinatarios/${destId}`, {
+        headers: { 'X-Ingesta-Auth': 'pdi2026' }
+      });
+      expect(delRes.ok()).toBeTruthy();
+    }
+  });
 });

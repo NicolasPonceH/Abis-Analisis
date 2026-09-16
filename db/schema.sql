@@ -79,3 +79,19 @@ CREATE TABLE IF NOT EXISTS registro_auditoria_cifrada (
 );
 
 CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON registro_auditoria_cifrada (fecha_evento);
+
+-- Tabla de destinatarios institucionales de Telegram (almacenamiento local cifrado AES-256 en PostgreSQL)
+CREATE TABLE IF NOT EXISTS destinatarios_telegram (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    chat_id TEXT NOT NULL,
+    chat_id_hash VARCHAR(64) NOT NULL UNIQUE,
+    rol_unidad VARCHAR(120) DEFAULT 'General',
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_destinatarios_activo ON destinatarios_telegram (activo);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_destinatarios_hash ON destinatarios_telegram (chat_id_hash);
+

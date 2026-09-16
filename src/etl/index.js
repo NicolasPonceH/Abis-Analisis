@@ -1,4 +1,4 @@
-const { processExcelFile } = require("../ingest");
+const { processExcelFile, processSheetRows } = require("../ingest");
 const { bulkInsertRegistros } = require("./bulkInsert");
 
 // Orquesta el ETL completo de Sprint 3: lee y mapea el Excel (Sprint 2, ya con tolerancia a
@@ -17,4 +17,16 @@ async function runEtl(filePath, pool) {
   return { ...result, insertResult };
 }
 
-module.exports = { runEtl };
+// Orquesta la ingesta directa de filas pegadas desde la hoja de cálculo / portapapeles
+async function runSheetEtl(headers, rows, pool) {
+  const result = await processSheetRows(headers, rows, pool);
+
+  if (!result.headerValidation.ok || result.rows.length === 0) {
+    return { ...result, insertResult: { inserted: 0, batches: 0 } };
+  }
+
+  const insertResult = await bulkInsertRegistros(pool, result.rows);
+  return { ...result, insertResult };
+}
+
+module.exports = { runEtl, runSheetEtl };

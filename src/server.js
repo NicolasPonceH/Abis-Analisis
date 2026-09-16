@@ -8,8 +8,9 @@ const {
   obtenerReporteRango,
   obtenerTendenciaHistorica,
   obtenerFechasDisponibles,
+  obtenerComparacionPeriodos,
 } = require("./reportes/reporteRango");
-const { runEtl } = require("./etl");
+const { runEtl, runSheetEtl } = require("./etl");
 const {
   generarHashSHA256,
   esBufferCifrado,
@@ -22,6 +23,7 @@ const { crearBotonesDescarga } = require("./telegram/botService");
 const { generarReporteWord } = require("./reportes/wordReportService");
 const { generarReporteExcel } = require("./reportes/excelReportService");
 const schedulerService = require("./services/schedulerService");
+const recipientService = require("./telegram/recipientService");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -118,6 +120,63 @@ app.get("/api/metricas/tendencia", async (req, res) => {
   try {
     const tendencia = await obtenerTendenciaHistorica(pool);
     res.json(tendencia);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint para obtener la bitácora de auditoría
+app.get("/api/auditoria", async (req, res) => {
+  try {
+    const { tipo, desde, hasta, limit = 50, offset = 0 } = req.query;
+    
+    let whereClause = "1=1";
+    const params = [];
+    let paramIndex = 1;
+
+    if (tipo) {
+      whereClause += ` AND tipo_evento = $${paramIndex++}`;
+      params.push(tipo);
+    }
+    
+    if (desde && FECHA_VALIDA.test(desde)) {
+      whereClause += ` AND fecha_evento >= $${paramIndex++}::date`;
+      params.push(desde);
+    }
+    
+    if (hasta && FECHA_VALIDA.test(hasta)) {
+      whereClause += ` AND fecha_evento < ($${paramIndex++}::date + interval '1 day')`;
+      params.push(hasta);
+    }
+
+    params.push(parseInt(limit, 10));
+    params.push(parseInt(offset, 10));
+
+    const { rows } = await pool.query(
+      `SELECT id_auditoria, fecha_evento, tipo_evento, archivo_procesado, detalles_cifrados, usuario_o_proceso
+       FROM registro_auditoria_cifrada
+       WHERE ${whereClause}
+       ORDER BY fecha_evento DESC
+       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+      params
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("[ERROR AUDITORIA]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint de comparación de períodos (Semana/Mes)
+app.get("/api/metricas/comparar", async (req, res) => {
+  try {
+    const { tipo } = req.query;
+    if (tipo !== "semana" && tipo !== "mes") {
+      return res.status(400).json({ error: "Parámetro 'tipo' debe ser 'semana' o 'mes'" });
+    }
+    const comparacion = await obtenerComparacionPeriodos(pool, tipo);
+    res.json(comparacion);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -366,6 +425,84 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
     });
   } catch (err) {
     console.error("[UPLOAD ERROR]", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Ingesta directa desde Hoja de Cálculo / Portapapeles (Copiar y Pegar desde Oracle/Excel)
+app.post("/api/ingest/sheet", async (req, res) => {
+  try {
+    // 1. Verificación estricta de la clave de autorización policial
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      console.warn(`[SEGURIDAD] Intento de ingesta de hoja de cálculo rechazado: Clave no autorizada.`);
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada para poblar la base de datos.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
+    const { headers, rows } = req.body || {};
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({
+        ok: false,
+        error: "No se suministraron filas para procesar en la hoja de cálculo.",
+      });
+    }
+
+    const payloadSummary = JSON.stringify({ headers, count: rows.length, muestra: rows.slice(0, 3) });
+    const hashSHA256 = generarHashSHA256(payloadSummary);
+
+    console.log(`[SHEET INGEST AUTORIZADO] Procesando ${rows.length} filas desde portapapeles/hoja de cálculo...`);
+
+    const tiempoInicio = Date.now();
+    const resultadoEtl = await runSheetEtl(headers, rows, pool);
+    const duracionMs = Date.now() - tiempoInicio;
+
+    if (!resultadoEtl.headerValidation.ok) {
+      return res.status(422).json({
+        ok: false,
+        error: "Estructura de columnas inválida. No se detectaron las columnas requeridas del sistema ABIS.",
+        headerValidation: resultadoEtl.headerValidation,
+        hashSHA256,
+      });
+    }
+
+    const totalInsertadas = resultadoEtl.insertResult ? resultadoEtl.insertResult.inserted : 0;
+
+    // Registro formal en bitácora de auditoría inmutable
+    try {
+      await pool.query(
+        `INSERT INTO registro_auditoria_cifrada 
+         (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
+         VALUES (NOW(), 'INGESTA_PORTAPAPELES_AUTORIZADA', $1, $2, $3, 'Operador Hoja de Cálculo Web')`,
+        [
+          'Portapapeles / Oracle Sheet',
+          hashSHA256,
+          `Insertadas: ${totalInsertadas}, Filas Enviadas: ${rows.length}, Errores Mapeo: ${resultadoEtl.errors.length}`,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("[AUDITORÍA] Advertencia al registrar en bitácora:", auditErr.message);
+    }
+
+    res.json({
+      ok: true,
+      mensaje: `Ingesta completada: se insertaron ${totalInsertadas} registros exitosamente en PostgreSQL.`,
+      hashSHA256,
+      duracionMs,
+      totalRecibidas: rows.length,
+      totalInsertadas,
+      totalMapeadas: resultadoEtl.rows.length,
+      erroresFilas: resultadoEtl.errors.length,
+      erroresDetalle: resultadoEtl.errors.slice(0, 50),
+    });
+  } catch (err) {
+    console.error("[SHEET INGEST ERROR]", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 });
@@ -663,6 +800,135 @@ app.post("/api/settings/schedule/test", async (req, res) => {
   }
 });
 
+// ==========================================================================
+// GESTOR DE DESTINATARIOS Y OFICIALES DE TELEGRAM (POSTGRESQL SEGURO)
+// ==========================================================================
+
+// Lista todos los destinatarios registrados e información pública del bot
+app.get("/api/telegram/destinatarios", async (req, res) => {
+  try {
+    const destinatarios = await recipientService.listarDestinatarios(pool);
+    let botInfo = null;
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      const info = await telegramClient.obtenerInfoBot({ token: process.env.TELEGRAM_BOT_TOKEN });
+      if (info && info.username) {
+        botInfo = {
+          username: info.username,
+          first_name: info.first_name,
+          link: `https://t.me/${info.username}`,
+        };
+      }
+    }
+    res.json({
+      ok: true,
+      destinatarios,
+      botInfo,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Registra o actualiza un destinatario (Protegido por Clave Institucional)
+app.post("/api/telegram/destinatarios", async (req, res) => {
+  try {
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
+    const { nombre, chatId, rolUnidad, activo } = req.body || {};
+    const nuevo = await recipientService.agregarDestinatario(pool, {
+      nombre,
+      chatId,
+      rolUnidad,
+      activo: activo !== undefined ? activo : true,
+    });
+
+    res.json({
+      ok: true,
+      mensaje: "Destinatario registrado exitosamente en el sistema.",
+      destinatario: nuevo,
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// Alterna el estado (Activo / Pausado) de un destinatario (Protegido por Clave Institucional)
+app.patch("/api/telegram/destinatarios/:id/toggle", async (req, res) => {
+  try {
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
+    const { id } = req.params;
+    const { activo } = req.body || {};
+    const actualizado = await recipientService.toggleEstadoDestinatario(pool, id, activo);
+
+    res.json({
+      ok: true,
+      mensaje: `Destinatario ${actualizado.activo ? "activado" : "pausado"} exitosamente.`,
+      destinatario: actualizado,
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// Elimina un destinatario del sistema (Protegido por Clave Institucional)
+app.delete("/api/telegram/destinatarios/:id", async (req, res) => {
+  try {
+    const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
+    const { id } = req.params;
+    const eliminado = await recipientService.eliminarDestinatario(pool, id);
+
+    res.json({
+      ok: true,
+      mensaje: `Destinatario '${eliminado.nombre}' (${eliminado.chat_id}) eliminado del sistema.`,
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+// Envío de prueba individual inmediata a un destinatario
+app.post("/api/telegram/destinatarios/:id/probar", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resultado = await recipientService.enviarPruebaIndividual(pool, id);
+
+    res.json({
+      ok: true,
+      mensaje: `Mensaje de verificación enviado exitosamente a ${resultado.destinatario.nombre} (${resultado.destinatario.chat_id}).`,
+      resultado,
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+
 // Previsualización directa en el navegador de la captura institucional oficial (PNG)
 app.get("/api/reportes/captura-preview", async (req, res) => {
   try {
@@ -736,6 +1002,11 @@ const server = app.listen(port, () => {
       console.error("Error iniciando bot interactivo en servidor:", err.message);
     });
   }
+
+  // Inicializar tabla segura de destinatarios y migración inicial si corresponde
+  recipientService.inicializarDestinatarios(pool).catch((err) => {
+    console.warn("Advertencia al inicializar destinatarios de Telegram:", err.message);
+  });
 
   // Iniciar servicio de horarios y reportes automáticos
   schedulerService.iniciarScheduler({ pool });

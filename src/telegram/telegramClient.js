@@ -195,6 +195,26 @@ async function enviarGrupoFotos({ token, chatId, fotos }) {
   return data.result;
 }
 
+let cachedBotInfo = null;
+
+async function obtenerInfoBot({ token }) {
+  if (cachedBotInfo) return cachedBotInfo;
+  if (!token) return null;
+  try {
+    const url = `${TELEGRAM_API}/bot${token}/getMe`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.ok && data.result) {
+      cachedBotInfo = data.result;
+      return cachedBotInfo;
+    }
+    return null;
+  } catch (err) {
+    console.warn("[TELEGRAM CLIENT] Error obteniendo info del bot:", err.message);
+    return null;
+  }
+}
+
 module.exports = {
   enviarMensaje,
   enviarFoto,
@@ -202,5 +222,7 @@ module.exports = {
   enviarDocumento,
   responderCallback,
   obtenerActualizaciones,
+  obtenerInfoBot,
 };
+
 
