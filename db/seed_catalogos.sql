@@ -10,6 +10,8 @@ INSERT INTO nacionalidad (descripcion, codigo_iso) VALUES
     ('ANGOLA', 'AGO'),
     ('ARABIA SAUDITA', 'SAU'),
     ('ARGENTINA', 'ARG'),
+    ('AU', 'AUS'),
+    ('AUSTRALIA', 'AUS'),
     ('BAHAMAS', 'BHS'),
     ('BOLIVIA', 'BOL'),
     ('BONAIRE, SAN EUSTAQUIO Y SABA', 'BES'),
