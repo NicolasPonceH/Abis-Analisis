@@ -17,7 +17,7 @@ flowchart TD
     Exacto1 -- No --> Fuzzy["Buscar el candidato mas cercano<br/>(distancia de Levenshtein) entre<br/>TODAS las claves del catalogo"]
     Fuzzy --> Distancia{"Hay un candidato<br/>UNICO a distancia <= 2?"}
     Distancia -- Si --> Corregir["Usar el ID de ese candidato<br/>+ registrar en 'correcciones'<br/>(queda auditable en el reporte)"]
-    Distancia -- "No<br/>(ninguno, o mas de uno empatado)" --> Error1["Error: '&lt;Campo&gt; desconocido: valor'<br/>la fila se rechaza"]
+    Distancia -- "No<br/>(ninguno, o mas de uno empatado)" --> Error1["Error: '<Campo> desconocido: valor'<br/>la fila se rechaza"]
 
     Rama -- "Region / Unidad / Cuartel<br/>(jerarquia de 3 niveles)" --> ExactoUnidad{"'REGION|UNIDAD' coincide<br/>EXACTO en el catalogo?"}
     ExactoUnidad -- No --> Error2["Error: Unidad no encontrada<br/>en esa Region — fila rechazada"]
