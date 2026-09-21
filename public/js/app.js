@@ -1408,13 +1408,71 @@ function renderTramosEtariosChart(items) {
 }
 
 // Gráfico 9: Perfil Sociolaboral (Top 10 Profesiones u Oficios Declarados)
+let profesionChartMode = "fecha"; // "fecha" | "total"
+
+function initProfesionChartControls() {
+  const btnFecha = document.getElementById("btn-prof-fecha");
+  const btnTotal = document.getElementById("btn-prof-total");
+  const btnSwitch = document.getElementById("btn-prof-switch-total");
+
+  if (btnFecha && !btnFecha.dataset.bound) {
+    btnFecha.dataset.bound = "true";
+    btnFecha.addEventListener("click", () => {
+      profesionChartMode = "fecha";
+      updateProfesionToggleUI();
+      loadAndRenderProfesionesChart();
+    });
+  }
+
+  if (btnTotal && !btnTotal.dataset.bound) {
+    btnTotal.dataset.bound = "true";
+    btnTotal.addEventListener("click", () => {
+      profesionChartMode = "total";
+      updateProfesionToggleUI();
+      loadAndRenderProfesionesChart();
+    });
+  }
+
+  if (btnSwitch && !btnSwitch.dataset.bound) {
+    btnSwitch.dataset.bound = "true";
+    btnSwitch.addEventListener("click", () => {
+      profesionChartMode = "total";
+      updateProfesionToggleUI();
+      loadAndRenderProfesionesChart();
+    });
+  }
+}
+
+function updateProfesionToggleUI() {
+  const btnFecha = document.getElementById("btn-prof-fecha");
+  const btnTotal = document.getElementById("btn-prof-total");
+  if (btnFecha && btnTotal) {
+    if (profesionChartMode === "fecha") {
+      btnFecha.style.background = "#0284c7";
+      btnFecha.style.color = "#fff";
+      btnTotal.style.background = "transparent";
+      btnTotal.style.color = "#64748b";
+    } else {
+      btnTotal.style.background = "#0284c7";
+      btnTotal.style.color = "#fff";
+      btnFecha.style.background = "transparent";
+      btnFecha.style.color = "#64748b";
+    }
+  }
+}
+
 async function loadAndRenderProfesionesChart() {
+  initProfesionChartControls();
+  updateProfesionToggleUI();
+
   try {
     let url = "/api/metricas/profesiones?limit=10";
-    if (state.filterMode === "single" && state.currentDate) {
-      url += `&fecha=${encodeURIComponent(state.currentDate)}`;
-    } else if (state.filterMode === "range" && state.dateFrom && state.dateTo) {
-      url += `&desde=${encodeURIComponent(state.dateFrom)}&hasta=${encodeURIComponent(state.dateTo)}`;
+    if (profesionChartMode === "fecha") {
+      if (state.filterMode === "single" && state.currentDate) {
+        url += `&fecha=${encodeURIComponent(state.currentDate)}`;
+      } else if (state.filterMode === "range" && state.dateFrom && state.dateTo) {
+        url += `&desde=${encodeURIComponent(state.dateFrom)}&hasta=${encodeURIComponent(state.dateTo)}`;
+      }
     }
     const res = await fetch(url);
     const data = await res.json();
@@ -1426,31 +1484,50 @@ async function loadAndRenderProfesionesChart() {
 
 function renderProfesionesChart(data) {
   destroyChart("chart-profesiones");
-  const ctx = document.getElementById("chart-profesiones")?.getContext("2d");
-  if (!ctx) return;
+  const canvas = document.getElementById("chart-profesiones");
+  const emptyState = document.getElementById("profesiones-empty-state");
+  const badge = document.getElementById("badge-chart-profesiones");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
 
   const items = data.profesiones || [];
-  const badge = document.getElementById("badge-chart-profesiones");
+
   if (badge) {
-    if (data.totalConProfesion > 0) {
+    if (profesionChartMode === "total") {
+      badge.textContent = `Acumulado General (${(data.totalConProfesion || 0).toLocaleString()} identificados)`;
+      badge.style.background = "rgba(2,132,199,0.12)";
+      badge.style.color = "#0284c7";
+      badge.style.border = "1px solid rgba(2,132,199,0.25)";
+    } else if (data.totalConProfesion > 0) {
       badge.textContent = `${data.totalConProfesion.toLocaleString()} con ocupación declarada`;
+      badge.style.background = "rgba(2,132,199,0.12)";
+      badge.style.color = "#0284c7";
+      badge.style.border = "1px solid rgba(2,132,199,0.25)";
     } else {
-      badge.textContent = "Extracción Oracle DB";
+      badge.textContent = "0 con profesión en esta fecha";
+      badge.style.background = "rgba(100,116,139,0.12)";
+      badge.style.color = "#64748b";
+      badge.style.border = "1px solid rgba(100,116,139,0.25)";
     }
   }
 
   if (items.length === 0) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.save();
-    ctx.font = "600 13px 'Open Sans', sans-serif";
-    ctx.fillStyle = "#94a3b8";
-    ctx.textAlign = "center";
-    ctx.fillText("Sin registros de profesión en la fecha seleccionada (Oracle DB)", ctx.canvas.width / 2, 140);
-    ctx.restore();
+    canvas.style.display = "none";
+    if (emptyState) {
+      emptyState.style.display = "flex";
+      const title = document.getElementById("profesiones-empty-title");
+      if (title && state.currentDate) {
+        title.textContent = `Sin registros de profesión para el ${formatDate(state.currentDate)}`;
+      }
+    }
     return;
   }
 
-  const labels = items.map((i) => formatChartLabel(i.profesion, 22));
+  // Hay items para mostrar
+  canvas.style.display = "block";
+  if (emptyState) emptyState.style.display = "none";
+
+  const labels = items.map((i) => formatChartLabel(i.profesion, 24));
   const values = items.map((i) => i.total);
 
   state.charts["chart-profesiones"] = new Chart(ctx, {
