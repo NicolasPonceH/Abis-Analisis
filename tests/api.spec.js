@@ -347,4 +347,19 @@ test.describe('Sistema ABIS - API Endpoints', () => {
       expect(delRes.ok()).toBeTruthy();
     }
   });
+
+  test('GET /api/metricas/profesiones returns top professions and totals', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/metricas/profesiones?limit=10`);
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    expect(body).toHaveProperty('totalGeneral');
+    expect(body).toHaveProperty('totalConProfesion');
+    expect(Array.isArray(body.profesiones)).toBeTruthy();
+    if (body.profesiones.length > 0) {
+      expect(body.profesiones[0]).toHaveProperty('profesion');
+      expect(body.profesiones[0]).toHaveProperty('total');
+      expect(body.profesiones[0]).toHaveProperty('porcentaje');
+    }
+  });
 });

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=21">
+  <link rel="stylesheet" href="css/styles.css?v=22">
   <style>
     /* ==========================================================================
        GLASSMORPHISM OVERHAUL EN LÍNEA (INMUNIDAD A CACHÉ DE NAVEGADOR)
@@ -1072,6 +1072,22 @@
           </div>
         </div>
 
+        <!-- Gráfico 9: Perfil Sociolaboral: Top 10 Profesiones u Oficios -->
+        <div class="chart-card col-12" style="margin-top: 6px;">
+          <div class="chart-header">
+            <div class="chart-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <span>Perfil Sociolaboral: Top 10 Profesiones y Oficios Declarados</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="chart-badge" id="badge-chart-profesiones" style="background:rgba(2,132,199,0.12); color:#0284c7; border:1px solid rgba(2,132,199,0.25);">Extracción Oracle DB</span>
+            </div>
+          </div>
+          <div class="chart-body" style="height: 300px; position: relative;">
+            <canvas id="chart-profesiones"></canvas>
+          </div>
+        </div>
+
       </div>
 
       <!-- Tabla Detallada Operativa con Buscador y Filtros -->
@@ -2093,6 +2109,6 @@
   </footer>
 
   <!-- Script Principal -->
-  <script src="js/app.js?v=7"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

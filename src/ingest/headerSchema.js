@@ -86,6 +86,23 @@ const EXPECTED_COLUMNS = [
     field: "estadoGeneral",
     required: true,
   },
+  {
+    header: "Profesion",
+    aliases: [
+      "Profesion",
+      "COD_PROFESION",
+      "PROFESION",
+      "Profesión",
+      "PROFESIÓN",
+      "Oficio",
+      "OFICIO",
+      "Ocupacion",
+      "OCUPACION",
+      "Ocupación",
+    ],
+    field: "profesion",
+    required: false,
+  },
 ];
 
 function normalizeHeaderName(h) {

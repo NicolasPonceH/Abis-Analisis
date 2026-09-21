@@ -66,3 +66,10 @@ CREATE OR REPLACE VIEW vw_total_diario AS
 SELECT fecha_enrolamiento, count(*) AS total
 FROM registro_enrolamiento
 GROUP BY fecha_enrolamiento;
+
+-- Cantidad de enrolamientos por dia y profesion/ocupacion.
+CREATE OR REPLACE VIEW vw_resumen_profesion_diario AS
+SELECT r.fecha_enrolamiento, p.nombre_profesion AS profesion, count(*) AS total
+FROM registro_enrolamiento r
+JOIN profesion p ON p.id_profesion = r.id_profesion
+GROUP BY r.fecha_enrolamiento, p.nombre_profesion;

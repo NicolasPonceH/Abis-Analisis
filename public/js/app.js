@@ -733,6 +733,9 @@ function renderCharts(data) {
 
   // 8. Gráfico de Tramos Etarios & Protección NNA
   renderTramosEtariosChart(data.tramosEtarios || []);
+
+  // 9. Gráfico de Profesiones y Oficios Declarados
+  loadAndRenderProfesionesChart();
 }
 
 function destroyChart(name) {
@@ -1401,6 +1404,105 @@ function renderTramosEtariosChart(items) {
         },
       },
     },
+  });
+}
+
+// Gráfico 9: Perfil Sociolaboral (Top 10 Profesiones u Oficios Declarados)
+async function loadAndRenderProfesionesChart() {
+  try {
+    let url = "/api/metricas/profesiones?limit=10";
+    if (state.filterMode === "single" && state.currentDate) {
+      url += `&fecha=${encodeURIComponent(state.currentDate)}`;
+    } else if (state.filterMode === "range" && state.dateFrom && state.dateTo) {
+      url += `&desde=${encodeURIComponent(state.dateFrom)}&hasta=${encodeURIComponent(state.dateTo)}`;
+    }
+    const res = await fetch(url);
+    const data = await res.json();
+    renderProfesionesChart(data);
+  } catch (err) {
+    console.error("Error al cargar profesiones:", err);
+  }
+}
+
+function renderProfesionesChart(data) {
+  destroyChart("chart-profesiones");
+  const ctx = document.getElementById("chart-profesiones")?.getContext("2d");
+  if (!ctx) return;
+
+  const items = data.profesiones || [];
+  const badge = document.getElementById("badge-chart-profesiones");
+  if (badge) {
+    if (data.totalConProfesion > 0) {
+      badge.textContent = `${data.totalConProfesion.toLocaleString()} con ocupación declarada`;
+    } else {
+      badge.textContent = "Extracción Oracle DB";
+    }
+  }
+
+  if (items.length === 0) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.save();
+    ctx.font = "600 13px 'Open Sans', sans-serif";
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "center";
+    ctx.fillText("Sin registros de profesión en la fecha seleccionada (Oracle DB)", ctx.canvas.width / 2, 140);
+    ctx.restore();
+    return;
+  }
+
+  const labels = items.map((i) => formatChartLabel(i.profesion, 22));
+  const values = items.map((i) => i.total);
+
+  state.charts["chart-profesiones"] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Personas",
+        data: values,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx: c, chartArea } = chart;
+          if (!chartArea) return "rgba(2, 132, 199, 0.85)";
+          const g = c.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+          g.addColorStop(0, "rgba(2, 132, 199, 0.7)");
+          g.addColorStop(1, "rgba(2, 132, 199, 0.95)");
+          return g;
+        },
+        hoverBackgroundColor: "#0284c7",
+        borderRadius: 6,
+        borderSkipped: false,
+        maxBarThickness: 20,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const item = items[context.dataIndex];
+              return ` ${item.total.toLocaleString()} personas (${item.porcentaje}% del total identificado)`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
+          border: { display: false },
+          ticks: { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 }, precision: 0 },
+          beginAtZero: true,
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: "#1e293b", font: { family: "'Open Sans', sans-serif", weight: "600", size: 11 } },
+        }
+      }
+    }
   });
 }
 
@@ -3822,6 +3924,7 @@ const SHEET_SCHEMA = [
   { field: "estadoSincronizacion", label: "Sincronización PDI", required: true, aliases: ["estado sincronizacion", "sincronización pdi", "sincronizacion_pdi", "sincronizacion pdi", "estado sincronización"] },
   { field: "estadoRegistro", label: "Registración Biométrica", required: true, aliases: ["estado registro", "registración biométrica", "registracion_biometrica", "registracion biometrica"] },
   { field: "estadoGeneral", label: "Estado General", required: true, aliases: ["estado general", "estado_general"] },
+  { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación"] },
 ];
 
 function initSpreadsheetIngest() {

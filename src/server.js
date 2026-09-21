@@ -125,6 +125,68 @@ app.get("/api/metricas/tendencia", async (req, res) => {
   }
 });
 
+// Endpoint analítico: Top profesiones y oficios registrados
+app.get("/api/metricas/profesiones", async (req, res) => {
+  try {
+    const { fecha, desde, hasta, limit = 10, incluirNoEspecificado = "false" } = req.query;
+    let whereClause = "1=1";
+    const params = [];
+    let paramIdx = 1;
+
+    if (fecha && FECHA_VALIDA.test(fecha)) {
+      whereClause += ` AND r.fecha_enrolamiento = $${paramIdx++}`;
+      params.push(fecha);
+    } else if (desde && hasta && FECHA_VALIDA.test(desde) && FECHA_VALIDA.test(hasta)) {
+      whereClause += ` AND r.fecha_enrolamiento >= $${paramIdx++} AND r.fecha_enrolamiento <= $${paramIdx++}`;
+      params.push(desde, hasta);
+    }
+
+    const filterClause = incluirNoEspecificado === "true" 
+      ? "" 
+      : " AND p.nombre_profesion NOT IN ('NO ESPECIFICADO', 'SIN PROFESION')";
+
+    const query = `
+      SELECT p.id_profesion, p.nombre_profesion AS profesion, count(*) AS total
+      FROM registro_enrolamiento r
+      JOIN profesion p ON p.id_profesion = r.id_profesion
+      WHERE ${whereClause} ${filterClause}
+      GROUP BY p.id_profesion, p.nombre_profesion
+      ORDER BY total DESC
+      LIMIT $${paramIdx}
+    `;
+    params.push(Math.min(Math.max(Number(limit) || 10, 1), 50));
+
+    const { rows } = await pool.query(query, params);
+
+    const baseWhere = whereClause;
+    const totalQuery = `
+      SELECT count(*) AS total_general,
+             count(*) FILTER (WHERE p.nombre_profesion NOT IN ('NO ESPECIFICADO', 'SIN PROFESION')) AS total_con_profesion
+      FROM registro_enrolamiento r
+      JOIN profesion p ON p.id_profesion = r.id_profesion
+      WHERE ${baseWhere}
+    `;
+    const totalsRes = await pool.query(totalQuery, params.slice(0, paramIdx - 1));
+    const totalConProf = Number(totalsRes.rows[0]?.total_con_profesion || 0);
+    const totalGeneral = Number(totalsRes.rows[0]?.total_general || 0);
+
+    const profesiones = rows.map(r => ({
+      profesion: r.profesion,
+      total: Number(r.total),
+      porcentaje: totalConProf > 0 ? Number(((Number(r.total) / totalConProf) * 100).toFixed(1)) : 0
+    }));
+
+    res.json({
+      ok: true,
+      totalGeneral,
+      totalConProfesion: totalConProf,
+      profesiones,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // Endpoint para obtener la bitácora de auditoría
 app.get("/api/auditoria", async (req, res) => {
   try {

@@ -8,8 +8,8 @@ const norm = (value) =>
 // Carga los seis catalogos en mapas de texto normalizado -> ID, para mapear el Excel en
 // memoria sin ida y vuelta a la base de datos por cada fila.
 async function loadCatalogs(pool) {
-  const [nacionalidad, region, unidad, cuartel, equipo, estadoProceso] = await Promise.all([
-    pool.query("SELECT id_nacionalidad, descripcion FROM nacionalidad"),
+  const [nacionalidad, region, unidad, cuartel, equipo, estadoProceso, profesion] = await Promise.all([
+    pool.query("SELECT id_nacionalidad, descripcion, codigo_iso FROM nacionalidad"),
     pool.query("SELECT id_region, nombre_region FROM region"),
     pool.query(
       "SELECT u.id_unidad, u.nombre_unidad, r.nombre_region FROM unidad u JOIN region r ON r.id_region = u.id_region"
@@ -19,10 +19,19 @@ async function loadCatalogs(pool) {
     ),
     pool.query("SELECT id_equipo, tipo_equipo FROM equipo"),
     pool.query("SELECT id_estado, tipo_estado, descripcion FROM estado_proceso"),
+    pool.query("SELECT id_profesion, nombre_profesion FROM profesion"),
   ]);
 
+  const nacMap = new Map();
+  nacionalidad.rows.forEach((r) => {
+    nacMap.set(norm(r.descripcion), r.id_nacionalidad);
+    if (r.codigo_iso) {
+      nacMap.set(norm(r.codigo_iso), r.id_nacionalidad);
+    }
+  });
+
   return {
-    nacionalidad: new Map(nacionalidad.rows.map((r) => [norm(r.descripcion), r.id_nacionalidad])),
+    nacionalidad: nacMap,
     region: new Map(region.rows.map((r) => [norm(r.nombre_region), r.id_region])),
     unidad: new Map(
       unidad.rows.map((r) => [`${norm(r.nombre_region)}|${norm(r.nombre_unidad)}`, r.id_unidad])
@@ -36,6 +45,7 @@ async function loadCatalogs(pool) {
     estadoProceso: new Map(
       estadoProceso.rows.map((r) => [`${norm(r.tipo_estado)}|${norm(r.descripcion)}`, r.id_estado])
     ),
+    profesion: new Map(profesion.rows.map((r) => [norm(r.nombre_profesion), r.id_profesion])),
   };
 }
 
@@ -226,6 +236,37 @@ function mapRow(row, catalogs) {
     correcciones
   );
 
+  // Profesion / Ocupacion
+  let idProfesion = catalogs.profesion ? catalogs.profesion.get("NO ESPECIFICADO") || 1 : 1;
+  let rawProf = norm(row.profesion);
+  const PROF_ALIASES = {
+    "DUE A DE CASA": "DUEÑA DE CASA",
+    "ALBA IL": "ALBAÑIL",
+    "ALBANIL": "ALBAÑIL",
+    "ALBANIL EN GENERAL": "ALBAÑIL EN GENERAL",
+    "ALBANIL (CONSTRUCCION)": "ALBAÑIL (CONSTRUCCION)",
+    "COMERCIENTE": "COMERCIANTE EN GENERAL",
+  };
+  if (PROF_ALIASES[rawProf]) {
+    rawProf = PROF_ALIASES[rawProf];
+  }
+
+  if (rawProf && catalogs.profesion) {
+    if (catalogs.profesion.has(rawProf)) {
+      idProfesion = catalogs.profesion.get(rawProf);
+    } else {
+      const resolvedProf = resolve(catalogs.profesion, rawProf);
+      if (resolvedProf) {
+        idProfesion = resolvedProf.id;
+        if (resolvedProf.corrected) {
+          correcciones.push(`Profesión: "${row.profesion}" interpretado como "${resolvedProf.matched}"`);
+        }
+      } else {
+        idProfesion = catalogs.profesion.get("NO ESPECIFICADO") || 1;
+      }
+    }
+  }
+
   // Fecha enrolamiento
   const fechaEnrolamiento = parseDateToString(row.fechaEnrolamiento);
   const fechaValida =
@@ -243,6 +284,7 @@ function mapRow(row, catalogs) {
       id_nacionalidad: idNacionalidad,
       id_cuartel: idCuartel,
       id_equipo: idEquipo,
+      id_profesion: idProfesion,
       genero,
       es_mayor_edad: esMayorEdad,
       edad_exacta: edadExacta,

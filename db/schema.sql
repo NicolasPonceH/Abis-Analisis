@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS estado_proceso (
     UNIQUE (tipo_estado, descripcion)
 );
 
+CREATE TABLE IF NOT EXISTS profesion (
+    id_profesion    SERIAL PRIMARY KEY,
+    nombre_profesion VARCHAR(150) NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS registro_enrolamiento (
     id_registro               BIGSERIAL PRIMARY KEY,
     fecha_enrolamiento        DATE NOT NULL,
@@ -49,6 +54,7 @@ CREATE TABLE IF NOT EXISTS registro_enrolamiento (
     id_nacionalidad           INTEGER NOT NULL REFERENCES nacionalidad(id_nacionalidad),
     id_cuartel                INTEGER NOT NULL REFERENCES cuartel(id_cuartel),
     id_equipo                 INTEGER NOT NULL REFERENCES equipo(id_equipo),
+    id_profesion              INTEGER REFERENCES profesion(id_profesion) DEFAULT 1,
     genero                    CHAR(1) NOT NULL CHECK (genero IN ('M', 'F', 'X')),
     es_mayor_edad             BOOLEAN NOT NULL,
     edad_exacta               SMALLINT,
@@ -60,6 +66,7 @@ CREATE TABLE IF NOT EXISTS registro_enrolamiento (
 CREATE INDEX IF NOT EXISTS idx_registro_fecha_enrolamiento ON registro_enrolamiento (fecha_enrolamiento);
 CREATE INDEX IF NOT EXISTS idx_registro_cuartel ON registro_enrolamiento (id_cuartel);
 CREATE INDEX IF NOT EXISTS idx_registro_nacionalidad ON registro_enrolamiento (id_nacionalidad);
+CREATE INDEX IF NOT EXISTS idx_registro_profesion ON registro_enrolamiento (id_profesion);
 
 -- Sprint 4: soportan las agrupaciones por estado del reporte diario (sincronizados/pendientes/
 -- error, registrados/pendientes, general OK/con error) sin escanear toda la tabla historica.

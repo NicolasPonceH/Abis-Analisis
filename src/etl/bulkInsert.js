@@ -3,6 +3,7 @@ const COLUMNS = [
   "id_nacionalidad",
   "id_cuartel",
   "id_equipo",
+  "id_profesion",
   "genero",
   "es_mayor_edad",
   "edad_exacta",
