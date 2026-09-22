@@ -128,7 +128,7 @@ app.get("/api/metricas/tendencia", async (req, res) => {
 // Endpoint analítico: Top profesiones y oficios registrados
 app.get("/api/metricas/profesiones", async (req, res) => {
   try {
-    const { fecha, desde, hasta, limit = 10, incluirNoEspecificado = "false" } = req.query;
+    const { fecha, desde, hasta, limit = 10, incluirNoEspecificado = "false", agrupar = "false" } = req.query;
     let whereClause = "1=1";
     const params = [];
     let paramIdx = 1;
@@ -141,27 +141,76 @@ app.get("/api/metricas/profesiones", async (req, res) => {
       params.push(desde, hasta);
     }
 
-    const filterClause = incluirNoEspecificado === "true" 
-      ? "" 
-      : " AND p.nombre_profesion NOT IN ('NO ESPECIFICADO', 'SIN PROFESION')";
-
-    const query = `
+    const rawQuery = `
       SELECT p.id_profesion, p.nombre_profesion AS profesion, count(*) AS total
       FROM registro_enrolamiento r
       JOIN profesion p ON p.id_profesion = r.id_profesion
-      WHERE ${whereClause} ${filterClause}
+      WHERE ${whereClause}
       GROUP BY p.id_profesion, p.nombre_profesion
-      ORDER BY total DESC
-      LIMIT $${paramIdx}
     `;
-    params.push(Math.min(Math.max(Number(limit) || 10, 1), 50));
+    // Extraemos todos para poder agruparlos en JS
+    const { rows: rawRows } = await pool.query(rawQuery, params);
 
-    const { rows } = await pool.query(query, params);
+    // Función para normalizar profesiones similares
+    const agruparProfesion = (prof) => {
+      const p = prof.toUpperCase();
+      if (p.includes("ALBAÑIL") || p.includes("CONSTRUCCION") || p.includes("EDIFICIOS")) return "ALBAÑILERÍA Y CONSTRUCCIÓN";
+      if (p.includes("COMERCIA") || p.includes("VENDEDOR") || p.includes("CAJERO") || p.includes("CAJERA")) return "COMERCIO Y VENTAS";
+      if (p.includes("CHOFER") || p.includes("CONDUCTOR") || p.includes("CAMION") || p.includes("TRANSPORTE") || p.includes("REPARTIDOR")) return "TRANSPORTE Y LOGÍSTICA";
+      if (p.includes("AGRICULT") || p.includes("TEMPORER") || p.includes("CAMPESIN") || p.includes("AGRÍCOLA")) return "AGRICULTURA Y TEMPOREROS";
+      if (p.includes("MECANIC") || p.includes("VULCANIZADOR") || p.includes("TALLER")) return "MECÁNICA Y AUTOMOTRIZ";
+      if (p.includes("CASA") && p.includes("DUEÑA")) return "LABORES DE HOGAR / DUEÑA DE CASA";
+      if (p.includes("ESTUDIANTE")) return "ESTUDIANTES";
+      if (p.includes("COCIN") || p.includes("CHEF") || p.includes("GARZON") || p.includes("MESERO") || p.includes("PANADERO")) return "GASTRONOMÍA Y ALIMENTOS";
+      if (p.includes("OBRERO") || p.includes("OPERARI") || p.includes("JORNALERO") || p.includes("PEON")) return "OPERARIOS Y OBREROS";
+      if (p.includes("PELUQUER") || p.includes("BARBER") || p.includes("ESTILISTA") || p.includes("MANICURA")) return "ESTÉTICA Y BELLEZA";
+      if (p.includes("ADMINISTRATIV") || p.includes("CONTADOR") || p.includes("SECRETARI")) return "ADMINISTRACIÓN Y OFICINA";
+      if (p.includes("MEDIC") || p.includes("ENFERMER") || p.includes("PSICOLOG") || p.includes("DENTISTA") || p.includes("SALUD")) return "PROFESIONALES DE LA SALUD";
+      if (p.includes("GUARDIA") || p.includes("SEGURIDAD")) return "SEGURIDAD PRIVADA";
+      if (p.includes("ASESORA") || p.includes("NANA") || p.includes("DOMESTICA") || p.includes("ASEO") || p.includes("LIMPIEZA")) return "ASESORA DEL HOGAR / LIMPIEZA";
+      if (p.includes("INDEPENDIENTE") || p.includes("EMPRESARIO") || p.includes("INDEPENDIENTE")) return "INDEPENDIENTE / EMPRESARIO";
+      if (p.includes("PROFESOR") || p.includes("DOCENTE") || p.includes("EDUCADOR")) return "EDUCACIÓN";
+      if (p.includes("INGENIERO")) return "INGENIERÍA";
+      if (p.includes("TECNICO")) return "TÉCNICOS ESPECIALIZADOS";
+      if (p.includes("JUBILADO") || p.includes("PENSIONADO")) return "JUBILADOS / PENSIONADOS";
+      if (p.includes("CESANTE") || p.includes("DESEMPLEADO") || p.includes("SIN OCUPACION") || p.includes("BUSCA DE SU PRIMER EMPLEO") || p.includes("NINGUNA")) return "CESANTES / SIN OCUPACIÓN";
+      return "OTROS OFICIOS / PROFESIONES";
+    };
+
+    const debeAgrupar = agrupar === "true";
+    const groupedMap = new Map();
+    
+    for (const row of rawRows) {
+      let g;
+      const pText = row.profesion ? row.profesion.toUpperCase() : "";
+      
+      // Siempre normalizar los no especificados, sin importar el modo
+      if (!row.profesion || pText === "0" || pText.includes("NO ESPECIFICADO") || pText.includes("SIN PROFESION") || pText === "NINGUNO") {
+        g = "NO ESPECIFICADO";
+      } else if (debeAgrupar) {
+        g = agruparProfesion(row.profesion);
+      } else {
+        g = row.profesion; // Específico sin agrupar
+      }
+      
+      const totalNum = parseInt(row.total, 10);
+      groupedMap.set(g, (groupedMap.get(g) || 0) + totalNum);
+    }
+
+    let rows = Array.from(groupedMap.entries()).map(([profesion, total]) => ({
+      profesion,
+      total: total.toString()
+    }));
+
+    // Ordenar de mayor a menor y aplicar el límite
+    rows.sort((a, b) => b.total - a.total);
+    const finalLimit = Math.min(Math.max(Number(limit) || 10, 1), 500);
+    rows = rows.slice(0, finalLimit);
 
     const baseWhere = whereClause;
     const totalQuery = `
       SELECT count(*) AS total_general,
-             count(*) FILTER (WHERE p.nombre_profesion NOT IN ('NO ESPECIFICADO', 'SIN PROFESION')) AS total_con_profesion
+             count(*) FILTER (WHERE p.nombre_profesion NOT IN ('NO ESPECIFICADO', 'SIN PROFESION', '0')) AS total_con_profesion
       FROM registro_enrolamiento r
       JOIN profesion p ON p.id_profesion = r.id_profesion
       WHERE ${baseWhere}

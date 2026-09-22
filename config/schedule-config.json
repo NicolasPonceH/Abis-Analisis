@@ -19,19 +19,71 @@
   "targetChannel": "telegram",
   "telegramChatId": "",
   "lastSent": {
-    "id": "disp_1790018275146",
-    "timestamp": "2026-09-21T19:17:55.146Z",
-    "horaChile": "2026-09-21 16:17",
-    "fechaReportada": "21-08-2026 al 23-08-2026",
-    "totalEnrolados": 36,
+    "id": "disp_1790078407614",
+    "timestamp": "2026-09-22T12:00:07.614Z",
+    "horaChile": "2026-09-22 09:00",
+    "fechaReportada": "16-09-2026",
+    "totalEnrolados": 2,
     "slaPDI": 100,
-    "tipo": "PRUEBA_MANUAL_VISUAL",
+    "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
     "canal": "Telegram Oficial PDI",
     "chatId": "-100***456, 1466***122",
     "estado": "EXITO",
-    "messageId": 637
+    "messageId": 650
   },
   "history": [
+    {
+      "id": "disp_1790078407614",
+      "timestamp": "2026-09-22T12:00:07.614Z",
+      "horaChile": "2026-09-22 09:00",
+      "fechaReportada": "16-09-2026",
+      "totalEnrolados": 2,
+      "slaPDI": 100,
+      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "-100***456, 1466***122",
+      "estado": "EXITO",
+      "messageId": 650
+    },
+    {
+      "id": "disp_1790077747222",
+      "timestamp": "2026-09-22T11:49:07.222Z",
+      "horaChile": "2026-09-22 08:49",
+      "fechaReportada": "16-09-2026",
+      "totalEnrolados": 2,
+      "slaPDI": 100,
+      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "-100***456, 1466***122",
+      "estado": "EXITO",
+      "messageId": 648
+    },
+    {
+      "id": "disp_1790076606414",
+      "timestamp": "2026-09-22T11:30:06.414Z",
+      "horaChile": "2026-09-22 08:30",
+      "fechaReportada": "16-09-2026",
+      "totalEnrolados": 2,
+      "slaPDI": 100,
+      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "-100***456, 1466***122",
+      "estado": "EXITO",
+      "messageId": 646
+    },
+    {
+      "id": "disp_1790071804334",
+      "timestamp": "2026-09-22T10:10:04.334Z",
+      "horaChile": "2026-09-22 07:10",
+      "fechaReportada": "16-09-2026",
+      "totalEnrolados": 2,
+      "slaPDI": 100,
+      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
+      "canal": "Telegram Oficial PDI",
+      "chatId": "-100***456, 1466***122",
+      "estado": "EXITO",
+      "messageId": 644
+    },
     {
       "id": "disp_1790018275146",
       "timestamp": "2026-09-21T19:17:55.146Z",
@@ -304,58 +356,6 @@
       "chatId": "-100***456, 1466***122",
       "estado": "EXITO",
       "messageId": 585
-    },
-    {
-      "id": "disp_1789639807944",
-      "timestamp": "2026-09-17T10:10:07.944Z",
-      "horaChile": "2026-09-17 07:10",
-      "fechaReportada": "16-09-2026",
-      "totalEnrolados": 2,
-      "slaPDI": 100,
-      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
-      "canal": "Telegram Oficial PDI",
-      "chatId": "-100***456, 1466***122",
-      "estado": "EXITO",
-      "messageId": 583
-    },
-    {
-      "id": "disp_1789590613264",
-      "timestamp": "2026-09-16T20:30:13.264Z",
-      "horaChile": "2026-09-16 17:30",
-      "fechaReportada": "16-09-2026",
-      "totalEnrolados": 2,
-      "slaPDI": 100,
-      "tipo": "PRUEBA_MANUAL_VISUAL",
-      "canal": "Telegram Oficial PDI",
-      "chatId": "-100***456, 1466***122",
-      "estado": "EXITO",
-      "messageId": 571
-    },
-    {
-      "id": "disp_1789560014594",
-      "timestamp": "2026-09-16T12:00:14.594Z",
-      "horaChile": "2026-09-16 09:00",
-      "fechaReportada": "22-08-2026",
-      "totalEnrolados": 3,
-      "slaPDI": 100,
-      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
-      "canal": "Telegram Oficial PDI",
-      "chatId": "-100***456, 1466***122",
-      "estado": "EXITO",
-      "messageId": 569
-    },
-    {
-      "id": "disp_1789559356351",
-      "timestamp": "2026-09-16T11:49:16.351Z",
-      "horaChile": "2026-09-16 08:49",
-      "fechaReportada": "22-08-2026",
-      "totalEnrolados": 3,
-      "slaPDI": 100,
-      "tipo": "AUTOMATICO_PROGRAMADO_VISUAL",
-      "canal": "Telegram Oficial PDI",
-      "chatId": "-100***456, 1466***122",
-      "estado": "EXITO",
-      "messageId": 567
     }
   ]
 }

@@ -171,7 +171,7 @@ h1, h2, h3, h4, h5, h6,
 
 /* Contenedor Principal */
 .app-container {
-  max-width: 1480px;
+  max-width: 1640px;
   margin: 0 auto;
   padding: 24px 24px 48px;
   width: 100%;
@@ -330,9 +330,21 @@ h1, h2, h3, h4, h5, h6,
 
 /* ==========================================================================
    SCORECARD DE SALUD Y RESUMEN EJECUTIVO (SUPERIOR)
-/* ==========================================================================
-   SCORECARD DE SALUD Y RESUMEN EJECUTIVO (SUPERIOR)
    ========================================================================== */
+.kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .executive-banner {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -1257,8 +1269,9 @@ select.form-control {
 
 .chart-card:hover {
   border-top-color: var(--pdi-gold);
-  border-color: var(--border-medium);
-  box-shadow: 0 12px 28px -6px rgba(0, 35, 76, 0.09), 0 8px 12px -6px rgba(0, 35, 76, 0.05);
+  border-color: rgba(255, 209, 0, 0.3); /* Borde sutil amarillo */
+  box-shadow: 0 12px 28px -6px rgba(0, 35, 76, 0.09), 0 0 18px rgba(255, 209, 0, 0.25); /* Glow amarillo institucional */
+  transform: translateY(-2px); /* Pequeño salto al pasar el mouse */
 }
 
 .chart-card.col-12 { grid-column: span 12; }
@@ -3421,3 +3434,5 @@ body {
   font-size: 0.8rem;
   max-width: 600px;
 }
+. k p i - c a r d   {   u s e r - s e l e c t :   n o n e ;   - w e b k i t - u s e r - s e l e c t :   n o n e ;   c u r s o r :   d e f a u l t ;   }  
+ 

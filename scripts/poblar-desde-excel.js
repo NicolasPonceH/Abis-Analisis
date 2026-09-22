@@ -14,7 +14,7 @@ async function runSeed() {
   }
 }
 
-async function poblarBaseDeDatos(excelPath = "New_Enrolados Abis.xlsx") {
+async function poblarBaseDeDatos(excelPath = "data/New_Enrolados Abis.xlsx") {
   const fullPath = path.isAbsolute(excelPath) ? excelPath : path.join(process.cwd(), excelPath);
 
   if (!fs.existsSync(fullPath)) {

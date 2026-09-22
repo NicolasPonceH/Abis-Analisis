@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=22">
+  <link rel="stylesheet" href="css/styles.css?v=23">
   <style>
     /* ==========================================================================
        GLASSMORPHISM OVERHAUL EN LÍNEA (INMUNIDAD A CACHÉ DE NAVEGADOR)
@@ -1072,12 +1072,12 @@
           </div>
         </div>
 
-        <!-- Gráfico 9: Perfil Sociolaboral: Top 10 Profesiones u Oficios -->
+        <!-- Gráfico 9: Perfil Sociolaboral: Total Profesiones u Oficios -->
         <div class="chart-card col-12" style="margin-top: 6px;">
           <div class="chart-header" style="flex-wrap: wrap; gap: 8px;">
             <div class="chart-title">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              <span>Perfil Sociolaboral: Top 10 Profesiones y Oficios Declarados</span>
+              <span>Perfil Sociolaboral: Total Profesiones y Oficios Declarados</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               <div class="profesion-toggle-group" style="display:inline-flex; background:rgba(226,232,240,0.6); border-radius:6px; padding:2px; font-size:11px; font-weight:600;">
@@ -1093,8 +1093,8 @@
               <div style="width:48px; height:48px; border-radius:50%; background:rgba(2,132,199,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
                 <svg class="svg-icon" viewBox="0 0 24 24" style="stroke:#0284c7; width:24px; height:24px;"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
               </div>
-              <div style="font-weight:700; color:#1e293b; font-size:14px;" id="profesiones-empty-title">Sin registros de profesión en la fecha seleccionada</div>
-              <div style="font-size:12px; color:#64748b; margin-top:4px; max-width:440px;" id="profesiones-empty-desc">Los enrolamientos de este día específico no contienen el campo COD_PROFESION. Puedes visualizar el desglose global consolidado de la extracción Oracle.</div>
+              <div style="font-weight:700; color:#1e293b; font-size:14px;" id="profesiones-empty-title">Sin registros de profesión para este día</div>
+              <div style="font-size:12px; color:#64748b; margin-top:4px; max-width:440px; line-height: 1.4;" id="profesiones-empty-desc">Ninguna de las personas enroladas en la fecha seleccionada declaró su ocupación (todos figuran como "No Especificado"). Puedes visualizar el top 10 histórico consolidado de toda la base.</div>
               <button type="button" id="btn-prof-switch-total" style="margin-top:12px; background:#0284c7; color:#fff; border:none; padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; box-shadow:0 2px 6px rgba(2,132,199,0.25);">
                 Ver Acumulado General (Oracle DB)
               </button>

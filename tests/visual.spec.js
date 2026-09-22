@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-const outDir = 'C:\\Users\\Nicolás\\.gemini\\antigravity-ide\\brain\\b20a865e-701a-4c8a-87f8-76dd31526630\\screenshots';
+const outDir = path.join(__dirname, 'screenshots');
 
 test.describe('Visual Inspection - PDI Chile Styling', () => {
   test('Capture screenshots of all views', async ({ page }) => {

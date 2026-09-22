@@ -56,6 +56,40 @@ const CHART_PALETTE = {
 
 // Inicialización de la aplicación
 document.addEventListener("DOMContentLoaded", async () => {
+  // Plugin para crear un verdadero "Glow Difuminado" en las gráficas al pasar el mouse
+  if (typeof Chart !== 'undefined') {
+    const trueGlowPlugin = {
+      id: 'trueGlowHover',
+      afterDatasetsDraw(chart) {
+        const active = chart.getActiveElements();
+        if (active.length > 0) {
+          const ctx = chart.ctx;
+          ctx.save();
+          // Configuración del difuminado (sombra HTML5 real)
+          ctx.shadowColor = "rgba(255, 209, 0, 0.8)"; // Amarillo
+          ctx.shadowBlur = 14; // Más difuminado
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          
+          // Redibujar solo el elemento bajo el mouse para que emita la luz
+          for (const el of active) {
+            const meta = chart.getDatasetMeta(el.datasetIndex);
+            const element = meta.data[el.index];
+            if (element && element.draw) {
+              element.draw(ctx);
+            }
+          }
+          ctx.restore();
+        }
+      }
+    };
+    Chart.register(trueGlowPlugin);
+    
+    // Restaurar el borde a la normalidad para que sea "más delgado"
+    Chart.defaults.elements.bar.hoverBorderWidth = 0;
+    Chart.defaults.elements.arc.hoverBorderWidth = 0;
+  }
+
   setupEventListeners();
   setupDragAndDrop();
   initSpreadsheetIngest();
@@ -1466,7 +1500,7 @@ async function loadAndRenderProfesionesChart() {
   updateProfesionToggleUI();
 
   try {
-    let url = "/api/metricas/profesiones?limit=10";
+    let url = `/api/metricas/profesiones?limit=500&agrupar=${profesionChartMode === "total"}`;
     if (profesionChartMode === "fecha") {
       if (state.filterMode === "single" && state.currentDate) {
         url += `&fecha=${encodeURIComponent(state.currentDate)}`;
@@ -1480,6 +1514,33 @@ async function loadAndRenderProfesionesChart() {
   } catch (err) {
     console.error("Error al cargar profesiones:", err);
   }
+}
+
+function getProfesionIcon(profesion) {
+  if (!profesion) return "\uf068"; // minus
+  const p = profesion.toUpperCase();
+  if (p.includes("COMERCIO") || p.includes("VENTAS") || p.includes("VENDEDOR")) return "\uf54e"; // store
+  if (p.includes("ESTUDIANTE")) return "\uf19d"; // user-graduate
+  if (p.includes("ALBAÑIL") || p.includes("CONSTRUCCION") || p.includes("CONSTRUCCIÓN")) return "\uf818"; // trowel-bricks
+  if (p.includes("TRANSPORTE") || p.includes("LOGÍSTICA") || p.includes("CHOFER") || p.includes("CONDUCTOR")) return "\uf0d1"; // truck
+  if (p.includes("AGRICULTURA") || p.includes("TEMPORERO") || p.includes("CAMPESINO")) return "\uf722"; // tractor
+  if (p.includes("MECÁNICA") || p.includes("AUTOMOTRIZ") || p.includes("MECANICO")) return "\uf0ad"; // wrench
+  if (p.includes("HOGAR") || p.includes("DUEÑA DE CASA")) return "\uf015"; // home
+  if (p.includes("GASTRONOMÍA") || p.includes("ALIMENTOS") || p.includes("COCIN") || p.includes("CHEF")) return "\uf2e7"; // utensils
+  if (p.includes("OPERARIO") || p.includes("OBRERO")) return "\uf805"; // hard-hat
+  if (p.includes("ESTÉTICA") || p.includes("BELLEZA") || p.includes("PELUQUER")) return "\uf0c4"; // scissors
+  if (p.includes("ADMINISTRACIÓN") || p.includes("OFICINA") || p.includes("CONTADOR")) return "\uf1ec"; // calculator
+  if (p.includes("SALUD") || p.includes("MEDICO") || p.includes("ENFERMER")) return "\uf0f1"; // stethoscope
+  if (p.includes("SEGURIDAD") || p.includes("GUARDIA")) return "\uf3ed"; // shield-halved
+  if (p.includes("LIMPIEZA") || p.includes("ASEO") || p.includes("ASESORA")) return "\uf51a"; // broom
+  if (p.includes("INDEPENDIENTE") || p.includes("EMPRESARIO")) return "\uf0b1"; // briefcase
+  if (p.includes("EDUCACIÓN") || p.includes("PROFESOR") || p.includes("DOCENTE")) return "\uf51c"; // chalkboard-user
+  if (p.includes("INGENIERÍA") || p.includes("INGENIERO")) return "\uf085"; // cogs
+  if (p.includes("TÉCNICO") || p.includes("TECNICO")) return "\uf7d9"; // tools
+  if (p.includes("JUBILADO") || p.includes("PENSIONADO")) return "\uf007"; // user
+  if (p.includes("CESANTE") || p.includes("OCUPACIÓN") || p.includes("DESEMPLEADO")) return "\uf068"; // minus
+  if (p.includes("NO ESPECIFICADO")) return "\uf007"; // user
+  return "\uf0b1"; // default briefcase
 }
 
 function renderProfesionesChart(data) {
@@ -1517,7 +1578,7 @@ function renderProfesionesChart(data) {
       emptyState.style.display = "flex";
       const title = document.getElementById("profesiones-empty-title");
       if (title && state.currentDate) {
-        title.textContent = `Sin registros de profesión para el ${formatDate(state.currentDate)}`;
+        title.textContent = `Sin registros de profesión para el ${state.currentDate}`;
       }
     }
     return;
@@ -1527,8 +1588,37 @@ function renderProfesionesChart(data) {
   canvas.style.display = "block";
   if (emptyState) emptyState.style.display = "none";
 
-  const labels = items.map((i) => formatChartLabel(i.profesion, 24));
+  const isGlobal = profesionChartMode === "total";
+  const chartContainer = canvas.parentElement;
+
+  // Ajustar altura del contenedor dinámicamente si es global y hay muchos ítems
+  if (isGlobal && items.length > 15) {
+    chartContainer.style.height = `${items.length * 18}px`; 
+  } else {
+    chartContainer.style.height = "280px";
+  }
+
+  const labels = items.map((i) => {
+    const icon = getProfesionIcon(i.profesion);
+    const formatted = formatChartLabel(i.profesion, 22);
+    if (Array.isArray(formatted)) {
+      return [icon + " " + formatted[0], ...formatted.slice(1)];
+    }
+    return icon + " " + formatted;
+  });
   const values = items.map((i) => i.total);
+
+  // Configuraciones de ejes dinámicas según la orientación
+  const labelTicksConfig = { 
+    color: "#475569", 
+    font: { family: "'Font Awesome 6 Free', 'Open Sans', sans-serif", weight: "600", size: 11.5 },
+    autoSkip: false, // Forzar que NUNCA se oculten etiquetas, ni en global ni en día
+    maxRotation: isGlobal ? 0 : 45,
+    minRotation: isGlobal ? 0 : 45
+  };
+
+  const valueTicksConfig = { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 }, precision: 0 };
+  const valueGridConfig = { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] };
 
   state.charts["chart-profesiones"] = new Chart(ctx, {
     type: "bar",
@@ -1541,7 +1631,10 @@ function renderProfesionesChart(data) {
           const chart = context.chart;
           const { ctx: c, chartArea } = chart;
           if (!chartArea) return "rgba(2, 132, 199, 0.85)";
-          const g = c.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+          const isHoriz = chart.options.indexAxis === "y";
+          const g = isHoriz 
+            ? c.createLinearGradient(chartArea.left, 0, chartArea.right, 0)
+            : c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
           g.addColorStop(0, "rgba(2, 132, 199, 0.7)");
           g.addColorStop(1, "rgba(2, 132, 199, 0.95)");
           return g;
@@ -1549,16 +1642,24 @@ function renderProfesionesChart(data) {
         hoverBackgroundColor: "#0284c7",
         borderRadius: 6,
         borderSkipped: false,
-        maxBarThickness: 20,
+        maxBarThickness: isGlobal ? 14 : 40,
       }],
     },
     options: {
-      indexAxis: "y",
+      indexAxis: isGlobal ? "y" : "x",
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { top: isGlobal ? 0 : 24, right: isGlobal ? 24 : 0 }
+      },
       plugins: {
         legend: { display: false },
+        bklitDataLabels: {
+          display: items.length <= 25 
+        },
         tooltip: {
+          titleFont: { family: "'Font Awesome 6 Free', 'Open Sans', sans-serif", weight: "900", size: 13 },
+          bodyFont: { family: "'Open Sans', sans-serif", size: 12 },
           callbacks: {
             label: function(context) {
               const item = items[context.dataIndex];
@@ -1569,14 +1670,16 @@ function renderProfesionesChart(data) {
       },
       scales: {
         x: {
-          grid: { color: "rgba(226, 232, 240, 0.6)", borderDash: [4, 4] },
-          border: { display: false },
-          ticks: { color: "#64748b", font: { family: "'Open Sans', sans-serif", size: 11 }, precision: 0 },
+          grid: isGlobal ? valueGridConfig : { display: false },
+          border: isGlobal ? { display: false } : undefined,
+          ticks: isGlobal ? valueTicksConfig : labelTicksConfig,
           beginAtZero: true,
         },
         y: {
-          grid: { display: false },
-          ticks: { color: "#1e293b", font: { family: "'Open Sans', sans-serif", weight: "600", size: 11 } },
+          grid: isGlobal ? { display: false } : valueGridConfig,
+          border: !isGlobal ? { display: false } : undefined,
+          ticks: isGlobal ? labelTicksConfig : valueTicksConfig,
+          beginAtZero: true,
         }
       }
     }
@@ -4001,7 +4104,7 @@ const SHEET_SCHEMA = [
   { field: "estadoSincronizacion", label: "Sincronización PDI", required: true, aliases: ["estado sincronizacion", "sincronización pdi", "sincronizacion_pdi", "sincronizacion pdi", "estado sincronización"] },
   { field: "estadoRegistro", label: "Registración Biométrica", required: true, aliases: ["estado registro", "registración biométrica", "registracion_biometrica", "registracion biometrica"] },
   { field: "estadoGeneral", label: "Estado General", required: true, aliases: ["estado general", "estado_general"] },
-  { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación"] },
+  { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación", "region 2", "región 2", "REGION2"] },
 ];
 
 function initSpreadsheetIngest() {

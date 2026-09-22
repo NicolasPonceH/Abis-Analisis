@@ -36,6 +36,39 @@ function toFieldKeyedRow(rawRow, actualHeaders) {
   return row;
 }
 
+async function autoInsertNewProfessions(pool, rows, headers) {
+  const uniqueProfs = new Set();
+  rows.forEach(rawRow => {
+    let rowObj = rawRow;
+    if (Array.isArray(rawRow)) {
+      rowObj = {};
+      headers.forEach((h, i) => { rowObj[h] = rawRow[i]; });
+    }
+    const keyedRow = toFieldKeyedRow(rowObj, headers);
+    if (keyedRow.profesion) {
+      const val = String(keyedRow.profesion).trim().toUpperCase();
+      if (val && val !== "NULL" && val !== "(NULL)" && val !== "NO ESPECIFICADO" && val !== "SIN PROFESION") {
+        uniqueProfs.add(val);
+      }
+    }
+  });
+
+  if (uniqueProfs.size > 0) {
+    const profArray = Array.from(uniqueProfs);
+    // Insertamos en lotes de 100
+    for (let i = 0; i < profArray.length; i += 100) {
+      const batch = profArray.slice(i, i + 100);
+      const values = batch.map((_, idx) => `($${idx + 1})`).join(",");
+      const query = `INSERT INTO profesion (nombre_profesion) VALUES ${values} ON CONFLICT (nombre_profesion) DO NOTHING`;
+      try {
+        await pool.query(query, batch);
+      } catch (err) {
+        console.warn("[ETL] Advertencia al inyectar profesiones dinámicas:", err.message);
+      }
+    }
+  }
+}
+
 // Orquesta el modulo de ingesta: lee el Excel, valida su estructura y mapea
 // cada fila en memoria contra los catalogos. No inserta en la base de datos.
 async function processExcelFile(filePath, pool, options = {}) {
@@ -45,6 +78,9 @@ async function processExcelFile(filePath, pool, options = {}) {
   if (!headerValidation.ok) {
     return { headerValidation, rows: [], errors: [], sheetName };
   }
+
+  // Auto-descubrir e inyectar nuevas profesiones ANTES de cargar los catálogos
+  await autoInsertNewProfessions(pool, rows, headers);
 
   const catalogs = await loadCatalogs(pool);
 
@@ -68,6 +104,9 @@ async function processSheetRows(headers, rows, pool) {
   if (!headerValidation.ok) {
     return { headerValidation, rows: [], errors: [] };
   }
+
+  // Auto-descubrir e inyectar nuevas profesiones ANTES de cargar los catálogos
+  await autoInsertNewProfessions(pool, rows, headers);
 
   const catalogs = await loadCatalogs(pool);
 

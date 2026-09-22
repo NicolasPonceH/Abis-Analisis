@@ -99,6 +99,12 @@ const EXPECTED_COLUMNS = [
       "Ocupacion",
       "OCUPACION",
       "Ocupación",
+      "Region 2",
+      "REGION 2",
+      "Región 2",
+      "región 2",
+      "REGION2",
+      "Region2"
     ],
     field: "profesion",
     required: false,
