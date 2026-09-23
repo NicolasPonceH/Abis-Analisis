@@ -1,5 +1,9 @@
 const fs = require("fs");
 const crypto = require("crypto");
+const path = require("path");
+// 1. Intentar cargar .env.local con prioridad (para almacenar ENCRYPTION_KEY seguro localmente)
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env.local") });
+// 2. Cargar .env normal si faltan variables
 require("dotenv").config();
 
 const ALGORITMO = "aes-256-gcm";

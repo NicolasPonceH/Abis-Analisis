@@ -121,9 +121,9 @@ async function ejecutarFlujoDiario(filePath, pool) {
       canal: "Telegram Oficial PDI",
       estado: notificado ? "EXITO" : "FALLO",
     };
-    const currentConfig = schedulerService.getConfig();
+    const currentConfig = await schedulerService.getConfig();
     const history = [entry, ...(currentConfig.history || [])].slice(0, 25);
-    schedulerService.saveConfig({ lastSent: entry, history });
+    await schedulerService.saveConfig({ lastSent: entry, history });
   } catch (err) {
     // Si falla el guardado de historial, no afecta el resultado del ETL
   }

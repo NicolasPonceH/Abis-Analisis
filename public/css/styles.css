@@ -532,7 +532,7 @@ h1, h2, h3, h4, h5, h6,
 .tabs-nav.navbar-top .tab-button:hover .nav-svg-icon {
   transform: scale(1.12);
   stroke: var(--pdi-gold);
-  filter: drop-shadow(0 0 6px rgba(255, 209, 0, 0.6));
+  filter: none;
 }
 
 /* Animación Active */
@@ -547,7 +547,7 @@ h1, h2, h3, h4, h5, h6,
 .tabs-nav.navbar-top .tab-button.active .nav-svg-icon {
   stroke: var(--pdi-gold);
   transform: scale(1.1);
-  filter: drop-shadow(0 0 8px rgba(255, 209, 0, 0.8));
+  filter: none;
 }
 
 .tabs-nav.navbar-top .tab-button.active::after {
@@ -559,7 +559,7 @@ h1, h2, h3, h4, h5, h6,
   height: 3.5px;
   background: var(--pdi-gold);
   border-radius: 3px 3px 0 0;
-  box-shadow: 0 0 10px rgba(255, 209, 0, 0.9);
+  box-shadow: none;
   animation: navbarSlideIndicator 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -722,10 +722,10 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .preset-btn.active {
-  background: var(--pdi-navy);
-  color: var(--pdi-gold);
+  background: var(--pdi-gold);
+  color: var(--pdi-navy);
   border-color: var(--pdi-gold);
-  box-shadow: 0 2px 6px rgba(0, 35, 76, 0.25);
+  box-shadow: 0 2px 6px rgba(255, 209, 0, 0.4);
 }
 
 .filters-grid {
@@ -901,9 +901,12 @@ select.form-control {
 }
 
 .btn-primary {
-  background: var(--pdi-navy);
-  color: #ffffff;
-  border: 1px solid rgba(255, 209, 0, 0.35);
+  background: var(--pdi-gold);
+  color: var(--pdi-navy-dark);
+  /* filter removed */
+  /* color removed */
+  border: 1px solid var(--pdi-gold-dark);
+  font-weight: 700;
   font-family: var(--font-heading);
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -911,8 +914,8 @@ select.form-control {
 }
 
 .btn-primary:hover {
-  background: var(--pdi-navy-light);
-  border-color: var(--pdi-gold);
+  background: var(--pdi-gold-dark);
+  border-color: var(--pdi-gold-dark);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(0, 35, 76, 0.35);
 }
@@ -1477,7 +1480,7 @@ select.form-control {
   letter-spacing: 0.3px;
 }
 
-.badge-primary { background: var(--pdi-navy); color: #ffffff; border: 1px solid var(--pdi-navy-light); }
+.badge-primary { background: var(--pdi-gold); color: var(--pdi-navy-dark); border: 1px solid var(--pdi-gold-dark); font-weight: 700; }
 .badge-success { background: var(--status-success-bg); color: var(--status-success); border: 1px solid var(--status-success-border); }
 .badge-warning { background: var(--status-warning-bg); color: var(--status-warning); border: 1px solid var(--status-warning-border); }
 .badge-danger  { background: var(--status-danger-bg);  color: var(--status-danger);  border: 1px solid var(--status-danger-border); }
@@ -1907,7 +1910,7 @@ select.form-control {
    ========================================================================== */
 .footer {
   margin-top: auto;
-  background: var(--pdi-navy-dark);
+  background: var(--pdi-navy);
   border-top: 3.5px solid var(--pdi-gold);
   padding: 22px 28px;
   text-align: center;
@@ -2229,8 +2232,11 @@ select.form-control {
 
 /* Banner de Estado del Reloj y Automatización */
 .schedule-status-banner {
-  background: linear-gradient(135deg, var(--pdi-navy) 0%, var(--pdi-navy-dark) 100%);
-  border: none;
+  background: rgba(0, 35, 76, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* border: none; removed */
   border-radius: var(--radius-lg);
   padding: 18px 24px;
   display: flex;

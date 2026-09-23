@@ -22,6 +22,17 @@ const state = {
 // Variable global para el reloj en vivo de ajustes
 var liveClockInterval = null;
 
+// Función de sanitización anti-XSS
+function escapeHtml(unsafe) {
+  if (unsafe == null) return '';
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Paleta de colores ejecutiva institucional para Chart.js (Fondo claro / Alto contraste)
 // Paleta de colores ejecutiva inspirada en la estética bklit-ui / shadcn
 const CHART_PALETTE = {
@@ -2292,8 +2303,8 @@ function renderDataTable(data) {
 
       return `
         <tr class="table-row-item">
-          <td><strong>${r.cuartel}</strong></td>
-          <td><span class="badge badge-info">${r.unidad}</span></td>
+          <td><strong>${escapeHtml(r.cuartel)}</strong></td>
+          <td><span class="badge badge-info">${escapeHtml(r.unidad)}</span></td>
           <td style="text-align:right; font-weight:700;">${r.total.toLocaleString()}</td>
           <td style="text-align:right; color:var(--status-success); font-weight:600;">${r.sincronizados.toLocaleString()}</td>
           <td style="text-align:right; color:${r.conError > 0 ? 'var(--status-danger)' : 'var(--text-muted)'}; font-weight:600;">${r.conError.toLocaleString()}</td>

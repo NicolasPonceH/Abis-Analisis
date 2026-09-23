@@ -28,16 +28,115 @@ const recipientService = require("./telegram/recipientService");
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Rate limiting local sin dependencias externas
+// Protege contra fuerza bruta de la contraseña INGESTA_PASSWORD
+const rateLimitStore = new Map();
+let lastCleanup = Date.now();
+
+function rateLimitMiddleware(maxRequests = 30, windowMs = 900000) {
+  // 30 peticiones por 15 minutos (900000 ms)
+  return (req, res, next) => {
+    const ip =
+      req.ip || req.socket.remoteAddress || "unknown";
+    const now = Date.now();
+
+    // Limpieza cada minuto de entradas viejas
+    if (now - lastCleanup > 60000) {
+      const cutoff = now - windowMs;
+      for (const [key, entry] of rateLimitStore) {
+        if (entry.timestamp < cutoff) rateLimitStore.delete(key);
+      }
+      lastCleanup = now;
+    }
+
+    const entry = rateLimitStore.get(ip);
+    if (!entry) {
+      rateLimitStore.set(ip, { count: 1, timestamp: now });
+      return next();
+    }
+
+    if (entry.count >= maxRequests) {
+      const remainingWait = windowMs - (now - entry.timestamp);
+      return res.status(429).json({
+        ok: false,
+        error: `Demasiados intentos. Intente nuevamente en ${Math.ceil(
+          remainingWait / 1000
+        )} segundos`,
+      });
+    }
+
+    entry.count++;
+    next();
+  };
+}
+
+// Aplicar rate limiting a endpoints sensibles
+app.use("/api/ingest/*", rateLimitMiddleware(20, 900000)); // 20 intentos / 15 min
+app.use("/api/settings/*", rateLimitMiddleware(20, 900000));
+app.use("/api/telegram/*", rateLimitMiddleware(30, 900000));
+app.use("/api/security/*", rateLimitMiddleware(20, 900000));
+
 const FECHA_VALIDA = /^\d{4}-\d{2}-\d{2}$/;
 
 // Configurar multer para almacenar archivos en memoria RAM (seguridad: sin residuos en disco)
 const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  // Validar extensión
+  const allowedExtensions = [".xlsx", ".xlsm"];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (!allowedExtensions.includes(ext)) {
+    return cb(new Error("Solo se permiten archivos .xlsx o .xlsm"), false);
+  }
+  
+  // Validar tamaño (adicional al limit de multer)
+  if (file.size && file.size > 100 * 1024 * 1024) {
+    return cb(new Error("Archivo muy grande: máximo 100MB"), false);
+  }
+  
+  cb(null, true);
+};
+
 const upload = multer({
   storage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB límite
+  fileFilter
 });
 
 app.use(express.json());
+
+// Middleware de Rate Limiting Local
+const rateLimit = (ms = 15000, maxAttempts = 20) => {
+  const attempts = new Map();
+  
+  return (req, res, next) => {
+    const ip = req.ip || req.socket.remoteAddress;
+    const now = Date.now();
+    
+    // Limpiar entradas viejas (>5 minutos)
+    for (const [key, count] of attempts) {
+      if (now - key > 300000) attempts.delete(key);
+    }
+    
+    let count = attempts.get(ip) || 0;
+    attempts.set(ip, count + 1);
+    
+    if (count >= maxAttempts) {
+      return res.status(429).json({
+        ok: false,
+        error: "Demasiados intentos. Intente en " + Math.ceil((300000 - (now - attempts.keys().next().value || 0)) / 1000) + " segundos"
+      });
+    }
+    
+    next();
+  };
+};
+
+// Aplicar a endpoints sensibles
+app.use("/api/ingest", rateLimit(15000, 20));
+app.use("/api/settings", rateLimit(15000, 20));
+app.use("/api/telegram", rateLimit(15000, 20));
+
 // Servir archivos estáticos del frontend (Dashboard Web)
 app.use(express.static(path.join(__dirname, "../public")));
 
@@ -207,15 +306,14 @@ app.get("/api/metricas/profesiones", async (req, res) => {
     const finalLimit = Math.min(Math.max(Number(limit) || 10, 1), 500);
     rows = rows.slice(0, finalLimit);
 
-    const baseWhere = whereClause;
     const totalQuery = `
       SELECT count(*) AS total_general,
              count(*) FILTER (WHERE p.nombre_profesion NOT IN ('NO ESPECIFICADO', 'SIN PROFESION', '0')) AS total_con_profesion
       FROM registro_enrolamiento r
       JOIN profesion p ON p.id_profesion = r.id_profesion
-      WHERE ${baseWhere}
+      WHERE ${whereClause}
     `;
-    const totalsRes = await pool.query(totalQuery, params.slice(0, paramIdx - 1));
+    const totalsRes = await pool.query(totalQuery, params);
     const totalConProf = Number(totalsRes.rows[0]?.total_con_profesion || 0);
     const totalGeneral = Number(totalsRes.rows[0]?.total_general || 0);
 
@@ -470,7 +568,7 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
 
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       console.warn(`[SEGURIDAD] Intento de ingesta rechazado: Clave de autorización no válida o ausente.`);
@@ -545,7 +643,7 @@ app.post("/api/ingest/sheet", async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
 
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       console.warn(`[SEGURIDAD] Intento de ingesta de hoja de cálculo rechazado: Clave no autorizada.`);
@@ -707,7 +805,7 @@ app.post("/api/security/cifrar", upload.single("archivo"), async (req, res) => {
   try {
     // Verificación de clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
 
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       console.warn(`[SEGURIDAD] Intento de cifrado rechazado: Clave de autorización no válida o ausente.`);
@@ -757,7 +855,7 @@ app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) =
   try {
     // Verificación de clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
 
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       console.warn(`[SEGURIDAD] Intento de descifrado rechazado: Clave de autorización no válida o ausente.`);
@@ -813,9 +911,9 @@ app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) =
 // ==========================================================================
 
 // Obtiene la configuración actual de horarios de reporte y próxima ejecución
-app.get("/api/settings/schedule", (req, res) => {
+app.get("/api/settings/schedule", async (req, res) => {
   try {
-    const config = schedulerService.getConfig();
+    const config = await schedulerService.getConfig();
     const next = schedulerService.getNextExecution(config);
     const horaChile = schedulerService.obtenerHoraChile();
 
@@ -840,7 +938,7 @@ app.post("/api/settings/schedule", async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
 
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       console.warn(`[SEGURIDAD] Intento de modificación de programación rechazado: Clave de autorización no válida o ausente.`);
@@ -852,7 +950,7 @@ app.post("/api/settings/schedule", async (req, res) => {
     }
 
     const { enabled, times, days, reportType, telegramChatId } = req.body || {};
-    const updated = schedulerService.saveConfig({
+    const updated = await schedulerService.saveConfig({
       enabled: enabled !== undefined ? Boolean(enabled) : undefined,
       times,
       days,
@@ -932,7 +1030,10 @@ app.get("/api/telegram/destinatarios", async (req, res) => {
     }
     res.json({
       ok: true,
-      destinatarios,
+      destinatarios: destinatarios.map(d => ({
+        ...d,
+        chatId: maskSensitiveId(d.chatId)
+      })),
       botInfo,
     });
   } catch (err) {
@@ -944,7 +1045,7 @@ app.get("/api/telegram/destinatarios", async (req, res) => {
 app.post("/api/telegram/destinatarios", async (req, res) => {
   try {
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       return res.status(401).json({
         ok: false,
@@ -975,7 +1076,7 @@ app.post("/api/telegram/destinatarios", async (req, res) => {
 app.patch("/api/telegram/destinatarios/:id/toggle", async (req, res) => {
   try {
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       return res.status(401).json({
         ok: false,
@@ -1002,7 +1103,7 @@ app.patch("/api/telegram/destinatarios/:id/toggle", async (req, res) => {
 app.delete("/api/telegram/destinatarios/:id", async (req, res) => {
   try {
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD || "pdi2026";
+    const claveEsperada = process.env.INGESTA_PASSWORD;
     if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
       return res.status(401).json({
         ok: false,
@@ -1099,7 +1200,21 @@ app.get("/api/reportes/captura-preview", async (req, res) => {
   }
 });
 
+function maskSensitiveId(id) {
+  const s = String(id).trim();
+  if (!s) return s;
+  // Formato: primeros 4 + *** + últimos 3
+  if (s.length <= 7) return "***";
+  return s.slice(0, 4) + "***" + s.slice(-3);
+}
+
 const { iniciarBot, detenerBot } = require("./telegram/botService");
+
+// Validación de arranque: Asegurar que las variables críticas existan
+if (!process.env.INGESTA_PASSWORD) {
+  console.error("❌ FALTA INGESTA_PASSWORD - Deteniendo servidor por seguridad");
+  process.exit(1);
+}
 
 const server = app.listen(port, () => {
   console.log(`Sistema ABIS escuchando en http://localhost:${port}`);

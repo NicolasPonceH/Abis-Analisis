@@ -72,6 +72,25 @@ async function autoInsertNewProfessions(pool, rows, headers) {
 // Orquesta el modulo de ingesta: lee el Excel, valida su estructura y mapea
 // cada fila en memoria contra los catalogos. No inserta en la base de datos.
 async function processExcelFile(filePath, pool, options = {}) {
+  // Verificación de cabecera mágica (Office Open XML / ZIP)
+  let isValidExcel = false;
+  if (Buffer.isBuffer(filePath)) {
+    isValidExcel = filePath.length >= 2 && filePath[0] === 0x50 && filePath[1] === 0x4b;
+  } else if (typeof filePath === "string") {
+    const fs = require("fs");
+    if (fs.existsSync(filePath)) {
+      const fd = fs.openSync(filePath, "r");
+      const buffer = Buffer.alloc(2);
+      fs.readSync(fd, buffer, 0, 2, 0);
+      fs.closeSync(fd);
+      isValidExcel = buffer[0] === 0x50 && buffer[1] === 0x4b;
+    }
+  }
+
+  if (!isValidExcel) {
+    return { headerValidation: { ok: false, error: "Archivo no es un Excel válido (Firma PK no encontrada)" }, rows: [], errors: [], sheetName: "invalid" };
+  }
+
   const { headers, rows, sheetName } = readExcelFile(filePath, options);
 
   const headerValidation = validateHeaders(headers);

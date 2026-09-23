@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sistema ABIS - Plataforma oficial de la Policía de Investigaciones de Chile (PDI) para análisis, auditoría y reportería ejecutiva de enrolamiento biométrico.">
+  <meta name="description"
+    content="Sistema ABIS - Plataforma oficial de la Policía de Investigaciones de Chile (PDI) para análisis, auditoría y reportería ejecutiva de enrolamiento biométrico.">
   <title>Sistema ABIS - Panel Analítico de Enrolamiento Biométrico | PDI Chile</title>
-  
+
   <!-- Favicon y Tipografía Oficial PDI Chile (Open Sans Unificada) -->
   <link rel="icon" type="image/png" href="assets/logo-pdi.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=23">
+  <link rel="stylesheet" href="css/styles.css?v=28">
   <style>
     /* ==========================================================================
        GLASSMORPHISM OVERHAUL EN LÍNEA (INMUNIDAD A CACHÉ DE NAVEGADOR)
        ========================================================================== */
     body {
-      background: 
+      background:
         radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%),
         radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%),
         radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%),
@@ -26,14 +29,37 @@
       background-attachment: fixed !important;
     }
 
-    .executive-banner, .kpi-card, .dashboard-card, .chart-card, .filters-card, .table-card, 
-    .trend-toolbar-card, .modal-content, .sheet-workflow-card, .sheet-preview-card, .upload-info-card {
+    .executive-banner,
+    .kpi-card,
+    .dashboard-card,
+    .chart-card,
+    .filters-card,
+    .table-card,
+    .modal-content,
+    .sheet-workflow-card,
+    .sheet-preview-card,
+    .upload-info-card {
       background: rgba(255, 255, 255, 0.58) !important;
       backdrop-filter: blur(24px) !important;
       -webkit-backdrop-filter: blur(24px) !important;
       border: 1px solid rgba(255, 255, 255, 0.8) !important;
       box-shadow: 0 8px 32px rgba(0, 35, 76, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
       border-radius: 14px !important;
+    }
+    
+    .trend-toolbar-card {
+      background: linear-gradient(135deg, rgba(0, 48, 105, 0.85) 0%, rgba(0, 80, 160, 0.7) 100%) !important;
+      backdrop-filter: blur(16px) saturate(120%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
+      padding: 16px 24px !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 209, 0, 0.6) !important;
+      box-shadow: none !important;
+    }
+    
+    .trend-toolbar-label {
+      color: #ffffff !important;
+      font-weight: 600 !important;
     }
 
     .header-institutional {
@@ -44,23 +70,142 @@
       box-shadow: 0 4px 24px rgba(0, 15, 33, 0.4) !important;
     }
 
+    .schedule-status-banner,
+    .data-table th,
+    .footer {
+      background: linear-gradient(135deg, rgba(0, 48, 105, 0.85) 0%, rgba(0, 80, 160, 0.7) 100%) !important;
+      backdrop-filter: blur(16px) saturate(120%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
+    }
+
     .tabs-nav .tab-button {
       background: rgba(255, 255, 255, 0.05) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
       color: rgba(255, 255, 255, 0.7) !important;
     }
+
+    .table-header-bar,
+    .chart-header,
+    .filters-header,
+    .settings-card-header,
+    .sheet-workflow-header,
+    .sheet-preview-header,
+    .modal-header {
+      background: linear-gradient(135deg, rgba(0, 48, 105, 0.85) 0%, rgba(0, 80, 160, 0.7) 100%) !important;
+      backdrop-filter: blur(16px) saturate(120%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
+      padding: 16px 24px !important;
+      border-radius: 12px 12px 0 0 !important;
+      border: 1px solid rgba(255, 209, 0, 0.6) !important;
+      border-bottom: none !important;
+      box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+      margin: -24px -24px 24px -24px !important;
+    }
+
+    .table-header-bar .chart-title,
+    .chart-header .chart-title,
+    .filters-header .filters-title,
+    .settings-card-header h3,
+    .sheet-workflow-header h3,
+    .sheet-preview-header h3,
+    .modal-header h2,
+    .table-header-bar .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
+    .chart-header .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
+    .filters-header .filters-title span:not(.badge-primary):not(.badge):not(.chart-badge),
+    .settings-card-header .settings-card-title span,
+    .schedule-clock-title,
+    .schedule-clock-time,
+    .schedule-next-badge,
+    .data-table th,
+    .footer,
+    .footer div,
+    .footer strong {
+      color: #ffffff !important;
+    }
+
+    .badge-primary {
+      color: #00234c !important;
+    }
+
+    .table-header-bar svg,
+    .chart-header svg,
+    .filters-header svg,
+    .settings-card-header svg,
+    .sheet-workflow-header svg,
+    .sheet-preview-header svg,
+    .modal-header svg {
+      stroke: #ffd100 !important;
+    }
+
+    /* ALTO CONTRASTE PARA BOTONES SECUNDARIOS E INPUTS DENTRO DE CABECERAS AZULES */
+    .table-header-bar .btn-secondary,
+    .chart-header .btn-secondary,
+    .filters-header .btn-secondary,
+    .settings-card-header .btn-secondary,
+    .sheet-workflow-header .btn-secondary,
+    .sheet-preview-header .btn-secondary,
+    .modal-header .btn-secondary {
+      background: #ffffff !important;
+      color: #00234c !important;
+      border: 1px solid rgba(255, 209, 0, 0.8) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      font-weight: 600 !important;
+    }
+    
+    .table-header-bar .btn-secondary:hover,
+    .chart-header .btn-secondary:hover,
+    .filters-header .btn-secondary:hover,
+    .settings-card-header .btn-secondary:hover,
+    .sheet-workflow-header .btn-secondary:hover,
+    .sheet-preview-header .btn-secondary:hover,
+    .modal-header .btn-secondary:hover {
+      background: #f8fafc !important;
+      border-color: #ffd100 !important;
+      transform: translateY(-1px) !important;
+    }
+
+    .table-header-bar .form-control,
+    .chart-header .form-control,
+    .filters-header .form-control,
+    .settings-card-header .form-control,
+    .sheet-workflow-header .form-control,
+    .sheet-preview-header .form-control,
+    .modal-header .form-control,
+    .table-header-bar .trend-calendar-box {
+      background: rgba(255, 255, 255, 0.95) !important;
+      color: #00234c !important;
+      border: 1px solid rgba(255, 209, 0, 0.6) !important;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .table-header-bar .trend-calendar-box svg,
+    .table-header-bar .btn-secondary svg,
+    .chart-header .btn-secondary svg,
+    .filters-header .btn-secondary svg,
+    .settings-card-header .btn-secondary svg,
+    .sheet-workflow-header .btn-secondary svg,
+    .sheet-preview-header .btn-secondary svg,
+    .modal-header .btn-secondary svg {
+      stroke: #00234c !important;
+    }
+
+
+
     .tabs-nav .tab-button:hover {
       background: rgba(255, 255, 255, 0.15) !important;
       color: #fff !important;
     }
+
     .tabs-nav .tab-button.active {
       background: rgba(255, 255, 255, 0.25) !important;
-      border-color: rgba(255, 209, 0, 0.7) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
       color: #fff !important;
     }
+
     .demo-block {
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+
     .demo-block:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0, 35, 76, 0.1) !important;
@@ -76,7 +221,8 @@
     }
 
     .ingesta-mode-selector {
-      display: inline-flex !important;
+      display: flex !important;
+      width: 100% !important;
       gap: 8px !important;
       background: rgba(255, 255, 255, 0.65) !important;
       backdrop-filter: blur(20px) !important;
@@ -90,6 +236,8 @@
 
     .ingesta-mode-btn {
       display: inline-flex !important;
+      flex: 1 !important;
+      justify-content: center !important;
       align-items: center !important;
       gap: 10px !important;
       padding: 10px 18px !important;
@@ -218,7 +366,8 @@
       box-shadow: 0 8px 32px rgba(0, 35, 76, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
     }
 
-    .sheet-paste-zone:hover, .sheet-paste-zone:focus-within {
+    .sheet-paste-zone:hover,
+    .sheet-paste-zone:focus-within {
       border-color: #0284c7 !important;
       background: rgba(240, 248, 255, 0.75) !important;
       transform: translateY(-2px) !important;
@@ -528,17 +677,21 @@
       text-decoration: none !important;
     }
 
-    .btn-primary {
-      background: #00234c !important;
-      color: #ffffff !important;
-      border: 1px solid rgba(255, 209, 0, 0.45) !important;
-      box-shadow: 0 4px 14px rgba(0, 35, 76, 0.25) !important;
+    .btn-primary,
+    .badge-primary {
+      background: #ffd100 !important;
+      color: #001733 !important;
+      border: 1px solid #ffd100 !important;
+      box-shadow: 0 4px 14px rgba(0, 35, 76, 0.15) !important;
+      font-weight: 700 !important;
     }
-    .btn-primary:hover {
-      background: #00387a !important;
-      border-color: #ffd100 !important;
+
+    .btn-primary:hover,
+    .badge-primary:hover {
+      background: #e6bc00 !important;
+      border-color: #e6bc00 !important;
       transform: translateY(-1.5px) !important;
-      box-shadow: 0 6px 20px rgba(0, 35, 76, 0.35) !important;
+      box-shadow: 0 6px 20px rgba(0, 35, 76, 0.25) !important;
     }
 
     .btn-secondary {
@@ -547,6 +700,7 @@
       color: #00234c !important;
       box-shadow: 0 2px 8px rgba(0, 35, 76, 0.04) !important;
     }
+
     .btn-secondary:hover {
       background: #ffffff !important;
       border-color: #00234c !important;
@@ -564,18 +718,22 @@
       display: inline-block !important;
       flex-shrink: 0 !important;
     }
+
     .svg-icon-xs {
       width: 14px !important;
       height: 14px !important;
     }
+
     .svg-icon-sm {
       width: 16px !important;
       height: 16px !important;
     }
+
     .svg-icon-md {
       width: 22px !important;
       height: 22px !important;
     }
+
     .svg-icon-xl {
       width: 36px !important;
       height: 36px !important;
@@ -590,38 +748,44 @@
       font-size: 0.75rem !important;
       font-weight: 600 !important;
     }
+
     .badge-default {
       background: #f1f5f9 !important;
       color: #475569 !important;
       border: 1px solid #cbd5e1 !important;
     }
+
     .badge-info {
       background: rgba(2, 132, 199, 0.12) !important;
       color: #0284c7 !important;
       border: 1px solid rgba(2, 132, 199, 0.25) !important;
     }
+
     .badge-success {
       background: rgba(16, 185, 129, 0.12) !important;
       color: #059669 !important;
       border: 1px solid rgba(16, 185, 129, 0.25) !important;
     }
+
     .badge-warning {
       background: rgba(245, 158, 11, 0.12) !important;
       color: #d97706 !important;
       border: 1px solid rgba(245, 158, 11, 0.25) !important;
     }
   </style>
-  
+
   <!-- Chart.js CDN Oficial -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
 
   <!-- Header Institucional PDI (Estilo Oficial pdichile.cl) -->
   <header class="header-institutional">
     <div class="header-inner">
       <div class="brand-section">
-        <img src="assets/logo-pdi.png" alt="Policía de Investigaciones de Chile" class="logo-pdi" id="pdi-logo-header" width="76" height="38">
+        <img src="assets/logo-pdi.png" alt="Policía de Investigaciones de Chile" class="logo-pdi" id="pdi-logo-header"
+          width="76" height="38">
         <div class="brand-titles">
           <div class="brand-title">
             <span>SISTEMA ABIS</span>
@@ -633,31 +797,35 @@
       <!-- Barra de Navegación de Paneles Centrada -->
       <nav class="tabs-nav navbar-top" id="main-navbar">
         <button class="tab-button active" data-tab="metricas">
-          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="7" height="9" x="3" y="3" rx="1"/>
-            <rect width="7" height="5" x="14" y="3" rx="1"/>
-            <rect width="7" height="9" x="14" y="12" rx="1"/>
-            <rect width="7" height="5" x="3" y="16" rx="1"/>
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1" />
+            <rect width="7" height="5" x="14" y="3" rx="1" />
+            <rect width="7" height="9" x="14" y="12" rx="1" />
+            <rect width="7" height="5" x="3" y="16" rx="1" />
           </svg>
           <span>Panel Ejecutivo</span>
         </button>
         <button class="tab-button" data-tab="ingesta">
-          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" x2="12" y1="3" y2="15"/>
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" x2="12" y1="3" y2="15" />
           </svg>
           <span>Ingesta ABIS</span>
         </button>
         <button class="tab-button" data-tab="tendencias">
-          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-            <polyline points="16 7 22 7 22 13"/>
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
           </svg>
           <span>Evolución & Tendencias</span>
         </button>
         <button class="tab-button" data-tab="auditoria">
-          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -667,9 +835,11 @@
           <span>Bitácora & Auditoría</span>
         </button>
         <button class="tab-button" data-tab="ajustes">
-          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
           <span>Ajustes & Horarios</span>
         </button>
@@ -692,13 +862,25 @@
       <div class="filters-card">
         <div class="filters-header">
           <div class="filters-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <line x1="4" x2="4" y1="21" y2="14" />
+              <line x1="4" x2="4" y1="10" y2="3" />
+              <line x1="12" x2="12" y1="21" y2="12" />
+              <line x1="12" x2="12" y1="8" y2="3" />
+              <line x1="20" x2="20" y1="21" y2="16" />
+              <line x1="20" x2="20" y1="12" y2="3" />
+              <line x1="1" x2="7" y1="14" y2="14" />
+              <line x1="9" x2="15" y1="8" y2="8" />
+              <line x1="17" x2="23" y1="16" y2="16" />
+            </svg>
             <span>Parámetros de Filtrado Analítico</span>
             <div class="db-filter-status" id="db-status-badge">
               <span class="status-dot"></span> Consultando registros...
             </div>
-            <span id="loading-indicator" style="display:none; font-size:0.8rem; color:var(--status-info); margin-left:10px;">
-              <span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Consultando vistas SQL...
+            <span id="loading-indicator"
+              style="display:none; font-size:0.8rem; color:var(--status-info); margin-left:10px;">
+              <span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span>
+              Consultando vistas SQL...
             </span>
           </div>
           <div class="filter-presets">
@@ -741,30 +923,50 @@
           <!-- Grupo de Acciones (Botones unificados) -->
           <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto;">
             <button id="btn-apply-filter" class="btn btn-primary" style="height: 38px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
               <span>Actualizar Analítica</span>
             </button>
-            <button id="btn-export-word" class="btn btn-word" style="height: 38px;" title="Descargar Informe Oficial en Microsoft Word (.docx)">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+            <button id="btn-export-word" class="btn btn-word" style="height: 38px;"
+              title="Descargar Informe Oficial en Microsoft Word (.docx)">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" x2="8" y1="13" y2="13" />
+                <line x1="16" x2="8" y1="17" y2="17" />
+                <line x1="10" x2="8" y1="9" y2="9" />
+              </svg>
               <span>Word (.docx)</span>
             </button>
-            <button id="btn-export-excel" class="btn btn-excel" style="height: 38px;" title="Descargar Informe Oficial Formateado en Microsoft Excel (.xlsx)">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 13 8 4"/><path d="m16 13-8 4"/></svg>
+            <button id="btn-export-excel" class="btn btn-excel" style="height: 38px;"
+              title="Descargar Informe Oficial Formateado en Microsoft Excel (.xlsx)">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <path d="m8 13 8 4" />
+                <path d="m16 13-8 4" />
+              </svg>
               <span>Excel (.xlsx)</span>
             </button>
-            <button id="btn-export-telegram" class="btn btn-telegram" style="height: 38px;" title="Enviar reporte del período actual por Telegram al canal institucional">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            <button id="btn-export-telegram" class="btn btn-telegram" style="height: 38px;"
+              title="Enviar reporte del período actual por Telegram al canal institucional">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="m22 2-7 20-4-9-9-4Z" />
+                <path d="M22 2 11 13" />
+              </svg>
               <span>Telegram</span>
             </button>
           </div>
         </div>
 
         <div class="period-summary-banner" id="period-summary-container">
-          <svg class="period-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
+          <svg class="period-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
           <span id="period-summary-text">Consolidando registros analíticos...</span>
         </div>
@@ -776,12 +978,13 @@
         <div class="kpi-card blue">
           <div class="kpi-top">
             <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
+                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
               </svg>
               Total de Enrolamientos
             </span>
@@ -798,8 +1001,9 @@
         <div class="kpi-card success">
           <div class="kpi-top">
             <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-12.28l5.07 5.07"/>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
+                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-12.28l5.07 5.07" />
               </svg>
               Sincronizados con PDI
             </span>
@@ -816,15 +1020,16 @@
         <div class="kpi-card info">
           <div class="kpi-top">
             <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
-                <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
-                <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
-                <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
-                <path d="M2 12a10 10 0 0 1 18-6"/>
-                <path d="M2 16h.01"/>
-                <path d="M21.8 16c.2-2 .13-4-.01-5.3"/>
-                <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .14-1.26"/>
-                <path d="M8.65 22c.21-.66.45-1.32.57-2"/>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
+                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+                <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+                <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+                <path d="M2 12a10 10 0 0 1 18-6" />
+                <path d="M2 16h.01" />
+                <path d="M21.8 16c.2-2 .13-4-.01-5.3" />
+                <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .14-1.26" />
+                <path d="M8.65 22c.21-.66.45-1.32.57-2" />
               </svg>
               Registro Biométrico ABIS
             </span>
@@ -841,10 +1046,11 @@
         <div class="kpi-card danger">
           <div class="kpi-top">
             <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
+                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
               Inconsistencias
             </span>
@@ -860,12 +1066,16 @@
 
       <!-- Grid de Gráficos Analíticos -->
       <div class="charts-grid">
-        
+
         <!-- Gráfico 1: Rendimiento por Cuartel (Sincronizados vs Errores) -->
         <div class="chart-card col-7">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <rect width="16" height="20" x="4" y="2" rx="2" />
+                <path
+                  d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01" />
+              </svg>
               <span>Rendimiento Operativo por Cuartel Fronterizo</span>
             </div>
             <span class="chart-badge" id="badge-chart-cuarteles">Sincronizados vs Con Error</span>
@@ -879,7 +1089,10 @@
         <div class="chart-card col-5">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" />
+              </svg>
               <span>Top Nacionalidades de Enrolados</span>
             </div>
             <span class="chart-badge" id="badge-chart-nacionalidades">Países de Origen</span>
@@ -893,7 +1106,12 @@
         <div class="chart-card col-4">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
               <span>Distribución de Sincronización</span>
             </div>
             <span class="chart-badge" id="badge-chart-sincronizacion">PDI / ABIS</span>
@@ -907,116 +1125,180 @@
         <div class="chart-card col-8">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
               <span>Análisis Demográfico y Rango Etario</span>
             </div>
-            <span class="chart-badge" id="badge-chart-demografia-cruzada" style="background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; font-weight:600;">0 Hombres · 0 Mujeres</span>
+            <span class="chart-badge" id="badge-chart-demografia-cruzada"
+              style="background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; font-weight:600;">0 Hombres · 0
+              Mujeres</span>
           </div>
           <div class="chart-body" style="padding-top:16px;">
             <div class="demografia-widget" style="width: 100%;">
               <!-- 4 Tarjetas de Resumen: Hombres, Mujeres, Adultos, NNA -->
-              <div class="demo-blocks" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px;">
+              <div class="demo-blocks"
+                style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px;">
                 <!-- Hombres -->
-                <div class="demo-block demo-block-m" style="background:rgba(37,99,235,0.06); border:1px solid rgba(37,99,235,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(37,99,235,0.06); backdrop-filter:blur(10px);">
-                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(37,99,235,0.35); flex-shrink:0;">
+                <div class="demo-block demo-block-m"
+                  style="background:rgba(37,99,235,0.06); border:1px solid rgba(37,99,235,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(37,99,235,0.06); backdrop-filter:blur(10px);">
+                  <div
+                    style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(37,99,235,0.35); flex-shrink:0;">
                     <i class="fa-solid fa-mars" style="font-size:20px;"></i>
                   </div>
                   <div>
-                    <div style="font-size:0.72rem; color:#1e40af; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Hombres (M)</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-m-total" style="color:#2563eb;">0</span> <span id="demo-m-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                    <div
+                      style="font-size:0.72rem; color:#1e40af; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">
+                      Hombres (M)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-m-total"
+                        style="color:#2563eb;">0</span> <span id="demo-m-pct"
+                        style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
                   </div>
                 </div>
                 <!-- Mujeres -->
-                <div class="demo-block demo-block-f" style="background:rgba(225,29,72,0.06); border:1px solid rgba(225,29,72,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(225,29,72,0.06); backdrop-filter:blur(10px);">
-                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #e11d48 0%, #be123c 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(225,29,72,0.35); flex-shrink:0;">
+                <div class="demo-block demo-block-f"
+                  style="background:rgba(225,29,72,0.06); border:1px solid rgba(225,29,72,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(225,29,72,0.06); backdrop-filter:blur(10px);">
+                  <div
+                    style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #e11d48 0%, #be123c 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(225,29,72,0.35); flex-shrink:0;">
                     <i class="fa-solid fa-venus" style="font-size:20px;"></i>
                   </div>
                   <div>
-                    <div style="font-size:0.72rem; color:#9f1239; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Mujeres (F)</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-f-total" style="color:#e11d48;">0</span> <span id="demo-f-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                    <div
+                      style="font-size:0.72rem; color:#9f1239; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">
+                      Mujeres (F)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-f-total"
+                        style="color:#e11d48;">0</span> <span id="demo-f-pct"
+                        style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
                   </div>
                 </div>
                 <!-- Adultos -->
-                <div class="demo-block demo-block-adult" style="background:rgba(15,23,42,0.05); border:1px solid rgba(15,23,42,0.18); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(15,23,42,0.05); backdrop-filter:blur(10px);">
-                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(15,23,42,0.35); flex-shrink:0;">
+                <div class="demo-block demo-block-adult"
+                  style="background:rgba(15,23,42,0.05); border:1px solid rgba(15,23,42,0.18); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(15,23,42,0.05); backdrop-filter:blur(10px);">
+                  <div
+                    style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(15,23,42,0.35); flex-shrink:0;">
                     <i class="fa-solid fa-user-check" style="font-size:18px;"></i>
                   </div>
                   <div>
-                    <div style="font-size:0.72rem; color:#334155; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Adultos (≥18)</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-adult-total" style="color:#1e293b;">0</span> <span id="demo-adult-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                    <div
+                      style="font-size:0.72rem; color:#334155; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">
+                      Adultos (≥18)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-adult-total"
+                        style="color:#1e293b;">0</span> <span id="demo-adult-pct"
+                        style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
                   </div>
                 </div>
                 <!-- NNA (Menores) -->
-                <div class="demo-block demo-block-x" style="background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(124,58,237,0.06); backdrop-filter:blur(10px);">
-                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(124,58,237,0.35); flex-shrink:0;">
+                <div class="demo-block demo-block-x"
+                  style="background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.22); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(124,58,237,0.06); backdrop-filter:blur(10px);">
+                  <div
+                    style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 12px rgba(124,58,237,0.35); flex-shrink:0;">
                     <i class="fa-solid fa-child-reaching" style="font-size:20px;"></i>
                   </div>
                   <div>
-                    <div style="font-size:0.72rem; color:#6d28d9; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">NNA (&lt;18)</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-x-total" style="color:#7c3aed;">0</span> <span id="demo-x-pct" style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
+                    <div
+                      style="font-size:0.72rem; color:#6d28d9; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">
+                      NNA (&lt;18)</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:#0f172a;"><span id="demo-x-total"
+                        style="color:#7c3aed;">0</span> <span id="demo-x-pct"
+                        style="font-size:0.78rem; color:#64748b; font-weight:600;">(0.0%)</span></div>
                   </div>
                 </div>
               </div>
 
               <!-- Barras de Proporción Visual (Género y Rango Etario) -->
-              <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; background: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <div
+                style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; background: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                 <!-- Proporción Género -->
                 <div style="flex: 1 1 240px;">
-                  <div style="display:flex; justify-content:space-between; font-size:0.74rem; font-weight:700; color:#475569; margin-bottom:6px;">
-                    <span><i class="fa-solid fa-venus-mars" style="color:#64748b; margin-right:4px;"></i> DISTRIBUCIÓN POR GÉNERO</span>
+                  <div
+                    style="display:flex; justify-content:space-between; font-size:0.74rem; font-weight:700; color:#475569; margin-bottom:6px;">
+                    <span><i class="fa-solid fa-venus-mars" style="color:#64748b; margin-right:4px;"></i> DISTRIBUCIÓN
+                      POR GÉNERO</span>
                     <span id="demo-bar-gender-text" style="color:#1e293b;">0% M · 0% F</span>
                   </div>
                   <div style="height:9px; border-radius:6px; background:#e2e8f0; display:flex; overflow:hidden;">
-                    <div id="demo-bar-m" style="width:50%; background:linear-gradient(90deg, #2563eb, #3b82f6); transition:width 0.4s ease;"></div>
-                    <div id="demo-bar-f" style="width:50%; background:linear-gradient(90deg, #e11d48, #f43f5e); transition:width 0.4s ease;"></div>
+                    <div id="demo-bar-m"
+                      style="width:50%; background:linear-gradient(90deg, #2563eb, #3b82f6); transition:width 0.4s ease;">
+                    </div>
+                    <div id="demo-bar-f"
+                      style="width:50%; background:linear-gradient(90deg, #e11d48, #f43f5e); transition:width 0.4s ease;">
+                    </div>
                   </div>
                 </div>
                 <!-- Proporción Etaria -->
                 <div style="flex: 1 1 240px;">
-                  <div style="display:flex; justify-content:space-between; font-size:0.74rem; font-weight:700; color:#475569; margin-bottom:6px;">
-                    <span><i class="fa-solid fa-users-between-lines" style="color:#64748b; margin-right:4px;"></i> PROPORCIÓN ETARIA (ADULTOS VS NNA)</span>
+                  <div
+                    style="display:flex; justify-content:space-between; font-size:0.74rem; font-weight:700; color:#475569; margin-bottom:6px;">
+                    <span><i class="fa-solid fa-users-between-lines" style="color:#64748b; margin-right:4px;"></i>
+                      PROPORCIÓN ETARIA (ADULTOS VS NNA)</span>
                     <span id="demo-bar-age-text" style="color:#1e293b;">0% Adultos · 0% NNA</span>
                   </div>
                   <div style="height:9px; border-radius:6px; background:#e2e8f0; display:flex; overflow:hidden;">
-                    <div id="demo-bar-adult" style="width:50%; background:linear-gradient(90deg, #1e293b, #334155); transition:width 0.4s ease;"></div>
-                    <div id="demo-bar-nna" style="width:50%; background:linear-gradient(90deg, #8b5cf6, #a855f7); transition:width 0.4s ease;"></div>
+                    <div id="demo-bar-adult"
+                      style="width:50%; background:linear-gradient(90deg, #1e293b, #334155); transition:width 0.4s ease;">
+                    </div>
+                    <div id="demo-bar-nna"
+                      style="width:50%; background:linear-gradient(90deg, #8b5cf6, #a855f7); transition:width 0.4s ease;">
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- Tabla Cruzada Demográfica -->
-              <div style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
-                <table class="demo-table" style="width:100%; border-collapse:collapse; font-size:0.86rem; text-align:center;">
+              <div
+                style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                <table class="demo-table"
+                  style="width:100%; border-collapse:collapse; font-size:0.86rem; text-align:center;">
                   <thead>
                     <tr style="background:#f8fafc; color:#475569; font-weight:700;">
                       <th style="padding:10px 16px; text-align:left; border-bottom:1px solid #e2e8f0;">GÉNERO</th>
-                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;"><i class="fa-solid fa-user-check" style="font-size:12px; margin-right:4px; color:#1e293b;"></i> ADULTOS (≥ 18)</th>
-                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;"><i class="fa-solid fa-child-reaching" style="font-size:12px; margin-right:4px; color:#7c3aed;"></i> NNA (&lt; 18)</th>
+                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;"><i class="fa-solid fa-user-check"
+                          style="font-size:12px; margin-right:4px; color:#1e293b;"></i> ADULTOS (≥ 18)</th>
+                      <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;"><i
+                          class="fa-solid fa-child-reaching"
+                          style="font-size:12px; margin-right:4px; color:#7c3aed;"></i> NNA (&lt; 18)</th>
                       <th style="padding:10px 16px; border-bottom:1px solid #e2e8f0;">SUBTOTAL</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style="padding:12px 16px; text-align:left; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
-                        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(37,99,235,0.12); color:#2563eb; border-radius:6px; font-size:13px;"><i class="fa-solid fa-mars"></i></span>
+                      <td
+                        style="padding:12px 16px; text-align:left; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
+                        <span
+                          style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(37,99,235,0.12); color:#2563eb; border-radius:6px; font-size:13px;"><i
+                            class="fa-solid fa-mars"></i></span>
                         Hombres
                       </td>
-                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-m-adult">0</td>
-                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-m-nna">0</td>
-                      <td style="padding:12px 16px; font-weight:800; color:#2563eb; border-bottom:1px solid #f1f5f9;" id="demo-m-subtot">0</td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;"
+                        id="demo-m-adult">0</td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-m-nna">0
+                      </td>
+                      <td style="padding:12px 16px; font-weight:800; color:#2563eb; border-bottom:1px solid #f1f5f9;"
+                        id="demo-m-subtot">0</td>
                     </tr>
                     <tr>
-                      <td style="padding:12px 16px; text-align:left; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
-                        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(225,29,72,0.12); color:#e11d48; border-radius:6px; font-size:13px;"><i class="fa-solid fa-venus"></i></span>
+                      <td
+                        style="padding:12px 16px; text-align:left; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; display: flex; align-items: center; gap: 10px;">
+                        <span
+                          style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(225,29,72,0.12); color:#e11d48; border-radius:6px; font-size:13px;"><i
+                            class="fa-solid fa-venus"></i></span>
                         Mujeres
                       </td>
-                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-f-adult">0</td>
-                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-f-nna">0</td>
-                      <td style="padding:12px 16px; font-weight:800; color:#e11d48; border-bottom:1px solid #f1f5f9;" id="demo-f-subtot">0</td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;"
+                        id="demo-f-adult">0</td>
+                      <td style="padding:12px 16px; font-weight:700; border-bottom:1px solid #f1f5f9;" id="demo-f-nna">0
+                      </td>
+                      <td style="padding:12px 16px; font-weight:800; color:#e11d48; border-bottom:1px solid #f1f5f9;"
+                        id="demo-f-subtot">0</td>
                     </tr>
                     <tr style="background:#f8fafc;">
-                      <td style="padding:12px 16px; text-align:left; font-weight:800; color:#0f172a; display: flex; align-items: center; gap: 10px;">
-                        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(15,23,42,0.08); color:#0f172a; border-radius:6px; font-size:13px;"><i class="fa-solid fa-users"></i></span>
+                      <td
+                        style="padding:12px 16px; text-align:left; font-weight:800; color:#0f172a; display: flex; align-items: center; gap: 10px;">
+                        <span
+                          style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:rgba(15,23,42,0.08); color:#0f172a; border-radius:6px; font-size:13px;"><i
+                            class="fa-solid fa-users"></i></span>
                         Total Enrolados
                       </td>
                       <td style="padding:12px 16px; font-weight:800; color:#1e293b;" id="demo-tot-adult">0</td>
@@ -1034,7 +1316,10 @@
         <div class="chart-card col-4">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><circle cx="12" cy="18" r="1"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <rect width="16" height="20" x="4" y="2" rx="2" />
+                <circle cx="12" cy="18" r="1" />
+              </svg>
               <span>Dispositivos de Captura</span>
             </div>
             <span class="chart-badge" id="badge-chart-dispositivos">Terreno vs Fija</span>
@@ -1048,7 +1333,11 @@
         <div class="chart-card col-4">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                <line x1="9" x2="9" y1="3" y2="18" />
+                <line x1="15" x2="15" y1="6" y2="21" />
+              </svg>
               <span>Despliegue Macro-Zonal</span>
             </div>
             <span class="chart-badge" id="badge-chart-regiones">Región Policial</span>
@@ -1062,7 +1351,11 @@
         <div class="chart-card col-4">
           <div class="chart-header">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
               <span>Distribución por Tramos Etarios</span>
             </div>
             <span class="chart-badge" id="badge-chart-tramos-etarios">Protección N.N.A.</span>
@@ -1076,26 +1369,46 @@
         <div class="chart-card col-12" style="margin-top: 6px;">
           <div class="chart-header" style="flex-wrap: wrap; gap: 8px;">
             <div class="chart-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;">
+                <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
               <span>Perfil Sociolaboral: Total Profesiones y Oficios Declarados</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <div class="profesion-toggle-group" style="display:inline-flex; background:rgba(226,232,240,0.6); border-radius:6px; padding:2px; font-size:11px; font-weight:600;">
-                <button type="button" id="btn-prof-fecha" style="border:none; background:#0284c7; color:#fff; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:600; transition:all 0.2s;">Día Filtrado</button>
-                <button type="button" id="btn-prof-total" style="border:none; background:transparent; color:#64748b; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:600; transition:all 0.2s;">Acumulado General (Oracle DB)</button>
+              <div class="profesion-toggle-group"
+                style="display:inline-flex; background:rgba(226,232,240,0.6); border-radius:6px; padding:2px; font-size:11px; font-weight:600;">
+                <button type="button" id="btn-prof-fecha"
+                  style="border:none; background:#0284c7; color:#fff; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:600; transition:all 0.2s;">Día
+                  Filtrado</button>
+                <button type="button" id="btn-prof-total"
+                  style="border:none; background:transparent; color:#64748b; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-weight:600; transition:all 0.2s;">Acumulado
+                  General (Oracle DB)</button>
               </div>
-              <span class="chart-badge" id="badge-chart-profesiones" style="background:rgba(2,132,199,0.12); color:#0284c7; border:1px solid rgba(2,132,199,0.25);">Extracción Oracle DB</span>
+              <span class="chart-badge" id="badge-chart-profesiones"
+                style="background:rgba(2,132,199,0.12); color:#0284c7; border:1px solid rgba(2,132,199,0.25);">Extracción
+                Oracle DB</span>
             </div>
           </div>
           <div class="chart-body" style="min-height: 280px; position: relative;">
             <canvas id="chart-profesiones"></canvas>
-            <div id="profesiones-empty-state" style="display:none; position:absolute; inset:0; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; background:rgba(255,255,255,0.95); border-radius:8px;">
-              <div style="width:48px; height:48px; border-radius:50%; background:rgba(2,132,199,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
-                <svg class="svg-icon" viewBox="0 0 24 24" style="stroke:#0284c7; width:24px; height:24px;"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <div id="profesiones-empty-state"
+              style="display:none; position:absolute; inset:0; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; background:rgba(255,255,255,0.95); border-radius:8px;">
+              <div
+                style="width:48px; height:48px; border-radius:50%; background:rgba(2,132,199,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
+                <svg class="svg-icon" viewBox="0 0 24 24" style="stroke:#0284c7; width:24px; height:24px;">
+                  <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
               </div>
-              <div style="font-weight:700; color:#1e293b; font-size:14px;" id="profesiones-empty-title">Sin registros de profesión para este día</div>
-              <div style="font-size:12px; color:#64748b; margin-top:4px; max-width:440px; line-height: 1.4;" id="profesiones-empty-desc">Ninguna de las personas enroladas en la fecha seleccionada declaró su ocupación (todos figuran como "No Especificado"). Puedes visualizar el top 10 histórico consolidado de toda la base.</div>
-              <button type="button" id="btn-prof-switch-total" style="margin-top:12px; background:#0284c7; color:#fff; border:none; padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; box-shadow:0 2px 6px rgba(2,132,199,0.25);">
+              <div style="font-weight:700; color:#1e293b; font-size:14px;" id="profesiones-empty-title">Sin registros de
+                profesión para este día</div>
+              <div style="font-size:12px; color:#64748b; margin-top:4px; max-width:440px; line-height: 1.4;"
+                id="profesiones-empty-desc">Ninguna de las personas enroladas en la fecha seleccionada declaró su
+                ocupación (todos figuran como "No Especificado"). Puedes visualizar el top 10 histórico consolidado de
+                toda la base.</div>
+              <button type="button" id="btn-prof-switch-total"
+                style="margin-top:12px; background:#0284c7; color:#fff; border:none; padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; box-shadow:0 2px 6px rgba(2,132,199,0.25);">
                 Ver Acumulado General (Oracle DB)
               </button>
             </div>
@@ -1108,10 +1421,15 @@
       <div class="table-card">
         <div class="table-header-bar">
           <div class="chart-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <path d="M12 11h4M12 16h4M8 11h.01M8 16h.01" />
+            </svg>
             <span>Matriz Operativa de Cuarteles y Eficiencia de Sincronización</span>
           </div>
-          <input type="text" id="table-search-input" class="form-control search-input" placeholder="Filtrar por cuartel, unidad o nacionalidad...">
+          <input type="text" id="table-search-input" class="form-control search-input"
+            placeholder="Filtrar por cuartel, unidad o nacionalidad...">
         </div>
         <div class="table-container">
           <table class="data-table">
@@ -1142,28 +1460,28 @@
     <!-- TAB 2: INGESTA DE DATOS (HOJA DE CÁLCULO / UPLOAD) -->
     <!-- ========================================== -->
     <section id="tab-ingesta" class="tab-content" style="display: none;">
-      
+
       <!-- Selector de Modalidad de Ingesta -->
       <div class="ingesta-mode-selector-card">
         <div class="ingesta-mode-selector">
-          <button type="button" class="ingesta-mode-btn active" id="btn-mode-sheet" data-ingest-mode="sheet">
+          <button type="button" class="ingesta-mode-btn active" id="btn-mode-file" data-ingest-mode="file">
             <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-              <line x1="3" y1="9" x2="21" y2="9"/>
-              <line x1="3" y1="15" x2="21" y2="15"/>
-              <line x1="9" y1="3" x2="9" y2="21"/>
-              <line x1="15" y1="3" x2="15" y2="21"/>
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <span>Carga de Archivo (.xlsx / .enc)</span>
+          </button>
+
+          <button type="button" class="ingesta-mode-btn" id="btn-mode-sheet" data-ingest-mode="sheet">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="3" y1="15" x2="21" y2="15" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <line x1="15" y1="3" x2="15" y2="21" />
             </svg>
             <span>Hoja de Cálculo / Portapapeles (Oracle DB / Excel)</span>
             <span class="mode-badge-pill">Directo DB</span>
-          </button>
-
-          <button type="button" class="ingesta-mode-btn" id="btn-mode-file" data-ingest-mode="file">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
-            <span>Carga de Archivo (.xlsx / .enc)</span>
           </button>
         </div>
       </div>
@@ -1171,47 +1489,54 @@
       <!-- ========================================== -->
       <!-- VISTA 1: HOJA DE CÁLCULO / COPIAR Y PEGAR -->
       <!-- ========================================== -->
-      <div id="ingesta-view-sheet" class="ingesta-view-pane" style="display: block;">
-        
+      <div id="ingesta-view-sheet" class="ingesta-view-pane" style="display: none;">
+
         <!-- Tarjeta de Instrucciones y Controles de Hoja de Cálculo -->
         <div class="sheet-workflow-card">
           <div class="sheet-workflow-header">
             <div class="sheet-workflow-title">
               <div class="sheet-icon-wrapper">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-                  <line x1="3" y1="9" x2="21" y2="9"/>
-                  <line x1="3" y1="15" x2="21" y2="15"/>
-                  <line x1="9" y1="3" x2="9" y2="21"/>
-                  <line x1="15" y1="3" x2="15" y2="21"/>
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #ffffff;">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                  <line x1="9" y1="3" x2="9" y2="21" />
+                  <line x1="15" y1="3" x2="15" y2="21" />
                 </svg>
               </div>
               <div>
-                <h3 style="margin: 0; font-size: 1.08rem; color: var(--pdi-navy); font-weight: 700;">Ingesta Rápida desde Portapapeles (Oracle DB / Hoja de Cálculo)</h3>
-                <p style="margin: 3px 0 0; font-size: 0.83rem; color: var(--text-muted); line-height: 1.4;">
-                  Copia las celdas desde tu consulta SQL (Oracle SQL Developer, Toad, DBeaver) o desde Microsoft Excel y pégalas directamente con <kbd class="kbd-badge">Ctrl + V</kbd>. No requiere guardar un archivo intermedio.
+                <h3 style="margin: 0; font-size: 1.08rem; color: #ffffff; font-weight: 700;">Ingesta Rápida
+                  desde Portapapeles (Oracle DB / Hoja de Cálculo)</h3>
+                <p style="margin: 3px 0 0; font-size: 0.83rem; color: #cbd5e1; line-height: 1.4;">
+                  Copia las celdas desde tu consulta SQL (Oracle SQL Developer, Toad, DBeaver) o desde Microsoft Excel y
+                  pégalas directamente con <kbd class="kbd-badge">Ctrl + V</kbd>. No requiere guardar un archivo
+                  intermedio.
                 </p>
               </div>
             </div>
 
             <div class="sheet-actions-group">
-              <button type="button" id="btn-paste-clipboard" class="btn btn-primary" title="Pegar contenido del portapapeles del sistema">
+              <button type="button" id="btn-paste-clipboard" class="btn btn-primary"
+                title="Pegar contenido del portapapeles del sistema">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
                 </svg>
                 <span>Pegar Portapapeles</span>
               </button>
-              <button type="button" id="btn-load-sample-sheet" class="btn btn-secondary" title="Cargar datos de ejemplo de Oracle para probar el flujo">
+              <button type="button" id="btn-load-sample-sheet" class="btn btn-secondary"
+                title="Cargar datos de ejemplo de Oracle para probar el flujo">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
                 <span>Cargar Ejemplo Oracle</span>
               </button>
-              <button type="button" id="btn-clear-sheet" class="btn btn-secondary" title="Limpiar datos de la tabla" style="display: none;">
+              <button type="button" id="btn-clear-sheet" class="btn btn-secondary" title="Limpiar datos de la tabla"
+                style="display: none;">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                 </svg>
                 <span>Limpiar Hoja</span>
               </button>
@@ -1243,52 +1568,62 @@
         <div id="sheet-paste-dropzone" class="sheet-paste-zone">
           <div class="paste-zone-icon">
             <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-              <line x1="3" y1="9" x2="21" y2="9"/>
-              <line x1="3" y1="15" x2="21" y2="15"/>
-              <line x1="9" y1="3" x2="9" y2="21"/>
-              <line x1="15" y1="3" x2="15" y2="21"/>
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="3" y1="15" x2="21" y2="15" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <line x1="15" y1="3" x2="15" y2="21" />
             </svg>
           </div>
           <h4 class="paste-zone-title">Área de Captura de Hoja de Cálculo</h4>
           <p class="paste-zone-desc">
-            Haz clic aquí y presiona <kbd class="kbd-badge">Ctrl + V</kbd> para volcar las celdas copiadas directamente de la base de datos Oracle o Excel.
+            Haz clic aquí y presiona <kbd class="kbd-badge">Ctrl + V</kbd> para volcar las celdas copiadas directamente
+            de la base de datos Oracle o Excel.
           </p>
           <div class="paste-zone-shortcuts">
             <span class="shortcut-chip">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0284c7; width: 14px; height: 14px; flex-shrink: 0;">
-                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                style="color: #0284c7; width: 14px; height: 14px; flex-shrink: 0;">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
               </svg>
               <span>Copiar en Oracle (Ctrl + C)</span>
             </span>
             <span class="shortcut-arrow">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
-                <path d="M5 12h14M13 5l7 7-7 7"/>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
+                <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </span>
             <span class="shortcut-chip">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #2563eb; width: 14px; height: 14px; flex-shrink: 0;">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
-                <path d="M12 11v6M9 14l3 3 3-3"/>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                style="color: #2563eb; width: 14px; height: 14px; flex-shrink: 0;">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                <path d="M12 11v6M9 14l3 3 3-3" />
               </svg>
               <span>Pegar Aquí (Ctrl + V)</span>
             </span>
             <span class="shortcut-arrow">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
-                <path d="M5 12h14M13 5l7 7-7 7"/>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
+                <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </span>
             <span class="shortcut-chip">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #16a34a; width: 14px; height: 14px; flex-shrink: 0;">
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                style="color: #16a34a; width: 14px; height: 14px; flex-shrink: 0;">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               <span>Validar e Ingestar en BD</span>
             </span>
           </div>
-          <textarea id="sheet-hidden-paste-area" class="sheet-paste-textarea" placeholder="O si lo prefieres, pega el texto tabulado aquí manualmente..."></textarea>
+          <textarea id="sheet-hidden-paste-area" class="sheet-paste-textarea"
+            placeholder="O si lo prefieres, pega el texto tabulado aquí manualmente..."></textarea>
         </div>
 
         <!-- Vista Previa de Hoja de Cálculo (visible tras pegar datos) -->
@@ -1296,22 +1631,27 @@
           <div class="sheet-preview-header">
             <div style="display:flex; align-items:center; gap:8px;">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                <path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/>
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <path d="M12 11h4M12 16h4M8 11h.01M8 16h.01" />
               </svg>
-              <strong style="font-size: 0.95rem; color: var(--text-primary);">Hoja de Cálculo Interactiva (Previsualización)</strong>
+              <strong style="font-size: 0.95rem; color: var(--text-primary);">Hoja de Cálculo Interactiva
+                (Previsualización)</strong>
               <span id="sheet-preview-count-badge" class="badge badge-info">0 filas</span>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <button type="button" id="btn-sheet-add-row" class="btn btn-secondary" style="font-size:0.82rem; height:34px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <button type="button" id="btn-sheet-add-row" class="btn btn-secondary"
+                style="font-size:0.82rem; height:34px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
                 <span>+ Fila</span>
               </button>
               <button type="button" id="btn-sheet-submit" class="btn btn-primary" style="height:36px; font-weight:700;">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="m9 12 2 2 4-4"/>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="m9 12 2 2 4-4" />
                 </svg>
                 <span>Validar e Ingestar en BD</span>
               </button>
@@ -1333,15 +1673,16 @@
           <div class="sheet-preview-footer">
             <div class="sheet-footer-info">
               <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--pdi-navy); flex-shrink:0;">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-              <span>Puedes editar o corregir cualquier celda directamente haciendo doble clic antes de poblar la base de datos PostgreSQL.</span>
+              <span>Puedes editar o corregir cualquier celda directamente haciendo doble clic antes de poblar la base de
+                datos PostgreSQL.</span>
             </div>
             <button type="button" id="btn-sheet-submit-bottom" class="btn btn-primary" style="font-weight:700;">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
               <span>Autorizar e Ingestar Registros en BD</span>
             </button>
@@ -1356,20 +1697,28 @@
       <!-- ========================================== -->
       <!-- VISTA 2: CARGA TRADICIONAL DE ARCHIVO (.XLSX / .ENC) -->
       <!-- ========================================== -->
-      <div id="ingesta-view-file" class="ingesta-view-pane" style="display: none;">
-        
+      <div id="ingesta-view-file" class="ingesta-view-pane" style="display: block;">
+
         <div class="upload-wrapper">
-          
+
           <!-- Zona Dropzone -->
           <div class="dropzone" id="upload-dropzone">
             <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
             <div class="dropzone-icon">
-              <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+              <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                <path d="M12 12v9" />
+                <path d="m16 16-4-4-4 4" />
+              </svg>
             </div>
             <div class="dropzone-title">Carga Directa de Archivo Excel ABIS (Oracle)</div>
-            <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic para examinar</div>
+            <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic
+              para examinar</div>
             <button type="button" id="btn-select-file" class="btn btn-primary">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path
+                  d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2" />
+              </svg>
               <span>Seleccionar Archivo desde el Equipo</span>
             </button>
             <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
@@ -1379,38 +1728,54 @@
 
           <!-- Tarjeta de Instrucciones de Seguridad -->
           <div class="upload-info-card">
-            <h3 style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            <h3
+              style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
               <span>Protocolo de Seguridad e Integridad ETL</span>
             </h3>
 
             <div class="info-item">
               <div class="info-item-icon">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
               </div>
               <div class="info-item-content">
                 <h4>Descifrado Exclusivo en Memoria RAM</h4>
-                <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil del servidor sin escribir datos planos temporales en el disco.</p>
+                <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil
+                  del servidor sin escribir datos planos temporales en el disco.</p>
               </div>
             </div>
 
             <div class="info-item">
               <div class="info-item-icon">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+                  <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+                  <path d="m2 17 10 5 10-5" />
+                  <path d="m2 12 10 5 10-5" />
+                </svg>
               </div>
               <div class="info-item-content">
                 <h4>Normalización y Tolerancia a Errores Tipográficos</h4>
-                <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y nacionalidades) hacia el modelo relacional 3NF.</p>
+                <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y
+                  nacionalidades) hacia el modelo relacional 3NF.</p>
               </div>
             </div>
 
             <div class="info-item">
               <div class="info-item-icon">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
               </div>
               <div class="info-item-content">
                 <h4>Inserción Atómica y Trazabilidad Criptográfica</h4>
-                <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de la información procesada.</p>
+                <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de
+                  la información procesada.</p>
               </div>
             </div>
           </div>
@@ -1430,15 +1795,15 @@
     <!-- TAB 3: EVOLUCIÓN Y TENDENCIAS -->
     <!-- ========================================== -->
     <section id="tab-tendencias" class="tab-content" style="display: none;">
-      
+
       <!-- Comparador de Períodos (Benchmarking) -->
       <div class="trend-toolbar-card" style="margin-bottom: 20px;">
         <div class="trend-toolbar-left">
           <div class="trend-toolbar-group">
             <span class="trend-toolbar-label">Comparativa Operativa (Benchmarking):</span>
             <div class="filter-presets">
-              <button class="preset-btn active" id="btn-comp-semana">📊 Semana vs Anterior</button>
-              <button class="preset-btn" id="btn-comp-mes">📊 Mes vs Anterior</button>
+              <button class="preset-btn active" id="btn-comp-semana"><i class="fa-solid fa-chart-column" style="margin-right: 4px;"></i> Semana vs Anterior</button>
+              <button class="preset-btn" id="btn-comp-mes"><i class="fa-solid fa-chart-column" style="margin-right: 4px;"></i> Mes vs Anterior</button>
             </div>
           </div>
         </div>
@@ -1509,7 +1874,7 @@
       </div>
 
       <!-- Barra de Filtros y Expansión -->
-      <div class="trend-toolbar-card">
+      <div class="trend-toolbar-card" style="margin-bottom: 0; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;">
         <div class="trend-toolbar-left">
           <div class="trend-toolbar-group">
             <span class="trend-toolbar-label">Período:</span>
@@ -1533,25 +1898,38 @@
 
         <div class="trend-toolbar-right">
           <button id="btn-toggle-expand-trend" class="btn btn-primary" title="Expandir gráfico para ver detalladamente">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" x2="14" y1="3" y2="10" />
+              <line x1="3" x2="10" y1="21" y2="14" />
+            </svg>
             <span id="trend-expand-text">Expandir Vista Detallada</span>
           </button>
           <button id="btn-fullscreen-trend" class="btn btn-secondary" title="Modo Pantalla Completa">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m3 9 6-6M9 21l-6-6M15 3l6 6M21 15l-6 6"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="m3 9 6-6M9 21l-6-6M15 3l6 6M21 15l-6 6" />
+            </svg>
             <span>Pantalla Completa</span>
           </button>
           <button id="btn-export-trend-csv" class="btn btn-csv" title="Descargar Serie Temporal en Formato CSV">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18" />
+            </svg>
             <span>Exportar CSV</span>
           </button>
         </div>
       </div>
 
       <!-- Tarjeta del Gráfico de Evolución Temporal -->
-      <div class="chart-card col-12" id="trend-chart-card" style="margin-bottom: 24px;">
-        <div class="chart-header">
+      <div class="chart-card col-12" id="trend-chart-card" style="margin-bottom: 24px; margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none !important;">
+        <div class="chart-header" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; border-top: none !important;">
           <div class="chart-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
             <span>Curva de Evolución Temporal de Enrolamientos Biométricos</span>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
@@ -1567,20 +1945,36 @@
       <div class="table-card" id="trend-detail-matrix">
         <div class="table-header-bar">
           <div class="chart-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <line x1="16" x2="16" y1="2" y2="6" />
+              <line x1="8" x2="8" y1="2" y2="6" />
+              <line x1="3" x2="21" y1="10" y2="10" />
+            </svg>
             <span>Matriz Histórica Detallada Día por Día</span>
             <span class="badge badge-info" id="trend-matrix-count" style="margin-left: 8px;">0 jornadas</span>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <!-- Selector con Calendario Nativo -->
             <div class="trend-calendar-box" id="trend-calendar-box" title="Hacer clic para abrir calendario">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: var(--pdi-navy); flex-shrink: 0;"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-              <input type="date" id="trend-calendar-picker" class="trend-calendar-input" title="Hacer clic para abrir calendario">
-              <button type="button" id="btn-clear-trend-calendar" class="btn-clear-date" style="display: none;" title="Limpiar filtro de fecha">✕</button>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: var(--pdi-navy); flex-shrink: 0;">
+                <rect width="18" height="18" x="3" y="4" rx="2" />
+                <line x1="16" x2="16" y1="2" y2="6" />
+                <line x1="8" x2="8" y1="2" y2="6" />
+                <line x1="3" x2="21" y1="10" y2="10" />
+              </svg>
+              <input type="date" id="trend-calendar-picker" class="trend-calendar-input"
+                title="Hacer clic para abrir calendario">
+              <button type="button" id="btn-clear-trend-calendar" class="btn-clear-date" style="display: none;"
+                title="Limpiar filtro de fecha">✕</button>
             </div>
-            <input type="text" id="trend-search-input" class="form-control search-input" placeholder="Buscar fecha (ej: 2024-11, 2026)..." style="width: 230px;">
+            <input type="text" id="trend-search-input" class="form-control search-input"
+              placeholder="Buscar fecha (ej: 2024-11, 2026)..." style="width: 230px;">
             <button id="btn-collapse-trend" class="btn btn-secondary btn-sm" title="Contraer o alternar matriz">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <polyline points="4 14 10 14 10 20" />
+                <polyline points="20 10 14 10 14 4" />
+              </svg>
               <span>Alternar Tabla</span>
             </button>
           </div>
@@ -1617,12 +2011,19 @@
       <div class="modal-dialog modal-fullscreen-dialog">
         <div class="modal-header">
           <div class="modal-title">
-            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
             <span>Centro de Mando: Evolución y Tendencias Históricas ABIS</span>
             <span class="badge badge-primary" id="modal-trend-badge">Alta Resolución</span>
           </div>
-          <button type="button" class="modal-close" id="btn-close-trend-fullscreen" title="Cerrar pantalla completa" aria-label="Cerrar">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button type="button" class="modal-close" id="btn-close-trend-fullscreen" title="Cerrar pantalla completa"
+            aria-label="Cerrar">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1;">
@@ -1640,7 +2041,13 @@
       <div class="filters-card" style="margin-bottom: 24px;">
         <div class="filters-header">
           <div class="filters-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
             <span>Bitácora de Eventos y Trazabilidad (Inmutable)</span>
           </div>
           <div style="display: flex; gap: 10px;">
@@ -1672,11 +2079,14 @@
               </tr>
             </thead>
             <tbody id="audit-table-body">
-              <tr><td colspan="5" style="text-align:center; padding: 24px;">Cargando bitácora inmutable...</td></tr>
+              <tr>
+                <td colspan="5" style="text-align:center; padding: 24px;">Cargando bitácora inmutable...</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        <div class="pagination-footer" style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color);">
+        <div class="pagination-footer"
+          style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color);">
           <span id="audit-page-info" style="font-size: 0.9rem; color: var(--text-muted);">Página 1</span>
           <div style="display: flex; gap: 8px;">
             <button class="btn btn-secondary btn-sm" id="btn-audit-prev" disabled>Anterior</button>
@@ -1695,11 +2105,15 @@
       <div class="schedule-status-banner">
         <div class="schedule-status-left">
           <div class="schedule-clock-icon">
-            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
           </div>
           <div>
             <div class="schedule-clock-title">Reloj del Servidor & Automatización PDI</div>
-            <div class="schedule-clock-time" id="schedule-clock-display">Zona Horaria: America/Santiago (Chile) &bull; Sincronizando...</div>
+            <div class="schedule-clock-time" id="schedule-clock-display">Zona Horaria: America/Santiago (Chile) &bull;
+              Sincronizando...</div>
           </div>
         </div>
         <div class="schedule-status-right">
@@ -1712,12 +2126,15 @@
 
       <!-- Grid de Configuración de Horarios y Canal -->
       <div class="settings-grid">
-        
+
         <!-- Tarjeta 1: Gestión de Horas y Frecuencia de Envío -->
         <div class="settings-card">
           <div class="settings-card-header">
             <div class="settings-card-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
               <span>Programación de Horarios de Reporte</span>
             </div>
             <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
@@ -1727,11 +2144,13 @@
           </div>
 
           <div class="settings-card-body">
-            
+
             <!-- Estado del Switch -->
             <div class="schedule-enabled-alert" id="schedule-enabled-alert">
               <span id="schedule-enabled-text" style="display:inline-flex; align-items:center; gap:6px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
                 <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
               </span>
             </div>
@@ -1750,7 +2169,10 @@
               <div class="add-time-row">
                 <input type="time" id="input-new-time" class="form-control" value="12:00">
                 <button type="button" id="btn-add-time" class="btn btn-primary">
-                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
                   <span>Agregar Hora</span>
                 </button>
               </div>
@@ -1778,13 +2200,20 @@
                 </div>
               </div>
               <div class="days-selector-grid">
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked> <span>Lun</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked> <span>Mar</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked> <span>Mié</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked> <span>Jue</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked> <span>Vie</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked> <span>Sáb</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked> <span>Dom</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked>
+                  <span>Lun</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked>
+                  <span>Mar</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked>
+                  <span>Mié</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked>
+                  <span>Jue</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked>
+                  <span>Vie</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked>
+                  <span>Sáb</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked>
+                  <span>Dom</span></label>
               </div>
             </div>
 
@@ -1792,14 +2221,20 @@
             <div class="form-group" style="margin-top: 18px;">
               <label class="filter-label" for="schedule-report-type">Estructura del Reporte a Despachar:</label>
               <select id="schedule-report-type" class="form-control">
-                <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)</option>
+                <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)
+                </option>
                 <option value="resumen">Resumen Ejecutivo Compacto (KPIs Rápidos)</option>
               </select>
             </div>
 
             <!-- Botón Guardar Cambios -->
-            <button type="button" id="btn-save-schedule" class="btn btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <button type="button" id="btn-save-schedule" class="btn btn-primary"
+              style="width: 100%; margin-top: 20px; padding: 12px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
               <span>Guardar Ajustes de Programación</span>
             </button>
             <div id="schedule-save-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
@@ -1811,15 +2246,19 @@
         <div class="settings-card">
           <div class="settings-card-header">
             <div class="settings-card-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;">
+                <path d="m22 2-7 20-4-9-9-4Z" />
+                <path d="M22 2 11 13" />
+              </svg>
               <span>Canal de Notificaciones (Telegram Oficial)</span>
             </div>
           </div>
 
           <div class="settings-card-body">
-            
+
             <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
-              Los reportes automáticos se envían mediante la API de Telegram hacia el canal institucional de la Jefatura Nacional de Migraciones y Policía Internacional.
+              Los reportes automáticos se envían mediante la API de Telegram hacia el canal institucional de la Jefatura
+              Nacional de Migraciones y Policía Internacional.
             </p>
 
             <div class="channel-info-box">
@@ -1839,19 +2278,25 @@
 
             <!-- Sección de Prueba Manual -->
             <div class="test-dispatch-box" style="margin-top: 20px;">
-              <h4 style="font-size: 0.92rem; color: var(--pdi-navy); margin-bottom: 8px; display:flex; align-items:center; gap:8px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <h4
+                style="font-size: 0.92rem; color: var(--pdi-navy); margin-bottom: 8px; display:flex; align-items:center; gap:8px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
                 <span>Prueba de Despacho Inmediato</span>
               </h4>
               <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                Verifica que el canal reciba el reporte sin esperar la hora programada. Esto emitirá un reporte de prueba con los datos más recientes.
+                Verifica que el canal reciba el reporte sin esperar la hora programada. Esto emitirá un reporte de
+                prueba con los datos más recientes.
               </p>
 
               <div class="form-group" style="margin-bottom: 12px;">
-                <label for="test-report-modo" style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); margin-bottom: 6px; display: block;">
+                <label for="test-report-modo"
+                  style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); margin-bottom: 6px; display: block;">
                   Tipo de Reporte a Probar:
                 </label>
-                <select id="test-report-modo" class="form-control form-control-sm" style="font-size: 0.85rem; padding: 6px;">
+                <select id="test-report-modo" class="form-control form-control-sm"
+                  style="font-size: 0.85rem; padding: 6px;">
                   <option value="">Automático según el día de hoy (Diario)</option>
                   <option value="fds">Forzar Reporte de Fin de Semana (4 fotos)</option>
                 </select>
@@ -1859,34 +2304,52 @@
 
               <div class="form-group" style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="test-report-adjuntos" checked style="cursor: pointer;">
-                <label for="test-report-adjuntos" style="font-size: 0.82rem; color: var(--pdi-navy); margin: 0; cursor: pointer;">
+                <label for="test-report-adjuntos"
+                  style="font-size: 0.82rem; color: var(--pdi-navy); margin: 0; cursor: pointer;">
                   Incluir botones de descarga (Word/Excel)
                 </label>
               </div>
 
               <button type="button" id="btn-trigger-test-schedule" class="btn btn-telegram" style="width: 100%;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                  <path d="m22 2-7 20-4-9-9-4Z" />
+                  <path d="M22 2 11 13" />
+                </svg>
                 <span>Enviar Reporte de Prueba a Telegram Ahora</span>
               </button>
-              <div id="schedule-test-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
+              <div id="schedule-test-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;">
+              </div>
 
               <!-- Selector de Previsualización de las 4 Capturas Oficiales -->
               <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-light);">
-                <label style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                <label
+                  style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
                   <span>Previsualizar las 4 Capturas Institucionales (PNG):</span>
                 </label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                  <a href="/api/reportes/captura-preview?tipo=fds_matriz" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                  <a href="/api/reportes/captura-preview?tipo=fds_matriz" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
                     Foto 1: Matriz FDS
                   </a>
-                  <a href="/api/reportes/captura-preview?tipo=fds_enrolados" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                  <a href="/api/reportes/captura-preview?tipo=fds_enrolados" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
                     Foto 2: Acum. Enrolados
                   </a>
-                  <a href="/api/reportes/captura-preview?tipo=fds_distribucion" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                  <a href="/api/reportes/captura-preview?tipo=fds_distribucion" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
                     Foto 3: Dist. FDS
                   </a>
-                  <a href="/api/reportes/captura-preview?tipo=fds_registros" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                  <a href="/api/reportes/captura-preview?tipo=fds_registros" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
                     Foto 4: Acum. Registros
                   </a>
                 </div>
@@ -1894,9 +2357,13 @@
             </div>
 
             <!-- Aviso de Seguridad -->
-            <div style="margin-top: 20px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md); font-size: 0.8rem; color: #166534;">
+            <div
+              style="margin-top: 20px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md); font-size: 0.8rem; color: #166534;">
               <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; margin-bottom: 4px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: #166534;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke: #166534;">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
                 <span>Trazabilidad y No-Repudio</span>
               </div>
               Cada despacho automático queda registrado en la bitácora criptográfica de PostgreSQL.
@@ -1911,53 +2378,85 @@
       <div class="table-card" style="margin-top: 24px;" id="card-destinatarios-telegram">
         <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
           <div class="chart-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
             <span>Gestor de Destinatarios de Telegram (Oficiales y Jefaturas)</span>
-            <span class="badge badge-primary" id="destinatarios-count-badge" style="margin-left: 8px;">0 destinatarios</span>
+            <span class="badge badge-primary" id="destinatarios-count-badge" style="margin-left: 8px;">0
+              destinatarios</span>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <!-- Botón Copiar Enlace Directo al Bot -->
-            <button type="button" id="btn-copiar-link-bot" class="btn btn-secondary btn-sm" title="Copiar enlace directo para enrolar nuevos oficiales">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <button type="button" id="btn-copiar-link-bot" class="btn btn-secondary btn-sm"
+              title="Copiar enlace directo para enrolar nuevos oficiales">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
               <span id="text-copiar-link-bot">Copiar Enlace al Bot</span>
             </button>
-            <button type="button" id="btn-refresh-destinatarios" class="btn btn-secondary btn-sm" title="Actualizar lista de destinatarios">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            <button type="button" id="btn-refresh-destinatarios" class="btn btn-secondary btn-sm"
+              title="Actualizar lista de destinatarios">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
               <span>Actualizar</span>
             </button>
           </div>
         </div>
 
         <!-- Banner Informativo con Instrucciones y Enlace Directo -->
-        <div style="padding: 14px 20px; background: #f0f9ff; border-bottom: 1px solid #bae6fd; font-size: 0.84rem; color: #0369a1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div
+          style="padding: 14px 20px; background: #f0f9ff; border-bottom: 1px solid #bae6fd; font-size: 0.84rem; color: #0369a1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7; flex-shrink: 0;">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
             <span>
-              <strong>Regla de Conexión Telegram:</strong> Todo oficial debe pulsar <strong>/start</strong> en el bot una sola vez antes de poder recibir mensajes. Las IDs quedan alojadas en PostgreSQL y <strong>nunca</strong> se suben al repositorio Git.
+              <strong>Regla de Conexión Telegram:</strong> Todo oficial debe pulsar <strong>/start</strong> en el bot
+              una sola vez antes de poder recibir mensajes.
             </span>
           </div>
-          <a id="link-directo-bot" href="#" target="_blank" rel="noopener" class="badge badge-info" style="font-size: 0.8rem; text-decoration: none; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+          <a id="link-directo-bot" href="#" target="_blank" rel="noopener" class="badge badge-info"
+            style="font-size: 0.8rem; text-decoration: none; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
             <span id="label-link-bot">Abrir Bot en Telegram</span> &rarr;
           </a>
         </div>
 
         <!-- Formulario para Registrar / Asignar Nuevo Destinatario -->
         <div style="padding: 16px 20px; background: #fafbfc; border-bottom: 1px solid var(--border-color);">
-          <form id="form-nuevo-destinatario" style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto; gap: 12px; align-items: end;">
+          <form id="form-nuevo-destinatario"
+            style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto; gap: 12px; align-items: end;">
             <div class="form-group" style="margin: 0;">
-              <label for="dest-nombre" class="filter-label" style="margin-bottom: 4px;">Nombre / Oficial / Unidad:</label>
-              <input type="text" id="dest-nombre" class="form-control" placeholder="Ej: Comisario Morales / Chacalluta" required>
+              <label for="dest-nombre" class="filter-label" style="margin-bottom: 4px;">Nombre / Oficial /
+                Unidad:</label>
+              <input type="text" id="dest-nombre" class="form-control" placeholder="Ej: Comisario Morales / Chacalluta"
+                required>
             </div>
             <div class="form-group" style="margin: 0;">
               <label for="dest-chat-id" class="filter-label" style="margin-bottom: 4px;">Chat ID de Telegram:</label>
-              <input type="text" id="dest-chat-id" class="form-control" placeholder="Ej: 7961617813 ó -1004420809456" required>
+              <input type="text" id="dest-chat-id" class="form-control" placeholder="Ej: 7961617813 ó -1004420809456"
+                required>
             </div>
             <div class="form-group" style="margin: 0;">
               <label for="dest-rol" class="filter-label" style="margin-bottom: 4px;">Rol / Unidad Destino:</label>
-              <input type="text" id="dest-rol" class="form-control" placeholder="Ej: Operaciones / Enrolamiento" value="Operativo">
+              <input type="text" id="dest-rol" class="form-control" placeholder="Ej: Operaciones / Enrolamiento"
+                value="Operativo">
             </div>
-            <button type="submit" id="btn-agregar-destinatario" class="btn btn-primary" style="height: 38px; white-space: nowrap;">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button type="submit" id="btn-agregar-destinatario" class="btn btn-primary"
+              style="height: 38px; white-space: nowrap;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               <span>+ Asignar ID</span>
             </button>
           </form>
@@ -1992,12 +2491,23 @@
       <div class="table-card" style="margin-top: 24px;">
         <div class="table-header-bar">
           <div class="chart-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <line x1="16" x2="16" y1="2" y2="6" />
+              <line x1="8" x2="8" y1="2" y2="6" />
+              <line x1="3" x2="21" y1="10" y2="10" />
+            </svg>
             <span>Historial de Envíos de Reportes y Notificaciones</span>
             <span class="badge badge-info" id="schedule-history-count">0 registros</span>
           </div>
-          <button type="button" id="btn-refresh-schedule-history" class="btn btn-secondary btn-sm" title="Actualizar historial">
-            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+          <button type="button" id="btn-refresh-schedule-history" class="btn btn-secondary btn-sm"
+            title="Actualizar historial">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+              <path d="M16 16h5v5" />
+            </svg>
             <span>Actualizar</span>
           </button>
         </div>
@@ -2037,9 +2547,9 @@
         <div class="modal-title">
           <div class="modal-icon-shield">
             <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <rect width="8" height="5" x="8" y="11" rx="1"/>
-              <path d="M10 11V9a2 2 0 1 1 4 0v2"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <rect width="8" height="5" x="8" y="11" rx="1" />
+              <path d="M10 11V9a2 2 0 1 1 4 0v2" />
             </svg>
           </div>
           <div>
@@ -2048,7 +2558,10 @@
           </div>
         </div>
         <button type="button" class="modal-close" id="btn-modal-auth-close" title="Cerrar" aria-label="Cerrar">
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
 
@@ -2056,8 +2569,8 @@
         <div class="file-summary-card">
           <div class="file-summary-icon" id="modal-summary-icon">
             <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-              <polyline points="14 2 14 8 20 8"/>
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
             </svg>
           </div>
           <div class="file-summary-info">
@@ -2068,31 +2581,27 @@
 
         <div class="auth-warning-box">
           <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #b45309; flex-shrink: 0;">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <span id="modal-warning-text">Para realizar esta operación se requiere verificar su credencial policial de operador autorizado.</span>
+          <span id="modal-warning-text">Para realizar esta operación se requiere verificar su credencial policial de
+            operador autorizado.</span>
         </div>
 
         <div class="auth-input-group">
           <label for="input-auth-clave" class="auth-label">Clave de Autorización Policial</label>
           <div class="auth-input-wrapper">
             <svg class="svg-icon svg-icon-sm auth-input-icon" viewBox="0 0 24 24">
-              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <input 
-              type="password" 
-              id="input-auth-clave" 
-              class="form-control auth-control" 
-              placeholder="Ingrese clave de operador..." 
-              autocomplete="current-password"
-            >
+            <input type="password" id="input-auth-clave" class="form-control auth-control"
+              placeholder="Ingrese clave de operador..." autocomplete="current-password">
             <button type="button" class="btn-toggle-eye" id="btn-toggle-password" title="Mostrar u ocultar clave">
               <svg class="svg-icon svg-icon-xs" id="eye-icon" viewBox="0 0 24 24">
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                <circle cx="12" cy="12" r="3"/>
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
               </svg>
             </button>
           </div>
@@ -2106,7 +2615,7 @@
         </button>
         <button type="button" class="btn btn-primary" id="btn-modal-auth-confirm">
           <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
           </svg>
           <span>Autorizar y Poblar BD</span>
         </button>
@@ -2116,7 +2625,8 @@
 
   <!-- Footer Institucional -->
   <footer class="footer">
-    <div><strong>Sistema de Gestión ABIS</strong> &bull; Policía de Investigaciones de Chile (PDI) &bull; Jefatura Nacional de Migraciones y Policía Internacional</div>
+    <div><strong>Sistema de Gestión ABIS</strong> &bull; Policía de Investigaciones de Chile (PDI) &bull; Jefatura
+      Nacional de Migraciones y Policía Internacional</div>
     <div style="margin-top: 4px; color: var(--text-light); font-size: 0.76rem;">
       Base de Datos: PostgreSQL 3NF &bull; Cifrado: AES-256-GCM &bull; Ingesta ETL Integrada
     </div>
@@ -2125,4 +2635,5 @@
   <!-- Script Principal -->
   <script src="js/app.js?v=9"></script>
 </body>
+
 </html>

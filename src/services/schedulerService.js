@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const pool = require("../db");
 const telegramClient = require("../telegram/telegramClient");
 const { obtenerReporteDiario } = require("../reportes/reporteDiario");
 const { obtenerReporteRango } = require("../reportes/reporteRango");
@@ -35,40 +36,79 @@ function ensureConfigDir() {
   }
 }
 
-// Carga la configuración guardada o retorna la predeterminada
-function getConfig() {
+async function saveConfigToDB(config) {
+  try {
+    await pool.query(
+      `INSERT INTO scheduler_config (config_key, config_value) 
+       VALUES ('current', $1)
+       ON CONFLICT (config_key) 
+       DO UPDATE SET config_value = $1, updated_at = NOW()`,
+      [JSON.stringify(config)]
+    );
+  } catch (err) {
+    console.error("[SCHEDULER] Error guardando config en DB:", err.message);
+  }
+}
+
+async function getConfigFromDB() {
+  try {
+    const { rows } = await pool.query(
+      "SELECT config_value FROM scheduler_config WHERE config_key = 'current'"
+    );
+    if (rows.length === 0) return null;
+    return JSON.parse(rows[0].config_value);
+  } catch (err) {
+    console.error("[SCHEDULER] Error leyendo config de DB:", err.message);
+    return null;
+  }
+}
+
+// Carga la configuración guardada o retorna la predeterminada (Síncrono fall-back por retrocompatibilidad, pero idealmente async)
+// Nota: Para mantener compatibilidad con las partes síncronas del código, usaremos await en los lugares principales, 
+// y permitiremos usar esto sincrónicamente donde no importa, usando solo archivo, pero lo ideal es refactorizar a async.
+// Mejor aún, vamos a refactorizar getConfig para que sea async y devuelva promesa.
+async function getConfig() {
   ensureConfigDir();
+  
+  // 1. Intentar DB
+  const dbConfig = await getConfigFromDB();
+  if (dbConfig) {
+    return {
+      ...DEFAULT_CONFIG,
+      ...dbConfig,
+      times: Array.isArray(dbConfig.times) ? dbConfig.times : DEFAULT_CONFIG.times,
+      days: Array.isArray(dbConfig.days) ? dbConfig.days : DEFAULT_CONFIG.days,
+      history: Array.isArray(dbConfig.history) ? dbConfig.history : [],
+    };
+  }
+
+  // 2. Fallback a archivo
   if (!fs.existsSync(CONFIG_FILE)) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf8");
+    await saveConfigToDB(DEFAULT_CONFIG); // Migrar a DB
     return { ...DEFAULT_CONFIG };
   }
   try {
     const raw = fs.readFileSync(CONFIG_FILE, "utf8");
     const parsed = JSON.parse(raw);
-    return {
+    const conf = {
       ...DEFAULT_CONFIG,
       ...parsed,
       times: Array.isArray(parsed.times) ? parsed.times : DEFAULT_CONFIG.times,
       days: Array.isArray(parsed.days) ? parsed.days : DEFAULT_CONFIG.days,
       history: Array.isArray(parsed.history) ? parsed.history : [],
     };
+    await saveConfigToDB(conf); // Migrar a DB
+    return conf;
   } catch (err) {
     console.warn("[SCHEDULER] Error leyendo schedule-config.json, usando defaults:", err.message);
     return { ...DEFAULT_CONFIG };
   }
 }
 
-// Guarda la configuración en disco
-function saveConfig(newConfig) {
-  ensureConfigDir();
-  let current = { ...DEFAULT_CONFIG };
-  if (fs.existsSync(CONFIG_FILE)) {
-    try {
-      current = { ...DEFAULT_CONFIG, ...JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8")) };
-    } catch {
-      current = { ...DEFAULT_CONFIG };
-    }
-  }
+// Guarda la configuración en DB y en disco
+async function saveConfig(newConfig) {
+  const current = await getConfig();
 
   const merged = {
     ...current,
@@ -92,6 +132,7 @@ function saveConfig(newConfig) {
   }
 
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), "utf8");
+  await saveConfigToDB(merged);
   return merged;
 }
 
@@ -256,7 +297,7 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
 
 // Dispara el envío de reporte (tanto programado como de prueba manual)
 async function triggerScheduledReport({ pool, isTest = false, customChatId = null, fechaReferencia = null, forzarModo = null, incluirAdjuntos = true }) {
-  const config = getConfig();
+  const config = await getConfig();
   const token = process.env.TELEGRAM_BOT_TOKEN;
 
   let chatIds = [];
@@ -558,7 +599,7 @@ function iniciarScheduler({ pool, logger = console }) {
 
   schedulerTimer = setInterval(async () => {
     try {
-      const config = getConfig();
+      const config = await getConfig();
       if (!config.enabled) return;
 
       const { timeStr, dateStr, dayOfWeek } = obtenerHoraChile();
@@ -603,7 +644,7 @@ function iniciarScheduler({ pool, logger = console }) {
             error: dispatchErr.message,
           };
           const history = [entry, ...(config.history || [])].slice(0, 25);
-          saveConfig({ history });
+          await saveConfig({ history });
         }
       }
     } catch (err) {
