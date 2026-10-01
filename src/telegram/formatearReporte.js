@@ -108,10 +108,34 @@ function formatearDistribucion(reporte) {
   return `📌 <b>DISTRIBUCIÓN</b>\n\n${bloques.join("\n\n")}`;
 }
 
-// Formatea la data de obtenerReporteDiario() (Sprint 5) como el mensaje de Telegram (HTML parse
-// mode). No consulta la base de datos ni sabe como se calculo esa data — solo la formatea.
+// Formatea la data como un Resumen Ejecutivo Compacto (KPIs rápidos)
 function formatearReporte(reporte, opciones = {}) {
-  return formatearReporteExtenso(reporte, opciones);
+  const total = reporte.total || 0;
+  const exec = reporte.resumenEjecutivo || {};
+  const periodoTexto = formatearPeriodoDestacado(reporte, opciones);
+
+  const sincData = reporte.sincronizacion || [];
+  const regData = reporte.registro || [];
+  const sincOK = sincData.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.total || 0;
+  const regOK = regData.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO"))?.total || 0;
+  const errSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0;
+  const pendSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("PENDIENTE"))?.total || 0;
+
+  let texto = `🏛 <b>PDI - RESUMEN EJECUTIVO ABIS</b>\n`;
+  texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  texto += `📅 <b>PERÍODO:</b> ${periodoTexto}\n`;
+  texto += `👥 <b>Total Enrolamientos:</b> <b>${total.toLocaleString("es-CL")}</b>\n`;
+  texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  texto += `📊 <b>KPIs (SLA PDI)</b>\n`;
+  texto += `• Sincronización: <b>${exec.tasaSincronizacion || 0}%</b> (${sincOK.toLocaleString("es-CL")}) — <b>${exec.estadoSLA || "Óptimo"}</b>\n`;
+  texto += `• Registro Biométrico: <b>${exec.tasaRegistroBiometrico || 0}%</b> (${regOK.toLocaleString("es-CL")})\n`;
+  texto += `• Errores / Inconsistencias: <b>${exec.tasaError || 0}%</b> (${errSinc.toLocaleString("es-CL")})\n`;
+  if (pendSinc > 0) {
+    texto += `• Pendientes: <b>${pendSinc.toLocaleString("es-CL")}</b>\n`;
+  }
+
+  return texto;
 }
 
 // Mensaje de alerta (Sprint 7) para cuando el flujo automatico no pudo generar el reporte

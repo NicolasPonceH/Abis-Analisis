@@ -1,0 +1,606 @@
+/* ==========================================================================
+   ESTILOS: TAB 5 - AJUSTES & PROGRAMACIÓN DE HORARIOS DE REPORTE
+   ========================================================================== */
+
+/* Banner de Estado del Reloj y Automatización */
+.schedule-status-banner {
+  background: rgba(0, 35, 76, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* border: none; removed */
+  border-radius: var(--radius-lg);
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 35, 76, 0.25);
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.live-clock-digits {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.schedule-status-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.schedule-clock-icon {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 209, 0, 0.15);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pdi-gold);
+}
+
+.schedule-clock-icon .svg-icon {
+  stroke: var(--pdi-gold) !important;
+}
+
+.schedule-clock-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.schedule-clock-time {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+.schedule-next-badge {
+  background: transparent;
+  border: none;
+  color: #34d399;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.schedule-next-badge .status-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+/* Grid de Ajustes */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 22px;
+  margin-bottom: 24px;
+}
+
+.settings-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.settings-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--pdi-navy);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #10b981;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+}
+
+.schedule-enabled-alert {
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  color: #166534;
+  font-weight: 500;
+}
+
+.schedule-enabled-alert.disabled {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Contenedor de Chips de Horarios */
+.time-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+}
+
+.time-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.time-chip-del {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.time-chip-del:hover {
+  color: #b91c1c;
+}
+
+/* Caja para añadir horario */
+.add-time-box {
+  margin-top: 14px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+}
+
+.add-time-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.add-time-row input[type="time"] {
+  flex: 1;
+}
+
+/* Grid de Presets de Horas */
+.time-presets-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset-pill-btn { background: rgba(0, 35, 76, 0.15); backdrop-filter: blur(8px); border: 1px solid rgba(0, 35, 76, 0.3); color: var(--pdi-navy) !important; font-size: 0.85rem; font-weight: 700; padding: 6px 14px; border-radius: var(--radius-full); cursor: pointer; transition: all 0.15s ease; box-shadow: 0 0 10px rgba(0, 35, 76, 0.15); }
+
+.preset-pill-btn:hover { background: rgba(0, 35, 76, 0.22); transform: translateY(-1px); color: var(--pdi-navy) !important; border-color: rgba(0, 35, 76, 0.45); box-shadow: 0 0 16px rgba(0, 35, 76, 0.25); }
+
+/* Selector de Días */
+.days-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day-checkbox-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #475569;
+  transition: all 0.15s;
+}
+
+.day-checkbox-label:has(input:checked) {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+
+.day-checkbox-label input {
+  margin-bottom: 4px;
+}
+
+.btn-link-action {
+  background: transparent;
+  border: none;
+  color: var(--pdi-navy-light);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.btn-link-action:hover {
+  color: #0369a1;
+}
+
+/* Caja de Info de Canal */
+.channel-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.channel-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.channel-info-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.channel-info-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+
+/* ==========================================================================
+   GESTOR DE DESTINATARIOS DE TELEGRAM (UI STYLES)
+   ========================================================================== */
+
+.badge-active {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-paused { background: rgba(0, 35, 76, 0.15); color: var(--pdi-navy); border: 1px solid rgba(0, 35, 76, 0.3); box-shadow: 0 4px 12px rgba(0, 35, 76, 0.08); backdrop-filter: blur(8px); font-weight: 700; padding: 3px 8px; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; }
+
+.dest-actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.btn-dest-action {
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-dest-test {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+.btn-dest-test:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.btn-dest-toggle {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+.btn-dest-toggle:hover:not(:disabled) {
+  background: #ffd100; transform: translateY(-1px);
+}
+
+.btn-dest-delete {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+.btn-dest-delete:hover:not(:disabled) {
+  background: #ffe4e6;
+  border-color: #fda4af;
+}
+
+.btn-dest-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  #form-nuevo-destinatario {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #form-nuevo-destinatario {
+    grid-template-columns: 1fr !important;
+  }
+  .dest-actions-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+
+/* ==========================================================================
+   GESTOR DE DESTINATARIOS DE TELEGRAM (UI STYLES)
+   ========================================================================== */
+
+.badge-active {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-paused { background: rgba(0, 35, 76, 0.15); color: var(--pdi-navy); border: 1px solid rgba(0, 35, 76, 0.3); box-shadow: 0 4px 12px rgba(0, 35, 76, 0.08); backdrop-filter: blur(8px); font-weight: 700; padding: 3px 8px; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; }
+
+.dest-actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.btn-dest-action {
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-dest-test {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+.btn-dest-test:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.btn-dest-toggle {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+.btn-dest-toggle:hover:not(:disabled) {
+  background: #ffd100; transform: translateY(-1px);
+}
+
+.btn-dest-delete {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+.btn-dest-delete:hover:not(:disabled) {
+  background: #ffe4e6;
+  border-color: #fda4af;
+}
+
+.btn-dest-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  #form-nuevo-destinatario {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #form-nuevo-destinatario {
+    grid-template-columns: 1fr !important;
+  }
+  .dest-actions-group {
+    flex-direction: column;
+  }
+}
+
+/* ==========================================================================
+   POPUP ELIMINAR HORARIO
+   ========================================================================== */
+.toast-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 15, 33, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toast-modal {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(255, 209, 0, 0.6);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  padding: 28px 32px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-family: 'Open Sans', sans-serif;
+}
+
+.toast-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+}
+
+.toast-icon-wrapper svg {
+  width: 28px;
+  height: 28px;
+  stroke: #d97706;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.toast-title {
+  margin: 0 0 8px 0;
+  color: #00234c;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.toast-text {
+  margin: 0 0 24px 0;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.toast-highlight {
+  background: rgba(0, 35, 76, 0.1);
+  color: #00234c;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 35, 76, 0.3);
+  display: inline-block;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0, 35, 76, 0.05);
+}
+
+.toast-btn {
+  background: linear-gradient(to right, #ffd100, #f59e0b);
+  color: #00234c;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.toast-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}

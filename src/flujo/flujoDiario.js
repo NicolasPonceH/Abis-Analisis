@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { runEtl } = require("../etl");
 const { obtenerReporteDiario } = require("../reportes/reporteDiario");
-const { formatearReporte, formatearAlerta, formatearAvisoFilasOmitidas } = require("../telegram/formatearReporte");
+const { formatearReporte, formatearReporteExtenso, formatearAlerta, formatearAvisoFilasOmitidas } = require("../telegram/formatearReporte");
 const { enviarMensaje } = require("../telegram/telegramClient");
 const { crearBotonesDescarga } = require("../telegram/botService");
 
@@ -98,7 +98,7 @@ async function ejecutarFlujoDiario(filePath, pool) {
   const fecha = fechas[fechas.length - 1];
 
   const reporte = await obtenerReporteDiario(pool, fecha);
-  let texto = formatearReporte(reporte);
+  let texto = formatearReporteExtenso(reporte);
   if (resultadoEtl.errors.length > 0) {
     texto += `\n\n${formatearAvisoFilasOmitidas(resultadoEtl.errors)}`;
   }

@@ -1,0 +1,99 @@
+/* ==========================================================================
+   BITÁCORA DE AUDITORÍA
+   ========================================================================== */
+
+.audit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.audit-badge-ingesta {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.audit-badge-telegram {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+.audit-badge-seguridad {
+.btn-link-action:hover {
+  color: #0369a1;
+}
+
+/* Caja de Info de Canal */
+.channel-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.channel-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.channel-info-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.channel-info-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+
+/* ==========================================================================
+   BITÁCORA DE AUDITORÍA
+   ========================================================================== */
+
+.audit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.audit-badge-ingesta {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.audit-badge-telegram {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+.audit-badge-seguridad {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.audit-badge-default {
+  background: #ffd100;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+
