@@ -101,7 +101,7 @@ _nlp.max_length = 2_000_000  # actas largas pueden superar el limite por defecto
 try:
     db.init_schema()
     if db.count_users() == 0:
-        db.create_user("admin", generate_password_hash("admin123"), "admin")
+        db.create_user("abis_user", generate_password_hash(os.environ.get("ABIS_PASSWORD", "abis123")), "admin")
 except Exception as exc:  # PostgreSQL puede no estar disponible; el resto de la app sigue andando
     print(f"Aviso: no se pudo inicializar el esquema de PostgreSQL ({exc}).")
 
@@ -745,66 +745,6 @@ def login():
         flash("Credenciales incorrectas.")
     return render_template("login.html", next=next_url)
 
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username", "")
-        password = request.form.get("password", "")
-        confirm_password = request.form.get("confirm_password", "")
-        nombre_completo = request.form.get("nombre_completo", "")
-
-        if not username or not password or not nombre_completo:
-            flash("Todos los campos son obligatorios.")
-            return render_template("register.html")
-
-        if password != confirm_password:
-            flash("Las contraseñas no coinciden.")
-            return render_template("register.html")
-            
-        try:
-            existing_user = db.get_user_by_username(username)
-            if existing_user:
-                flash("El nombre de usuario ya existe.")
-                return render_template("register.html")
-                
-            db.create_user(username, generate_password_hash(password), nombre_completo=nombre_completo)
-            flash("Usuario registrado exitosamente. Ahora puedes iniciar sesión.", "success")
-            return redirect(url_for("login"))
-        except Exception as e:
-            flash(f"Error al registrar usuario: {e}")
-            
-    return render_template("register.html")
-
-
-@app.route("/forgot-password", methods=["GET", "POST"])
-def forgot_password():
-    if request.method == "POST":
-        username = request.form.get("username", "")
-        new_password = request.form.get("new_password", "")
-        confirm_password = request.form.get("confirm_password", "")
-
-        if not username or not new_password:
-            flash("Todos los campos son obligatorios.")
-            return render_template("forgot_password.html")
-
-        if new_password != confirm_password:
-            flash("Las contraseñas no coinciden.")
-            return render_template("forgot_password.html")
-            
-        try:
-            user = db.get_user_by_username(username)
-            if not user:
-                flash("El usuario no existe.")
-                return render_template("forgot_password.html")
-                
-            db.update_password(username, generate_password_hash(new_password))
-            flash("Contraseña actualizada exitosamente. Inicia sesión.", "success")
-            return redirect(url_for("login"))
-        except Exception as e:
-            flash(f"Error al actualizar la contraseña: {e}")
-            
-    return render_template("forgot_password.html")
 
 @app.route("/logout")
 def logout():
