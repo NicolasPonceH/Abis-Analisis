@@ -81,7 +81,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret")
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password"}
+LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
