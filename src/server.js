@@ -1457,7 +1457,7 @@ const server = app.listen(port, () => {
 
   // Iniciar microservicio de Análisis Documental (SIAD)
   iniciarSIAD({
-    NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
+
     SIAD_PORT: process.env.SIAD_PORT || '5001',
   });
 });

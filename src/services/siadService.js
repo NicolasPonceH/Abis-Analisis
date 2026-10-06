@@ -22,7 +22,7 @@ function iniciarSIAD(envVars = {}) {
     DB_NAME: 'Abis_OCR',
     DB_USER: 'postgres',
     DB_PASSWORD: 'abis_dev_pw',
-    NVIDIA_API_KEY: envVars.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY || '',
+
     FLASK_RUN_PORT: envVars.SIAD_PORT || process.env.SIAD_PORT || '5001',
     APPLICATION_ROOT: '/analisis'
   };
