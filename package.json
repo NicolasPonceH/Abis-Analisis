@@ -18,10 +18,14 @@
     "telegram:enviar": "node scripts/enviar-reporte-telegram.js",
     "security:cifrar": "node scripts/cifrar-archivo.js",
     "security:descifrar": "node scripts/descifrar-archivo.js",
-    "postinstall": "npx playwright install --with-deps chromium"
+    "postinstall": "npx playwright install --with-deps chromium",
+    "db:crear": "node scripts/crear-bd-unificada.js",
+    "siad:install": "cd siad && python -m venv .venv && .venv\\Scripts\\pip install -r requirements.txt",
+    "setup": "npm install && npm run siad:install && npm run db:crear"
   },
   "dependencies": {
     "docx": "^9.7.1",
+    "docxtemplater": "^3.71.0",
     "dotenv": "^16.4.5",
     "ejs": "^6.0.1",
     "exceljs": "^4.4.0",
@@ -30,7 +34,9 @@
     "multer": "^2.3.0",
     "oracledb": "^7.0.1",
     "pg": "^8.12.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "pizzip": "^3.3.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "xlsx-populate": "^1.21.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -73,3 +73,11 @@ SELECT r.fecha_enrolamiento, p.nombre_profesion AS profesion, count(*) AS total
 FROM registro_enrolamiento r
 JOIN profesion p ON p.id_profesion = r.id_profesion
 GROUP BY r.fecha_enrolamiento, p.nombre_profesion;
+
+
+-- Cantidad de enrolamientos por dia y equipo.
+CREATE OR REPLACE VIEW vw_resumen_equipo_diario AS
+SELECT r.fecha_enrolamiento, e.tipo_equipo AS equipo, count(*) AS total
+FROM registro_enrolamiento r
+JOIN equipo e ON e.id_equipo = r.id_equipo
+GROUP BY r.fecha_enrolamiento, e.tipo_equipo;

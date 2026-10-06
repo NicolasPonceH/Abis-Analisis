@@ -1,108 +1,39 @@
 <section id="tab-ingesta" class="tab-content" style="display: none;">
 
-      <!-- Selector de Modalidad de Ingesta -->
-      <div class="ingesta-mode-selector-card">
-        <div class="ingesta-mode-selector">
-          <button type="button" class="ingesta-mode-btn active" id="btn-mode-file" data-ingest-mode="file">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            <span>Carga de Archivo (.xlsx / .enc)</span>
-          </button>
+  <!-- Selector de Modalidad de Ingesta -->
+  <div class="ingesta-mode-selector-card">
+    <div class="ingesta-mode-selector">
+      <button type="button" class="ingesta-mode-btn active" id="btn-mode-file" data-ingest-mode="file">
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        <span>Carga de Archivo (.xlsx / .enc)</span>
+      </button>
 
-          <button type="button" class="ingesta-mode-btn" id="btn-mode-sheet" data-ingest-mode="sheet">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" style="stroke: #000000 !important;" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-            </svg>
-            <span>Hoja de Cálculo / Portapapeles</span>
-            <span class="mode-badge-pill">Directo BD PostgreSQL</span>
-          </button>
-        </div>
-      </div>
+      <button type="button" class="ingesta-mode-btn" id="btn-mode-sheet" data-ingest-mode="sheet">
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" style="stroke: #000000 !important;"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+        <span>Hoja de Cálculo / Portapapeles</span>
+        <span class="mode-badge-pill">Directo BD PostgreSQL</span>
+      </button>
+    </div>
+  </div>
 
-      <!-- ========================================== -->
-      <!-- VISTA 1: HOJA DE CÁLCULO / COPIAR Y PEGAR -->
-      <!-- ========================================== -->
-      <div id="ingesta-view-sheet" class="ingesta-view-pane" style="display: none;">
+  <!-- ========================================== -->
+  <!-- VISTA 1: HOJA DE CÁLCULO / COPIAR Y PEGAR -->
+  <!-- ========================================== -->
+  <div id="ingesta-view-sheet" class="ingesta-view-pane" style="display: none;">
 
-        <!-- Tarjeta de Instrucciones y Controles de Hoja de Cálculo -->
-        <div class="sheet-workflow-card">
-          <div class="sheet-workflow-header">
-            <div class="sheet-workflow-title">
-              <div class="sheet-icon-wrapper">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                  <line x1="3" y1="9" x2="21" y2="9" />
-                  <line x1="3" y1="15" x2="21" y2="15" />
-                  <line x1="9" y1="3" x2="9" y2="21" />
-                  <line x1="15" y1="3" x2="15" y2="21" />
-                </svg>
-              </div>
-              <div>
-                <h3 style="margin: 0; font-size: 1.08rem; color: #ffffff; font-weight: 700;">Ingesta Rápida
-                  desde Portapapeles (BD PostgreSQL / Hoja de Cálculo)</h3>
-                <p style="margin: 3px 0 0; font-size: 0.83rem; color: #cbd5e1; line-height: 1.4;">
-                  Copia las celdas desde tu consulta SQL (desde Oracle BD) o desde Microsoft Excel y
-                  pégalas directamente con <kbd class="kbd-badge">Ctrl + V</kbd>.
-                </p>
-              </div>
-            </div>
-
-            <div class="sheet-actions-group">
-              <button type="button" id="btn-paste-clipboard" class="btn btn-primary"
-                title="Pegar contenido del portapapeles del sistema">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #000000 !important; fill: none !important;">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-                </svg>
-                <span>Pegar Portapapeles</span>
-              </button>
-              <button type="button" id="btn-load-sample-sheet" class="btn btn-secondary"
-                title="Cargar datos de ejemplo para probar el flujo">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <polygon
-                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-                <span>Cargar Ejemplo PostgreSQL</span>
-              </button>
-              <button type="button" id="btn-clear-sheet" class="btn btn-secondary" title="Limpiar datos de la tabla"
-                style="display: none;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-                <span>Limpiar Hoja</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Métricas de estado de la hoja de cálculo -->
-          <div class="sheet-status-bar" id="sheet-status-bar">
-            <div class="sheet-stat-pill">
-              <span class="sheet-stat-label">Destino:</span>
-              <span class="badge badge-info">BD PostgreSQL</span>
-            </div>
-            <div class="sheet-stat-pill">
-              <span class="sheet-stat-label">Filas Detectadas:</span>
-              <strong id="sheet-stat-rows" class="sheet-stat-num">0</strong>
-            </div>
-            <div class="sheet-stat-pill">
-              <span class="sheet-stat-label">Columnas Mapeadas:</span>
-              <strong id="sheet-stat-cols" class="sheet-stat-num">0 / 12</strong>
-            </div>
-            <div class="sheet-stat-pill">
-              <span class="sheet-stat-label">Estado de Validación:</span>
-              <span id="sheet-stat-status" class="badge badge-default">Esperando datos</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Área de Pegado y Captura interactiva (visible cuando no hay filas) -->
-        <div id="sheet-paste-dropzone" class="sheet-paste-zone">
-          <div class="paste-zone-icon">
-            <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+    <!-- Tarjeta de Instrucciones y Controles de Hoja de Cálculo -->
+    <div class="sheet-workflow-card">
+      <div class="sheet-workflow-header">
+        <div class="sheet-workflow-title">
+          <div class="sheet-icon-wrapper">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24">
               <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
               <line x1="3" y1="9" x2="21" y2="9" />
               <line x1="3" y1="15" x2="21" y2="15" />
@@ -110,223 +41,293 @@
               <line x1="15" y1="3" x2="15" y2="21" />
             </svg>
           </div>
-          <h4 class="paste-zone-title">Área de Captura de Hoja de Cálculo</h4>
-          <p class="paste-zone-desc">
-            Haz clic aquí y presiona <kbd class="kbd-badge">Ctrl + V</kbd> para volcar las celdas copiadas directamente
-            de la base de datos Oracle o Excel.
-          </p>
-          <div class="paste-zone-shortcuts">
-            <span class="shortcut-chip">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round"
-                style="color: #0284c7; width: 14px; height: 14px; flex-shrink: 0;">
-                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-              </svg>
-              <span>Copiar en Oracle (Ctrl + C)</span>
-            </span>
-            <span class="shortcut-arrow">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </span>
-            <span class="shortcut-chip">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round"
-                style="color: #2563eb; width: 14px; height: 14px; flex-shrink: 0;">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
-                <path d="M12 11v6M9 14l3 3 3-3" />
-              </svg>
-              <span>Pegar Aquí (Ctrl + V)</span>
-            </span>
-            <span class="shortcut-arrow">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </span>
-            <span class="shortcut-chip">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round"
-                style="color: #16a34a; width: 14px; height: 14px; flex-shrink: 0;">
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <span>Validar e Ingestar en BD PostgreSQL</span>
-            </span>
-          </div>
-          <textarea id="sheet-hidden-paste-area" class="sheet-paste-textarea"
-            placeholder="O si lo prefieres, pega el texto tabulado aquí manualmente..."></textarea>
-        </div>
-
-        <!-- Vista Previa de Hoja de Cálculo (visible tras pegar datos) -->
-        <div id="sheet-preview-card" class="sheet-preview-card" style="display: none;">
-          <div class="sheet-preview-header">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                <path d="M12 11h4M12 16h4M8 11h.01M8 16h.01" />
-              </svg>
-              <strong style="font-size: 0.95rem; color: var(--text-primary);">Hoja de Cálculo Interactiva
-                (Previsualización)</strong>
-              <span id="sheet-preview-count-badge" class="badge badge-info">0 filas</span>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <button type="button" id="btn-sheet-add-row" class="btn btn-secondary"
-                style="font-size:0.82rem; height:34px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>+ Fila</span>
-              </button>
-              <button type="button" id="btn-sheet-submit" class="btn btn-primary" style="height:36px; font-weight:700;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  <path d="m9 12 2 2 4-4" />
-                </svg>
-                <span>Validar e Ingestar en BD</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Mapeo de Columnas Detectadas -->
-          <div id="sheet-column-mapping-chips" class="sheet-column-mapping-bar"></div>
-
-          <!-- Tabla de Datos con cabecera sticky y celdas editables -->
-          <div class="sheet-table-scroll-container">
-            <table class="data-table sheet-table" id="sheet-preview-table">
-              <thead id="sheet-table-head"></thead>
-              <tbody id="sheet-table-body"></tbody>
-            </table>
-          </div>
-
-          <!-- Pie de Hoja de Cálculo con confirmación -->
-          <div class="sheet-preview-footer">
-            <div class="sheet-footer-info">
-              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--pdi-navy); flex-shrink:0;">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-              <span>Puedes editar o corregir cualquier celda directamente haciendo doble clic antes de poblar la base de
-                datos PostgreSQL.</span>
-            </div>
-            <button type="button" id="btn-sheet-submit-bottom" class="btn btn-primary" style="font-weight:700;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg>
-              <span>Autorizar e Ingestar Registros en BD</span>
-            </button>
+          <div>
+            <h3 style="margin: 0; font-size: 1.08rem; color: #ffffff; font-weight: 700;">Ingesta Rápida
+              desde Portapapeles (BD PostgreSQL / Hoja de Cálculo)</h3>
+            <p style="margin: 3px 0 0; font-size: 0.83rem; color: #cbd5e1; line-height: 1.4;">
+              Copia las celdas desde tu consulta SQL (desde Oracle BD) o desde Microsoft Excel y
+              pégalas directamente con <kbd class="kbd-badge">Ctrl + V</kbd>.
+            </p>
           </div>
         </div>
 
-        <!-- Feedback de Ingesta desde Hoja de Cálculo -->
-        <div id="sheet-ingest-feedback" class="upload-results" style="display:none; margin-top:20px;"></div>
-
+        <div class="sheet-actions-group">
+          <button type="button" id="btn-paste-clipboard" class="btn btn-primary"
+            title="Pegar contenido del portapapeles del sistema">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
+              style="stroke: #000000 !important; fill: none !important;">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            </svg>
+            <span>Pegar Portapapeles</span>
+          </button>
+          <button type="button" id="btn-load-sample-sheet" class="btn btn-secondary"
+            title="Cargar datos de ejemplo para probar el flujo">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span>Cargar Ejemplo PostgreSQL</span>
+          </button>
+          <button type="button" id="btn-clear-sheet" class="btn btn-secondary" title="Limpiar datos de la tabla"
+            style="display: none;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            <span>Limpiar Hoja</span>
+          </button>
+        </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- VISTA 2: CARGA TRADICIONAL DE ARCHIVO (.XLSX / .ENC) -->
-      <!-- ========================================== -->
-      <div id="ingesta-view-file" class="ingesta-view-pane" style="display: block;">
-
-        <div class="upload-wrapper">
-
-          <!-- Zona Dropzone -->
-          <div class="dropzone" id="upload-dropzone">
-            <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
-            <div class="dropzone-icon">
-              <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                <path d="M12 12v9" />
-                <path d="m16 16-4-4-4 4" />
-              </svg>
-            </div>
-            <div class="dropzone-title">Carga Directa de Archivo Excel ABIS (Oracle)</div>
-            <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic
-              para examinar</div>
-            <button type="button" id="btn-select-file" class="btn btn-primary">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                <path
-                  d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2" />
-              </svg>
-              <span>Seleccionar Archivo desde el Equipo</span>
-            </button>
-            <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
-              Formatos admitidos: <strong>.xlsx</strong> nativo o archivo protegido <strong>.enc</strong> (AES-256-GCM)
-            </div>
-          </div>
-
-          <!-- Tarjeta de Instrucciones de Seguridad -->
-          <div class="upload-info-card">
-            <h3
-              style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-              <span>Protocolo de Seguridad e Integridad ETL</span>
-            </h3>
-
-            <div class="info-item">
-              <div class="info-item-icon">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-              </div>
-              <div class="info-item-content">
-                <h4>Descifrado Exclusivo en Memoria RAM</h4>
-                <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil
-                  del servidor sin escribir datos planos temporales en el disco.</p>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-item-icon">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                  <path d="M12 2 2 7l10 5 10-5-10-5Z" />
-                  <path d="m2 17 10 5 10-5" />
-                  <path d="m2 12 10 5 10-5" />
-                </svg>
-              </div>
-              <div class="info-item-content">
-                <h4>Normalización y Tolerancia a Errores Tipográficos</h4>
-                <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y
-                  nacionalidades) hacia el modelo relacional 3NF.</p>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-item-icon">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-              </div>
-              <div class="info-item-content">
-                <h4>Inserción Atómica y Trazabilidad Criptográfica</h4>
-                <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de
-                  la información procesada.</p>
-              </div>
-            </div>
-          </div>
-
+      <!-- Métricas de estado de la hoja de cálculo -->
+      <div class="sheet-status-bar" id="sheet-status-bar">
+        <div class="sheet-stat-pill">
+          <span class="sheet-stat-label">Destino:</span>
+          <span class="badge badge-info">BD PostgreSQL</span>
         </div>
-
-        <!-- Resultados de la subida -->
-        <div class="upload-results" id="upload-results">
-          <div id="upload-status"></div>
+        <div class="sheet-stat-pill">
+          <span class="sheet-stat-label">Filas Detectadas:</span>
+          <strong id="sheet-stat-rows" class="sheet-stat-num">0</strong>
         </div>
+        <div class="sheet-stat-pill">
+          <span class="sheet-stat-label">Columnas Mapeadas:</span>
+          <strong id="sheet-stat-cols" class="sheet-stat-num">0 / 12</strong>
+        </div>
+        <div class="sheet-stat-pill">
+          <span class="sheet-stat-label">Estado de Validación:</span>
+          <span id="sheet-stat-status" class="badge badge-default">Esperando datos</span>
+        </div>
+      </div>
+    </div>
 
+    <!-- Área de Pegado y Captura interactiva (visible cuando no hay filas) -->
+    <div id="sheet-paste-dropzone" class="sheet-paste-zone">
+      <div class="paste-zone-icon">
+        <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="3" y1="15" x2="21" y2="15" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="15" y1="3" x2="15" y2="21" />
+        </svg>
+      </div>
+      <h4 class="paste-zone-title">Área de Captura de Hoja de Cálculo</h4>
+      <p class="paste-zone-desc">
+        Haz clic aquí y presiona <kbd class="kbd-badge">Ctrl + V</kbd> para volcar las celdas copiadas directamente
+        de la base de datos Oracle o Excel.
+      </p>
+      <div class="paste-zone-shortcuts">
+        <span class="shortcut-chip">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"
+            style="color: #0284c7; width: 14px; height: 14px; flex-shrink: 0;">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+          </svg>
+          <span>Copiar en Oracle (Ctrl + C)</span>
+        </span>
+        <span class="shortcut-arrow">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
+            <path d="M5 12h14M13 5l7 7-7 7" />
+          </svg>
+        </span>
+        <span class="shortcut-chip">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"
+            style="color: #2563eb; width: 14px; height: 14px; flex-shrink: 0;">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+            <path d="M12 11v6M9 14l3 3 3-3" />
+          </svg>
+          <span>Pegar Aquí (Ctrl + V)</span>
+        </span>
+        <span class="shortcut-arrow">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #94a3b8;">
+            <path d="M5 12h14M13 5l7 7-7 7" />
+          </svg>
+        </span>
+        <span class="shortcut-chip">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"
+            style="color: #16a34a; width: 14px; height: 14px; flex-shrink: 0;">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span>Validar e Ingestar en BD PostgreSQL</span>
+        </span>
+      </div>
+      <textarea id="sheet-hidden-paste-area" class="sheet-paste-textarea"
+        placeholder="O si lo prefieres, pega el texto tabulado aquí manualmente..."></textarea>
+    </div>
+
+    <!-- Vista Previa de Hoja de Cálculo (visible tras pegar datos) -->
+    <div id="sheet-preview-card" class="sheet-preview-card" style="display: none;">
+      <div class="sheet-preview-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <path d="M12 11h4M12 16h4M8 11h.01M8 16h.01" />
+          </svg>
+          <strong style="font-size: 0.95rem; color: #ffffff;">Hoja de Cálculo Interactiva
+            (Previsualización)</strong>
+          <span id="sheet-preview-count-badge" class="badge badge-info">0 filas</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" id="btn-sheet-add-row" class="btn btn-secondary"
+            style="font-size:0.82rem; height:34px;">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>+ Fila</span>
+          </button>
+          <button type="button" id="btn-sheet-submit" class="btn btn-primary" style="height:36px; font-weight:700;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+            <span>Validar e Ingestar en BD</span>
+          </button>
+        </div>
       </div>
 
-    </section>
+      <!-- Mapeo de Columnas Detectadas -->
+      <div id="sheet-column-mapping-chips" class="sheet-column-mapping-bar"></div>
 
-    <!-- ========================================== -->
-    <!-- TAB 3: EVOLUCIÓN Y TENDENCIAS -->
-    <!-- ========================================== -->
-    
+      <!-- Tabla de Datos con cabecera sticky y celdas editables -->
+      <div class="sheet-table-scroll-container">
+        <table class="data-table sheet-table" id="sheet-preview-table">
+          <thead id="sheet-table-head"></thead>
+          <tbody id="sheet-table-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Pie de Hoja de Cálculo con confirmación -->
+      <div class="sheet-preview-footer">
+        <div class="sheet-footer-info">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--pdi-navy); flex-shrink:0;">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>Puedes editar o corregir cualquier celda directamente haciendo doble clic antes de poblar la base de
+            datos PostgreSQL.</span>
+        </div>
+        <button type="button" id="btn-sheet-submit-bottom" class="btn btn-primary" style="font-weight:700;">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          <span>Autorizar e Ingestar Registros en BD</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Feedback de Ingesta desde Hoja de Cálculo -->
+    <div id="sheet-ingest-feedback" class="upload-results" style="display:none; margin-top:20px;"></div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- VISTA 2: CARGA TRADICIONAL DE ARCHIVO (.XLSX / .ENC) -->
+  <!-- ========================================== -->
+  <div id="ingesta-view-file" class="ingesta-view-pane" style="display: block;">
+
+    <div class="upload-wrapper">
+
+      <!-- Zona Dropzone -->
+      <div class="dropzone" id="upload-dropzone">
+        <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
+        <div class="dropzone-icon">
+          <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+            <path d="M12 12v9" />
+            <path d="m16 16-4-4-4 4" />
+          </svg>
+        </div>
+        <div class="dropzone-title">Carga Directa de Archivo Excel ABIS (Oracle)</div>
+        <div class="dropzone-desc">Arrastra y suelta aquí el archivo extraído de la base de datos Oracle o haz clic
+          para examinar</div>
+        <button type="button" id="btn-select-file" class="btn btn-primary">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+            <path
+              d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2" />
+          </svg>
+          <span>Seleccionar Archivo desde el Equipo</span>
+        </button>
+        <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
+          Formatos admitidos: <strong>.xlsx</strong> nativo o archivo protegido <strong>.enc</strong> (AES-256-GCM)
+        </div>
+      </div>
+
+      <!-- Tarjeta de Instrucciones de Seguridad -->
+      <div class="upload-info-card">
+        <h3
+          style="font-size: 1.05rem; color: var(--pdi-navy); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          <span>Protocolo de Seguridad e Integridad ETL</span>
+        </h3>
+
+        <div class="info-item">
+          <div class="info-item-icon">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+          </div>
+          <div class="info-item-content">
+            <h4>Descifrado Exclusivo en Memoria RAM</h4>
+            <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil
+              del servidor sin escribir datos planos temporales en el disco.</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+              <path d="m2 17 10 5 10-5" />
+              <path d="m2 12 10 5 10-5" />
+            </svg>
+          </div>
+          <div class="info-item-content">
+            <h4>Normalización y Tolerancia a Errores Tipográficos</h4>
+            <p>El sistema mapea automáticamente inconsistencias textuales (cruces de unidades, cuarteles y
+              nacionalidades) hacia el modelo relacional 3NF.</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+          <div class="info-item-content">
+            <h4>Inserción Atómica y Trazabilidad Criptográfica</h4>
+            <p>Cada lote genera una huella <strong>SHA-256</strong> inmutable para auditoría interna y no repudio de
+              la información procesada.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Resultados de la subida -->
+    <div class="upload-results" id="upload-results">
+      <div id="upload-status"></div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- TAB 3: EVOLUCIÓN Y TENDENCIAS -->
+<!-- ========================================== -->

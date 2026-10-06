@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Configuración - SIAD{% endblock %}
+{% block content %}
+
+<div class="px-6 lg:px-margin-desktop py-8 max-w-[1400px] mx-auto w-full flex flex-col gap-6">
+  
+  <!-- Cabecera -->
+  <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="flex items-start gap-4">
+      <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 shrink-0">
+        <span class="material-symbols-outlined text-[24px]">settings</span>
+      </div>
+      <div class="flex flex-col">
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Configuración del Sistema</h1>
+        <p class="text-[13px] text-slate-500 dark:text-slate-400 font-medium mt-1">Preferencias de visualización guardadas localmente en este navegador.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    
+    <!-- Apariencia -->
+    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <span class="material-symbols-outlined text-[24px]">palette</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Apariencia</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tema visual de la interfaz</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-4 py-2">
+        <div class="flex flex-col gap-1">
+          <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Modo Oscuro</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[250px]">Invierte los colores de la pantalla para reducir la fatiga visual en entornos de poca luz.</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner group-hover:shadow transition-all"></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Accesibilidad -->
+    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+          <span class="material-symbols-outlined text-[24px]">accessibility_new</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Accesibilidad</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ajustes de lectura y tamaño</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4 py-2">
+        <div class="flex items-center justify-between">
+          <div class="flex flex-col gap-1">
+            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Tamaño de la Fuente</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">Ajusta el zoom global de la interfaz.</p>
+          </div>
+          <span id="font-size-value" class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 font-bold px-3 py-1 rounded-lg text-sm border border-blue-100 dark:border-blue-900/50">100%</span>
+        </div>
+        <div class="flex items-center gap-4 mt-2">
+          <span class="font-bold text-slate-400 dark:text-slate-500" style="font-size:14px">A</span>
+          <input type="range" id="font-size-slider" min="80" max="150" step="5" value="100" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+          <span class="font-bold text-slate-600 dark:text-slate-300" style="font-size:20px">A</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IA y Procesamiento -->
+    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+          <span class="material-symbols-outlined text-[24px]">psychology</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Inteligencia Artificial</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Preferencias del motor de IA</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-5 py-2">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-1">
+            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Resumen por Defecto</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[220px]">Define qué tipo de resumen se generará automáticamente.</p>
+          </div>
+          <select class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
+            <option value="tecnico">Técnico (Viñetas)</option>
+            <option value="narrativo">Narrativo (Párrafos)</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-2 mt-2">
+          <div class="flex items-center justify-between">
+            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Nivel de Extracción</p>
+            <span class="bg-purple-50 dark:bg-purple-900/30 text-purple-700 font-bold px-3 py-1 rounded-lg text-[11px] border border-purple-100 dark:border-purple-900/50">Estricto</span>
+          </div>
+          <div class="flex items-center gap-4 mt-1">
+            <span class="text-[10px] font-bold text-slate-400">Exacto</span>
+            <input type="range" min="1" max="3" step="1" value="1" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600">
+            <span class="text-[10px] font-bold text-slate-400">Deductivo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exportación y Privacidad -->
+    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
+          <span class="material-symbols-outlined text-[24px]">shield_lock</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Privacidad y Exportación</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control de datos y actas</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-5 py-2">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-1">
+            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Anonimizar Datos Personales</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[250px]">Oculta RUTs y nombres en la previsualización por seguridad.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" checked class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500 shadow-inner group-hover:shadow transition-all"></div>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 mt-2">
+          <div class="flex flex-col gap-1">
+            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Formato de Acta</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[250px]">Estilo predeterminado para documentos Word.</p>
+          </div>
+          <select class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
+            <option value="estandar">RF-07 Estándar</option>
+            <option value="resumido">Solo Resumen</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    var darkToggle = document.getElementById('dark-mode-toggle');
+    darkToggle.checked = root.classList.contains('dark');
+    darkToggle.addEventListener('change', function () {
+      root.classList.toggle('dark', darkToggle.checked);
+      localStorage.setItem('darkMode', darkToggle.checked ? '1' : '0');
+    });
+
+    var slider = document.getElementById('font-size-slider');
+    var valorEtiqueta = document.getElementById('font-size-value');
+    var tamanoActual = parseInt(localStorage.getItem('fontSize'), 10) || 100;
+    slider.value = tamanoActual;
+    valorEtiqueta.textContent = tamanoActual + '%';
+
+    slider.addEventListener('input', function () {
+      root.style.zoom = slider.value + '%';
+      valorEtiqueta.textContent = slider.value + '%';
+      localStorage.setItem('fontSize', slider.value);
+    });
+  })();
+</script>
+{% endblock %}

@@ -105,7 +105,7 @@
 
             <div class="trend-toolbar-right">
               <button id="btn-toggle-expand-trend" class="btn btn-primary" title="Expandir gráfico para ver detalladamente">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #000000 !important;">
                   <polyline points="15 3 21 3 21 9" />
                   <polyline points="9 21 3 21 3 15" />
                   <line x1="21" x2="14" y1="3" y2="10" />
@@ -217,7 +217,7 @@
       <div class="modal-dialog modal-fullscreen-dialog">
         <div class="modal-header">
           <div class="modal-title">
-            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #ffd100;">
               <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
               <polyline points="16 7 22 7 22 13" />
             </svg>
@@ -232,15 +232,11 @@
             </svg>
           </button>
         </div>
-        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1;">
-          <div style="flex: 1; min-height: 520px; position: relative;">
+        <div class="modal-body modal-fullscreen-body">
+          <div class="modal-fullscreen-canvas-wrapper">
             <canvas id="chart-tendencia-modal"></canvas>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- ========================================== -->
-    <!-- TAB 4: BITÁCORA Y AUDITORÍA -->
-    <!-- ========================================== -->
     

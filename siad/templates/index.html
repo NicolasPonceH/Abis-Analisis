@@ -1,0 +1,1440 @@
+{% extends "base.html" %}
+{% block title %}Procesar Documentos - SIAD{% endblock %}
+{% block content %}
+
+<style>
+  #entidades .grid>div {
+    animation: cardIn .4s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  }
+
+  #entidades .grid>div:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  #entidades .grid>div:nth-child(2) {
+    animation-delay: 80ms;
+  }
+
+  #entidades .grid>div:nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  @keyframes cardIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .anim-in {
+    animation: chipsIn .25s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  @keyframes chipsIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #entidades .grid>div {
+      animation: cardFadeOnly .25s ease-out backwards;
+    }
+
+    .anim-in {
+      animation: none;
+    }
+  }
+  /* Estilos limpios y modernos para QuillJS */
+  .ql-toolbar.ql-snow {
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    background-color: #f8fafc;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding: 6px 8px !important;
+    font-family: inherit;
+  }
+  .dark .ql-toolbar.ql-snow {
+    background-color: #0f172a;
+    border-bottom-color: #1e293b !important;
+  }
+  .ql-container.ql-snow {
+    border: none !important;
+    font-family: inherit;
+  }
+  .ql-editor {
+    padding: 12px 16px;
+  }
+  .editor-wrapper {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    background: #ffffff;
+  }
+  .dark .editor-wrapper {
+    border-color: #1e293b;
+    background: #0f172a;
+  }
+  .editor-wrapper:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+</style>
+
+<div class="px-6 lg:px-8 py-3 w-full max-w-[1920px] mx-auto flex flex-col gap-4">
+
+  {% if not viewing %}
+
+  <div
+    class="rounded-2xl shadow-md border border-slate-200 backdrop-blur-md p-8 flex flex-col items-center" style="background: radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%), radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%), radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%), linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%);">
+    <div class="flex flex-col items-center mb-6 text-center">
+
+      <h2 class="text-xl font-extrabold text-[#00234c] tracking-tight">Cargar documentos para análisis</h2>
+    </div>
+
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data"
+      class="w-full max-w-3xl flex flex-col gap-4">
+
+      <label id="drop-zone"
+        class="cursor-pointer group relative flex flex-col items-center justify-center w-full h-48 border-[2.5px] border-dashed border-blue-400 rounded-2xl bg-blue-50 hover:bg-blue-100 hover:border-blue-500 hover:shadow-[0_0_20px_rgba(96,165,250,0.4)] transition-all duration-300 ease-out overflow-hidden">
+        <!-- Decoración sutil de fondo -->
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-blue-200/30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+        <!-- Círculo del ícono animado -->
+        <div id="drop-zone-icon"
+          class="relative z-10 w-16 h-16 mb-4 bg-blue-600 border border-blue-400/30 shadow-[0_4px_15px_rgba(0,0,0,0.2)] rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-700 transition-all duration-300 ease-out">
+          <span class="material-symbols-outlined text-[32px] text-white">upload_file</span>
+        </div>
+
+        <span
+          class="text-[16px] font-bold text-blue-900 group-hover:text-blue-800 transition-colors relative z-10">Haz
+          clic para examinar o arrastra tus archivos aquí</span>
+        <span class="text-[11px] text-blue-700 mt-2 relative z-10 font-bold tracking-wide uppercase">PDF, Documentos
+          Ofimáticos, TXT, Imágenes</span>
+
+        <input type="file" id="pdf-file-input" name="pdf_file"
+          accept=".pdf, image/*, .txt, .csv, .log, .doc, .docx, .xls, .xlsx, .ppt, .pptx" multiple required
+          class="hidden">
+      </label>
+
+      <div class="flex items-center justify-between min-h-[40px]">
+        <span id="file-count-label" class="text-sm text-slate-500 dark:text-slate-400 italic">No se ha seleccionado
+          ningún archivo</span>
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="document.getElementById('pasteModal').showModal()"
+            class="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">content_paste</span> Pegar Texto Directo
+          </button>
+          <button type="submit" id="submit-action"
+            class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-2.5 rounded shadow-sm transition-all uppercase tracking-wide items-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0">
+            <span class="material-symbols-outlined text-[18px]">upload</span> Subir Doc
+          </button>
+        </div>
+      </div>
+
+      <div id="pdf-file-chips-row"
+        class="hidden flex-col gap-3 mt-4 bg-white/10 dark:bg-slate-800 p-4 rounded-xl border border-white/20 dark:border-slate-700">
+        <div class="flex items-center justify-between border-b border-white/20 dark:border-slate-700 pb-2 mb-1">
+          <span class="text-[10px] font-bold text-[#00234c] dark:text-slate-400 uppercase tracking-widest">En cola para
+            procesar</span>
+          <button type="button" id="pdf-file-clear"
+            class="text-red-500 hover:bg-red-50 transition-colors px-2 py-1 rounded text-[11px] flex items-center gap-1 font-bold uppercase tracking-wider">
+            <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar todo
+          </button>
+        </div>
+        <div id="pdf-file-chips" class="flex flex-wrap gap-2 w-full"></div>
+      </div>
+    </form>
+
+    <script>
+      (function () {
+        var input = document.getElementById('pdf-file-input');
+        var dropZone = document.getElementById('drop-zone');
+        var chipsBox = document.getElementById('pdf-file-chips');
+        var chipsRow = document.getElementById('pdf-file-chips-row');
+        var botonLimpiar = document.getElementById('pdf-file-clear');
+        var acumulados = [];
+
+        function clave(archivo) {
+          return archivo.name + '|' + archivo.size + '|' + archivo.lastModified;
+        }
+
+        function refrescar() {
+          var fileCountLabel = document.getElementById('file-count-label');
+          var submitAction = document.getElementById('submit-action');
+          var dt = new DataTransfer();
+          acumulados.forEach(function (archivo) { dt.items.add(archivo); });
+          input.files = dt.files;
+
+          if (acumulados.length === 0) {
+            fileCountLabel.textContent = "No se ha seleccionado ningún archivo";
+            fileCountLabel.classList.add('italic', 'text-slate-400', 'dark:text-slate-500');
+            fileCountLabel.classList.remove('text-slate-700', 'dark:text-slate-200', 'font-bold', 'not-italic');
+
+            chipsRow.classList.replace('flex', 'hidden');
+            submitAction.classList.replace('flex', 'hidden');
+          } else {
+            if (acumulados.length === 1) {
+              fileCountLabel.textContent = "Archivo listo: " + acumulados[0].name;
+            } else {
+              fileCountLabel.textContent = acumulados.length + " archivos listos";
+            }
+            fileCountLabel.classList.remove('italic', 'text-slate-400', 'dark:text-slate-500');
+            fileCountLabel.classList.add('text-slate-700', 'dark:text-slate-200', 'font-bold', 'not-italic');
+
+            chipsRow.classList.replace('hidden', 'flex');
+            submitAction.classList.replace('hidden', 'flex');
+          }
+
+          chipsBox.innerHTML = '';
+          acumulados.forEach(function (archivo, indice) {
+            var chip = document.createElement('span');
+            chip.className = 'anim-in inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 px-2.5 py-1.5 rounded-md text-[11px] font-bold border border-slate-200 dark:border-slate-700 shadow-sm';
+            chip.textContent = archivo.name;
+            var quitar = document.createElement('button');
+            quitar.type = 'button';
+            quitar.title = 'Quitar';
+            quitar.className = 'material-symbols-outlined text-[14px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors ml-1 leading-none p-0.5';
+            quitar.textContent = 'close';
+            quitar.addEventListener('click', function () {
+              acumulados.splice(indice, 1);
+              refrescar();
+            });
+            chip.appendChild(quitar);
+            chipsBox.appendChild(chip);
+          });
+        }
+
+        function handleFiles(files) {
+          var vistos = {};
+          acumulados.forEach(function (a) { vistos[clave(a)] = true; });
+          Array.from(files).forEach(function (archivo) {
+            var k = clave(archivo);
+            if (!vistos[k]) {
+              acumulados.push(archivo);
+              vistos[k] = true;
+            }
+          });
+          refrescar();
+        }
+
+        // Drag and Drop Events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+          dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+          dropZone.addEventListener(eventName, function () {
+            dropZone.classList.add('border-[#C5A059]', 'bg-blue-500/20', 'scale-[1.02]', 'shadow-[0_0_25px_rgba(197,160,89,0.5)]', 'animate-pulse');
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50', 'hover:bg-blue-100');
+            var icon = document.getElementById('drop-zone-icon');
+            if (icon) {
+              icon.classList.remove('bg-blue-600', 'group-hover:bg-blue-700');
+              icon.classList.add('bg-[#C5A059]', 'border-[#C5A059]', 'scale-125');
+            }
+          }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          dropZone.addEventListener(eventName, function () {
+            dropZone.classList.remove('border-[#C5A059]', 'bg-blue-500/20', 'scale-[1.02]', 'shadow-[0_0_25px_rgba(197,160,89,0.5)]', 'animate-pulse');
+            dropZone.classList.add('border-blue-400', 'bg-blue-50');
+            var icon = document.getElementById('drop-zone-icon');
+            if (icon) {
+              icon.classList.remove('bg-[#C5A059]', 'border-[#C5A059]', 'scale-125');
+              icon.classList.add('bg-blue-600');
+            }
+          }, false);
+        });
+
+        dropZone.addEventListener('drop', function (e) {
+          var dt = e.dataTransfer;
+          var files = dt.files;
+          handleFiles(files);
+        }, false);
+
+        input.addEventListener('change', function () {
+          handleFiles(input.files);
+        });
+
+        botonLimpiar.addEventListener('click', function () {
+          acumulados = [];
+          refrescar();
+        });
+      })();
+    </script>
+  </div>
+
+  <div
+    class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 mt-6">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-blue-900/50 pb-4 gap-4 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 -mx-6 -mt-6 rounded-t-2xl">
+      <div class="flex items-center gap-2 text-white">
+        <div class="w-8 h-8 rounded flex items-center justify-center">
+          <span class="material-symbols-outlined text-[20px]">folder_open</span>
+        </div>
+        <h2 class="text-lg font-bold tracking-tight">Documentos Cargados</h2>
+      </div>
+      {% if files %}
+      <form action="{{ url_for('delete_all_documents') }}" method="post"
+        onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos cargados del espacio de trabajo? Esta acción no afecta al historial forense.');">
+        <button type="submit"
+          class="bg-red-50 text-red-700 hover:bg-red-100 transition-colors px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 border border-red-200">
+          <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar Espacio
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 gap-2">
+      {% for f in files %}
+      <div
+        class="flex items-center gap-3 group bg-white dark:bg-slate-900 hover:bg-blue-50 transition-colors p-3 rounded-lg border border-slate-100 dark:border-slate-800 shadow-sm hover:border-blue-200 hover:shadow">
+        <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3">
+          <span class="material-symbols-outlined text-red-500 text-[24px]">picture_as_pdf</span>
+          <span
+            class="text-sm font-semibold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 transition-colors">{{
+            f }}</span>
+        </a>
+        <form action="{{ url_for('delete_document', filename=f) }}" method="post"
+          onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
+          <button type="submit" title="Eliminar documento"
+            class="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors p-1.5 rounded opacity-50 group-hover:opacity-100">close</button>
+        </form>
+      </div>
+      {% else %}
+      <div
+        class="py-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
+        <span class="material-symbols-outlined text-[32px] text-slate-300 dark:text-slate-500 mb-2">inventory_2</span>
+        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">El espacio de trabajo está vacío.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% else %}
+
+  <!-- 2. Cabecera Operativa Forense -->
+  <div
+    class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-3 border-b border-slate-200 dark:border-slate-700 bg-transparent">
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Procesamiento</h1>
+        <span
+          class="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-medium uppercase break-all"
+          title="{{ viewing }}">
+          {{ viewing }}
+        </span>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 mt-2.5 text-sm">
+        {% if extracted_text %}
+        <div
+          class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-0.5 rounded-full text-xs font-semibold">
+          <span class="material-symbols-outlined text-[16px]">task_alt</span>
+          <span>EXTRACCIÓN COMPLETADA</span>
+        </div>
+        {% else %}
+        <div
+          class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-0.5 rounded-full text-xs font-semibold">
+          <span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+          <span>PENDIENTE DE EXTRACCIÓN</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="flex items-start flex-wrap gap-3 w-full xl:w-auto justify-start xl:justify-end mt-2 xl:mt-0">
+      <div class="flex items-center gap-2">
+        <!-- Botón Volver -->
+        <a href="{{ url_for('index') }}"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 hover:border-slate-300 text-slate-700 dark:text-slate-200 text-sm font-bold tracking-wide uppercase transition-all shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">west</span>
+          Volver
+        </a>
+
+        <!-- Botón Cargar Lote -->
+        <form class="m-0 p-0">
+          <label
+            class="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-blue-50/50 hover:border-blue-200 hover:text-blue-700 text-slate-700 dark:text-slate-200 text-sm font-bold tracking-wide uppercase transition-all shadow-sm group">
+            <span class="material-symbols-outlined text-[18px] text-blue-600 group-hover:scale-110 transition-transform">cloud_upload</span>
+            Cargar Documentos
+            <input accept=".pdf, image/*, .txt, .doc, .docx" class="hidden" type="file" multiple onchange="iniciarSubidaLotes(this)">
+          </label>
+        </form>
+
+        <!-- Botón Pegar Texto -->
+        <button type="button" onclick="document.getElementById('pasteModal').showModal()"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-emerald-50/50 hover:border-emerald-200 hover:text-emerald-700 text-slate-700 dark:text-slate-200 text-sm font-bold tracking-wide uppercase transition-all shadow-sm group">
+          <span
+            class="material-symbols-outlined text-[18px] text-emerald-600 group-hover:scale-110 transition-transform">content_paste</span>
+          Pegar Texto
+        </button>
+      </div>
+
+      <!-- Botón Descargar y Vista Previa -->
+      <div class="flex flex-col items-end ml-2">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="mostrarVistaPrevia()"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-900/30 font-bold text-sm tracking-wide shadow-sm transition-all uppercase"
+            {{ 'disabled' if not extracted_text else '' }}>
+            <span class="material-symbols-outlined text-[20px]">preview</span> Vista Previa
+          </button>
+          
+          <form action="{{ url_for('export_docx', filename=viewing) }}" method="post" class="m-0 p-0">
+            <button type="submit"
+              class="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm tracking-wide shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none uppercase"
+              {{ 'disabled' if not extracted_text else '' }}>
+              <span class="material-symbols-outlined text-[20px]">description</span>
+              Descargar (.DOCX)
+            </button>
+          </form>
+        </div>
+        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-1.5 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[12px]">info</span>
+          Se utilizará la síntesis seleccionada
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta de Fecha Anómala Global -->
+  {% if entities_data and entities_data.metadata and entities_data.metadata.fecha_futura_warning %}
+  <div class="mb-5 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded-lg p-3 flex items-start gap-3 shadow-sm animate-pulse-soft">
+    <span class="material-symbols-outlined text-orange-600 dark:text-orange-400 text-[20px] mt-0.5">error</span>
+    <div>
+      <p class="text-[13px] text-orange-800 dark:text-orange-200 leading-relaxed font-bold">
+        Advertencia de Fecha Anómala: 
+      </p>
+      <p class="text-[12px] text-orange-700 dark:text-orange-300 leading-relaxed mt-0.5">
+        Se ha detectado que el documento indica una fecha futura (<strong>{{ entities_data.metadata.fecha }}</strong>). Por favor, verifica si el documento original tiene un error de tipeo en el año antes de guardar.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Layout Principal Redimensionable -->
+  <div class="flex flex-col xl:flex-row gap-5 items-stretch mt-2" id="split-container">
+
+    <!-- 3. Panel Izquierdo (Documento Original y OCR) -->
+    <div class="flex flex-col gap-6 w-full xl:w-[30%] flex-shrink-0" id="split-left">
+
+      <!-- Visor Documento Original -->
+      <div
+        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
+        <div
+          class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-4 py-3 border-b border-blue-900/50 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-white">
+            <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest">Documento Original (PDF)</span>
+          </div>
+        </div>
+        <iframe src="{{ url_for('serve_upload', filename=viewing) }}" class="w-full h-[400px] border-0"></iframe>
+        <div
+          class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+          <span class="truncate max-w-[300px]">{{ viewing }}</span>
+        </div>
+      </div>
+
+
+
+      <!-- Texto Extraído (OCR Crudo) -->
+      <div
+        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex flex-col gap-4">
+        <!-- Encabezado OCR -->
+        <div
+          class="flex items-start sm:items-center justify-between gap-2 border-b border-blue-900/50 pb-3 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 -mx-5 -mt-5 rounded-t-xl">
+          <div class="flex items-center gap-2 text-white">
+            <div class="w-8 h-8 rounded flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">manage_search</span>
+            </div>
+            <h3 class="font-bold text-[14px]">Texto Extraído (OCR)</h3>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <form action="{{ url_for('extract', filename=viewing) }}" method="post"
+              class="js-processing-form m-0 hidden sm:block">
+              <button type="submit" title="{{ 'Reextraer' if extracted_text else 'Extraer' }}"
+                class="flex items-center justify-center p-1.5 rounded hover:bg-slate-100 transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600 border border-transparent hover:border-slate-200">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
+              </button>
+            </form>
+            <button type="button"
+              onclick="const text=document.getElementById('ocr-raw-content').innerText; navigator.clipboard.writeText(text); alert('OCR Copiado al portapapeles');"
+              class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 transition-colors rounded px-3 py-1 text-slate-700 dark:text-slate-200 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">file_copy</span>
+              <span class="text-[11px] font-bold uppercase tracking-wide">Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Caja Gris del OCR -->
+        <div
+          class="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 flex flex-col gap-3 border border-slate-200 dark:border-slate-700">
+          <div
+            class="bg-white dark:bg-slate-900 rounded px-3 py-2 font-mono text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center shadow-sm border border-slate-100 dark:border-slate-800">
+            <span>ORIGEN: <span class="text-slate-800 dark:text-slate-100">{{ viewing }}</span></span>
+          </div>
+
+          <div
+            class="font-mono text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-h-[350px] overflow-y-auto uppercase tracking-wide pr-2 custom-scrollbar"
+            id="ocr-raw-content">
+            {% if extracted_text %}
+            {{ extracted_text }}
+            {% else %}
+            <span class="italic text-slate-400 dark:text-slate-500 normal-case">Aún no se ha extraído texto de este
+              documento.</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Footer OCR -->
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 gap-2">
+          <div class="flex items-center gap-1.5">
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_4px_rgba(16,185,129,0.8)]"></span>
+            <span>{{ '{:,}'.format(extracted_text|length) if extracted_text else 0 }} caracteres • {{
+              '{:,}'.format(extracted_text.split()|length) if extracted_text else 0 }} palabras</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulo de Extracción y Clasificación de Entidades -->
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden"
+        id="entidades">
+        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex items-center justify-between border-b border-blue-900/50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-900/40 flex items-center justify-center text-emerald-400">
+              <span class="material-symbols-outlined text-[24px]">hub</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Entidades Detectadas</h3>
+              <p class="text-[11px] text-blue-200 mt-0.5 tracking-wide">Extracción estructurada de metadatos clave
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+
+
+            {% if extracted_text %}
+            <form action="{{ url_for('entities_view', filename=viewing) }}" method="post" class="js-processing-form m-0">
+              <button type="submit"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                <span class="js-btn-label">{{ 'Identificar' if not entities_data else 'Reidentificar' }}</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="p-6">
+        {% if entities_data %}
+        {% macro campo_valor(label, valores, color_class) %}
+        {% if valores and valores|length > 0 %}
+        <div class="flex items-start sm:items-center gap-2 py-1.5 border-b border-white/50 last:border-0 min-h-[32px]">
+          <span class="text-slate-600 dark:text-slate-300 font-semibold text-xs min-w-[80px]">{{ label }}:</span>
+          <div class="flex flex-wrap gap-1.5">
+            {% for v in valores %}
+            <span
+              class="font-bold {{ color_class }} bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm px-2 py-0.5 rounded text-[11px]">{{
+              v }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        {% endmacro %}
+
+        <div class="flex flex-col gap-4">
+        {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
+        
+        {% if docs_to_render|length > 1 %}
+        <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto mb-1 custom-scrollbar">
+          {% for doc_data in docs_to_render %}
+          <button type="button" onclick="switchTab('entidades', parseInt(this.dataset.index))" class="entidades-tab-btn px-4 py-2.5 border-b-2 {{ 'border-emerald-500 text-emerald-700 dark:text-emerald-400' if loop.first else 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }} font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors" data-index="{{ loop.index0 }}">
+            📄 {{ doc_data.filename | default('Doc ' ~ loop.index) }}
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% for doc_data in docs_to_render %}
+        {% if doc_data %}
+        <div id="entidades_pane_{{ loop.index0 }}" class="entidades-pane {{ 'hidden' if not loop.first }}">
+          <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-5 flex flex-col gap-5">
+            <div class="grid grid-cols-1 gap-5 items-start">
+              <!-- Vehículos -->
+              {% set v_count = doc_data.vehiculos.values() | map('length') | sum if doc_data.vehiculos else 0 %}
+              <div class="border rounded-xl p-5 transition-opacity {{ 'border-blue-200 dark:border-blue-900/50 bg-blue-50/30' if v_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-blue-100 dark:border-blue-900/50' if v_count > 0 else 'border-slate-200' }}">
+                  <div class="flex items-center gap-2 {{ 'text-blue-700' if v_count > 0 else 'text-slate-400' }}">
+                    <span class="material-symbols-outlined text-[20px]">directions_car</span>
+                    <h4 class="font-bold text-[13px] uppercase tracking-wide">Vehículos</h4>
+                  </div>
+                  <span
+                    class="bg-white dark:bg-slate-900 border {{ 'border-blue-200 dark:border-blue-900/50 text-blue-600' if v_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
+                    v_count }} Datos</span>
+                </div>
+                {% if v_count > 0 %}
+                <div class="space-y-1">
+                  {{ campo_valor('Marcas', doc_data.vehiculos.marcas, 'text-blue-700') }}
+                  {{ campo_valor('Modelos', doc_data.vehiculos.modelos, 'text-blue-700') }}
+                  {{ campo_valor('Colores', doc_data.vehiculos.colores, 'text-blue-700') }}
+                  {{ campo_valor('Años', doc_data.vehiculos.anios, 'text-blue-700') }}
+                  {{ campo_valor('Patentes', doc_data.vehiculos.patentes, 'text-blue-700') }}
+                </div>
+                {% else %}
+                <div class="text-center py-2"><span class="text-[11px] text-blue-400/80 font-medium italic">No se detectaron vehículos.</span></div>
+                {% endif %}
+              </div>
+
+              <!-- Armas -->
+              {% set a_count = doc_data.armas.values() | map('length') | sum if doc_data.armas else 0 %}
+              <div class="border rounded-xl p-5 transition-opacity {{ 'border-red-200 bg-red-50/30' if a_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-red-100' if a_count > 0 else 'border-slate-200' }}">
+                  <div class="flex items-center gap-2 {{ 'text-red-600' if a_count > 0 else 'text-slate-400' }}">
+                    <span class="material-symbols-outlined text-[20px]">warning</span>
+                    <h4 class="font-bold text-[13px] uppercase tracking-wide">Armamento</h4>
+                  </div>
+                  <span
+                    class="bg-white dark:bg-slate-900 border {{ 'border-red-200 text-red-600' if a_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
+                    a_count }} Datos</span>
+                </div>
+                {% if a_count > 0 %}
+                <div class="space-y-1">
+                  {{ campo_valor('Tipos', doc_data.armas.tipos, 'text-red-700') }}
+                  {{ campo_valor('Marcas', doc_data.armas.marcas, 'text-red-700') }}
+                  {{ campo_valor('Calibres', doc_data.armas.calibres, 'text-red-700') }}
+                  {{ campo_valor('Series', doc_data.armas.series, 'text-red-700') }}
+                </div>
+                {% else %}
+                <div class="text-center py-2"><span class="text-[11px] text-red-400/80 font-medium italic">No se detectó armamento.</span></div>
+                {% endif %}
+              </div>
+
+              <!-- Drogas -->
+              {% set d_count = doc_data.drogas.values() | map('length') | sum if doc_data.drogas else 0 %}
+              <div class="border rounded-xl p-5 transition-opacity {{ 'border-yellow-200 bg-yellow-50/30' if d_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-yellow-100' if d_count > 0 else 'border-slate-200' }}">
+                  <div class="flex items-center gap-2 {{ 'text-yellow-700' if d_count > 0 else 'text-slate-400' }}">
+                    <span class="material-symbols-outlined text-[20px]">science</span>
+                  <h4 class="font-bold text-[13px] uppercase tracking-wide">Drogas / Sustancias</h4>
+                </div>
+                <span
+                  class="bg-white dark:bg-slate-900 border {{ 'border-yellow-200 text-yellow-700' if d_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
+                  d_count }} Datos</span>
+              </div>
+              {% if d_count > 0 %}
+              <div class="space-y-1">
+                {{ campo_valor('Sustancias', doc_data.drogas.sustancias, 'text-yellow-700') }}
+                {{ campo_valor('Pesajes', doc_data.drogas.medidas, 'text-yellow-700') }}
+              </div>
+              {% else %}
+              <div class="text-center py-2"><span class="text-[11px] text-yellow-600/60 font-medium italic">No se detectaron drogas.</span></div>
+              {% endif %}
+            </div>
+
+            <!-- Personas -->
+            {% set p_count = doc_data.personas.values() | map('length') | sum if doc_data.personas else 0 %}
+            <div class="border rounded-xl p-5 transition-opacity {{ 'border-purple-200 bg-purple-50/30' if p_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
+              <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-purple-100' if p_count > 0 else 'border-slate-200' }}">
+                <div class="flex items-center gap-2 {{ 'text-purple-700' if p_count > 0 else 'text-slate-400' }}">
+                  <span class="material-symbols-outlined text-[20px]">person_search</span>
+                  <h4 class="font-bold text-[13px] uppercase tracking-wide">Personas / Identidad</h4>
+                </div>
+                <span
+                  class="bg-white dark:bg-slate-900 border {{ 'border-purple-200 text-purple-600' if p_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
+                  p_count }} Datos</span>
+              </div>
+              {% if p_count > 0 %}
+              <div class="space-y-1">
+                {{ campo_valor('Nombres', doc_data.personas.detenidos, 'text-purple-700') }}
+                {{ campo_valor('RUTs / Identificación (Ext)', doc_data.personas.ruts, 'text-purple-700') }}
+                {{ campo_valor('Teléfonos', doc_data.personas.telefonos, 'text-purple-700') }}
+                {{ campo_valor('Direcciones', doc_data.personas.direcciones, 'text-purple-700') }}
+              </div>
+              {% else %}
+              <div class="text-center py-2"><span class="text-[11px] text-purple-400/80 font-medium italic">No se detectaron personas.</span></div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        </div>
+        {% elif extracted_text %}
+        <div
+          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">Aún no se han identificado entidades.
+          </p>
+        </div>
+        {% else %}
+        <div
+          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">Requiere extracción OCR primero.</p>
+        </div>
+        {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 & 5. Módulos de Inteligencia (8 Columnas) -->
+    <!-- Barra redimensionable (oculta en móviles) -->
+    <div class="hidden xl:flex w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-blue-500 dark:hover:bg-blue-400 cursor-col-resize rounded-full mx-1 transition-colors self-stretch" id="resizer"></div>
+
+    <!-- 4. Panel Derecho (Entidades y Resumen) -->
+    <div class="flex flex-col gap-6 w-full xl:flex-1" id="split-right">
+
+      <!-- Alertas Cruzadas -->
+      {% if cross_references %}
+      <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3 shadow-sm animate-pulse-soft">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 shrink-0 shadow-inner mt-0.5">
+            <span class="material-symbols-outlined text-[16px]">warning</span>
+          </div>
+          <div class="w-full">
+            <h3 class="text-red-800 dark:text-red-200 font-bold text-sm tracking-tight">Alerta de Inteligencia: Coincidencias en Historial</h3>
+            <p class="text-[11px] text-red-700 dark:text-red-300 mt-0.5 mb-2 font-medium leading-relaxed">Se detectaron identificadores que ya existen en investigaciones previas.</p>
+            <div class="flex flex-col gap-1.5">
+              {% for ref in cross_references %}
+              <div class="flex items-center justify-between bg-white/60 dark:bg-slate-900/40 px-3 py-1.5 rounded-md border border-red-100/50 dark:border-red-800/30 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-red-700 dark:text-red-400 text-xs font-mono tracking-tight">{{ ref.valor }}</span>
+                  <span class="text-[9px] bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-widest">{{ ref.categoria }}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">DOC-{{ "%04d" % ref.documento_id }} ({{ ref.fecha.strftime('%d-%m-%Y') }})</span>
+                  <a href="{{ url_for('historial_detalle', documento_id=ref.documento_id, return_to=url_for('view_pdf', filename=viewing), highlight=ref.valor) }}" class="flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 uppercase tracking-wide transition-colors bg-white dark:bg-slate-800 px-2 py-1 rounded border border-red-200 dark:border-red-800 hover:border-red-300 shadow-sm">
+                    <span class="material-symbols-outlined text-[12px]">open_in_new</span> Revisar
+                  </a>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Módulo de Resúmenes Inteligentes -->
+      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700">
+        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 flex items-center justify-between border-b border-blue-900/50">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-blue-100">
+              <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+            </div>
+            <h3 class="text-[17px] font-semibold text-white tracking-wide">Resumen Asistido por IA</h3>
+          </div>
+
+          <div class="flex items-center gap-2">
+            {% if summary_options %}
+            <button type="submit" form="summary_form"
+              class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm border border-blue-600">
+              <span class="material-symbols-outlined text-[16px]">save</span>
+              <span>Guardar Selección</span>
+            </button>
+            {% endif %}
+
+            {% if extracted_text %}
+            <form action="{{ url_for('summarize', filename=viewing) }}" method="post" class="js-processing-form m-0">
+              <button type="submit"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-blue-700 hover:bg-blue-50 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                <span class="js-btn-label">{{ 'Generar' if not summary_options else 'Regenerar' }}</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        <div class="p-6">
+        <!-- Incluir librerías de Quill -->
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+        {% if summary_options %}
+        
+        <!-- Metadatos Extraídos -->
+        {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
+        
+        {% if summary_options|length > 1 %}
+        <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto mb-6 custom-scrollbar">
+          {% for opt in summary_options %}
+          <button type="button" onclick="switchTab('resumen', parseInt(this.dataset.index))" class="resumen-tab-btn px-4 py-2.5 border-b-2 {{ 'border-blue-500 text-blue-700 dark:text-blue-400' if loop.first else 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }} font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors" data-index="{{ loop.index0 }}">
+            📄 {{ opt.filename | default('Doc ' ~ loop.index) }}
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('select_summary', filename=viewing) }}" method="post" id="summary_form">
+        <div class="flex flex-col gap-4 relative">
+          {% for opt in summary_options %}
+            {% set doc_data = docs_to_render[loop.index0] if docs_to_render|length > loop.index0 else None %}
+            <div id="resumen_pane_{{ loop.index0 }}" class="resumen-pane {{ 'hidden' if not loop.first }}">
+              
+              <!-- Caja Metadatos -->
+              {% if doc_data %}
+              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
+                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500 text-[20px]">list_alt</span> Metadatos Extraídos
+                  </h4>
+                </div>
+                <div class="p-5 flex flex-col gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Card Unidad -->
+                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-3.5 flex items-center gap-3">
+                    <div class="text-blue-500 dark:text-blue-400 flex-shrink-0 bg-blue-100/50 dark:bg-blue-900/50 rounded-lg p-1.5">
+                      <span class="material-symbols-outlined text-[20px]">local_police</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">Unidad Policial</span>
+                      <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Card Delito -->
+                  <div class="bg-orange-50/80 dark:bg-orange-900/20 rounded-xl p-3.5 flex items-center gap-3">
+                    <div class="text-orange-500 dark:text-orange-400 flex-shrink-0 bg-orange-100/50 dark:bg-orange-900/50 rounded-lg p-1.5">
+                      <span class="material-symbols-outlined text-[20px]">warning</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">Motivo o Delito</span>
+                      <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-indigo-500 text-[20px]">groups</span>
+                    Detenidos Identificados
+                  </h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
+                      {% for detenido in doc_data.personas.detenidos %}
+                      <!-- Avatar Card -->
+                      <div class="flex items-center gap-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
+                          <span class="material-symbols-outlined text-[24px]">face</span>
+                        </div>
+                        <div class="flex flex-col">
+                          {% set partes = detenido.split(',') %}
+                          <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(detenido) }}</span>
+                          <span class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Sin más datos' }}</span>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
+                        No se registran detenidos.
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                </div>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Caja Resumen -->
+              {% if opt %}
+              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500 text-[20px]">auto_awesome</span> Opciones de Resumen
+                  </h4>
+                </div>
+                <div class="p-5">
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                <!-- Opción A -->
+                <label for="radio_a_{{ loop.index0 }}" class="cursor-pointer">
+                  <div class="relative flex flex-col border-2 transition-all duration-300 rounded-xl p-5 has-[:checked]:border-blue-500 has-[:checked]:bg-gradient-to-b has-[:checked]:from-blue-50/50 has-[:checked]:to-transparent has-[:checked]:shadow-[0_0_25px_rgba(59,130,246,0.2)] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 group h-full">
+                    
+                    <input type="radio" name="opcion_{{ loop.index0 }}" id="radio_a_{{ loop.index0 }}" value="a" class="peer hidden" {% if opt.get('selected', 'a') == 'a' %}checked{% endif %} required />
+                    
+                    <div class="absolute top-5 right-5 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
+                      <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
+                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">A</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Técnica</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Acta Estructurada</span>
+                      </div>
+                    </div>
+                    
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Extracto directo más la enumeración estructurada de los elementos clave detectados.</p>
+                    
+                    <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
+                    <div class="editor-wrapper mt-auto">
+                      <div id="editor_{{ loop.index0 }}_a" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Opción B -->
+                <label for="radio_b_{{ loop.index0 }}" class="cursor-pointer">
+                  <div class="relative flex flex-col border-2 transition-all duration-300 rounded-xl p-5 has-[:checked]:border-blue-500 has-[:checked]:bg-gradient-to-b has-[:checked]:from-blue-50/50 has-[:checked]:to-transparent has-[:checked]:shadow-[0_0_25px_rgba(59,130,246,0.2)] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 group h-full">
+                    
+                    <input type="radio" name="opcion_{{ loop.index0 }}" id="radio_b_{{ loop.index0 }}" value="b" class="peer hidden" {% if opt.get('selected') == 'b' %}checked{% endif %} required />
+                    
+                    <div class="absolute top-5 right-5 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
+                      <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
+                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">B</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Narrativa</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Resumen Fluido</span>
+                      </div>
+                    </div>
+                    
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Resumen en narrativa preservando la intención del parte policial original.</p>
+                    
+                    <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
+                    <div class="editor-wrapper mt-auto">
+                      <div id="editor_{{ loop.index0 }}_b" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
+                    </div>
+                  </div>
+                </label>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+            </div>
+          {% endfor %}
+        </div>
+        </form>
+        
+        <!-- AVISO DE EDICIÓN -->
+        <div class="mt-5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-start gap-3 shadow-sm">
+          <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px] mt-0.5">lightbulb</span>
+          <div>
+            <p class="text-[13px] text-blue-800 dark:text-blue-200 leading-relaxed">
+              <strong>Tip de uso:</strong> Los datos de arriba y las entidades detectadas se añadirán <strong>automáticamente</strong> a la tabla de tu archivo Word. El texto editable de arriba corresponde exclusivamente a la celda <strong>"Resumen Diligencia"</strong>.
+            </p>
+          </div>
+        </div>
+        {% elif summary_text %}
+        <div class="max-h-[400px] overflow-y-auto pr-2 bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div class="text-[14px] text-slate-700 dark:text-slate-200 leading-relaxed ql-editor" style="padding:0;">
+            {{ summary_text | safe }}
+          </div>
+        </div>
+        {% elif extracted_text %}
+        <div
+          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">No hay resúmenes generados aún. Haz
+            clic en "Generar".</p>
+        </div>
+        {% else %}
+        <div
+          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">Requiere extracción OCR primero.</p>
+        </div>
+        {% endif %}
+        </div>
+      </div>
+
+
+  </div>
+
+  {% endif %}
+</div>
+
+<!-- Modal Pegar Texto -->
+<dialog id="pasteModal"
+  class="p-0 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm w-full max-w-2xl">
+  <form action="{{ url_for('upload_pasted_text') }}" method="post" class="flex flex-col h-full m-0 js-processing-form">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+      <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-600">content_paste</span>
+        Pegar Texto (Ej. Reporte WhatsApp)
+      </h3>
+      <button type="button" onclick="document.getElementById('pasteModal').close()"
+        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-4 flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5 border-b border-slate-200 dark:border-slate-700 pb-4">
+        <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Título General del Archivo (Opcional)</label>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-1">Nombre con el que se guardará el conjunto de mensajes en el sistema.</p>
+        <input type="text" name="titulo_general" maxlength="60"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+          placeholder="Ej: Reportes Operativos WhatsApp - 11 Septiembre">
+      </div>
+      
+      <div id="textAreasContainer" class="flex flex-col gap-4 max-h-[50vh] overflow-y-auto pr-2">
+        <!-- Primer Mensaje -->
+        <div class="flex flex-col gap-1.5 report-block relative">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Mensaje 1</label>
+          <input type="text" name="pasted_title" maxlength="60"
+            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            placeholder="Sub-Título (Ej: BICRIM Arica)">
+          <textarea name="pasted_text" rows="6"
+            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-y"
+            placeholder="Pega el texto del mensaje aquí..."></textarea>
+        </div>
+      </div>
+      
+      <button type="button" onclick="addTextArea()" class="text-xs text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1 hover:text-blue-700 w-fit px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded">
+        <span class="material-symbols-outlined text-[16px]">add_circle</span> Agregar otro mensaje
+      </button>
+    </div>
+    <div
+      class="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-slate-800/50">
+      <button type="button" onclick="document.getElementById('pasteModal').close()"
+        class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancelar</button>
+      <button type="submit"
+        class="px-4 py-2 text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">check_circle</span>
+        <span class="js-btn-label">Procesar Texto</span>
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Modal Procesamiento por Lotes -->
+<dialog id="batchModal" class="p-0 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm w-full max-w-xl">
+  <div class="flex flex-col h-full m-0">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+      <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-600">upload_file</span>
+        Procesando Lote
+      </h3>
+      <button type="button" id="batchCancelBtn" onclick="window.cancelBatch = true;" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-3 py-1.5 rounded-lg transition-colors border border-red-200 dark:border-red-800">
+        Cancelar Restantes
+      </button>
+    </div>
+    
+    <!-- Barra de Progreso Visible -->
+    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5">
+      <div id="batchProgressBar" class="bg-blue-600 h-1.5 transition-all duration-300" style="width: 0%"></div>
+    </div>
+
+    <div class="p-4 flex flex-col gap-3 max-h-[50vh] overflow-y-auto" id="batchFileList">
+      <!-- Los archivos se inyectarán aquí -->
+    </div>
+    <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+      <span class="text-sm font-bold text-slate-600 dark:text-slate-400" id="batchStatusText">Iniciando...</span>
+      <button type="button" id="batchCloseBtn" onclick="window.location.href='/historial';" class="hidden px-4 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">check_circle</span> Ir al Historial
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  function addTextArea() {
+    const container = document.getElementById('textAreasContainer');
+    const count = container.querySelectorAll('.report-block').length + 1;
+    const div = document.createElement('div');
+    div.className = 'flex flex-col gap-1.5 report-block mt-2 pt-4 border-t border-slate-100 dark:border-slate-800 relative';
+    div.innerHTML = `
+        <button type="button" onclick="this.parentElement.remove()" class="absolute top-3 right-0 text-slate-400 hover:text-red-500 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">delete</span>
+        </button>
+        <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Mensaje ${count}</label>
+        <input type="text" name="pasted_title" maxlength="60" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" placeholder="Sub-Título (Ej: BRIDEC Arica)">
+        <textarea name="pasted_text" rows="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-y" placeholder="Pega el texto del mensaje aquí..."></textarea>
+    `;
+    container.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  async function iniciarSubidaLotes(input) {
+    const files = input.files;
+    if (files.length === 0) return;
+    
+    window.cancelBatch = false;
+    const modal = document.getElementById('batchModal');
+    const list = document.getElementById('batchFileList');
+    const statusText = document.getElementById('batchStatusText');
+    const closeBtn = document.getElementById('batchCloseBtn');
+    const cancelBtn = document.getElementById('batchCancelBtn');
+    const progressBar = document.getElementById('batchProgressBar');
+    
+    // Preparar UI
+    list.innerHTML = '';
+    closeBtn.classList.add('hidden');
+    cancelBtn.classList.remove('hidden');
+    progressBar.style.width = '0%';
+    modal.showModal();
+    
+    let completados = 0;
+    
+    // Función para formatear tamaño
+    const formatSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
+    
+    // Crear elementos UI para cada archivo
+    const fileElements = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const id = 'file-' + i;
+      
+      const ext = file.name.split('.').pop().toUpperCase();
+      const sizeStr = formatSize(file.size);
+      
+      const row = document.createElement('div');
+      row.className = 'flex justify-between items-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm';
+      row.innerHTML = `
+        <div class="flex flex-col w-3/4">
+          <span class="font-bold text-slate-700 dark:text-slate-300 truncate" title="${file.name}">${file.name}</span>
+          <span class="text-[10px] text-slate-500 font-mono tracking-wide">${ext} • ${sizeStr}</span>
+        </div>
+        <span id="${id}-status" class="flex items-center gap-1 text-slate-400 font-bold"><span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Pendiente</span>
+      `;
+      list.appendChild(row);
+      fileElements.push({ file: file, id: id });
+    }
+    
+    // Subir secuencialmente
+    for (let i = 0; i < fileElements.length; i++) {
+      if (window.cancelBatch) {
+          statusText.textContent = `Proceso cancelado (${completados}/${files.length} exitosos).`;
+          for(let j = i; j < fileElements.length; j++) {
+              document.getElementById(fileElements[j].id + '-status').innerHTML = '<span class="material-symbols-outlined text-[16px] text-slate-400">cancel</span> <span class="text-slate-400">Cancelado</span>';
+          }
+          break;
+      }
+        
+      const item = fileElements[i];
+      const statusEl = document.getElementById(item.id + '-status');
+      statusText.textContent = `Procesando ${i + 1} de ${files.length}...`;
+      
+      statusEl.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin text-blue-500">sync</span> <span class="text-blue-500">Analizando...</span>';
+      
+      const formData = new FormData();
+      formData.append('file', item.file);
+      
+      try {
+        const response = await fetch('{{ url_for("api_upload") }}', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          statusEl.innerHTML = '<span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span> <span class="text-emerald-500">Listo</span>';
+          completados++;
+        } else {
+          statusEl.innerHTML = `<span class="material-symbols-outlined text-[16px] text-red-500">error</span> <span class="text-red-500" title="${data.error || 'Error'}">Error</span>`;
+        }
+      } catch (error) {
+        statusEl.innerHTML = '<span class="material-symbols-outlined text-[16px] text-red-500">error</span> <span class="text-red-500">Fallo de red</span>';
+      }
+      
+      // Actualizar barra de progreso
+      progressBar.style.width = `${((i + 1) / files.length) * 100}%`;
+    }
+    
+    // Fin del lote
+    if (!window.cancelBatch) {
+        statusText.textContent = `Proceso completado (${completados}/${files.length} exitosos).`;
+    }
+    cancelBtn.classList.add('hidden');
+    closeBtn.classList.remove('hidden');
+    input.value = ''; // Reset input
+  }
+</script>
+
+<script>
+  document.querySelectorAll('.js-processing-form').forEach(function (form) {
+    form.addEventListener('submit', function () {
+      var boton = form.querySelector('button[type="submit"]');
+      if (!boton || boton.disabled) return;
+      boton.disabled = true;
+      var icono = boton.querySelector('.material-symbols-outlined');
+      if (icono) icono.classList.add('animate-spin');
+      var etiqueta = boton.querySelector('.js-btn-label');
+      if (etiqueta) etiqueta.textContent = 'Procesando...';
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function() {
+    var toolbarOptions = [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['clean']
+    ];
+    
+    // Mockups interactivos
+    window.highlightIntelligence = function(q) {
+      let html = q.root.innerHTML;
+      
+      // Nombres (Sujeto de Interés) - Morado
+      html = html.replace(/(Renato Javier RAMIREZ MESÍAS|Renato RAMIREZ|Ana María Paz MESÍAS LEUQUÉN|Ivonne Ayline Denisse BAINA GARCIA)/gi, '<span class="bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border-b-2 border-purple-500 font-bold px-1 rounded cursor-help" title="Sujeto de Interés / Involucrado">$&</span>');
+      
+      // RUTs - Rojo
+      html = html.replace(/(\d{1,2}\.\d{3}\.\d{3}-[\dkK])/g, '<span class="bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 border-b-2 border-red-500 font-bold px-1 rounded cursor-help" title="Identificador de Persona (RUT)">$&</span>');
+      
+      // Direcciones - Verde
+      html = html.replace(/(Calle Valdivia N° 1265)/gi, '<span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border-b-2 border-emerald-500 font-bold px-1 rounded cursor-help" title="Ubicación / Domicilio">$&</span>');
+      
+      // Delitos / Clasificación - Naranja
+      html = html.replace(/(Amenazas simples en contexto VIF|Amenazas Simples|Robo en Bienes Nacionales)/gi, '<span class="bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 border-b-2 border-orange-500 font-bold px-1 rounded cursor-help" title="Clasificación Penal">$&</span>');
+
+      q.root.innerHTML = html;
+    };
+
+    window.quillInstances = [];
+
+    // Find all editor wrappers
+    const editorsA = document.querySelectorAll('[id^="editor_"][id$="_a"]');
+    const editorsB = document.querySelectorAll('[id^="editor_"][id$="_b"]');
+    
+    editorsA.forEach((el, index) => {
+        let quillA = new Quill('#' + el.id, {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+        
+        let elB = editorsB[index];
+        let quillB = new Quill('#' + elB.id, {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+        
+        window.quillInstances.push({ a: quillA, b: quillB });
+
+        setTimeout(() => {
+            window.highlightIntelligence(quillA);
+            window.highlightIntelligence(quillB);
+        }, 300);
+    });
+
+    var form = document.getElementById('summary_form');
+    if (form) {
+        form.onsubmit = function() {
+            window.quillInstances.forEach((quills, index) => {
+                document.getElementById('texto_' + index + '_a_input').value = quills.a.root.innerHTML;
+                document.getElementById('texto_' + index + '_b_input').value = quills.b.root.innerHTML;
+            });
+        };
+    }
+  });
+</script>
+
+<!-- MODAL VISTA PREVIA EXACTA -->
+<script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+<script src="https://unpkg.com/docx-preview/dist/docx-preview.min.js"></script>
+<style>
+  #docx-container .docx-wrapper {
+    background-color: transparent !important;
+    padding: 0 !important;
+  }
+  #docx-container .docx {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  }
+</style>
+<dialog id="previewModal" class="bg-transparent m-auto p-0 backdrop:bg-slate-900/80 w-full max-w-5xl h-[90vh]">
+  <div class="bg-slate-100 dark:bg-slate-900 w-full h-full rounded-2xl flex flex-col shadow-2xl border border-slate-300 dark:border-slate-700 overflow-hidden">
+    <!-- Header Modal -->
+    <div class="bg-white dark:bg-slate-800 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center no-print">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-blue-600 text-[28px]">preview</span>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Vista Previa Exacta</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Estás viendo el documento de Word real que se va a descargar.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        {% if viewing %}
+        <form action="{{ url_for('export_docx', filename=viewing) }}" method="post" class="m-0 p-0" id="form-modal-download">
+          <input type="hidden" name="texto_a" id="modal_texto_a_dl">
+          <button type="submit" onclick="prepararDescargaReal()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">download</span> Descargar (.DOCX)
+          </button>
+        </form>
+        {% endif %}
+        <button onclick="document.getElementById('previewModal').close()" 
+          class="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-slate-700 dark:text-slate-200 transition-colors">
+          <span class="material-symbols-outlined block">close</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Contenedor del Word Real -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-200 dark:bg-slate-950 flex flex-col items-center">
+      <div id="docx-container" class="w-full max-w-[900px] flex justify-center">
+        <!-- El documento de Word se renderizará aquí -->
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  async function mostrarVistaPrevia() {
+    const modal = document.getElementById('previewModal');
+    const container = document.getElementById('docx-container');
+    
+    // Estado de carga
+    container.innerHTML = `
+      <div class="flex flex-col items-center justify-center p-20 text-slate-500">
+        <span class="material-symbols-outlined animate-spin text-[40px] mb-4">progress_activity</span>
+        <p class="font-bold">Generando documento oficial...</p>
+      </div>
+    `;
+    modal.showModal();
+    
+    try {
+        const formData = new FormData();
+        const selectedRadio = document.querySelector('input[name="opcion"]:checked');
+        const selectedVal = selectedRadio ? selectedRadio.value : 'a';
+        
+        let textoVivo = "";
+        if (selectedVal === 'b' && window.quillB) {
+            textoVivo = window.quillB.root.innerHTML;
+        } else if (window.quillA) {
+            textoVivo = window.quillA.root.innerHTML;
+        }
+
+        if (textoVivo) {
+            formData.append('texto_a', textoVivo);
+        }
+
+        const viewingFilename = "{{ viewing if viewing else '' }}";
+        
+        if (!viewingFilename) {
+            throw new Error("No hay documento activo para previsualizar.");
+        }
+
+        const response = await fetch(`/export/${viewingFilename}`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            let errorMsg = "Error al generar Word";
+            try {
+                const errData = await response.json();
+                if (errData.error) errorMsg = errData.error;
+            } catch (e) {}
+            throw new Error(errorMsg);
+        }
+        
+        const blob = await response.blob();
+        container.innerHTML = ""; // Limpiar loading
+        
+        // Renderizar el blob directamente usando docx-preview
+        await docx.renderAsync(blob, container, null, {
+            className: "docx", // Clase base
+            inWrapper: true, // Ponerlo en wrapper centrado
+            ignoreWidth: false, // Respetar tamaño original de hoja
+            ignoreHeight: false, 
+            ignoreFonts: false,
+            breakPages: true, // Mostrar saltos de pagina
+            ignoreLastRenderedPageBreak: true,
+            experimental: true
+        });
+    } catch (error) {
+        container.innerHTML = `
+          <div class="p-10 text-center text-red-500 bg-red-50 w-full rounded border border-red-200 mt-10">
+            <span class="material-symbols-outlined text-[40px] mb-2">error</span>
+            <p class="font-bold">Error al cargar la vista previa exacta del Word.</p>
+            <p class="text-sm mt-2">${error.message}</p>
+          </div>
+        `;
+    }
+  }
+
+  function prepararDescargaReal() {
+      // Find the first selected radio in the first form group (index 0)
+      const selectedRadio = document.querySelector('input[name="opcion_0"]:checked') || document.querySelector('input[name="opcion"]:checked');
+      const selectedVal = selectedRadio ? selectedRadio.value : 'a';
+      let textoVivo = "";
+      if (window.quillInstances && window.quillInstances.length > 0) {
+          if (selectedVal === 'b') {
+              textoVivo = window.quillInstances[0].b.root.innerHTML;
+          } else {
+              textoVivo = window.quillInstances[0].a.root.innerHTML;
+          }
+      }
+      document.getElementById('modal_texto_a_dl').value = textoVivo;
+  }
+
+  function switchTab(group, index) {
+      document.querySelectorAll(`.${group}-pane`).forEach(el => el.classList.add('hidden'));
+      const selectedPane = document.getElementById(`${group}_pane_${index}`);
+      if (selectedPane) selectedPane.classList.remove('hidden');
+
+      document.querySelectorAll(`.${group}-tab-btn`).forEach(btn => {
+          if (parseInt(btn.dataset.index) === index) {
+              if (group === 'entidades') {
+                  btn.className = `entidades-tab-btn px-4 py-2.5 border-b-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+              } else {
+                  btn.className = `resumen-tab-btn px-4 py-2.5 border-b-2 border-blue-500 text-blue-700 dark:text-blue-400 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+              }
+          } else {
+              btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+          }
+      });
+  }
+
+  // Resizer functionality
+  const resizer = document.getElementById('resizer');
+  const leftSide = document.getElementById('split-left');
+  const container = document.getElementById('split-container');
+  let isResizing = false;
+
+  if (resizer) {
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        e.preventDefault(); // Evitar selección de texto
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const containerRect = container.getBoundingClientRect();
+        // Calculate new width percentage
+        const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+        // Limit width between 20% and 80%
+        if (newWidth > 20 && newWidth < 80) {
+            leftSide.style.width = `${newWidth}%`;
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = '';
+        }
+    });
+  }
+</script>
+
+{% endblock %}

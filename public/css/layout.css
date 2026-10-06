@@ -353,4 +353,36 @@
   }
 }
 
+.btn-siad-link {
+  margin-left: auto;
+  background-color: #22c55e;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 200ms ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #16a34a;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-siad-link:hover {
+  background-color: #16a34a;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.btn-siad-link .nav-svg-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #ffffff;
+}
+
 

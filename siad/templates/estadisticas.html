@@ -1,0 +1,572 @@
+{% extends "base.html" %}
+{% block title %}Estadisticas - SIAD{% endblock %}
+{% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+  // Función para descargar la tarjeta completa (gráfico + texto)
+  function descargarGrafico(cardId, fileName) {
+    const card = document.getElementById(cardId);
+    
+    // Ocultar temporalmente el botón de descarga para que no salga en la imagen
+    const btn = card.querySelector('button[onclick^="descargarGrafico"]');
+    if(btn) btn.style.visibility = 'hidden';
+    
+    // Configuración para mejor resolución
+    const options = {
+      scale: 2, // Retinadisplay ready (mejora calidad)
+      backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+      useCORS: true
+    };
+    
+    html2canvas(card, options).then(canvas => {
+      // Restaurar el botón
+      if(btn) btn.style.visibility = '';
+      
+      // Descargar
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }
+</script>
+{% endblock %}
+{% block content %}
+
+<div class="px-6 lg:px-margin-desktop py-8 max-w-[1720px] mx-auto w-full flex flex-col">
+<!-- Header -->
+<div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 mb-8">
+  <div>
+    <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">MÓDULO RF-07 • DIVISIÓN DE INFORMÁTICA Y TELECOMUNICACIONES</div>
+    <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
+      Tablero de Estadísticas Operativas
+      <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Datos Reales en Vivo
+      </span>
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Métricas consolidadas de procesamiento documental, incautaciones físicas y rendimiento de motores OCR/NLP.</p>
+  </div>
+  <div class="flex flex-col gap-2 relative" id="filtroDropdownContainer">
+    <div class="flex items-center justify-end gap-2">
+      <!-- Filtro Días -->
+      <div class="relative">
+        <button onclick="document.getElementById('filtroMenu').style.display = document.getElementById('filtroMenu').style.display === 'none' ? 'block' : 'none'; document.getElementById('agrupacionMenu').style.display = 'none';" class="bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 rounded flex items-center gap-1 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+          <span class="material-symbols-outlined text-[14px]">calendar_today</span> 
+          {% if dias_actuales == 7 %}Últimos 7 días
+          {% elif dias_actuales == 30 %}Últimos 30 días
+          {% elif dias_actuales == 90 %}Últimos 90 días
+          {% else %}Histórico Completo{% endif %}
+          <span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+        </button>
+        <!-- Dropdown menu -->
+        <div id="filtroMenu" style="display: none;" class="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-900 rounded-md shadow-lg py-1 z-50 border border-slate-100 dark:border-slate-800">
+          <a href="{{ url_for('estadisticas', dias=7, agrupacion=agrupacion_actual) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 {{ 'font-bold bg-slate-50 dark:bg-slate-800' if dias_actuales == 7 }}">Últimos 7 días</a>
+          <a href="{{ url_for('estadisticas', dias=30, agrupacion=agrupacion_actual) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 {{ 'font-bold bg-slate-50 dark:bg-slate-800' if dias_actuales == 30 }}">Últimos 30 días</a>
+          <a href="{{ url_for('estadisticas', dias=90, agrupacion=agrupacion_actual) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 {{ 'font-bold bg-slate-50 dark:bg-slate-800' if dias_actuales == 90 }}">Últimos 90 días</a>
+          <a href="{{ url_for('estadisticas', agrupacion=agrupacion_actual) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 border-t border-slate-100 dark:border-slate-800 {{ 'font-bold bg-slate-50 dark:bg-slate-800' if not dias_actuales }}">Histórico Completo</a>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // Cerrar el dropdown si se hace clic afuera
+      document.addEventListener('click', function(event) {
+        var container = document.getElementById('filtroDropdownContainer');
+        var menu = document.getElementById('filtroMenu');
+        if (container && menu && !container.contains(event.target)) {
+          menu.style.display = 'none';
+        }
+      });
+    </script>
+    <a href="{{ url_for('estadisticas_excel') }}" class="flex items-center gap-2 bg-[#0047AB] hover:bg-blue-800 text-white font-bold text-[11px] uppercase tracking-wide px-4 py-2 rounded shadow transition-colors">
+      <span class="material-symbols-outlined text-[16px]">download</span> Exportar Informe Estadístico (.PDF / Excel)
+    </a>
+  </div>
+</div>
+
+<!-- 4 KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <!-- Doc Procesados -->
+  <div class="bg-blue-50/30 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-blue-100 dark:border-blue-900/50 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+    <div class="flex justify-between items-start">
+      <span class="text-[13px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-widest">Documentos procesados</span>
+      <div class="bg-blue-50 dark:bg-blue-900/30 text-[#0047AB] p-1.5 rounded shadow-sm border border-blue-100 dark:border-blue-900/50"><span class="material-symbols-outlined text-[20px]">description</span></div>
+    </div>
+    <div class="mt-3">
+      <div class="flex items-baseline gap-1">
+        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.total_documentos) if stats else '0' }}</span>
+        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">expedientes</span>
+      </div>
+      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">trending_up</span> Actividad Reciente</div>
+    </div>
+    <div class="absolute bottom-0 left-0 w-full h-1 bg-[#0047AB]"></div>
+  </div>
+
+  <!-- Vehículos -->
+  <div class="bg-sky-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-sky-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+    <div class="flex justify-between items-start">
+      <span class="text-[13px] font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-widest">Vehículos detectados</span>
+      <div class="bg-sky-50 text-sky-600 p-1.5 rounded shadow-sm border border-sky-100"><span class="material-symbols-outlined text-[20px]">commute</span></div>
+    </div>
+    <div class="mt-3">
+      <div class="flex items-baseline gap-1">
+        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.vehiculo) if stats else '0' }}</span>
+        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">unidades</span>
+      </div>
+      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">trending_up</span> Registros vehiculares</div>
+    </div>
+    <div class="absolute bottom-0 left-0 w-full h-1 bg-sky-500"></div>
+  </div>
+
+  <!-- Armas -->
+  <div class="bg-red-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-red-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+    <div class="flex justify-between items-start">
+      <span class="text-[13px] font-extrabold text-red-600 dark:text-red-400 uppercase tracking-widest">Armamento identificado</span>
+      <div class="bg-red-50 text-red-500 p-1.5 rounded shadow-sm border border-red-100"><span class="material-symbols-outlined text-[20px]">military_tech</span></div>
+    </div>
+    <div class="mt-3">
+      <div class="flex items-baseline gap-1">
+        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.arma) if stats else '0' }}</span>
+        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">armas de fuego</span>
+      </div>
+      <div class="text-red-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">trending_up</span> Hallazgos balísticos</div>
+    </div>
+    <div class="absolute bottom-0 left-0 w-full h-1 bg-red-600"></div>
+  </div>
+
+  <!-- Drogas -->
+  <div class="bg-yellow-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-yellow-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+    <div class="flex justify-between items-start">
+      <span class="text-[13px] font-extrabold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">Sustancias ilícitas</span>
+      <div class="bg-yellow-50 text-yellow-600 p-1.5 rounded shadow-sm border border-yellow-100"><span class="material-symbols-outlined text-[20px]">biotech</span></div>
+    </div>
+    <div class="mt-3">
+      <div class="flex items-baseline gap-1">
+        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.droga) if stats else '0' }}</span>
+        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">incautaciones</span>
+      </div>
+      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">task_alt</span> Extracción verificada</div>
+    </div>
+    <div class="absolute bottom-0 left-0 w-full h-1 bg-yellow-500"></div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  
+  <!-- Line Chart -->
+  <div id="cardTendencias" class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col relative overflow-hidden">
+    <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex justify-between items-start z-10 border-b border-blue-900/50">
+      <div>
+        <div class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-1">HISTÓRICO MULTIVARIABLE</div>
+        <h3 class="text-xl font-bold text-white leading-tight">Tendencias Históricas de<br>Procesamiento Documental</h3>
+        <p class="text-[11px] text-blue-200 mt-2 max-w-[320px] leading-relaxed">Evolución en 12 meses correlacionando entidades detectadas en partes policiales.</p>
+      </div>
+      <div class="flex flex-col items-end gap-3">
+        <div class="bg-white rounded-lg px-5 py-2.5 flex items-center gap-5 text-[13px] font-extrabold text-blue-900 shadow-md">
+          <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-[#0047AB]"></span>Vehículos</div>
+          <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-red-500"></span>Armamento</div>
+          <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-yellow-500"></span>Sustancias</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Dropdown Agrupación -->
+          <div class="relative">
+            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border-0 rounded-lg text-[11px] font-bold tracking-wide uppercase transition-colors shadow-md">
+                <span class="material-symbols-outlined text-[14px]">bar_chart</span> 
+                {% if agrupacion_actual == 'ano' %}Anual
+                {% elif agrupacion_actual == 'semana' %}Semanal
+                {% elif agrupacion_actual == 'mes' %}Mensual
+                {% else %}Diaria{% endif %}
+                <span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+            </button>
+            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg py-1 z-50 border border-slate-100 text-left">
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'semana' }}">Semanal</a>
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'mes' }}">Mensual</a>
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'ano' }}">Anual</a>
+            </div>
+          </div>
+          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border-0 rounded-lg text-[11px] font-bold tracking-wide uppercase transition-colors shadow-md">
+            <span class="material-symbols-outlined text-[14px]">download</span> Descargar PNG
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="w-full relative h-[320px] p-6 bg-white dark:bg-slate-900/50 flex flex-col justify-center">
+      {% if stats and stats.tendencias and stats.tendencias|length > 0 %}
+      <canvas id="chartTendencias"></canvas>
+      {% else %}
+      <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-10 w-full">
+        <span class="material-symbols-outlined text-[48px] mb-3 opacity-30">query_stats</span>
+        <p class="font-bold text-sm text-slate-500">No hay registros de tendencias en este período</p>
+        <p class="text-xs mt-1">Intenta seleccionar un rango de fechas más amplio (Ej. Últimos 90 días o Histórico Completo).</p>
+      </div>
+      {% endif %}
+    </div>
+    <div class="flex justify-between items-center mt-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-4 uppercase">
+      <span>Fuente: Base de Datos SIAD</span>
+      <span>Actualización en tiempo real</span>
+    </div>
+  </div>
+
+  <!-- Donut Chart -->
+  <div id="cardDistribucion" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col relative overflow-hidden">
+    <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex justify-between items-start z-10 w-full border-b border-blue-900/50">
+      <div>
+        <div class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-1">DESGLOSE CONSOLIDADO</div>
+        <h3 class="text-lg font-bold text-white leading-tight">Distribución de Entidades</h3>
+        <p class="text-[11px] text-blue-200 mt-2 max-w-[200px] leading-relaxed">Composición relativa de hallazgos verificados en el periodo.</p>
+      </div>
+      <button onclick="descargarGrafico('cardDistribucion', 'Distribucion_Entidades.png')" class="flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border-0 rounded-lg text-[11px] font-bold tracking-wide uppercase transition-colors shrink-0 shadow-md">
+        <span class="material-symbols-outlined text-[14px]">download</span> Descargar PNG
+      </button>
+    </div>
+    
+    <div class="p-6 flex flex-col items-center bg-white dark:bg-slate-900/50 w-full h-full">
+      <div class="relative w-[220px] h-[220px] flex items-center justify-center my-4">
+      {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
+      <canvas id="chartDistribucion"></canvas>
+      <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+        <span class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">TOTAL CATEGORÍAS</span>
+        <span class="text-3xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format((stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) if stats else 0) }}</span>
+        <span class="text-[8px] font-bold text-emerald-500 uppercase tracking-wider">100% Indexadas</span>
+      </div>
+      {% else %}
+      <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center w-full h-full border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-full">
+        <span class="material-symbols-outlined text-[32px] mb-2 opacity-30">pie_chart</span>
+        <p class="text-[10px] font-bold uppercase tracking-widest">Sin Entidades</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="w-full mt-6 space-y-2">
+      <!-- Vehiculos -->
+      <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-200 shadow-sm transition hover:shadow-md">
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-[#0047AB]"></span><span class="font-bold text-slate-700 dark:text-slate-200">Vehículos Motorizados</span></div>
+        <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+          <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
+            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
+              {{ "%.1f" | format(stats.por_categoria.vehiculo / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) * 100) }}%
+            {% else %}
+              0%
+            {% endif %}
+          </span>
+          <a href="{{ url_for('historial', categoria='vehiculo', dias=dias_actuales) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-bold cursor-pointer" title="Ver documentos con vehículos detectados">
+            ({{ '{:,}'.format(stats.por_categoria.vehiculo) if stats else '0' }})
+          </a>
+        </div>
+      </div>
+      <!-- Armas -->
+      <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-200 shadow-sm mt-2 transition hover:shadow-md">
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-500"></span><span class="font-bold text-slate-700 dark:text-slate-200">Armas y Municiones</span></div>
+        <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+          <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
+            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
+              {{ "%.1f" | format(stats.por_categoria.arma / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) * 100) }}%
+            {% else %}
+              0%
+            {% endif %}
+          </span>
+          <a href="{{ url_for('historial', categoria='arma', dias=dias_actuales) }}" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 underline font-bold cursor-pointer" title="Ver documentos con armamento detectado">
+            ({{ '{:,}'.format(stats.por_categoria.arma) if stats else '0' }})
+          </a>
+        </div>
+      </div>
+      <!-- Drogas -->
+      <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-200 shadow-sm mt-2 transition hover:shadow-md">
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-yellow-500"></span><span class="font-bold text-slate-700 dark:text-slate-200">Sustancias Controladas</span></div>
+        <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+          <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
+            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
+              {{ "%.1f" | format(stats.por_categoria.droga / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) * 100) }}%
+            {% else %}
+              0%
+            {% endif %}
+          </span>
+          <a href="{{ url_for('historial', categoria='droga', dias=dias_actuales) }}" class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 underline font-bold cursor-pointer" title="Ver documentos con sustancias detectadas">
+            ({{ '{:,}'.format(stats.por_categoria.droga) if stats else '0' }})
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-auto pt-6 text-[10px] text-center text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider w-full">
+      Motor de Extracción de Entidades SIAD
+    </div>
+    </div>
+  </div>
+
+  <!-- Vista de Datos Detallados (Top 5) -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 mt-4">
+    <!-- Top Vehiculos -->
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
+      <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px] text-[#0047AB]">directions_car</span> Top 5 Marcas de Vehículos
+      </h4>
+      <div class="flex flex-col gap-2">
+        {% if stats and stats.top_marcas_vehiculos %}
+          {% for item in stats.top_marcas_vehiculos %}
+          <div class="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-800 pb-2 last:border-0">
+            <span class="font-bold text-slate-700 dark:text-slate-300 capitalize truncate" title="{{ item.nombre }}">{{ item.nombre }}</span>
+            <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-xs font-mono">{{ item.count }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-xs text-slate-400 italic text-center py-4">Sin datos registrados</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Top Armas -->
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
+      <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px] text-red-500">crisis_alert</span> Top 5 Armamento
+      </h4>
+      <div class="flex flex-col gap-2">
+        {% if stats and stats.top_marcas_armas %}
+          {% for item in stats.top_marcas_armas %}
+          <div class="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-800 pb-2 last:border-0">
+            <span class="font-bold text-slate-700 dark:text-slate-300 capitalize truncate" title="{{ item.nombre }}">{{ item.nombre }}</span>
+            <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-xs font-mono">{{ item.count }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-xs text-slate-400 italic text-center py-4">Sin datos registrados</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Top Drogas -->
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
+      <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px] text-yellow-500">medication</span> Top 5 Sustancias
+      </h4>
+      <div class="flex flex-col gap-2">
+        {% if stats and stats.top_sustancias %}
+          {% for item in stats.top_sustancias %}
+          <div class="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-800 pb-2 last:border-0">
+            <span class="font-bold text-slate-700 dark:text-slate-300 capitalize truncate" title="{{ item.nombre }}">{{ item.nombre }}</span>
+            <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-xs font-mono">{{ item.count }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-xs text-slate-400 italic text-center py-4">Sin datos registrados</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="application/json" id="tendencias-data">
+  {{ stats.tendencias | tojson | safe if stats and stats.tendencias else '[]' }}
+</script>
+<script>
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = "#64748b"; // slate-500
+
+  // Datos dinámicos desde el backend
+  const tendenciasData = JSON.parse(document.getElementById("tendencias-data").textContent);
+  const labelsMeses = tendenciasData.length > 0 ? tendenciasData.map(d => d.label) : ["No hay datos"];
+  const dataVehiculos = tendenciasData.map(d => d.vehiculos);
+  const dataSustancias = tendenciasData.map(d => d.drogas);
+  const dataArmamento = tendenciasData.map(d => d.armas);
+  
+  const ctxTendencias = document.getElementById("chartTendencias").getContext("2d");
+  
+  // Crear gradientes para el efecto "Shadcn / bklit-ui"
+  const gradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 400);
+  gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.2)');
+  gradientVehiculos.addColorStop(1, 'rgba(0, 71, 171, 0)');
+  
+  const gradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 400);
+  gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.1)');
+  gradientSustancias.addColorStop(1, 'rgba(234, 179, 8, 0)');
+
+  const gradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 400);
+  gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
+  gradientArmamento.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+  const agrupacionActual = "{{ agrupacion_actual or 'dia' }}";
+  let chartType = "bar";
+  let isLine = false;
+  let isArea = false;
+  
+  if (agrupacionActual === "mes" || agrupacionActual === "semana") {
+      chartType = "line";
+      isLine = true;
+      if (agrupacionActual === "mes") isArea = true;
+  }
+
+  new Chart(ctxTendencias, {
+    type: chartType,
+    data: {
+      labels: labelsMeses,
+      datasets: [
+        {
+          label: "Vehículos",
+          data: dataVehiculos,
+          backgroundColor: isArea ? gradientVehiculos : "#0047AB",
+          borderColor: isLine ? "#0047AB" : "transparent",
+          borderWidth: isLine ? 2 : 0,
+          borderRadius: isLine ? 0 : 4,
+          fill: isArea,
+          tension: 0,
+          pointRadius: isLine ? 3 : 0,
+          pointBackgroundColor: "#0047AB"
+        },
+        {
+          label: "Sustancias",
+          data: dataSustancias,
+          backgroundColor: isArea ? gradientSustancias : "#eab308",
+          borderColor: isLine ? "#eab308" : "transparent",
+          borderWidth: isLine ? 2 : 0,
+          borderRadius: isLine ? 0 : 4,
+          fill: isArea,
+          tension: 0,
+          pointRadius: isLine ? 3 : 0,
+          pointBackgroundColor: "#eab308"
+        },
+        {
+          label: "Armamento",
+          data: dataArmamento,
+          backgroundColor: isArea ? gradientArmamento : "#ef4444",
+          borderColor: isLine ? "#ef4444" : "transparent",
+          borderWidth: isLine ? 2 : 0,
+          borderRadius: isLine ? 0 : 4,
+          fill: isArea,
+          tension: 0,
+          pointRadius: isLine ? 3 : 0,
+          pointBackgroundColor: "#ef4444"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          titleColor: '#0f172a',
+          bodyColor: '#64748b',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          padding: 12,
+          titleFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
+          bodyFont: { size: 12, weight: 'bold' },
+          displayColors: true,
+          usePointStyle: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          cornerRadius: 8,
+          mode: 'index',
+          intersect: false
+        }
+      },
+      scales: { 
+        x: { 
+          grid: { display: false, drawBorder: false },
+          ticks: { font: { weight: 'bold', size: 11 }, padding: 8 }
+        },
+        y: { 
+          beginAtZero: true,
+          ticks: { 
+            font: { weight: 'bold', size: 11 },
+            padding: 8,
+            callback: function(value) {
+              if (value >= 1000) return (value/1000) + 'k';
+              return value;
+            }
+          },
+          border: { display: false },
+          grid: { color: '#f8fafc', drawBorder: false }
+        } 
+      },
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+    },
+    plugins: [{
+      id: 'verticalLine',
+      afterDraw: chart => {
+        if (chart.tooltip?._active?.length) {
+          let x = chart.tooltip._active[0].element.x;
+          let yAxis = chart.scales.y;
+          let ctx = chart.ctx;
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x, yAxis.top);
+          ctx.lineTo(x, yAxis.bottom);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = '#cbd5e1'; // slate-300
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }]
+  });
+
+  const ctxDistribucion = document.getElementById("chartDistribucion").getContext("2d");
+  
+  const valVehiculos = Number("{{ stats.por_categoria.vehiculo if stats else 0 }}");
+  const valArmas = Number("{{ stats.por_categoria.arma if stats else 0 }}");
+  const valDrogas = Number("{{ stats.por_categoria.droga if stats else 0 }}");
+  const totalValores = valVehiculos + valArmas + valDrogas;
+
+  let doughnutData, doughnutColors, doughnutLabels, tooltipEnabled;
+  if (totalValores === 0) {
+    doughnutData = [1];
+    const isDark = document.documentElement.classList.contains('dark');
+    doughnutColors = [isDark ? "#334155" : "#e2e8f0"]; // slate-700 o slate-200
+    doughnutLabels = ["Sin datos"];
+    tooltipEnabled = false;
+  } else {
+    doughnutData = [valVehiculos, valArmas, valDrogas];
+    doughnutColors = ["#0047AB", "#ef4444", "#eab308"];
+    doughnutLabels = ["Vehículos", "Armas", "Drogas"];
+    tooltipEnabled = true;
+  }
+
+  new Chart(ctxDistribucion, {
+    type: "doughnut",
+    data: {
+      labels: doughnutLabels,
+      datasets: [{
+        data: doughnutData,
+        backgroundColor: doughnutColors,
+        borderWidth: totalValores === 0 ? 0 : 2,
+        borderColor: '#ffffff',
+        hoverOffset: totalValores === 0 ? 0 : 4
+      }],
+    },
+    options: { 
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '80%', 
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          enabled: tooltipEnabled,
+          backgroundColor: '#ffffff',
+          titleColor: '#0f172a',
+          bodyColor: '#64748b',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 12 },
+          bodyFont: { size: 12, weight: 'bold' },
+          displayColors: true,
+          usePointStyle: true,
+          boxWidth: 8,
+          boxHeight: 8
+        }
+      } 
+    },
+  });
+</script>
+</div>
+{% endblock %}

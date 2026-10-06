@@ -142,7 +142,11 @@ export async function sendReportToTelegram() {
       throw new Error(data.error || "Error en el despacho del mensaje.");
     }
 
-    alert(data.mensaje);
+    const dateStr = new Date().toLocaleDateString('es-CL', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    showTelegramPopup(data.mensaje, dateStr);
   } catch (err) {
     console.error("Error enviando reporte a Telegram:", err);
     alert(`No se pudo enviar el reporte a Telegram: ${err.message}`);
@@ -152,3 +156,63 @@ export async function sendReportToTelegram() {
   }
 }
 
+window.showTelegramPopup = function(mensaje, dateStr) {
+  const overlay = document.createElement('div');
+  overlay.className = 'telegram-popup-overlay';
+  
+  const content = document.createElement('div');
+  content.className = 'telegram-popup-content';
+  
+  const iconHtml = `
+    <div class="telegram-icon-wrapper">
+      <svg viewBox="0 0 24 24">
+        <path d="m22 2-7 20-4-9-9-4Z"></path>
+        <path d="M22 2 11 13"></path>
+      </svg>
+    </div>
+  `;
+  
+  const dateIcon = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+  `;
+  
+  content.innerHTML = `
+    ${iconHtml}
+    <div class="telegram-popup-title">¡Reporte Enviado!</div>
+    <div class="telegram-popup-msg">${mensaje}</div>
+    <div class="telegram-popup-date">${dateIcon} ${dateStr}</div>
+    <br>
+    <button class="telegram-popup-close">Aceptar</button>
+  `;
+  
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+  
+  const closeBtn = content.querySelector('.telegram-popup-close');
+  
+  const closePopup = () => {
+    overlay.classList.add('telegram-popup-fadeout');
+    setTimeout(() => {
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    }, 400);
+  };
+  
+  closeBtn.addEventListener('click', closePopup);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      closePopup();
+    }
+  });
+
+  // Auto-close after 6 seconds
+  setTimeout(() => {
+    if (overlay.parentNode) closePopup();
+  }, 6000);
+}

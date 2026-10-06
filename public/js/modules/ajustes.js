@@ -133,7 +133,12 @@ export function renderTimeChips(times) {
   container.querySelectorAll(".time-chip-del").forEach(btn => {
     btn.addEventListener("click", function() {
       const timeToRemove = this.getAttribute("data-time");
-      // Modal dinámico centrado (Modularizado en CSS)
+      
+      // 1. Eliminarlo de la lista actual y re-renderizar para que desaparezca visualmente
+      state.currentScheduleTimes = state.currentScheduleTimes.filter(t => t !== timeToRemove);
+      renderTimeChips(state.currentScheduleTimes);
+
+      // 2. Mostrar el modal dinámico centrado
       const overlay = document.createElement("div");
       overlay.className = "toast-overlay";
 
@@ -141,18 +146,17 @@ export function renderTimeChips(times) {
       modal.className = "toast-modal";
 
       modal.innerHTML = `
-        <div class="toast-icon-wrapper">
-          <svg viewBox="0 0 24 24">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
+        <div class="toast-icon-wrapper" style="background: rgba(220, 38, 38, 0.15);">
+          <svg class="icon-animate-cross" viewBox="0 0 24 24" style="stroke: #dc2626; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </div>
         <h3 class="toast-title">Horario Removido</h3>
         <p class="toast-text">
           Recuerda hacer clic en el botón <strong class="toast-highlight">"Guardar Ajustes de Programación"</strong> al final de la página para que este cambio sea permanente.
         </p>
-        <button id="btn-entendido" class="toast-btn">
+        <button id="btn-entendido" class="toast-btn" style="background: linear-gradient(to right, #ef4444, #dc2626); color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
           Entendido
         </button>
       `;
@@ -193,6 +197,47 @@ export function agregarHorario(newTime) {
   if (!state.currentScheduleTimes.includes(newTime)) {
     state.currentScheduleTimes.push(newTime);
     renderTimeChips(state.currentScheduleTimes);
+
+    // Modal dinámico centrado
+    const overlay = document.createElement("div");
+    overlay.className = "toast-overlay";
+    overlay.style.backgroundColor = "rgba(16, 185, 129, 0.12)";
+
+    const modal = document.createElement("div");
+    modal.className = "toast-modal";
+
+    modal.innerHTML = `
+      <div class="toast-icon-wrapper" style="background: rgba(16, 185, 129, 0.15);">
+        <svg class="icon-animate-check" viewBox="0 0 24 24" style="stroke: #059669; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <h3 class="toast-title">Horario Agregado</h3>
+      <p class="toast-text">
+        Recuerda hacer clic en el botón <strong class="toast-highlight">"Guardar Ajustes de Programación"</strong> al final de la página para que este cambio sea permanente.
+      </p>
+      <button id="btn-entendido-add" class="toast-btn" style="background: linear-gradient(to right, #10b981, #059669); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+        Entendido
+      </button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    const btnHover = modal.querySelector("#btn-entendido-add");
+    const closeModal = () => {
+      overlay.style.opacity = "0";
+      modal.style.transform = "scale(0.9)";
+      setTimeout(() => overlay.remove(), 300);
+    };
+
+    btnHover.addEventListener("click", closeModal);
+
+    requestAnimationFrame(() => {
+      overlay.style.opacity = "1";
+      modal.style.transform = "scale(1)";
+    });
   }
 }
 
@@ -315,7 +360,7 @@ export function setupScheduleEvents() {
   const btnSaveSchedule = document.getElementById("btn-save-schedule");
   const saveFeedback = document.getElementById("schedule-save-feedback");
   if (btnSaveSchedule) {
-    btnSaveSchedule.addEventListener("click", () => {
+    btnSaveSchedule.onclick = () => {
       try {
         const enabled = document.getElementById("schedule-enabled-toggle")?.checked ?? true;
         const reportType = document.getElementById("schedule-report-type")?.value || "extenso";
@@ -359,14 +404,14 @@ export function setupScheduleEvents() {
           }, 4000);
         }
       }
-    });
+    };
   }
 
   // Disparo de Prueba Inmediata a Telegram
   const btnTestSchedule = document.getElementById("btn-trigger-test-schedule");
   const testFeedback = document.getElementById("schedule-test-feedback");
   if (btnTestSchedule) {
-    btnTestSchedule.addEventListener("click", async () => {
+    btnTestSchedule.onclick = async () => {
       try {
         btnTestSchedule.disabled = true;
         btnTestSchedule.innerHTML = `<span class="spinner" style="width:14px; height:14px; border-width:2px; vertical-align:middle;"></span> Conectando y enviando a Telegram...`;
@@ -385,7 +430,10 @@ export function setupScheduleEvents() {
         const data = await res.json();
         if (!data.ok) throw new Error(data.error || "Fallo en el despacho de prueba.");
 
-        if (testFeedback) {
+        if (typeof window.showTelegramPopup === "function") {
+          const formattedDate = new Date().toLocaleDateString("es-CL", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          window.showTelegramPopup("Se ha realizado el envío del reporte de prueba exitosamente.", formattedDate);
+        } else if (testFeedback) {
           testFeedback.className = "crypto-feedback-box success";
           testFeedback.style.display = "block";
           testFeedback.innerHTML = `
@@ -422,7 +470,7 @@ export function setupScheduleEvents() {
           <span>Enviar Reporte de Prueba a Telegram Ahora</span>
         `;
       }
-    });
+    };
   }
 
   // Botón Refrescar Historial
@@ -502,11 +550,11 @@ export function renderTablaDestinatarios(destinatarios) {
 
     const testButtonHtml = d.activo
       ? `<button type="button" class="btn-dest-action btn-dest-test" onclick="probarDestinatarioIndividual(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', this)" title="Enviar mensaje de prueba individual a este destinatario">
-           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
            <span>Probar</span>
          </button>`
       : `<button type="button" class="btn-dest-action btn-dest-test" disabled style="opacity: 0.45; cursor: not-allowed;" title="No es posible probar porque el oficial está pausado. Actívelo primero para enviar pruebas.">
-           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
            <span>Probar</span>
          </button>`;
 

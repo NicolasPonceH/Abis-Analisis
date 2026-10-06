@@ -372,12 +372,16 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #eef4fc;
+  background: rgba(255, 209, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid rgba(0, 35, 76, 0.08);
+  border: 1px solid rgba(255, 209, 0, 0.3);
+}
+
+.sheet-icon-wrapper svg {
+  stroke: var(--pdi-gold);
 }
 
 .sheet-actions-group {
@@ -606,7 +610,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #00234c !important;
+  background: #2b78c5 !important;
   color: #ffffff !important;
   padding: 10px 12px;
   text-align: left;
@@ -620,7 +624,7 @@
 .sheet-table th.col-index {
   width: 44px;
   text-align: center;
-  background: #001938 !important;
+  background: #215e9a !important;
 }
 
 .sheet-table th.col-action {
@@ -777,8 +781,7 @@
     .filters-header,
     .settings-card-header,
     .sheet-workflow-header,
-    .sheet-preview-header,
-    .modal-header {
+    .sheet-preview-header {
       background: linear-gradient(135deg, rgba(0, 48, 105, 0.85) 0%, rgba(0, 80, 160, 0.7) 100%) !important;
       backdrop-filter: blur(16px) saturate(120%) !important;
       -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
@@ -806,8 +809,7 @@
     .settings-card-header h3,
     .sheet-workflow-header h3,
     .sheet-preview-header h3,
-    .modal-header h2,
-    .table-header-bar .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
+        .table-header-bar .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
     .chart-header .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
     .filters-header .filters-title span:not(.badge-primary):not(.badge):not(.chart-badge),
     .settings-card-header .settings-card-title span,
@@ -831,7 +833,7 @@
     .settings-card-header svg,
     .sheet-workflow-header svg,
     .sheet-preview-header svg,
-    .modal-header svg {
+    /* removed */ .unused-modal-svg {
       stroke: #ffd100 !important;
     }
 
@@ -842,7 +844,7 @@
     .settings-card-header .btn-secondary,
     .sheet-workflow-header .btn-secondary,
     .sheet-preview-header .btn-secondary,
-    .modal-header .btn-secondary {
+    /* removed */ .unused-modal-btn {
       background: #ffffff !important;
       color: #00234c !important;
       border: 1px solid rgba(255, 209, 0, 0.8) !important;
@@ -856,7 +858,7 @@
     .settings-card-header .btn-secondary:hover,
     .sheet-workflow-header .btn-secondary:hover,
     .sheet-preview-header .btn-secondary:hover,
-    .modal-header .btn-secondary:hover {
+    /* removed */ .unused-modal-btn-hover {
       background: #f8fafc !important;
       border-color: #ffd100 !important;
       transform: translateY(-1px) !important;
@@ -868,8 +870,7 @@
     .settings-card-header .form-control,
     .sheet-workflow-header .form-control,
     .sheet-preview-header .form-control,
-    .modal-header .form-control,
-    .table-header-bar .trend-calendar-box {
+        .table-header-bar .trend-calendar-box {
       background: rgba(255, 255, 255, 0.95) !important;
       color: #00234c !important;
       border: 1px solid rgba(255, 209, 0, 0.6) !important;
@@ -883,7 +884,7 @@
     .settings-card-header .btn-secondary svg,
     .sheet-workflow-header .btn-secondary svg,
     .sheet-preview-header .btn-secondary svg,
-    .modal-header .btn-secondary svg {
+    /* removed */ .unused-modal-btn-svg {
       stroke: #00234c !important;
     }
 
@@ -998,18 +999,18 @@
       width: 46px !important;
       height: 46px !important;
       border-radius: 12px !important;
-      background: rgba(0, 35, 76, 0.07) !important;
+      background: rgba(255, 209, 0, 0.15) !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       flex-shrink: 0 !important;
-      border: 1px solid rgba(0, 35, 76, 0.1) !important;
+      border: 1px solid rgba(255, 209, 0, 0.3) !important;
     }
 
     .sheet-icon-wrapper svg {
       width: 24px !important;
       height: 24px !important;
-      stroke: #00234c !important;
+      stroke: var(--pdi-gold) !important;
     }
 
     .sheet-actions-group {
@@ -1258,7 +1259,7 @@
       position: sticky !important;
       top: 0 !important;
       z-index: 10 !important;
-      background: #00234c !important;
+      background: #2b78c5 !important;
       color: #ffffff !important;
       padding: 10px 14px !important;
       text-align: left !important;
@@ -1272,7 +1273,7 @@
     .sheet-table th.col-index {
       width: 44px !important;
       text-align: center !important;
-      background: #001938 !important;
+      background: #215e9a !important;
     }
 
     .sheet-table th.col-action {

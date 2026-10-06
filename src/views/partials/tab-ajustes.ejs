@@ -1,91 +1,404 @@
-<div class="modal-backdrop" id="modal-trend-fullscreen" style="display: none;">
-      <div class="modal-dialog modal-fullscreen-dialog">
-        <div class="modal-header">
-          <div class="modal-title">
-            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-              <polyline points="16 7 22 7 22 13" />
+    <!-- ========================================== -->
+    <!-- TAB 5: AJUSTES & GESTIÓN DE HORARIOS -->
+    <!-- ========================================== -->
+    <section id="tab-ajustes" class="tab-content" style="display: none;">
+
+      <!-- Banner de Estado y Horario Oficial PDI -->
+      <div class="schedule-status-banner">
+        <div class="schedule-status-left">
+          <div class="schedule-clock-icon">
+            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
             </svg>
-            <span>Centro de Mando: Evolución y Tendencias Históricas ABIS</span>
-            <span class="badge badge-primary" id="modal-trend-badge">Alta Resolución</span>
           </div>
-          <button type="button" class="modal-close" id="btn-close-trend-fullscreen" title="Cerrar pantalla completa"
-            aria-label="Cerrar">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+          <div>
+            <div class="schedule-clock-title">Reloj del Servidor & Automatización PDI</div>
+            <div class="schedule-clock-time" id="schedule-clock-display">Zona Horaria: America/Santiago (Chile) &bull;
+              Sincronizando...</div>
+          </div>
         </div>
-        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1;">
-          <div style="flex: 1; min-height: 520px; position: relative;">
-            <canvas id="chart-tendencia-modal"></canvas>
+        <div class="schedule-status-right">
+          <div class="schedule-next-badge" id="schedule-next-badge">
+            <span class="status-dot"></span>
+            <span id="schedule-next-text">Próximo Envío: Calculando...</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 4: BITÁCORA Y AUDITORÍA -->
-    <!-- ========================================== -->
-    <section id="tab-auditoria" class="tab-content" style="display: none;">
-      <div class="table-card" style="margin-bottom: 24px;">
-        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
-          <div class="chart-title">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            <span>Bitácora de Eventos y Trazabilidad (Inmutable)</span>
+      <!-- Grid de Configuración de Horarios y Canal -->
+      <div class="settings-grid">
+
+        <!-- Tarjeta 1: Gestión de Horas y Frecuencia de Envío -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>Programación de Horarios de Reporte</span>
+            </div>
+            <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
+              <input type="checkbox" id="schedule-enabled-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <select id="audit-filter-tipo" class="form-control" style="width: auto;">
-              <option value="">-- Todos los Eventos --</option>
-              <option value="INGESTA_EXCEL_AUTORIZADA">Carga de Datos (Ingesta)</option>
-              <option value="ENVIO_CAPTURA_TELEGRAM">Despacho Telegram (Automático)</option>
-              <option value="TEST_CAPTURA_TELEGRAM">Prueba de Envío (Manual)</option>
-              <option value="SEGURIDAD_CIFRADO">Cifrado de Archivos</option>
-              <option value="SEGURIDAD_DESCIFRADO">Descifrado de Archivos</option>
-            </select>
-            <input type="date" id="audit-filter-desde" class="form-control" style="width: 140px;">
-            <input type="date" id="audit-filter-hasta" class="form-control" style="width: 140px;">
-            <button class="btn btn-primary btn-sm" id="btn-audit-search">Filtrar</button>
+
+          <div class="settings-card-body">
+
+            <!-- Estado del Switch -->
+            <div class="schedule-enabled-alert" id="schedule-enabled-alert">
+              <span id="schedule-enabled-text" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
+              </span>
+            </div>
+
+            <!-- Horarios Configurados Actualmente -->
+            <div class="form-group" style="margin-top: 16px;">
+              <label class="filter-label">Horarios Programados Activos (Formato 24 Horas):</label>
+              <div class="time-chips-container" id="time-chips-container">
+                <!-- Se poblará dinámicamente con chips: 08:30 hrs ×, 19:00 hrs × -->
+              </div>
+            </div>
+
+            <!-- Agregar Nuevo Horario -->
+            <div class="add-time-box">
+              <label class="filter-label" for="input-new-time">Añadir nueva hora de envío:</label>
+              <div class="add-time-row">
+                <input type="time" id="input-new-time" class="form-control" value="12:00">
+                <button type="button" id="btn-add-time" class="btn btn-primary">
+                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span>Agregar Hora</span>
+                </button>
+              </div>
+            </div>
+
+
+            <!-- Días de la Semana -->
+            <div class="form-group" style="margin-top: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label class="filter-label" style="margin-bottom:0;">Días de Envío Semanal:</label>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="btn-link-action" id="btn-select-weekdays">Lunes a Viernes</button>
+                  <span style="color:#cbd5e1;">&bull;</span>
+                  <button type="button" class="btn-link-action" id="btn-select-all-days">Todos los Días</button>
+                </div>
+              </div>
+              <div class="days-selector-grid">
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked>
+                  <span>Lun</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked>
+                  <span>Mar</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked>
+                  <span>Mié</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked>
+                  <span>Jue</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked>
+                  <span>Vie</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked>
+                  <span>Sáb</span></label>
+                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked>
+                  <span>Dom</span></label>
+              </div>
+            </div>
+
+            <!-- Formato del Reporte -->
+            <div class="form-group" style="margin-top: 18px;">
+              <label class="filter-label" for="schedule-report-type">Estructura del Reporte a Despachar:</label>
+              <select id="schedule-report-type" class="form-control">
+                <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)
+                </option>
+                <option value="resumen">Resumen Ejecutivo Compacto (KPIs Rápidos)</option>
+              </select>
+            </div>
+
+            <!-- Botón Guardar Cambios -->
+            <button type="button" id="btn-save-schedule" class="btn btn-primary"
+              style="width: 100%; margin-top: 20px; padding: 12px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+              <span>Guardar Ajustes de Programación</span>
+            </button>
+            <div id="schedule-save-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
+
           </div>
         </div>
 
-        <div class="table-container" style="margin-bottom: 0 !important; border-radius: 0 !important; border-bottom: none !important;">
+        <!-- Tarjeta 2: Canal de Notificaciones & Prueba Inmediata -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-title">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;">
+                <path d="m22 2-7 20-4-9-9-4Z" />
+                <path d="M22 2 11 13" />
+              </svg>
+              <span>Canal de Notificaciones (Telegram Oficial)</span>
+            </div>
+          </div>
+
+          <div class="settings-card-body">
+
+
+            <div class="channel-info-box">
+              <div class="channel-info-row">
+                <span class="channel-info-label">Bot Institucional:</span>
+                <span class="channel-info-val" id="telegram-bot-badge">@AbisSystemBot &bull; Enclave Activo</span>
+              </div>
+              <div class="channel-info-row">
+                <span class="channel-info-label">Chat ID Destino:</span>
+                <span class="channel-info-val" id="telegram-chat-id-display">Cargando...</span>
+              </div>
+              <div class="channel-info-row">
+                <span class="channel-info-label">Frecuencia Activa:</span>
+                <span class="channel-info-val" id="schedule-freq-summary">2 envíos al día</span>
+              </div>
+            </div>
+
+            <!-- Sección de Prueba Manual -->
+            <div class="test-dispatch-box" style="margin-top: 20px;">
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="test-report-modo"
+                  style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); margin-bottom: 6px; display: block;">
+                  Tipo de Reporte a Probar:
+                </label>
+                <select id="test-report-modo" class="form-control form-control-sm"
+                  style="font-size: 0.85rem; padding: 6px;">
+                  <option value="">Automático según el día de hoy (Diario)</option>
+                  <option value="fds">Forzar Reporte de Fin de Semana (4 fotos)</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="test-report-adjuntos" checked style="cursor: pointer;">
+                <label for="test-report-adjuntos"
+                  style="font-size: 0.82rem; color: var(--pdi-navy); margin: 0; cursor: pointer;">
+                  Incluir botones de descarga (Word/Excel)
+                </label>
+              </div>
+
+              <button type="button" id="btn-trigger-test-schedule" class="btn btn-telegram" style="width: 100%;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                  <path d="m22 2-7 20-4-9-9-4Z" />
+                  <path d="M22 2 11 13" />
+                </svg>
+                <span>Enviar Reporte de Prueba a Telegram Ahora</span>
+              </button>
+              <div id="schedule-test-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;">
+              </div>
+
+              <!-- Selector de Previsualización de las 4 Capturas Oficiales -->
+              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-light);">
+                <label
+                  style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                  <span>Previsualizar las 4 Capturas Institucionales (PNG):</span>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                  <a href="/api/reportes/captura-preview?tipo=fds_matriz" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                    Foto 1: Matriz FDS
+                  </a>
+                  <a href="/api/reportes/captura-preview?tipo=fds_enrolados" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                    Foto 2: Acum. Enrolados
+                  </a>
+                  <a href="/api/reportes/captura-preview?tipo=fds_distribucion" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                    Foto 3: Dist. FDS
+                  </a>
+                  <a href="/api/reportes/captura-preview?tipo=fds_registros" target="_blank" rel="noopener"
+                    class="btn btn-secondary btn-sm"
+                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
+                    Foto 4: Acum. Registros
+                  </a>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tarjeta: Gestión de Destinatarios y Oficiales de Telegram (Almacenamiento Seguro PostgreSQL) -->
+      <div class="table-card" style="margin-top: 24px;" id="card-destinatarios-telegram">
+        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7;">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span>Gestor de Destinatarios de Telegram (Oficiales y Jefaturas)</span>
+            <span class="badge badge-primary" id="destinatarios-count-badge" style="margin-left: 8px;">0
+              destinatarios</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Botón Copiar Enlace Directo al Bot -->
+            <button type="button" id="btn-copiar-link-bot" class="btn btn-secondary btn-sm"
+              title="Copiar enlace directo para enrolar nuevos oficiales">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              <span id="text-copiar-link-bot">Copiar Enlace al Bot</span>
+            </button>
+            <button type="button" id="btn-refresh-destinatarios" class="btn btn-secondary btn-sm"
+              title="Actualizar lista de destinatarios">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
+              <span>Actualizar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner Informativo con Instrucciones y Enlace Directo -->
+        <div
+          style="padding: 14px 20px; background: #f0f9ff; border-bottom: 1px solid #bae6fd; font-size: 0.84rem; color: #0369a1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: #0284c7; flex-shrink: 0;">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>
+              <strong>Regla de Conexión Telegram:</strong> Todo oficial debe pulsar <strong>/start</strong> en el bot
+              una sola vez antes de poder recibir mensajes.
+            </span>
+          </div>
+          <a id="link-directo-bot" href="#" target="_blank" rel="noopener" class="badge badge-info"
+            style="font-size: 0.8rem; text-decoration: none; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+            <span id="label-link-bot">Abrir Bot en Telegram</span> &rarr;
+          </a>
+        </div>
+
+        <!-- Formulario para Registrar / Asignar Nuevo Destinatario -->
+        <div style="padding: 16px 20px; background: #fafbfc; border-bottom: 1px solid var(--border-color);">
+          <form id="form-nuevo-destinatario"
+            style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto; gap: 12px; align-items: end;">
+            <div class="form-group" style="margin: 0;">
+              <label for="dest-nombre" class="filter-label" style="margin-bottom: 4px;">Nombre / Oficial /
+                Unidad:</label>
+              <input type="text" id="dest-nombre" class="form-control" placeholder="Ej: Comisario Morales / Chacalluta"
+                required>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="dest-chat-id" class="filter-label" style="margin-bottom: 4px;">Chat ID de Telegram:</label>
+              <input type="text" id="dest-chat-id" class="form-control" placeholder="Ej: 7961617813 ó -1004420809456"
+                required>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="dest-rol" class="filter-label" style="margin-bottom: 4px;">Rol / Unidad Destino:</label>
+              <input type="text" id="dest-rol" class="form-control" placeholder="Ej: Operaciones / Enrolamiento"
+                value="Operativo">
+            </div>
+            <button type="submit" id="btn-agregar-destinatario" class="btn btn-primary"
+              style="height: 38px; white-space: nowrap;">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>+ Asignar ID</span>
+            </button>
+          </form>
+          <div id="dest-feedback" class="crypto-feedback-box" style="display: none; margin-top: 10px;"></div>
+        </div>
+
+        <!-- Tabla de Destinatarios Asignados -->
+        <div class="table-container" style="max-height: 420px; overflow-y: auto;">
           <table class="data-table">
             <thead>
               <tr>
-                <th style="width: 160px;">Fecha y Hora</th>
-                <th style="width: 220px;">Tipo de Evento</th>
-                <th>Archivo o Recurso</th>
-                <th>Operador / Proceso</th>
-                <th>Detalle y Observaciones</th>
+                <th>Oficial / Destinatario</th>
+                <th>Chat ID Telegram</th>
+                <th>Rol / Unidad</th>
+                <th>Estado</th>
+                <th>Fecha Registro</th>
+                <th style="text-align: center;">Acciones Operativas</th>
               </tr>
             </thead>
-            <tbody id="audit-table-body">
+            <tbody id="destinatarios-table-body">
               <tr>
-                <td colspan="5" style="text-align:center; padding: 24px;">Cargando bitácora inmutable...</td>
+                <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                  Cargando destinatarios autorizados...
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="pagination-footer"
-          style="margin: 0 -24px -24px -24px; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.15); background: rgba(248, 250, 252, 0.4); border-radius: 0 0 12px 12px;">
-          <span id="audit-page-info" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 600;">Página 1</span>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-sm" id="btn-audit-prev" disabled>Anterior</button>
-            <button class="btn btn-secondary btn-sm" id="btn-audit-next">Siguiente</button>
+      </div>
+
+      <!-- Tarjeta 3: Bitácora de Envíos y Auditoría de Notificaciones -->
+      <div class="table-card" style="margin-top: 24px;">
+        <div class="table-header-bar">
+          <div class="chart-title">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <line x1="16" x2="16" y1="2" y2="6" />
+              <line x1="8" x2="8" y1="2" y2="6" />
+              <line x1="3" x2="21" y1="10" y2="10" />
+            </svg>
+            <span>Historial de Envíos de Reportes y Notificaciones</span>
+            <span class="badge" id="schedule-history-count" style="background-color: white; color: black; border: 1px solid #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);">0 registros</span>
           </div>
+          <button type="button" id="btn-refresh-schedule-history" class="btn btn-secondary btn-sm"
+            title="Actualizar historial">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+              <path d="M16 16h5v5" />
+            </svg>
+            <span>Actualizar</span>
+          </button>
+        </div>
+        <div class="table-container" style="max-height: 380px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha y Hora (Chile)</th>
+                <th>Tipo de Despacho</th>
+                <th>Período Reportado</th>
+                <th style="text-align:right;">Total Enrolados</th>
+                <th>Cumplimiento SLA</th>
+                <th>Canal Destino</th>
+                <th>Estado Entrega</th>
+                <th>Message ID</th>
+              </tr>
+            </thead>
+            <tbody id="schedule-history-tbody">
+              <tr>
+                <td colspan="8" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                  Cargando bitácora de despachos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </section>
 
-    <!-- ========================================== -->
-    <!-- TAB 5: AJUSTES & GESTIÓN DE HORARIOS -->
-    <!-- ========================================== -->
-    
+    </section>

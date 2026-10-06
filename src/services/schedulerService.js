@@ -56,7 +56,8 @@ async function getConfigFromDB() {
       "SELECT config_value FROM scheduler_config WHERE config_key = 'current'"
     );
     if (rows.length === 0) return null;
-    return JSON.parse(rows[0].config_value);
+    const val = rows[0].config_value;
+    return typeof val === 'string' ? JSON.parse(val) : val;
   } catch (err) {
     console.error("[SCHEDULER] Error leyendo config de DB:", err.message);
     return null;

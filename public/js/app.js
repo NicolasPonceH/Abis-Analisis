@@ -1,4 +1,4 @@
-import { state } from './core/state.js';
+﻿import { state } from './core/state.js';
 import { escapeHtml } from './core/utils.js';
 import { bklitDataLabelsPlugin } from './components/charts.js';
 import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportExcel, exportCurrentReportCsv, sendReportToTelegram } from './components/export.js';
@@ -10,9 +10,9 @@ import { auditState, cargarBitacoraAuditoria } from './modules/auditoria.js';
 import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js';
 
 export function setupEventListeners() {
-  // Función para activar pestaña basada en el hash o data-tab
+  // FunciÃ³n para activar pestaÃ±a basada en el hash o data-tab
   const activateTab = (tabTarget) => {
-    document.querySelectorAll(".tab-button").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab-button:not(a)").forEach((b) => b.classList.remove("active"));
     document.querySelectorAll(".tab-content").forEach((c) => (c.style.display = "none"));
     
     const btn = document.querySelector(`.tab-button[data-tab="${tabTarget}"]`);
@@ -40,10 +40,14 @@ export function setupEventListeners() {
     if (tabTarget === "ajustes") {
       loadScheduleSettings();
     }
+    
+    if (tabTarget === "analisis-documental") {
+      initSIADTab();
+    }
   };
 
   // Manejo de tabs (click -> cambia hash)
-  document.querySelectorAll(".tab-button").forEach((btn) => {
+  document.querySelectorAll(".tab-button:not(a)").forEach((btn) => {
     btn.addEventListener("click", () => {
       const tabTarget = btn.getAttribute("data-tab");
       window.location.hash = tabTarget;
@@ -56,7 +60,7 @@ export function setupEventListeners() {
     activateTab(hash);
   });
 
-  // Activar pestaña inicial al cargar la página
+  // Activar pestaÃ±a inicial al cargar la pÃ¡gina
   const initialHash = window.location.hash.replace("#", "") || "metricas";
   activateTab(initialHash);
 
@@ -71,7 +75,7 @@ export function setupEventListeners() {
     });
   }
 
-  // Cambio de fecha única (Reactivo inmediato)
+  // Cambio de fecha Ãºnica (Reactivo inmediato)
   const dateSingle = document.getElementById("filter-date-single");
   if (dateSingle) {
     dateSingle.addEventListener("change", (e) => {
@@ -105,7 +109,7 @@ export function setupEventListeners() {
     });
   }
 
-  // Botón Aplicar Filtro (Manual opcional)
+  // BotÃ³n Aplicar Filtro (Manual opcional)
   const btnApplyFilter = document.getElementById("btn-apply-filter");
   if (btnApplyFilter) {
     btnApplyFilter.addEventListener("click", () => {
@@ -113,7 +117,7 @@ export function setupEventListeners() {
     });
   }
 
-  // Botones de presets rápidos para métricas
+  // Botones de presets rÃ¡pidos para mÃ©tricas
   document.querySelectorAll(".preset-btn[data-preset]").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".preset-btn[data-preset]").forEach((b) => b.classList.remove("active"));
@@ -122,7 +126,7 @@ export function setupEventListeners() {
     });
   });
 
-  // Búsqueda en tabla de detalle
+  // BÃºsqueda en tabla de detalle
   const searchInput = document.getElementById("table-search-input");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
@@ -130,7 +134,7 @@ export function setupEventListeners() {
     });
   }
 
-  // Botones de exportación
+  // Botones de exportaciÃ³n
   const btnExportWord = document.getElementById("btn-export-word");
   if (btnExportWord) {
     btnExportWord.addEventListener("click", exportCurrentReportWord);
@@ -157,7 +161,7 @@ export function setupEventListeners() {
   }
 
 
-  // Inicializar controles interactivos de Tendencias y Evolución
+  // Inicializar controles interactivos de Tendencias y EvoluciÃ³n
   setupTrendControls();
 
   // Inicializar controles de Ajustes y Horarios
@@ -182,7 +186,7 @@ export async function checkSystemHealth() {
     console.error("Error en health check:", err);
     const badgeEl = document.getElementById("db-status-badge");
     if (badgeEl) {
-      badgeEl.innerHTML = `<span class="status-dot" style="background:#dc2626;box-shadow:0 0 8px #dc2626;"></span> Error de conexión`;
+      badgeEl.innerHTML = `<span class="status-dot" style="background:#dc2626;box-shadow:0 0 8px #dc2626;"></span> Error de conexiÃ³n`;
     }
   }
 }
@@ -218,33 +222,33 @@ export async function loadAvailableDates() {
 
 
 /**
- * Sistema ABIS - Controlador de Frontend y Dashboard Analítico Ejecutivo (PDI Chile)
- * Manejo de estado reactivo, gráficos Chart.js de alta fidelidad, filtros y exportación.
+ * Sistema ABIS - Controlador de Frontend y Dashboard AnalÃ­tico Ejecutivo (PDI Chile)
+ * Manejo de estado reactivo, grÃ¡ficos Chart.js de alta fidelidad, filtros y exportaciÃ³n.
  */
 
-// Estado global de la aplicación
+// Estado global de la aplicaciÃ³n
 
 
 // Variable global para el reloj en vivo de ajustes
 
 
-// Función de sanitización anti-XSS
+// FunciÃ³n de sanitizaciÃ³n anti-XSS
 
 
 // Paleta de colores ejecutiva institucional para Chart.js (Fondo claro / Alto contraste)
-// Paleta de colores ejecutiva inspirada en la estética bklit-ui / shadcn
+// Paleta de colores ejecutiva inspirada en la estÃ©tica bklit-ui / shadcn
 
 
-// Evitar que el navegador restaure la posición de scroll al recargar
+// Evitar que el navegador restaure la posiciÃ³n de scroll al recargar
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
 
-// Inicialización de la aplicación
+// InicializaciÃ³n de la aplicaciÃ³n
 document.addEventListener("DOMContentLoaded", async () => {
   // Garantizar scroll al inicio
   window.scrollTo(0, 0);
-  // Plugin para crear un verdadero "Glow Difuminado" en las gráficas al pasar el mouse
+  // Plugin para crear un verdadero "Glow Difuminado" en las grÃ¡ficas al pasar el mouse
   if (typeof Chart !== 'undefined') {
     const trueGlowPlugin = {
       id: 'trueGlowHover',
@@ -253,9 +257,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (active.length > 0) {
           const ctx = chart.ctx;
           ctx.save();
-          // Configuración del difuminado (sombra HTML5 real)
+          // ConfiguraciÃ³n del difuminado (sombra HTML5 real)
           ctx.shadowColor = "rgba(255, 209, 0, 0.8)"; // Amarillo
-          ctx.shadowBlur = 14; // Más difuminado
+          ctx.shadowBlur = 14; // MÃ¡s difuminado
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
           
@@ -273,7 +277,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     Chart.register(trueGlowPlugin);
     
-    // Restaurar el borde a la normalidad para que sea "más delgado"
+    // Restaurar el borde a la normalidad para que sea "mÃ¡s delgado"
     Chart.defaults.elements.bar.hoverBorderWidth = 0;
     Chart.defaults.elements.arc.hoverBorderWidth = 0;
   }
@@ -290,25 +294,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarBitacoraAuditoria();
 });
 
-// Configuración de escuchadores de eventos
+// ConfiguraciÃ³n de escuchadores de eventos
 
 
-// Verifica el estado del backend y la base de datos con métricas del Connection Pool
+// Verifica el estado del backend y la base de datos con mÃ©tricas del Connection Pool
 
 
 // Carga la lista de fechas disponibles
 
 
-// Control de visibilidad según modo de filtro
+// Control de visibilidad segÃºn modo de filtro
 
 
 // Aplica presets de fecha
 
 
-// Carga las métricas principales según el filtro activo
+// Carga las mÃ©tricas principales segÃºn el filtro activo
 
 
-// Actualiza el resumen textual y dinámico del período
+// Actualiza el resumen textual y dinÃ¡mico del perÃ­odo
 
 
 // Renderiza el banner superior de salud ejecutiva (Scorecard)
@@ -317,56 +321,56 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Renderiza los KPIs con animaciones
 
 
-// Animación de conteo numérico
+// AnimaciÃ³n de conteo numÃ©rico
 
 
-// Helpers para diseño de gráficos amigables, legibles y modernos
-
-
-
+// Helpers para diseÃ±o de grÃ¡ficos amigables, legibles y modernos
 
 
 
-// Configuración de Tooltip amigable, moderno y de alto contraste (Dark Card translúcida)
 
 
-// Plugin de etiquetas numéricas directas y métricas visuales estilo amigable y limpio
+
+// ConfiguraciÃ³n de Tooltip amigable, moderno y de alto contraste (Dark Card translÃºcida)
+
+
+// Plugin de etiquetas numÃ©ricas directas y mÃ©tricas visuales estilo amigable y limpio
 
 Chart.register(bklitDataLabelsPlugin);
 
-// Actualiza los badges en las cabeceras de las tarjetas de gráficos con los números relacionados
+// Actualiza los badges en las cabeceras de las tarjetas de grÃ¡ficos con los nÃºmeros relacionados
 
 
-// Renderizado de gráficos con Chart.js (Estilo bklit-ui / shadcn)
+// Renderizado de grÃ¡ficos con Chart.js (Estilo bklit-ui / shadcn)
 
 
 
 
-// Gráfico 1: Rendimiento por Cuartel (Con barras con gradiente suave, etiquetas legibles y números directos)
+// GrÃ¡fico 1: Rendimiento por Cuartel (Con barras con gradiente suave, etiquetas legibles y nÃºmeros directos)
 
 
-// Gráfico 2: Nacionalidades (Barras horizontales con gradientes armónicos y cifras holgadas)
+// GrÃ¡fico 2: Nacionalidades (Barras horizontales con gradientes armÃ³nicos y cifras holgadas)
 
 
-// Gráfico 3: Sincronización Donut Amigable (Con anillo suave y cifra central nítida)
+// GrÃ¡fico 3: SincronizaciÃ³n Donut Amigable (Con anillo suave y cifra central nÃ­tida)
 
 
-// Gráfico 4: Demografía Cruzada (Widget HTML Custom)
+// GrÃ¡fico 4: DemografÃ­a Cruzada (Widget HTML Custom)
 
 
-// Gráfico 5: Grupo Etario Donut Flotante (Con cifras en leyendas y centro)
+// GrÃ¡fico 5: Grupo Etario Donut Flotante (Con cifras en leyendas y centro)
 
 
-// Gráfico 6: Dispositivos de Captura (Tablet vs PC con donut suave y balanceado)
+// GrÃ¡fico 6: Dispositivos de Captura (Tablet vs PC con donut suave y balanceado)
 
 
-// Gráfico 7: Despliegue Territorial por Región Policial (Barras con gradiente horizontal)
+// GrÃ¡fico 7: Despliegue Territorial por RegiÃ³n Policial (Barras con gradiente horizontal)
 
 
-// Gráfico 8: Histograma de Tramos Etarios & Protección NNA (Barras con gradientes verticales diferenciados)
+// GrÃ¡fico 8: Histograma de Tramos Etarios & ProtecciÃ³n NNA (Barras con gradientes verticales diferenciados)
 
 
-// Gráfico 9: Perfil Sociolaboral (Top 10 Profesiones u Oficios Declarados)
+// GrÃ¡fico 9: Perfil Sociolaboral (Top 10 Profesiones u Oficios Declarados)
  // "fecha" | "total"
 
 
@@ -380,39 +384,39 @@ Chart.register(bklitDataLabelsPlugin);
 
 
 // ==========================================================================
-// MÓDULO AVANZADO: EVOLUCIÓN TEMPORAL Y TENDENCIAS HISTÓRICAS (TAB 3)
+// MÃ“DULO AVANZADO: EVOLUCIÃ“N TEMPORAL Y TENDENCIAS HISTÃ“RICAS (TAB 3)
 // ==========================================================================
 
-// Carga de la serie histórica de tendencias desde la API
+// Carga de la serie histÃ³rica de tendencias desde la API
 
 
-// Actualiza vista de tendencias: KPIs, filtros, gráfico y matriz detallada
+// Actualiza vista de tendencias: KPIs, filtros, grÃ¡fico y matriz detallada
 
 
-// Gráfico de Tendencia Histórica Profesional (Gradiente Canvas Área estilo bklit-ui)
+// GrÃ¡fico de Tendencia HistÃ³rica Profesional (Gradiente Canvas Ãrea estilo bklit-ui)
 
 
-// Renderizado de tabla de desglose histórico día por día
+// Renderizado de tabla de desglose histÃ³rico dÃ­a por dÃ­a
 
 
-// Configura límites min/max para el selector de calendario de la matriz histórica
+// Configura lÃ­mites min/max para el selector de calendario de la matriz histÃ³rica
 
 
-// Configuración de eventos de la pestaña de Evolución y Tendencias
+// ConfiguraciÃ³n de eventos de la pestaÃ±a de EvoluciÃ³n y Tendencias
 
 
-// Exporta la serie temporal histórica a formato CSV institucional
+// Exporta la serie temporal histÃ³rica a formato CSV institucional
 
 
-// Acción interactiva: Salta desde la matriz histórica directamente a la jornada en el Panel Analítico
+// AcciÃ³n interactiva: Salta desde la matriz histÃ³rica directamente a la jornada en el Panel AnalÃ­tico
 window.examinarFecha = function(fecha) {
   if (!fecha) return;
 
-  // 1. Activar pestaña de Métricas
+  // 1. Activar pestaÃ±a de MÃ©tricas
   const tabBtn = document.querySelector('.tab-button[data-tab="metricas"]');
   if (tabBtn) tabBtn.click();
 
-  // 2. Establecer modo a Fecha Específica
+  // 2. Establecer modo a Fecha EspecÃ­fica
   const filterModeSelect = document.getElementById("filter-mode-select");
   if (filterModeSelect) {
     filterModeSelect.value = "single";
@@ -427,7 +431,7 @@ window.examinarFecha = function(fecha) {
     state.currentDate = fecha;
   }
 
-  // 4. Cargar métricas de esa fecha
+  // 4. Cargar mÃ©tricas de esa fecha
   loadMetrics();
 
   // 5. Scroll suave al inicio del panel
@@ -439,32 +443,32 @@ window.examinarFecha = function(fecha) {
 
 
 
-// Configuración de Drag & Drop para Ingesta Web
+// ConfiguraciÃ³n de Drag & Drop para Ingesta Web
 
 
-// Variable para retener el archivo y tipo de acción en espera de autorización
+// Variable para retener el archivo y tipo de acciÃ³n en espera de autorizaciÃ³n
 
  // "ingesta", "cifrar", "descifrar"
 
 // Abre el modal de seguridad solicitando clave institucional
 
 
-// Cierra el modal de autorización
+// Cierra el modal de autorizaciÃ³n
 
 
-// Configuración de listeners del modal
+// ConfiguraciÃ³n de listeners del modal
 
 
-// Procesa la confirmación de autorización según la acción solicitada
+// Procesa la confirmaciÃ³n de autorizaciÃ³n segÃºn la acciÃ³n solicitada
 
 
-// Ejecuta el guardado de configuración de programación tras verificar la clave de autorización
+// Ejecuta el guardado de configuraciÃ³n de programaciÃ³n tras verificar la clave de autorizaciÃ³n
 
 
-// Envío y procesamiento seguro del archivo al backend con clave de autorización
+// EnvÃ­o y procesamiento seguro del archivo al backend con clave de autorizaciÃ³n
 
 
-// Exportación del reporte a JSON
+// ExportaciÃ³n del reporte a JSON
 
 
 // Descarga de Informe Oficial en Microsoft Word (.docx) formal
@@ -473,14 +477,14 @@ window.examinarFecha = function(fecha) {
 // Descarga de Informe Oficial en Microsoft Excel (.xlsx) formateado institucional
 
 
-// Exportación del reporte institucional a CSV con formato oficial PDI y BOM UTF-8
+// ExportaciÃ³n del reporte institucional a CSV con formato oficial PDI y BOM UTF-8
 
 
-// Envío manual del reporte activo al bot de Telegram institucional
+// EnvÃ­o manual del reporte activo al bot de Telegram institucional
 
 
 // ==========================================================================
-// MÓDULO DE AJUSTES: GESTIÓN DE HORARIOS DE REPORTE Y AUTOMATIZACIÓN
+// MÃ“DULO DE AJUSTES: GESTIÃ“N DE HORARIOS DE REPORTE Y AUTOMATIZACIÃ“N
 // ==========================================================================
 
 state.scheduleConfig = null;
@@ -492,7 +496,7 @@ state.serverTimeOffset = 0;
 
 
 
-// Carga la configuración actual de horarios desde la API
+// Carga la configuraciÃ³n actual de horarios desde la API
 
 
 // Renderiza los chips visuales de las horas configuradas
@@ -500,16 +504,16 @@ state.serverTimeOffset = 0;
 
 
 
-// Añade un horario si no existe y es válido
+// AÃ±ade un horario si no existe y es vÃ¡lido
 
 
-// Actualiza el texto de alerta según el toggle switch
+// Actualiza el texto de alerta segÃºn el toggle switch
 
 
-// Renderiza la tabla de bitácora histórica de despachos
+// Renderiza la tabla de bitÃ¡cora histÃ³rica de despachos
 
 
-// Configura los eventos interactivos del módulo de Ajustes
+// Configura los eventos interactivos del mÃ³dulo de Ajustes
 
 
 // ==========================================================================
@@ -522,7 +526,7 @@ state.telegramBotLink = "https://t.me/AbisSystemBot";
 // Carga la lista de destinatarios desde el backend
 
 
-// Función auxiliar de sanitización para prevenir XSS en renderizado de texto
+// FunciÃ³n auxiliar de sanitizaciÃ³n para prevenir XSS en renderizado de texto
 
 
 // Renderiza la tabla de destinatarios con acciones operativas
@@ -545,7 +549,7 @@ window.probarDestinatarioIndividual = async function(id, nombre, btn) {
           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           <span>Destinatario Pausado</span>
         </div>
-        No es posible enviar prueba a '${nombre}' porque está pausado. Debe activarlo primero.
+        No es posible enviar prueba a '${nombre}' porque estÃ¡ pausado. Debe activarlo primero.
       `;
       setTimeout(() => { feedback.style.display = "none"; }, 5000);
     }
@@ -566,13 +570,16 @@ window.probarDestinatarioIndividual = async function(id, nombre, btn) {
       throw new Error(data.error || "No se pudo enviar el mensaje.");
     }
 
-    if (feedback) {
+    if (typeof window.showTelegramPopup === "function") {
+      const formattedDate = new Date().toLocaleDateString("es-CL", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      window.showTelegramPopup(`Se ha enviado la verificaciÃ³n exitosamente a ${nombre}.`, formattedDate);
+    } else if (feedback) {
       feedback.className = "crypto-feedback-box success";
       feedback.style.display = "block";
       feedback.innerHTML = `
         <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Mensaje de Verificación Enviado</span>
+          <span>Mensaje de VerificaciÃ³n Enviado</span>
         </div>
         ${data.mensaje}
       `;
@@ -602,25 +609,25 @@ window.solicitarToggleDestinatario = function(id, nombre, chatId, estadoActual) 
   promptAuthModal({ id, nombre, chatId, nuevoEstado }, "destinatario_toggle");
 };
 
-// Solicitar eliminación de destinatario
+// Solicitar eliminaciÃ³n de destinatario
 window.solicitarEliminarDestinatario = function(id, nombre, chatId) {
-  if (!confirm(`¿Está seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
+  if (!confirm(`Â¿EstÃ¡ seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
     return;
   }
   promptAuthModal({ id, nombre, chatId }, "destinatario_eliminar");
 };
 
-// Ejecución autorizada para agregar destinatario
+// EjecuciÃ³n autorizada para agregar destinatario
 
 
-// Ejecución autorizada para toggle estado destinatario
+// EjecuciÃ³n autorizada para toggle estado destinatario
 
 
-// Ejecución autorizada para eliminar destinatario
+// EjecuciÃ³n autorizada para eliminar destinatario
 
 
 // ==========================================================================
-// MÓDULO: COMPARADOR DE PERÍODOS (BENCHMARKING)
+// MÃ“DULO: COMPARADOR DE PERÃODOS (BENCHMARKING)
 // ==========================================================================
 
 
@@ -629,7 +636,7 @@ document.getElementById("btn-comp-semana")?.addEventListener("click", () => carg
 document.getElementById("btn-comp-mes")?.addEventListener("click", () => cargarComparacionPeriodos("mes"));
 
 // ==========================================================================
-// MÓDULO: BITÁCORA Y AUDITORÍA
+// MÃ“DULO: BITÃCORA Y AUDITORÃA
 // ==========================================================================
 
 
@@ -656,7 +663,7 @@ document.getElementById("btn-audit-next")?.addEventListener("click", () => {
 });
 
 // ==========================================================================
-// MÓDULO DE HOJA DE CÁLCULO / PORTAPAPELES DIRECTO (ORACLE & EXCEL)
+// MÃ“DULO DE HOJA DE CÃLCULO / PORTAPAPELES DIRECTO (ORACLE & EXCEL)
 // ==========================================================================
 
 
@@ -679,6 +686,48 @@ document.getElementById("btn-audit-next")?.addEventListener("click", () => {
 
 
 
+
+
+
+
+// ========================================== 
+// MÓDULO: ANÁLISIS DOCUMENTAL (SIAD) 
+// ==========================================
+
+let siadInitialized = false;
+
+window.initSIADTab = async function() {
+  if (siadInitialized) return;
+  siadInitialized = true;
+
+  const iframe = document.getElementById('siad-iframe');
+  const statusText = document.getElementById('siad-status-text');
+  const statusDot = document.getElementById('siad-status-dot');
+  const btnFullscreen = document.getElementById('btn-siad-fullscreen');
+
+  try {
+    statusText.textContent = 'Conectando con el módulo SIAD...';
+    // Test connection to the proxy
+    const res = await fetch('/analisis/login');
+    if (res.ok) {
+      iframe.src = iframe.getAttribute('data-src');
+      statusText.textContent = 'Módulo activo y conectado (Puerto 5001)';
+      statusDot.style.background = '#22c55e'; // verde
+    } else {
+      throw new Error('No disponible');
+    }
+  } catch (err) {
+    statusText.textContent = 'Módulo Análisis Documental no disponible (El servicio Python podría estar apagado)';
+    statusDot.style.background = '#ef4444'; // rojo
+    siadInitialized = false; // Permitir reintento la próxima vez que entre
+  }
+
+  if (btnFullscreen) {
+    btnFullscreen.addEventListener('click', () => {
+      window.open('/analisis/', '_blank');
+    });
+  }
+};
 
 
 

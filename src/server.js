@@ -24,9 +24,40 @@ const { generarReporteWord } = require("./reportes/wordReportService");
 const { generarReporteExcel } = require("./reportes/excelReportService");
 const schedulerService = require("./services/schedulerService");
 const recipientService = require("./telegram/recipientService");
+const { iniciarSIAD, detenerSIAD } = require("./services/siadService");
+const http = require("http");
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Proxy para el módulo de Análisis Documental (SIAD)
+app.use("/analisis", (req, res) => {
+  const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+  const targetUrl = `${siadUrl}${req.url}`;
+  
+  const proxyReq = http.request(targetUrl, {
+    method: req.method,
+    headers: { 
+      ...req.headers, 
+      host: new URL(siadUrl).host,
+      "X-Forwarded-Prefix": "/analisis"
+    },
+  }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  });
+  
+  proxyReq.on("error", (err) => {
+    console.error("[PROXY SIAD ERROR]", err.message);
+    res.status(502).send("El módulo de Análisis Documental no está disponible.");
+  });
+  
+  if (["POST", "PUT", "PATCH"].includes(req.method)) {
+    req.pipe(proxyReq);
+  } else {
+    proxyReq.end();
+  }
+});
 
 // Rate limiting local sin dependencias externas
 // Protege contra fuerza bruta de la contraseña INGESTA_PASSWORD
@@ -1423,10 +1454,17 @@ const server = app.listen(port, () => {
 
   // Iniciar servicio de horarios y reportes automáticos
   schedulerService.iniciarScheduler({ pool });
+
+  // Iniciar microservicio de Análisis Documental (SIAD)
+  iniciarSIAD({
+    NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
+    SIAD_PORT: process.env.SIAD_PORT || '5001',
+  });
 });
 
 function cerrarServidor() {
   detenerBot();
+  detenerSIAD();
   schedulerService.detenerScheduler();
   server.close(() => {
     pool.end().finally(() => process.exit(0));

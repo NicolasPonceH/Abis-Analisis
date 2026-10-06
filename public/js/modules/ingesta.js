@@ -80,7 +80,10 @@ export async function handleFileUpload(file, clave) {
   formData.append("archivo", file);
   formData.append("clave", clave);
 
+  let progressOverlay = null;
+
   try {
+    progressOverlay = showIngestProgress();
     const res = await fetch("/api/ingest/upload", {
       method: "POST",
       headers: {
@@ -115,9 +118,14 @@ export async function handleFileUpload(file, clave) {
         claveInput.select();
         claveInput.focus();
       }
+      if (progressOverlay && progressOverlay.parentNode) {
+        progressOverlay.parentNode.removeChild(progressOverlay);
+      }
       return;
     }
 
+    if (progressOverlay) finishIngestProgress(progressOverlay);
+    
     // Autorización exitosa: cerrar modal
     closeAuthModal();
 
@@ -164,6 +172,9 @@ export async function handleFileUpload(file, clave) {
       }
     }
   } catch (err) {
+    if (progressOverlay && progressOverlay.parentNode) {
+      progressOverlay.parentNode.removeChild(progressOverlay);
+    }
     closeAuthModal();
     if (resultsDiv) resultsDiv.style.display = "block";
     if (statusDiv) {
@@ -603,7 +614,10 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
   const claveInput = document.getElementById("input-auth-clave");
   const feedbackDiv = document.getElementById("sheet-ingest-feedback");
 
+  let progressOverlay = null;
+
   try {
+    progressOverlay = showIngestProgress();
     const res = await fetch("/api/ingest/sheet", {
       method: "POST",
       headers: {
@@ -642,9 +656,13 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
         claveInput.select();
         claveInput.focus();
       }
+      if (progressOverlay && progressOverlay.parentNode) {
+        progressOverlay.parentNode.removeChild(progressOverlay);
+      }
       return;
     }
 
+    if (progressOverlay) finishIngestProgress(progressOverlay);
     closeAuthModal();
 
     if (feedbackDiv) feedbackDiv.style.display = "block";
@@ -694,6 +712,9 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
       }
     }
   } catch (err) {
+    if (progressOverlay && progressOverlay.parentNode) {
+      progressOverlay.parentNode.removeChild(progressOverlay);
+    }
     closeAuthModal();
     if (feedbackDiv) {
       feedbackDiv.style.display = "block";
@@ -710,3 +731,36 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
   }
 }
 
+function showIngestProgress() {
+  const overlay = document.createElement("div");
+  overlay.className = "progress-overlay";
+  
+  const modal = document.createElement("div");
+  modal.className = "progress-modal";
+  modal.innerHTML = `
+    <h3 class="progress-title">Subiendo a Base de Datos</h3>
+    <p class="progress-text">Procesando registros e insertando en PostgreSQL...</p>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="ingest-progress-fill"></div>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function finishIngestProgress(overlay) {
+  if (!overlay) return;
+  const fill = overlay.querySelector("#ingest-progress-fill");
+  if (fill) {
+    fill.classList.add("progress-bar-complete");
+  }
+  setTimeout(() => {
+    overlay.style.transition = "opacity 0.4s ease";
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 400);
+  }, 600);
+}

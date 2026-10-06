@@ -458,13 +458,13 @@
 }
 
 .btn-dest-test {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: #bbf7d0;
+  background: #e0f2fe;
+  color: #0284c7;
+  border-color: #bae6fd;
 }
 .btn-dest-test:hover:not(:disabled) {
-  background: #dcfce7;
-  border-color: #86efac;
+  background: #bae6fd;
+  border-color: #7dd3fc;
 }
 
 .btn-dest-toggle {
@@ -515,7 +515,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 15, 33, 0.6);
+  background-color: rgba(220, 38, 38, 0.12);
   backdrop-filter: blur(8px);
   z-index: 99999;
   display: flex;
@@ -576,14 +576,14 @@
 }
 
 .toast-highlight {
-  background: rgba(0, 35, 76, 0.1);
+  background: rgba(250, 204, 21, 0.3);
   color: #00234c;
   padding: 3px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(0, 35, 76, 0.3);
+  border: 1px solid rgba(250, 204, 21, 0.6);
   display: inline-block;
   margin-top: 4px;
-  box-shadow: 0 2px 8px rgba(0, 35, 76, 0.05);
+  box-shadow: 0 2px 8px rgba(250, 204, 21, 0.2);
 }
 
 .toast-btn {
@@ -603,4 +603,26 @@
 .toast-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.icon-animate-check {
+  animation: checkPop3D 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-style: preserve-3d;
+}
+
+.icon-animate-cross {
+  animation: crossSpin3D 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-style: preserve-3d;
+}
+
+@keyframes checkPop3D {
+  0% { transform: scale(0) rotateX(-90deg) rotateY(45deg) translateZ(-50px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1) rotateX(0deg) rotateY(0deg) translateZ(0); opacity: 1; }
+}
+
+@keyframes crossSpin3D {
+  0% { transform: scale(0) rotateY(-180deg) rotateZ(45deg); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1) rotateY(0deg) rotateZ(0deg); opacity: 1; }
 }
