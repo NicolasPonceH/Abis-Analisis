@@ -100,8 +100,11 @@ _nlp.max_length = 2_000_000  # actas largas pueden superar el limite por defecto
 
 try:
     db.init_schema()
-    if db.count_users() == 0:
-        db.create_user("admin", generate_password_hash("admin123"), "admin")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
+            if not cur.fetchone():
+                db.create_user("admin", generate_password_hash("admin123"), "admin")
 except Exception as exc:  # PostgreSQL puede no estar disponible; el resto de la app sigue andando
     print(f"Aviso: no se pudo inicializar el esquema de PostgreSQL ({exc}).")
 
