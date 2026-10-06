@@ -685,6 +685,34 @@ def parse_police_report(raw_text):
     data["narrativas"] = narratives
     return data
 
+def build_summary_options(raw_text, entities=None):
+    """Genera dos opciones de resumen limpias y fluidas para el parte policial,
+       exclusivas para el campo 'Resumen Diligencia' del Word."""
+    meta = parse_police_report(raw_text)
+    narratives = meta.get("narrativas", [])
+    
+    # 1. SÍNTESIS CORTA (Opción A)
+    sintesis_parts = []
+    for nar in narratives:
+        sents = split_sentences_safely(nar)
+        if len(sents) > 1:
+            sintesis_parts.append(f"{sents[0]} {sents[-1]}")
+        elif sents:
+            sintesis_parts.append(sents[0])
+            
+    hechos_sinteticos = " ".join(sintesis_parts) if sintesis_parts else "Procedimiento policial ejecutado conforme a las diligencias informadas."
+    
+    # 2. COMPLETO (Opción B)
+    hechos_completos = "<br><br>".join(narratives) if narratives else hechos_sinteticos
+
+    # Devolvemos puramente el relato para no duplicar datos en la tabla del Word
+    return {"a": hechos_sinteticos, "b": hechos_completos}
+
+def summarize_text(raw_text, limit_sentences=3):
+    options = build_summary_options(raw_text)
+    return options.get("a", "")
+
+
 @app.before_request
 def require_login():
     if request.endpoint is None or request.endpoint in LOGIN_EXEMPT_ENDPOINTS:
@@ -1239,6 +1267,104 @@ def extract(filename):
     flash(error or "Texto extraído correctamente.", "error" if error else "success")
     return redirect(url_for("view_pdf", filename=filename, _anchor="ocr"))
 
+
+@app.route("/summarize/<filename>", methods=["POST"])
+def summarize(filename):
+    filename = secure_filename(filename)
+    text_path = extracted_text_path(filename)
+    if not os.path.isfile(text_path):
+        flash("Primero debes extraer el texto (OCR) antes de generar un resumen.", "error")
+        return redirect(url_for("view_pdf", filename=filename, _anchor="resumen"))
+
+    with open(text_path, encoding="utf-8") as f:
+        raw_text = f.read()
+
+    # 1. Entidades
+    ent = extract_entities(raw_text)
+    
+    # 2. Generar opciones de resumen profesional
+    summary_options_list = []
+    subdocuments = ent.get("subdocuments")
+    
+    if subdocuments and len(subdocuments) > 0:
+        parts = re.split(r"(=== INICIO DOCUMENTO: .*? ===|=== FIN DOCUMENTO: .*? ===)", raw_text)
+        current_subdoc_name = None
+        current_text = []
+        
+        for part in parts:
+            if part.startswith("=== INICIO DOCUMENTO:"):
+                current_subdoc_name = part.replace("=== INICIO DOCUMENTO: ", "").replace(" ===", "")
+            elif part.startswith("=== FIN DOCUMENTO:"):
+                subdoc_text = "".join(current_text)
+                opts = build_summary_options(subdoc_text, None)
+                summary_options_list.append({
+                    "filename": current_subdoc_name,
+                    "a": opts["a"],
+                    "b": opts["b"],
+                    "selected": "a"
+                })
+                current_text = []
+            else:
+                if current_subdoc_name:
+                    current_text.append(part)
+    else:
+        summary_opts = build_summary_options(raw_text, ent)
+        summary_options_list.append({
+            "filename": filename,
+            "a": summary_opts["a"],
+            "b": summary_opts["b"],
+            "selected": "a"
+        })
+    
+    if os.path.isfile(summary_text_path(filename)):
+        os.remove(summary_text_path(filename))
+
+    with open(summary_options_path(filename), "w", encoding="utf-8") as f:
+        json.dump(summary_options_list, f, ensure_ascii=False, indent=2)
+        
+    flash("Opciones de resumen generadas. Selecciona la que más te acomode.", "success")
+    return redirect(url_for("view_pdf", filename=filename, _anchor="resumen"))
+
+
+@app.route("/select_summary/<filename>", methods=["POST"])
+def select_summary(filename):
+    filename = secure_filename(filename)
+    
+    options_path = summary_options_path(filename)
+    if not os.path.isfile(options_path):
+        flash("No hay opciones generadas.", "error")
+        return redirect(url_for("view_pdf", filename=filename, _anchor="resumen"))
+        
+    with open(options_path, encoding="utf-8") as f:
+        summary_options = json.load(f)
+        
+    if isinstance(summary_options, dict):
+        summary_options = [summary_options]
+        
+    for i, opt in enumerate(summary_options):
+        # Allow falling back to single option form if loop is not used
+        opcion_elegida = request.form.get(f"opcion_{i}") or request.form.get("opcion")
+        if not opcion_elegida or opcion_elegida not in ["a", "b"]:
+            continue
+            
+        texto_editado = request.form.get(f"texto_{i}_{opcion_elegida}") or request.form.get(f"texto_{opcion_elegida}")
+        if texto_editado:
+            opt["selected"] = opcion_elegida
+            cleaned_text = re.sub(r'</p>|<br\s*/?>', '\n', texto_editado)
+            cleaned_text = re.sub(r'<[^>]+>', '', cleaned_text).strip()
+            opt[opcion_elegida] = cleaned_text
+            
+    with open(options_path, "w", encoding="utf-8") as f:
+        json.dump(summary_options, f, ensure_ascii=False, indent=2)
+        
+    if summary_options:
+        first_opt = summary_options[0]
+        sel = first_opt.get("selected", "a")
+        with open(summary_text_path(filename), "w", encoding="utf-8") as f:
+            f.write(first_opt.get(sel, ""))
+            
+    flash("Selección guardada. Ahora puedes exportar a Word.", "success")
+    return redirect(url_for("view_pdf", filename=filename, _anchor="resumen"))
 
 
 @app.route("/entities/<filename>", methods=["POST"])

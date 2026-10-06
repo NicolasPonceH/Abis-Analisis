@@ -733,6 +733,233 @@
       </div>
       {% endif %}
 
+      <!-- Módulo de Resúmenes Inteligentes -->
+      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700">
+        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 flex items-center justify-between border-b border-blue-900/50">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-blue-100">
+              <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+            </div>
+            <h3 class="text-[17px] font-semibold text-white tracking-wide">Resumen Asistido por IA</h3>
+          </div>
+
+          <div class="flex items-center gap-2">
+            {% if summary_options %}
+            <button type="submit" form="summary_form"
+              class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm border border-blue-600">
+              <span class="material-symbols-outlined text-[16px]">save</span>
+              <span>Guardar Selección</span>
+            </button>
+            {% endif %}
+
+            {% if extracted_text %}
+            <form action="{{ url_for('summarize', filename=viewing) }}" method="post" class="js-processing-form m-0">
+              <button type="submit"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-blue-700 hover:bg-blue-50 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                <span class="js-btn-label">{{ 'Generar' if not summary_options else 'Regenerar' }}</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        <div class="p-6">
+        <!-- Incluir librerías de Quill -->
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+        {% if summary_options %}
+        
+        <!-- Metadatos Extraídos -->
+        {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
+        
+        {% if summary_options|length > 1 %}
+        <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto mb-6 custom-scrollbar">
+          {% for opt in summary_options %}
+          <button type="button" onclick="switchTab('resumen', parseInt(this.dataset.index))" class="resumen-tab-btn px-4 py-2.5 border-b-2 {{ 'border-blue-500 text-blue-700 dark:text-blue-400' if loop.first else 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }} font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors" data-index="{{ loop.index0 }}">
+            📄 {{ opt.filename | default('Doc ' ~ loop.index) }}
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('select_summary', filename=viewing) }}" method="post" id="summary_form">
+        <div class="flex flex-col gap-4 relative">
+          {% for opt in summary_options %}
+            {% set doc_data = docs_to_render[loop.index0] if docs_to_render|length > loop.index0 else None %}
+            <div id="resumen_pane_{{ loop.index0 }}" class="resumen-pane {{ 'hidden' if not loop.first }}">
+              
+              <!-- Caja Metadatos -->
+              {% if doc_data %}
+              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
+                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500 text-[20px]">list_alt</span> Metadatos Extraídos
+                  </h4>
+                </div>
+                <div class="p-5 flex flex-col gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Card Unidad -->
+                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-3.5 flex items-center gap-3">
+                    <div class="text-blue-500 dark:text-blue-400 flex-shrink-0 bg-blue-100/50 dark:bg-blue-900/50 rounded-lg p-1.5">
+                      <span class="material-symbols-outlined text-[20px]">local_police</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">Unidad Policial</span>
+                      <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Card Delito -->
+                  <div class="bg-orange-50/80 dark:bg-orange-900/20 rounded-xl p-3.5 flex items-center gap-3">
+                    <div class="text-orange-500 dark:text-orange-400 flex-shrink-0 bg-orange-100/50 dark:bg-orange-900/50 rounded-lg p-1.5">
+                      <span class="material-symbols-outlined text-[20px]">warning</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">Motivo o Delito</span>
+                      <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-indigo-500 text-[20px]">groups</span>
+                    Detenidos Identificados
+                  </h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
+                      {% for detenido in doc_data.personas.detenidos %}
+                      <!-- Avatar Card -->
+                      <div class="flex items-center gap-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
+                          <span class="material-symbols-outlined text-[24px]">face</span>
+                        </div>
+                        <div class="flex flex-col">
+                          {% set partes = detenido.split(',') %}
+                          <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(detenido) }}</span>
+                          <span class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Sin más datos' }}</span>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
+                        No se registran detenidos.
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                </div>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Caja Resumen -->
+              {% if opt %}
+              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500 text-[20px]">auto_awesome</span> Opciones de Resumen
+                  </h4>
+                </div>
+                <div class="p-5">
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                <!-- Opción A -->
+                <label for="radio_a_{{ loop.index0 }}" class="cursor-pointer">
+                  <div class="relative flex flex-col border-2 transition-all duration-300 rounded-xl p-5 has-[:checked]:border-blue-500 has-[:checked]:bg-gradient-to-b has-[:checked]:from-blue-50/50 has-[:checked]:to-transparent has-[:checked]:shadow-[0_0_25px_rgba(59,130,246,0.2)] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 group h-full">
+                    
+                    <input type="radio" name="opcion_{{ loop.index0 }}" id="radio_a_{{ loop.index0 }}" value="a" class="peer hidden" {% if opt.get('selected', 'a') == 'a' %}checked{% endif %} required />
+                    
+                    <div class="absolute top-5 right-5 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
+                      <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
+                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">A</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Técnica</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Acta Estructurada</span>
+                      </div>
+                    </div>
+                    
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Extracto directo más la enumeración estructurada de los elementos clave detectados.</p>
+                    
+                    <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
+                    <div class="editor-wrapper mt-auto">
+                      <div id="editor_{{ loop.index0 }}_a" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Opción B -->
+                <label for="radio_b_{{ loop.index0 }}" class="cursor-pointer">
+                  <div class="relative flex flex-col border-2 transition-all duration-300 rounded-xl p-5 has-[:checked]:border-blue-500 has-[:checked]:bg-gradient-to-b has-[:checked]:from-blue-50/50 has-[:checked]:to-transparent has-[:checked]:shadow-[0_0_25px_rgba(59,130,246,0.2)] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 group h-full">
+                    
+                    <input type="radio" name="opcion_{{ loop.index0 }}" id="radio_b_{{ loop.index0 }}" value="b" class="peer hidden" {% if opt.get('selected') == 'b' %}checked{% endif %} required />
+                    
+                    <div class="absolute top-5 right-5 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
+                      <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
+                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">B</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Narrativa</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Resumen Fluido</span>
+                      </div>
+                    </div>
+                    
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Resumen en narrativa preservando la intención del parte policial original.</p>
+                    
+                    <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
+                    <div class="editor-wrapper mt-auto">
+                      <div id="editor_{{ loop.index0 }}_b" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
+                    </div>
+                  </div>
+                </label>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+            </div>
+          {% endfor %}
+        </div>
+        </form>
+        
+        <!-- AVISO DE EDICIÓN -->
+        <div class="mt-5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-start gap-3 shadow-sm">
+          <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px] mt-0.5">lightbulb</span>
+          <div>
+            <p class="text-[13px] text-blue-800 dark:text-blue-200 leading-relaxed">
+              <strong>Tip de uso:</strong> Los datos de arriba y las entidades detectadas se añadirán <strong>automáticamente</strong> a la tabla de tu archivo Word. El texto editable de arriba corresponde exclusivamente a la celda <strong>"Resumen Diligencia"</strong>.
+            </p>
+          </div>
+        </div>
+        {% elif summary_text %}
+        <div class="max-h-[400px] overflow-y-auto pr-2 bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div class="text-[14px] text-slate-700 dark:text-slate-200 leading-relaxed ql-editor" style="padding:0;">
+            {{ summary_text | safe }}
+          </div>
+        </div>
+        {% elif extracted_text %}
+        <div
+          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">No hay resúmenes generados aún. Haz
+            clic en "Generar".</p>
+        </div>
+        {% else %}
+        <div
+          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">Requiere extracción OCR primero.</p>
+        </div>
+        {% endif %}
+        </div>
+      </div>
+
 
   </div>
 
