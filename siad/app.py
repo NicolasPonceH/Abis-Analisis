@@ -81,7 +81,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret")
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password"}
+LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
@@ -136,6 +136,26 @@ def verify_password():
     except Exception as e:
         print(f"Error verificando password: {e}")
     return {"ok": False}
+
+@app.route("/api/register", methods=["POST"])
+def api_register():
+    data = request.get_json()
+    if not data or not data.get("username") or not data.get("password"):
+        return {"ok": False, "error": "Faltan datos obligatorios"}, 400
+    
+    username = data["username"]
+    password = data["password"]
+    nombre_completo = data.get("nombre_completo", username)
+    
+    try:
+        if db.get_user_by_username(username):
+            return {"ok": False, "error": "El usuario ya existe"}
+            
+        db.create_user(username, generate_password_hash(password), nombre_completo=nombre_completo)
+        return {"ok": True}
+    except Exception as e:
+        print(f"Error registrando usuario: {e}")
+        return {"ok": False, "error": str(e)}, 500
 
 
 @app.context_processor

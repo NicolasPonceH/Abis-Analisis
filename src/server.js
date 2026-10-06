@@ -183,7 +183,8 @@ function requireAuth(req, res, next) {
   const token = req.cookies.abis_auth;
   if (!token) return res.redirect("/login");
   try {
-    jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
     next();
   } catch (err) {
     res.redirect("/login");
@@ -196,10 +197,7 @@ app.get("/login", (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  if (username !== "admin") {
-    return res.render("login", { error: "Usuario incorrecto." });
-  }
-
+  
   try {
     const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
     const authRes = await fetch(`${siadUrl}/api/verify_password`, {
@@ -228,7 +226,7 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/", requireAuth, (req, res) => {
-  res.render("index");
+  res.render("index", { user: req.user });
 });
 
 // Servir archivos estáticos del frontend (Dashboard Web)
