@@ -2,6 +2,8 @@ require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const multer = require("multer");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const { obtenerReporteDiario } = require("./reportes/reporteDiario");
 const {
@@ -136,6 +138,8 @@ const upload = multer({
 });
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Middleware de Rate Limiting Local
 const rateLimit = (ms = 15000, maxAttempts = 20) => {
@@ -173,7 +177,57 @@ const rateLimit = (ms = 15000, maxAttempts = 20) => {
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-app.get("/", (req, res) => {
+const JWT_SECRET = process.env.SECRET_KEY || "dev-only-secret";
+
+function requireAuth(req, res, next) {
+  const token = req.cookies.abis_auth;
+  if (!token) return res.redirect("/login");
+  try {
+    jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (err) {
+    res.redirect("/login");
+  }
+}
+
+app.get("/login", (req, res) => {
+  res.render("login", { error: null });
+});
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  if (username !== "admin") {
+    return res.render("login", { error: "Usuario incorrecto." });
+  }
+
+  try {
+    const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+    const authRes = await fetch(`${siadUrl}/api/verify_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    
+    if (authRes.ok) {
+      const data = await authRes.json();
+      if (data.ok) {
+        const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "8h" });
+        res.cookie("abis_auth", token, { httpOnly: true, maxAge: 8 * 3600 * 1000 });
+        return res.redirect("/");
+      }
+    }
+    return res.render("login", { error: "Contraseña incorrecta." });
+  } catch (err) {
+    return res.render("login", { error: "Error de conexión con el sistema de validación." });
+  }
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie("abis_auth");
+  res.redirect("/login");
+});
+
+app.get("/", requireAuth, (req, res) => {
   res.render("index");
 });
 
