@@ -940,7 +940,7 @@
               <!-- Personas -->
               {% set p_count = doc_data.personas.values() | map('length') | sum if doc_data.personas else 0 %}
               {% if p_count > 0 %}
-              <div class="rounded-xl p-5 bg-purple-50/30">
+              <div class="border rounded-xl p-5 border-purple-200 bg-purple-50/30">
                 <div class="flex items-center justify-between mb-4 pb-2 border-b border-purple-100">
                   <div class="flex items-center gap-2 text-purple-700">
                     <span class="material-symbols-outlined text-[20px]">person_search</span>
