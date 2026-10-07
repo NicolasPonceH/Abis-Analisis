@@ -520,8 +520,6 @@
     </div>
 
     <!-- 4 & 5. Módulos de Inteligencia (8 Columnas) -->
-    <!-- Barra redimensionable (oculta en móviles) -->
-    <div class="hidden lg:flex w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-blue-500 dark:hover:bg-blue-400 cursor-col-resize rounded-full mx-1 transition-colors self-stretch" id="resizer"></div>
 
     <!-- 4. Panel Derecho (Entidades y Resumen) -->
     <div class="flex flex-col gap-6 w-full lg:flex-1" id="split-right">
@@ -691,15 +689,9 @@
                 </div>
                 </div>
               {% endif %}
-              <!-- Caja Resumen -->
+              <!-- Caja Resumen (Sin envoltorio) -->
               {% if opt %}
-              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-500 text-[20px]">auto_awesome</span> Opciones de Resumen
-                  </h4>
-                </div>
-                <div class="p-5">
+                <div class="mb-2">
                   <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
                 <!-- Opción A -->
                 <label for="radio_a_{{ loop.index0 }}" class="cursor-pointer">
@@ -760,7 +752,6 @@
                 </label>
                   </div>
                 </div>
-              </div>
               {% endif %}
 
             </div>
@@ -1412,37 +1403,7 @@
       });
   }
 
-  // Resizer functionality
-  const resizer = document.getElementById('resizer');
-  const leftSide = document.getElementById('split-left');
-  const container = document.getElementById('split-container');
-  let isResizing = false;
 
-  if (resizer) {
-    resizer.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        document.body.style.cursor = 'col-resize';
-        e.preventDefault(); // Evitar selección de texto
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-        const containerRect = container.getBoundingClientRect();
-        // Calculate new width percentage
-        const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-        // Limit width between 20% and 80%
-        if (newWidth > 20 && newWidth < 80) {
-            leftSide.style.width = `${newWidth}%`;
-        }
-    });
-
-    document.addEventListener('mouseup', () => {
-        if (isResizing) {
-            isResizing = false;
-            document.body.style.cursor = '';
-        }
-    });
-  }
 </script>
 
 {% endblock %}
