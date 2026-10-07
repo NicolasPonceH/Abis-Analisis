@@ -737,30 +737,44 @@ def build_summary_options(raw_text, entities=None):
     for nar in narratives:
         all_sents.extend(split_sentences_safely(nar))
         
-    # 1. SÍNTESIS INTELIGENTE (Opción A - Info más importante, max ~6 líneas)
+    # 1. SÍNTESIS INTELIGENTE (Opción A - Info más importante, ultra corta)
     full_narrative = " ".join(all_sents)
     hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
+    hechos_completos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     
     if full_narrative:
         try:
             doc = _nlp(full_narrative)
-            # Extraer las 3 oraciones más importantes (aprox 6 líneas)
-            tr_sents = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=15, limit_sentences=3)]
-            if tr_sents:
-                # Mantener coherencia ordenándolas como aparecen en el texto original
-                ordered_sents = sorted(tr_sents, key=lambda s: full_narrative.find(s))
-                hechos_sinteticos = " ".join(ordered_sents)
+            
+            # Opción A: Ultra corta (max 1 oracion, max ~6 líneas = ~320 chars)
+            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=10, limit_sentences=1)]
+            if tr_sents_a:
+                ordered_a = sorted(tr_sents_a, key=lambda s: full_narrative.find(s))
+                hechos_sinteticos = " ".join(ordered_a)
             else:
                 hechos_sinteticos = full_narrative
-        except Exception:
-            hechos_sinteticos = " ".join(all_sents[:3])
-    
-    # 2. RESUMEN NARRATIVO COMPLETO (Opción B)
-    if all_sents:
-        hechos_completos = " ".join(all_sents) # Dejar el relato completo o hasta donde llegue
-    else:
-        hechos_completos = hechos_sinteticos
+                
+            # Truncado estricto si sigue siendo muy largo (para forzar <= 6 líneas visuales)
+            if len(hechos_sinteticos) > 320:
+                hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
 
+            # Opción B: Resumen fluido (max 3 oraciones, resume pero no deja original)
+            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=20, limit_sentences=3)]
+            if tr_sents_b:
+                ordered_b = sorted(tr_sents_b, key=lambda s: full_narrative.find(s))
+                hechos_completos = " ".join(ordered_b)
+            else:
+                hechos_completos = full_narrative
+                
+            if len(hechos_completos) > 1200:
+                hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
+                
+        except Exception:
+            hechos_sinteticos = " ".join(all_sents[:1])
+            if len(hechos_sinteticos) > 320:
+                hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
+            hechos_completos = " ".join(all_sents[:3])
+    
     # Devolvemos puramente el relato para no duplicar datos en la tabla del Word
     return {"a": hechos_sinteticos, "b": hechos_completos}
 
