@@ -1542,6 +1542,11 @@ def export_docx(filename):
             return jsonify({"error": "El archivo Word está abierto. Ciérralo antes de generar la vista previa."}), 409
         flash("El archivo Word está abierto en tu computador. Por favor ciérralo antes de intentar generarlo nuevamente.", "error")
         return redirect(url_for("view_pdf", filename=filename, _anchor="exportar"))
+    except Exception as e:
+        import traceback
+        with open("error_log_word.txt", "w") as err_f:
+            traceback.print_exc(file=err_f)
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
     base_name = os.path.splitext(filename)[0]
     return send_from_directory(
