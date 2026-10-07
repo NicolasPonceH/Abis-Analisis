@@ -121,6 +121,18 @@
       {% endif %}
     {% endwith %}
 
+    <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin-bottom: 20px; border-radius: 4px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
+      <div style="flex-shrink: 0; margin-top: 2px;">
+        <svg style="width: 20px; height: 20px; color: #f59e0b;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div style="flex: 1;">
+        <strong style="color: #002855; font-size: 14px; display: block; margin-bottom: 2px; font-weight: 700;">Credenciales Unificadas</strong>
+        <span style="color: #475569; font-size: 12.5px; font-weight: 500; display: block; line-height: 1.4;">Para ingresar al Módulo SIAD, debe usar las mismas credenciales de su cuenta de <strong>ABIS</strong>.</span>
+      </div>
+    </div>
+
     <label for="username">Nombre de usuario</label>
     <input type="text" id="username" name="username" autofocus required>
     
@@ -137,39 +149,6 @@
     <div class="footer-note">Uso interno — Policía de Investigaciones de Chile</div>
   </form>
 
-  <!-- Toast Flotante en la Esquina Superior Derecha -->
-  <div id="credential-popup" style="position: fixed; top: 24px; right: -400px; width: 340px; background: #ffffff; border-left: 5px solid #f59e0b; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 9999; display: flex; flex-direction: column; padding: 16px; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-family: 'Inter', sans-serif;">
-    <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-      <div style="flex-shrink: 0; margin-top: 2px;">
-        <svg style="width: 24px; height: 24px; color: #f59e0b;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div style="flex: 1; text-align: left;">
-        <strong style="color: #002855; font-size: 15px; display: block; margin-bottom: 4px; font-weight: 700;">Credenciales Unificadas</strong>
-        <span style="color: #475569; font-size: 13px; font-weight: 500; display: block; line-height: 1.4;">Para ingresar al Módulo SIAD, debe usar las mismas credenciales de su cuenta de <strong>ABIS</strong>.</span>
-      </div>
-    </div>
-    <button type="button" onclick="closePopup()" style="align-self: flex-end; background: #f59e0b; border: none; color: #ffffff; font-weight: 600; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: background 0.2s ease;">
-      Entendido
-    </button>
-  </div>
 
-  <script>
-    function closePopup() {
-      const popup = document.getElementById('credential-popup');
-      popup.style.right = '-400px';
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const hasErrors = document.querySelector('.flash') !== null;
-      if (!hasErrors) {
-        const popup = document.getElementById('credential-popup');
-        setTimeout(() => {
-          popup.style.right = '24px';
-        }, 500); 
-      }
-    });
-  </script>
 </body>
 </html>
