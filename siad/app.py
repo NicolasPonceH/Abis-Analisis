@@ -737,17 +737,27 @@ def build_summary_options(raw_text, entities=None):
     for nar in narratives:
         all_sents.extend(split_sentences_safely(nar))
         
-    # 1. SÍNTESIS MUY CORTA (Opción A - Máximo 2 oraciones)
-    if all_sents:
-        hechos_sinteticos = all_sents[0]
-        if len(all_sents) > 1:
-            hechos_sinteticos += " " + all_sents[1]
-    else:
-        hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
+    # 1. SÍNTESIS INTELIGENTE (Opción A - Info más importante, max ~6 líneas)
+    full_narrative = " ".join(all_sents)
+    hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     
-    # 2. RESUMEN NARRATIVO (Opción B - Máximo 6 oraciones)
+    if full_narrative:
+        try:
+            doc = _nlp(full_narrative)
+            # Extraer las 3 oraciones más importantes (aprox 6 líneas)
+            tr_sents = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=15, limit_sentences=3)]
+            if tr_sents:
+                # Mantener coherencia ordenándolas como aparecen en el texto original
+                ordered_sents = sorted(tr_sents, key=lambda s: full_narrative.find(s))
+                hechos_sinteticos = " ".join(ordered_sents)
+            else:
+                hechos_sinteticos = full_narrative
+        except Exception:
+            hechos_sinteticos = " ".join(all_sents[:3])
+    
+    # 2. RESUMEN NARRATIVO COMPLETO (Opción B)
     if all_sents:
-        hechos_completos = " ".join(all_sents[:6])
+        hechos_completos = " ".join(all_sents) # Dejar el relato completo o hasta donde llegue
     else:
         hechos_completos = hechos_sinteticos
 
