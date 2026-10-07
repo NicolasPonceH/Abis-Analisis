@@ -24,6 +24,7 @@
     "setup": "npm install && npm run siad:install && npm run db:crear"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "docx": "^9.7.1",
     "docxtemplater": "^3.71.0",
     "dotenv": "^16.4.5",
@@ -31,6 +32,7 @@
     "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "jsdom": "^30.0.1",
+    "jsonwebtoken": "^9.0.3",
     "multer": "^2.3.0",
     "oracledb": "^7.0.1",
     "pg": "^8.12.0",

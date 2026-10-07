@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Ingresar - SIAD</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<title>Crear Cuenta - ABIS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -13,33 +13,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #002855;
+    background-color: #002855; /* Fondo Azul Navy ABIS */
+    background-image: radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.05), transparent 30%), radial-gradient(circle at 85% 20%, rgba(255, 215, 0, 0.05), transparent 30%);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   .card {
     width: 100%;
-    max-width: 360px;
+    max-width: 400px;
     background: #ffffff;
     border-radius: 16px;
-    padding: 32px 28px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    padding: 36px 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     text-align: center;
   }
   .logo-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #002855;
-    border-radius: 12px;
-    padding: 12px 18px;
-    margin-bottom: 18px;
+    background: transparent;
+    margin-bottom: 12px;
   }
-  .logo-badge img { height: 44px; width: auto; display: block; }
+  .logo-badge img { height: 44px; width: auto; display: block; border-radius: 6px; }
   h1 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
     color: #002855;
     margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   p.subtitle {
     font-size: 13px;
@@ -49,6 +50,14 @@
   .flash {
     background: #ffdad6;
     color: #93000a;
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .flash-success {
+    background: #d1fae5;
+    color: #065f46;
     font-size: 13px;
     padding: 10px 12px;
     border-radius: 8px;
@@ -73,23 +82,25 @@
     font-family: inherit;
     margin-bottom: 18px;
   }
-  input[type="password"]:focus, input[type="text"]:focus { outline: none; border-color: #002855; }
+  input[type="password"]:focus, input[type="text"]:focus { outline: none; border-color: #002855; box-shadow: 0 0 0 3px rgba(0, 40, 85, 0.1); }
   button {
     width: 100%;
-    padding: 11px;
+    padding: 12px;
     border: none;
     border-radius: 8px;
     background: #FFD700;
     color: #002855;
     font-family: inherit;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 14px;
     letter-spacing: 0.03em;
     cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s;
   }
   button:hover { background: #e9c400; }
   .footer-note {
-    margin-top: 20px;
+    margin-top: 24px;
     font-size: 11px;
     color: #9ca3af;
   }
@@ -106,28 +117,36 @@
 </style>
 </head>
 <body>
-  <form class="card" method="post" action="/login">
+  <form class="card" method="post" action="/register">
     <div class="logo-badge">
-      <img src="/static/img/pdi-logo.jpg" alt="PDI">
+      <img src="/analisis/static/img/pdi-logo.jpg" alt="PDI">
     </div>
-    <h1>SIAD</h1>
-    <p class="subtitle">Sistema de Análisis Documental — acceso restringido</p>
+    <h1>Registro ABIS</h1>
+    <p class="subtitle">Creación de credencial de operador</p>
 
-    
-      
-    
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="flash"><%= error %></div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="flash-success"><%= success %></div>
+    <% } %>
 
     <label for="username">Nombre de usuario</label>
-    <input type="text" id="username" name="username" autofocus required>
+    <input type="text" id="username" name="username" placeholder="ej. juan.perez" required autofocus>
     
+    <label for="nombre_completo">Nombre Completo</label>
+    <input type="text" id="nombre_completo" name="nombre_completo" placeholder="ej. Juan Pérez" required>
+
     <label for="password">Contraseña</label>
     <input type="password" id="password" name="password" required>
-    <input type="hidden" name="next" value="/export/informe_16-09-2026_13-26.pdf">
-    <button type="submit">Ingresar</button>
+    
+    <label for="confirm_password">Confirmar Contraseña</label>
+    <input type="password" id="confirm_password" name="confirm_password" required>
+    
+    <button type="submit">Crear Credencial</button>
 
-    <div style="margin-top: 16px; font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
-      <a href="/register" style="color: #002855; text-decoration: none; font-weight: 500;">¿No tienes cuenta? Regístrate aquí</a>
-      <a href="/forgot-password" style="color: #002855; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+    <div style="margin-top: 18px; font-size: 13px;">
+      <a href="/login" style="color: #002855; text-decoration: none; font-weight: 600;">¿Ya tienes cuenta? Ingresar aquí</a>
     </div>
 
     <div class="footer-note">Uso interno — Policía de Investigaciones de Chile</div>

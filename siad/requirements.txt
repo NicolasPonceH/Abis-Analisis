@@ -14,3 +14,6 @@ waitress>=3.0
 comtypes>=1.4.1
 fpdf2>=2.7.9
 pywin32>=306
+PyJWT>=2.8.0
+python-dotenv>=1.0.0
+docxcompose>=1.4.0
