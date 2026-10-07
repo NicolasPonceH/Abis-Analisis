@@ -669,7 +669,7 @@
               
               <!-- Caja Metadatos -->
               {% if doc_data %}
-              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
+              <div class="bg-white dark:bg-slate-900 mb-6">
                 <div class="p-4 flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- Card Unidad -->
@@ -704,7 +704,7 @@
                     {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
                       {% for detenido in doc_data.personas.detenidos %}
                       <!-- Avatar Card -->
-                      <div class="flex items-center gap-2.5 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl">
+                      <div class="flex items-center gap-2.5 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-2 rounded-xl">
                         <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
                           <span class="material-symbols-outlined text-[20px]">person</span>
                         </div>
