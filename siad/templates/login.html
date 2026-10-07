@@ -11,6 +11,7 @@
     margin: 0;
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: #00234c;
@@ -106,6 +107,18 @@
 </style>
 </head>
 <body>
+  <div style="width: 100%; max-width: 360px; background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin-bottom: 24px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.25);">
+    <div style="flex-shrink: 0; margin-top: 2px;">
+      <svg style="width: 20px; height: 20px; color: #f59e0b;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+    <div style="flex: 1;">
+      <strong style="color: #002855; font-size: 14px; display: block; margin-bottom: 2px; font-weight: 700;">Credenciales Unificadas</strong>
+      <span style="color: #475569; font-size: 12.5px; font-weight: 500; display: block; line-height: 1.4;">Para ingresar al Módulo SIAD, debe usar las mismas credenciales de su cuenta de <strong>ABIS</strong>.</span>
+    </div>
+  </div>
+
   <form class="card" method="post" action="{{ url_for('login') }}">
     <div class="logo-badge">
       <img src="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}" alt="PDI" style="filter: brightness(0) invert(1);">
@@ -120,18 +133,6 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-
-    <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin-bottom: 20px; border-radius: 4px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
-      <div style="flex-shrink: 0; margin-top: 2px;">
-        <svg style="width: 20px; height: 20px; color: #f59e0b;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div style="flex: 1;">
-        <strong style="color: #002855; font-size: 14px; display: block; margin-bottom: 2px; font-weight: 700;">Credenciales Unificadas</strong>
-        <span style="color: #475569; font-size: 12.5px; font-weight: 500; display: block; line-height: 1.4;">Para ingresar al Módulo SIAD, debe usar las mismas credenciales de su cuenta de <strong>ABIS</strong>.</span>
-      </div>
-    </div>
 
     <label for="username">Nombre de usuario</label>
     <input type="text" id="username" name="username" autofocus required>
