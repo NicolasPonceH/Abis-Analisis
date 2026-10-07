@@ -658,69 +658,7 @@
             {% set doc_data = docs_to_render[loop.index0] if docs_to_render|length > loop.index0 else None %}
             <div id="resumen_pane_{{ loop.index0 }}" class="resumen-pane {{ 'hidden' if not loop.first }}">
               
-              <!-- Caja Metadatos -->
-              {% if doc_data %}
-              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
-                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
-                  <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-500 text-[18px]">list_alt</span> Metadatos Extraídos
-                  </h4>
-                </div>
-                <div class="p-4 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <!-- Card Unidad -->
-                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-2.5 flex items-center gap-2.5">
-                    <div class="text-blue-500 dark:text-blue-400 flex-shrink-0 bg-blue-100/50 dark:bg-blue-900/50 rounded-lg p-1">
-                      <span class="material-symbols-outlined text-[18px]">local_police</span>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Unidad Policial</span>
-                      <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
-                    </div>
-                  </div>
 
-                  <!-- Card Delito -->
-                  <div class="bg-orange-50/80 dark:bg-orange-900/20 rounded-xl p-2.5 flex items-center gap-2.5">
-                    <div class="text-orange-500 dark:text-orange-400 flex-shrink-0 bg-orange-100/50 dark:bg-orange-900/50 rounded-lg p-1">
-                      <span class="material-symbols-outlined text-[18px]">warning</span>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Motivo o Delito</span>
-                      <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 mb-2.5 flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-indigo-500 text-[18px]">groups</span>
-                    Detenidos Identificados
-                  </h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
-                      {% for detenido in doc_data.personas.detenidos %}
-                      <!-- Avatar Card -->
-                      <div class="flex items-center gap-2.5 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl">
-                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
-                          <span class="material-symbols-outlined text-[20px]">person</span>
-                        </div>
-                        <div class="flex flex-col">
-                          {% set partes = detenido.split(',') %}
-                          <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(detenido) }}</span>
-                          <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Sin más datos' }}</span>
-                        </div>
-                      </div>
-                      {% endfor %}
-                    {% else %}
-                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
-                        No se registran detenidos.
-                      </div>
-                    {% endif %}
-                  </div>
-                </div>
-                </div>
-                </div>
-              {% endif %}
               <!-- Caja Resumen (Sin envoltorio) -->
               {% if opt %}
                 <div class="mb-2">
