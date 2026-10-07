@@ -6,7 +6,11 @@ const { Pool } = require("pg");
  * Optimizado para alta concurrencia, tolerancia a fallos, monitoreo en vivo y cero caídas.
  */
 const poolConfig = {
-  connectionString: process.env.DATABASE_URL,
+  host: "127.0.0.1",
+  port: 5433,
+  user: "postgres",
+  password: "abis_dev_pw",
+  database: "Abis_OCR",
   application_name: "Sistema_ABIS_PDI",
   options: "-c timezone=America/Santiago",
   
