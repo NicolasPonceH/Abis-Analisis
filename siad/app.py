@@ -974,6 +974,9 @@ def upload_pasted_text():
             merged_filename = new_merged_filename
             merged_path = os.path.join(app.config["UPLOAD_FOLDER"], merged_filename)
             
+        with open(merged_path + ".is_pasted", "w") as f:
+            f.write("true")
+            
         # Limpiar temporales
         for p in file_paths:
             if os.path.exists(p):
@@ -988,7 +991,7 @@ def upload_pasted_text():
         flash(f"Error al procesar: {e}", "error")
         return redirect(url_for("index"))
         
-    error = extraer_y_cachear_texto(merged_filename, merged_path)
+    error = procesar_documento_completo(merged_filename, merged_path, session.get("username"))
     if error:
         flash(error, "error")
     else:
@@ -1076,7 +1079,7 @@ def upload():
     # Extraer el texto (OCR) apenas se sube el documento, sin que haya que presionar "Extraer"
     # a mano -- "best effort": si falla, el documento igual queda cargado y se puede reintentar
     # despues con el boton "Reextraer".
-    error = extraer_y_cachear_texto(filename, pdf_path_para_extraer)
+    error = procesar_documento_completo(filename, pdf_path_para_extraer, session.get("username"))
     if error:
         flash(error, "error")
 
@@ -1119,7 +1122,7 @@ def api_upload():
         return jsonify({"error": f"El archivo {pdf_filename} esta dañado o no es un PDF valido."}), 400
         
     # Extraer texto (OCR)
-    error = extraer_y_cachear_texto(pdf_filename, pdf_path)
+    error = procesar_documento_completo(pdf_filename, pdf_path, session.get("username"))
     if error:
         return jsonify({"error": error, "filename": pdf_filename}), 400
         
@@ -1224,10 +1227,14 @@ def view_pdf(filename):
     except Exception:
         saved_count = None  # base de datos no disponible
     ocr_html = highlight_entities_html(extracted_text, entities_data) if extracted_text else None
+    
+    is_pasted = os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"], filename + ".is_pasted"))
+    
     return render_template(
         "index.html",
         files=files,
         viewing=filename,
+        is_pasted=is_pasted,
         extracted_text=extracted_text,
         ocr_html=ocr_html,
         summary_text=summary_text,
@@ -1261,6 +1268,65 @@ def extraer_y_cachear_texto(filename, pdf_path):
 
     with open(extracted_text_path(filename), "w", encoding="utf-8") as f:
         f.write(text)
+    return None
+
+def procesar_documento_completo(filename, pdf_path, username=None):
+    error = extraer_y_cachear_texto(filename, pdf_path)
+    if error:
+        return error
+        
+    text_path = extracted_text_path(filename)
+    if not os.path.isfile(text_path):
+        return "No se pudo extraer el texto."
+        
+    with open(text_path, encoding="utf-8") as f:
+        raw_text = f.read()
+
+    # 1. Entidades
+    data = extract_entities(raw_text)
+    with open(entities_path(filename), "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    # 2. Resumen
+    summary_options_list = []
+    subdocuments = data.get("subdocuments")
+    
+    if subdocuments and len(subdocuments) > 0:
+        parts = re.split(r"(=== INICIO DOCUMENTO: .*? ===|=== FIN DOCUMENTO: .*? ===)", raw_text)
+        current_subdoc_name = None
+        current_text = []
+        for part in parts:
+            if part.startswith("=== INICIO DOCUMENTO:"):
+                current_subdoc_name = part.replace("=== INICIO DOCUMENTO: ", "").replace(" ===", "")
+            elif part.startswith("=== FIN DOCUMENTO:"):
+                subdoc_text = "".join(current_text)
+                opts = build_summary_options(subdoc_text, None)
+                summary_options_list.append({
+                    "filename": current_subdoc_name,
+                    "a": opts["a"],
+                    "b": opts["b"],
+                    "selected": "a"
+                })
+                current_text = []
+            else:
+                if current_subdoc_name:
+                    current_text.append(part)
+    else:
+        summary_opts = build_summary_options(raw_text, data)
+        summary_options_list.append({
+            "filename": filename,
+            "a": summary_opts["a"],
+            "b": summary_opts["b"],
+            "selected": "a"
+        })
+    
+    if os.path.isfile(summary_text_path(filename)):
+        os.remove(summary_text_path(filename))
+
+    with open(summary_options_path(filename), "w", encoding="utf-8") as f:
+        json.dump(summary_options_list, f, ensure_ascii=False, indent=2)
+
+    guardar_en_historial(filename, raw_text, None, data, username)
     return None
 
 
