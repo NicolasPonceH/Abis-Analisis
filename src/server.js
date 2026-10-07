@@ -262,6 +262,15 @@ app.get("/", requireAuth, (req, res) => {
   res.render("index", { user: req.user });
 });
 
+app.get("/ajustes/:seccion?", requireAuth, (req, res) => {
+  const seccion = req.params.seccion || "general";
+  const validSections = ["general", "horarios", "cuenta", "seguridad", "administracion"];
+  if (!validSections.includes(seccion)) {
+    return res.redirect("/ajustes/general");
+  }
+  res.render("ajustes", { user: req.user, activeSection: seccion });
+});
+
 // Servir archivos estáticos del frontend (Dashboard Web)
 app.use(express.static(path.join(__dirname, "../public")));
 

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Sistema ABIS - Plataforma oficial de la Policía de Investigaciones de Chile (PDI) para análisis, auditoría y reportería ejecutiva de enrolamiento biométrico.">
+  <title>Ajustes - Sistema ABIS | PDI Chile</title>
+
+  <!-- Favicon y Tipografía Oficial PDI Chile (Open Sans Unificada) -->
+  <link rel="icon" type="image/png" href="/assets/logo-pdi.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <link rel="stylesheet" href="/css/styles.css?v=45">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/siad.css"> <!-- Para estilos base siad -->
+  
+  <style>
+    body { background-color: #E6EDF7; font-family: 'Open Sans', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    
+    .ajustes-container { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
+    
+    .ajustes-sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 32px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.02); flex-shrink: 0; overflow-y: auto; }
+    .ajustes-sidebar-header { padding: 0 24px; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; color: #001F44; }
+    .ajustes-sidebar-header svg { width: 24px; height: 24px; stroke-width: 2.5; }
+    .ajustes-sidebar-header h2 { font-size: 18px; font-weight: 800; letter-spacing: 0.05em; margin: 0; }
+    
+    .ajustes-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
+    .ajustes-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; text-decoration: none; font-size: 14.5px; font-weight: 600; color: #475569; transition: all 0.2s ease; }
+    .ajustes-nav-item:hover { background: #f8fafc; color: #0f172a; }
+    .ajustes-nav-item.active { background: #eff6ff; color: #0B5ED7; font-weight: 700; box-shadow: inset 3px 0 0 #0B5ED7; }
+    .ajustes-nav-item i { font-size: 16px; width: 20px; text-align: center; }
+    
+    .ajustes-section-title { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 28px; margin: 24px 0 12px 0; }
+    
+    .ajustes-content { flex: 1; padding: 40px; overflow-y: auto; background-color: #E6EDF7; }
+    .ajustes-page-title { color: #001F44; font-size: 28px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.02em; }
+    .ajustes-page-subtitle { color: #64748b; font-size: 15px; margin: 0 0 32px 0; }
+    
+    .ajustes-card { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px; }
+    .ajustes-card-header { font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f8fafc; }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-label { color: #64748b; font-weight: 600; font-size: 14px; }
+    .info-value { color: #0f172a; font-weight: 700; font-size: 14px; text-align: right; }
+    
+    @media (max-width: 768px) {
+      .ajustes-container { flex-direction: column; overflow: auto; height: auto; }
+      .ajustes-sidebar { width: 100%; height: auto; padding: 16px 0; border-right: none; border-bottom: 1px solid #e2e8f0; }
+      .ajustes-content { padding: 20px; overflow: visible; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header Institucional PDI (Reutilizado visualmente) -->
+  <header class="header-institutional">
+    <div class="header-inner">
+      <a href="/" class="brand-section" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <img src="/assets/logo-pdi.png" alt="Policía de Investigaciones de Chile" class="logo-pdi" id="pdi-logo-header" width="76" height="38">
+        <div class="brand-titles">
+          <div class="brand-title"><span>SISTEMA ABIS</span></div>
+          <div class="brand-subtitle">ENROLAMIENTO BIOMÉTRICO</div>
+        </div>
+      </a>
+
+      <!-- Navegación central (Solo botón volver en este contexto) -->
+      <nav class="tabs-nav navbar-top" id="main-navbar">
+        <a href="/" style="display: flex; align-items: center; gap: 8px; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.1)';">
+           <i class="fa-solid fa-arrow-left"></i> Volver al Dashboard
+        </a>
+      </nav>
+
+      <!-- Contenedor alineado a la derecha -->
+      <div style="flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px;">
+        <a href="/analisis/" target="_blank" class="btn-siad-link">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="M9 15l2 2 4-4"></path>
+          </svg>
+          <span>Análisis Documental</span>
+        </a>
+        <!-- Contenedor del Usuario (Estilo Ghost / Cuadrado) -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-left: 16px; margin-right: 8px; user-select: none; padding: 4px 10px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)';" onmouseout="this.style.background='transparent';">
+          <div style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #ffffff; font-weight: 700; font-size: 14px; text-transform: uppercase;">
+            <%= typeof user !== 'undefined' ? user.username.charAt(0) : 'U' %>
+          </div>
+          <div style="display: flex; flex-direction: column; line-height: 1.2;">
+            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;"><%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %></span>
+            <span style="color: #ffffff; font-weight: 600; font-size: 14px; text-transform: capitalize; letter-spacing: 0.02em;">
+              <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="ajustes-container">
+    <aside class="ajustes-sidebar">
+      <div class="ajustes-sidebar-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <h2>AJUSTES</h2>
+      </div>
+
+      <nav class="ajustes-nav">
+        <a href="/ajustes/general" class="ajustes-nav-item <%= activeSection === 'general' ? 'active' : '' %>">
+          <i class="fa-solid fa-sliders"></i> General
+        </a>
+        <a href="/ajustes/horarios" class="ajustes-nav-item <%= activeSection === 'horarios' ? 'active' : '' %>">
+          <i class="fa-solid fa-clock"></i> Horarios
+        </a>
+        <a href="/ajustes/cuenta" class="ajustes-nav-item <%= activeSection === 'cuenta' ? 'active' : '' %>">
+          <i class="fa-solid fa-user"></i> Cuenta
+        </a>
+        <a href="/ajustes/seguridad" class="ajustes-nav-item <%= activeSection === 'seguridad' ? 'active' : '' %>">
+          <i class="fa-solid fa-shield-halved"></i> Seguridad
+        </a>
+      </nav>
+
+      <div class="ajustes-section-title">ADMINISTRACIÓN</div>
+      <nav class="ajustes-nav">
+        <a href="/ajustes/administracion" class="ajustes-nav-item <%= activeSection === 'administracion' ? 'active' : '' %>">
+          <i class="fa-solid fa-users-gear"></i> Administración
+        </a>
+      </nav>
+    </aside>
+
+    <main class="ajustes-content">
+      <% if (activeSection === 'general') { %>
+        <%- include('partials/ajustes/general') %>
+      <% } else if (activeSection === 'horarios') { %>
+        <%- include('partials/ajustes/horarios') %>
+      <% } else if (activeSection === 'cuenta') { %>
+        <%- include('partials/ajustes/cuenta') %>
+      <% } else if (activeSection === 'seguridad') { %>
+        <%- include('partials/ajustes/seguridad') %>
+      <% } else if (activeSection === 'administracion') { %>
+        <%- include('partials/ajustes/administracion') %>
+      <% } %>
+    </main>
+  </div>
+
+  <script type="module">
+    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js';
+    
+    <% if (activeSection === 'horarios') { %>
+      window.addEventListener('DOMContentLoaded', () => {
+        setupScheduleEvents();
+        loadScheduleSettings();
+      });
+    <% } %>
+  </script>
+</body>
+</html>

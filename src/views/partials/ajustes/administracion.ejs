@@ -1,0 +1,60 @@
+<h1 class="ajustes-page-title">Panel de Administración</h1>
+<p class="ajustes-page-subtitle">Gestión centralizada de usuarios, roles y accesos del Sistema ABIS.</p>
+
+<% if (typeof user !== 'undefined' && user.rol === 'admin') { %>
+  <div class="ajustes-card" style="border-top: 4px solid #D4AF37;">
+    <div class="ajustes-card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0;">
+      <div><i class="fa-solid fa-users" style="color: #001F44;"></i> Gestión de Usuarios</div>
+      <button style="background: #001F44; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+        <i class="fa-solid fa-plus"></i> Nuevo Usuario
+      </button>
+    </div>
+    
+    <div style="overflow-x: auto; margin-top: 16px;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+        <thead>
+          <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
+            <th style="padding: 12px 16px; font-weight: 600;">Usuario</th>
+            <th style="padding: 12px 16px; font-weight: 600;">Rol</th>
+            <th style="padding: 12px 16px; font-weight: 600;">Estado</th>
+            <th style="padding: 12px 16px; font-weight: 600;">Último Acceso</th>
+            <th style="padding: 12px 16px; font-weight: 600; text-align: right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Fila de ejemplo (Visual solamente) -->
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 14px 16px; font-weight: 600; color: #0f172a;"><i class="fa-solid fa-user-shield" style="color: #0B5ED7; margin-right: 8px;"></i> Nicolas</td>
+            <td style="padding: 14px 16px;"><span style="background: #eff6ff; color: #0B5ED7; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">Administrador</span></td>
+            <td style="padding: 14px 16px;"><span style="color: #10B981; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; vertical-align: middle;"></i> Activo</span></td>
+            <td style="padding: 14px 16px; color: #64748b;">Hoy, 14:30</td>
+            <td style="padding: 14px 16px; text-align: right;">
+              <button style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Editar Roles"><i class="fa-solid fa-pen"></i></button>
+              <button style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;" title="Restablecer Contraseña"><i class="fa-solid fa-key"></i></button>
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 14px 16px; font-weight: 600; color: #0f172a;"><i class="fa-solid fa-user" style="color: #64748b; margin-right: 8px;"></i> Ashley</td>
+            <td style="padding: 14px 16px;"><span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">Operador</span></td>
+            <td style="padding: 14px 16px;"><span style="color: #10B981; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; vertical-align: middle;"></i> Activo</span></td>
+            <td style="padding: 14px 16px; color: #64748b;">Hoy, 10:15</td>
+            <td style="padding: 14px 16px; text-align: right;">
+              <button style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;"><i class="fa-solid fa-pen"></i></button>
+              <button style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;"><i class="fa-solid fa-key"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% } else { %>
+  <div class="ajustes-card" style="border-left: 4px solid #DC2626;">
+    <div style="display: flex; align-items: flex-start; gap: 16px;">
+      <i class="fa-solid fa-triangle-exclamation" style="color: #DC2626; font-size: 24px; margin-top: 4px;"></i>
+      <div>
+        <h3 style="margin: 0 0 8px 0; color: #0f172a; font-size: 16px;">Acceso Denegado</h3>
+        <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.5;">Esta sección está restringida únicamente para usuarios con rol de <strong>Administrador</strong>. Si crees que esto es un error, por favor contacta a soporte técnico.</p>
+      </div>
+    </div>
+  </div>
+<% } %>
