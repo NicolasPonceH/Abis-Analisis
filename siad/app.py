@@ -77,7 +77,9 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con SECRET_KEY en
 # cualquier instalacion que no sea localhost (Sprint 9: revision de seguridad).
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret")
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-v2")
+app.config["SESSION_COOKIE_NAME"] = "siad_session"
+app.config["SESSION_COOKIE_PATH"] = "/"
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
@@ -754,6 +756,7 @@ def summarize_text(raw_text, limit_sentences=3):
 
 @app.before_request
 def require_login():
+    print("COOKIES RECIBIDAS:", request.cookies, flush=True)
     if request.endpoint is None or request.endpoint in LOGIN_EXEMPT_ENDPOINTS:
         return None
     if not session.get("user_id"):
@@ -778,7 +781,9 @@ def login():
                 session["rol"] = user["rol"]
                 session["nombre_completo"] = user.get("nombre_completo")
                 db.update_last_login(username)
-                return redirect(next_url or url_for("index"))
+                if not next_url or next_url == "/":
+                    next_url = url_for("index")
+                return redirect(next_url)
         except Exception:
             pass
         flash("Credenciales incorrectas.")
