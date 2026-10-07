@@ -355,11 +355,17 @@
 
 .btn-siad-link {
   margin-left: auto;
-  background-color: #22c55e;
-  color: #ffffff;
+  background-color: #FFD700;
+  color: #002855;
   font-weight: bold;
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 14px;
+  text-decoration: none;
   font-size: 0.875rem;
   letter-spacing: 0.025em;
   text-transform: uppercase;
@@ -374,15 +380,15 @@
 }
 
 .btn-siad-link:hover {
-  background-color: #16a34a;
-  color: #ffffff;
+  background-color: #e6c200;
+  color: #002855;
   transform: translateY(-2px);
 }
 
 .btn-siad-link .nav-svg-icon {
   width: 18px;
   height: 18px;
-  stroke: #ffffff;
+  stroke: #002855;
 }
 
 
