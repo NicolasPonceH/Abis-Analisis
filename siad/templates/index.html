@@ -200,9 +200,37 @@
 
           chipsBox.innerHTML = '';
           acumulados.forEach(function (archivo, indice) {
+            var ext = archivo.name.split('.').pop().toLowerCase();
+            var borderColorClass = 'border-slate-300 hover:border-slate-500';
+            var textColorClass = 'text-[#00234c]';
+            var iconHTML = '<span class="material-symbols-outlined text-[16px] text-slate-400">draft</span>';
+            
+            if (ext === 'pdf') {
+              borderColorClass = 'border-red-400 hover:border-red-500';
+              textColorClass = 'text-red-700';
+              iconHTML = '<span class="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>';
+            } else if (ext === 'doc' || ext === 'docx') {
+              borderColorClass = 'border-blue-400 hover:border-blue-500';
+              textColorClass = 'text-blue-700';
+              iconHTML = '<span class="material-symbols-outlined text-[16px] text-blue-500">description</span>';
+            } else if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') {
+              borderColorClass = 'border-emerald-400 hover:border-emerald-500';
+              textColorClass = 'text-emerald-700';
+              iconHTML = '<span class="material-symbols-outlined text-[16px] text-emerald-500">table</span>';
+            }
+            
             var chip = document.createElement('span');
-            chip.className = 'anim-in inline-flex items-center gap-2 bg-white text-[#00234c] px-4 py-2.5 rounded-lg text-[13px] font-extrabold border-2 border-blue-200 shadow-md transition-all hover:shadow-lg hover:border-blue-400';
-            chip.textContent = archivo.name;
+            chip.className = 'anim-in inline-flex items-center gap-2 bg-white ' + textColorClass + ' px-4 py-2.5 rounded-lg text-[13px] font-extrabold border-2 ' + borderColorClass + ' shadow-md transition-all hover:shadow-lg';
+            
+            var nameSpan = document.createElement('span');
+            nameSpan.textContent = archivo.name;
+            
+            var iconWrapper = document.createElement('div');
+            iconWrapper.className = 'flex items-center';
+            iconWrapper.innerHTML = iconHTML;
+            
+            chip.appendChild(iconWrapper);
+            chip.appendChild(nameSpan);
             var quitar = document.createElement('button');
             quitar.type = 'button';
             quitar.title = 'Quitar';
