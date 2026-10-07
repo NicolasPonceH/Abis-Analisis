@@ -396,7 +396,7 @@
             <span class="material-symbols-outlined text-[20px]">preview</span> Vista Previa
           </button>
           
-          <form action="{{ url_for('export_docx', filename=viewing) }}" method="post" class="m-0 p-0">
+          <form action="../export/{{ viewing }}" method="post" class="m-0 p-0">
             <button type="submit"
               class="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm tracking-wide shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none uppercase"
               {{ 'disabled' if not extracted_text else '' }}>
@@ -1334,7 +1334,7 @@
             throw new Error("No hay documento activo para previsualizar.");
         }
 
-        const response = await fetch(`/export/${viewingFilename}`, {
+        const response = await fetch(`../export/${viewingFilename}`, {
             method: 'POST',
             body: formData
         });
