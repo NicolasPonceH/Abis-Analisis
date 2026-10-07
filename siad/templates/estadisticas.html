@@ -261,8 +261,8 @@
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-[#0047AB]"></span><span class="font-bold text-slate-700 dark:text-slate-200">Vehículos Motorizados</span></div>
         <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
           <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
-            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
-              {{ "%.1f" | format(stats.por_categoria.vehiculo / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) * 100) }}%
+            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) > 0 %}
+              {{ "%.1f" | format(stats.por_categoria.vehiculo / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) * 100) }}%
             {% else %}
               0%
             {% endif %}
@@ -277,8 +277,8 @@
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-500"></span><span class="font-bold text-slate-700 dark:text-slate-200">Armas y Municiones</span></div>
         <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
           <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
-            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
-              {{ "%.1f" | format(stats.por_categoria.arma / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) * 100) }}%
+            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) > 0 %}
+              {{ "%.1f" | format(stats.por_categoria.arma / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) * 100) }}%
             {% else %}
               0%
             {% endif %}
@@ -293,8 +293,8 @@
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-yellow-500"></span><span class="font-bold text-slate-700 dark:text-slate-200">Sustancias Controladas</span></div>
         <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
           <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
-            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) > 0 %}
-              {{ "%.1f" | format(stats.por_categoria.droga / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga) * 100) }}%
+            {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) > 0 %}
+              {{ "%.1f" | format(stats.por_categoria.droga / (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) * 100) }}%
             {% else %}
               0%
             {% endif %}
@@ -303,7 +303,9 @@
             ({{ '{:,}'.format(stats.por_categoria.droga) if stats else '0' }})
           </a>
         </div>
-        <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-200 shadow-sm mt-2 transition hover:shadow-md">
+      </div>
+      <!-- Personas -->
+      <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-200 shadow-sm mt-2 transition hover:shadow-md">
           <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-purple-500"></span><span class="font-bold text-slate-700 dark:text-slate-200">Personas Identificadas</span></div>
           <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
             <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">
