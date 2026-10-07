@@ -1307,14 +1307,21 @@
     
     try {
         const formData = new FormData();
-        const selectedRadio = document.querySelector('input[name="opcion"]:checked');
-        const selectedVal = selectedRadio ? selectedRadio.value : 'a';
-        
         let textoVivo = "";
-        if (selectedVal === 'b' && window.quillB) {
-            textoVivo = window.quillB.root.innerHTML;
-        } else if (window.quillA) {
-            textoVivo = window.quillA.root.innerHTML;
+        if (window.quillInstances && window.quillInstances.length > 0) {
+            window.quillInstances.forEach((quills, index) => {
+                const radioA = document.getElementById(`radio_a_${index}`);
+                const selectedVal = (radioA && !radioA.checked) ? 'b' : 'a';
+                let t = "";
+                if (selectedVal === 'b' && quills.b) {
+                    t = quills.b.root.innerHTML;
+                } else if (quills.a) {
+                    t = quills.a.root.innerHTML;
+                }
+                const btn = document.querySelector(`.resumen-tab-btn[data-index="${index}"]`);
+                const docName = btn ? btn.innerText.trim().replace('📄 ', '') : `Doc ${index+1}`;
+                textoVivo += `=== INICIO DOCUMENTO: ${docName} ===<br>${t}<br>=== FIN DOCUMENTO: ${docName} ===<br><br>`;
+            });
         }
 
         if (textoVivo) {
@@ -1367,16 +1374,21 @@
   }
 
   function prepararDescargaReal() {
-      // Find the first selected radio in the first form group (index 0)
-      const selectedRadio = document.querySelector('input[name="opcion_0"]:checked') || document.querySelector('input[name="opcion"]:checked');
-      const selectedVal = selectedRadio ? selectedRadio.value : 'a';
       let textoVivo = "";
       if (window.quillInstances && window.quillInstances.length > 0) {
-          if (selectedVal === 'b') {
-              textoVivo = window.quillInstances[0].b.root.innerHTML;
-          } else {
-              textoVivo = window.quillInstances[0].a.root.innerHTML;
-          }
+          window.quillInstances.forEach((quills, index) => {
+              const radioA = document.getElementById(`radio_a_${index}`);
+              const selectedVal = (radioA && !radioA.checked) ? 'b' : 'a';
+              let t = "";
+              if (selectedVal === 'b' && quills.b) {
+                  t = quills.b.root.innerHTML;
+              } else if (quills.a) {
+                  t = quills.a.root.innerHTML;
+              }
+              const btn = document.querySelector(`.resumen-tab-btn[data-index="${index}"]`);
+              const docName = btn ? btn.innerText.trim().replace('📄 ', '') : `Doc ${index+1}`;
+              textoVivo += `=== INICIO DOCUMENTO: ${docName} ===\n${t}\n=== FIN DOCUMENTO: ${docName} ===\n\n`;
+          });
       }
       document.getElementById('modal_texto_a_dl').value = textoVivo;
   }
