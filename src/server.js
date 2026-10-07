@@ -220,6 +220,39 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.get("/register", (req, res) => {
+  res.render("register", { error: null, success: null });
+});
+
+app.post("/register", async (req, res) => {
+  const { username, password, confirm_password, nombre_completo } = req.body;
+  
+  if (password !== confirm_password) {
+    return res.render("register", { error: "Las contraseñas no coinciden.", success: null });
+  }
+
+  try {
+    const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+    const authRes = await fetch(`${siadUrl}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password, nombre_completo })
+    });
+    
+    if (authRes.ok) {
+      const data = await authRes.json();
+      if (data.ok) {
+        return res.render("login", { error: null, success: "Usuario registrado exitosamente. Ahora puedes iniciar sesión." });
+      } else {
+        return res.render("register", { error: data.error || "No se pudo registrar el usuario.", success: null });
+      }
+    }
+    return res.render("register", { error: "Error del servidor de base de datos.", success: null });
+  } catch (err) {
+    return res.render("register", { error: "Error de conexión con el sistema de validación.", success: null });
+  }
+});
+
 app.get("/logout", (req, res) => {
   res.clearCookie("abis_auth");
   res.redirect("/login");

@@ -89,13 +89,6 @@
 
       <!-- Contenedor alineado a la derecha para el botón -->
       <div style="flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-right: 12px; color: #002855; font-weight: 600; font-size: 14px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span style="text-transform: capitalize;"><%= typeof user !== 'undefined' ? user.username : 'Usuario' %></span>
-        </div>
         <a href="/analisis/" target="_blank" class="btn-siad-link">
           <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -104,6 +97,13 @@
           </svg>
           <span>Análisis Documental</span>
         </a>
+        <div style="display: flex; align-items: center; gap: 8px; color: #002855; font-weight: 600; font-size: 14px; margin-left: 8px; margin-right: 4px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span style="text-transform: capitalize;"><%= typeof user !== 'undefined' ? user.username : 'Usuario' %></span>
+        </div>
         <a href="/logout" title="Cerrar Sesión" style="display: flex; align-items: center; justify-content: center; background-color: #ef4444; color: #ffffff; width: 42px; height: 42px; border-radius: 8px; text-decoration: none; transition: transform 0.2s, filter 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.15);" onmouseover="this.style.filter='brightness(0.95)'; this.style.transform='scale(1.05)';" onmouseout="this.style.filter='brightness(1)'; this.style.transform='scale(1)';">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
