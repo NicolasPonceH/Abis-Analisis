@@ -15,155 +15,180 @@
     align-items: center;
     justify-content: center;
     font-family: 'Inter', system-ui, sans-serif;
-    background: linear-gradient(145deg, #e8edf5 0%, #dce4f0 50%, #e4ecf7 100%);
     position: relative;
     overflow: hidden;
+    background: #001830;
   }
 
-  /* Fondo decorativo suave */
-  .bg-blobs {
+  /* Foto de fondo */
+  .bg-photo {
     position: fixed;
     inset: 0;
-    pointer-events: none;
-    overflow: hidden;
+    background: url("{{ url_for('static', filename='img/login-bg.jpg') }}") center center / cover no-repeat;
+    filter: brightness(0.45) saturate(1.2);
+    z-index: 0;
   }
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(70px);
-    opacity: 0.35;
-    animation: blobMove 10s ease-in-out infinite alternate;
-  }
-  .blob-1 { width: 500px; height: 500px; background: #adc4e8; top: -150px; left: -150px; animation-delay: 0s; }
-  .blob-2 { width: 400px; height: 400px; background: #b8d0f0; bottom: -100px; right: -100px; animation-delay: 3s; }
-  .blob-3 { width: 300px; height: 300px; background: #fde68a; top: 40%; left: 60%; animation-delay: 1.5s; }
-  @keyframes blobMove {
-    0%   { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(20px, 15px) scale(1.05); }
-  }
-
-  /* Barra lateral izquierda de color */
-  .side-accent {
+  /* Overlay degradado encima de la foto */
+  .bg-overlay {
     position: fixed;
-    left: 0; top: 0; bottom: 0;
-    width: 6px;
-    background: linear-gradient(180deg, #002855 0%, #0047AB 50%, #FFD700 100%);
+    inset: 0;
+    background: linear-gradient(135deg,
+      rgba(0,20,50,0.75) 0%,
+      rgba(0,30,70,0.55) 50%,
+      rgba(0,15,40,0.70) 100%);
+    z-index: 1;
   }
 
-  /* Tarjeta principal */
-  .card {
+  /* Layout de dos columnas */
+  .page-wrap {
     position: relative;
     z-index: 10;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
     width: 100%;
-    max-width: 420px;
+    max-width: 1000px;
+    padding: 20px;
+  }
+
+  /* Columna izquierda: branding */
+  .brand-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 0;
+  }
+  .brand-title {
+    font-size: 52px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .brand-subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+    line-height: 1.6;
+    max-width: 340px;
+  }
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,215,0,0.15);
+    border: 1px solid rgba(255,215,0,0.4);
+    color: #FFD700;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Tarjeta de login */
+  .card {
+    width: 100%;
+    max-width: 400px;
     background: #ffffff;
     border-radius: 20px;
-    padding: 44px 40px;
-    box-shadow:
-      0 4px 6px rgba(0,0,0,0.04),
-      0 20px 60px rgba(0,40,85,0.12),
-      0 0 0 1px rgba(0,71,171,0.08);
-    animation: cardIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    padding: 40px 36px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+    animation: cardIn 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    flex-shrink: 0;
   }
   @keyframes cardIn {
     from { opacity: 0; transform: translateY(24px) scale(0.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* Logo */
   .logo-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
   .logo-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #002855 0%, #0047AB 100%);
-    border-radius: 16px;
-    padding: 14px 22px;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 24px rgba(0,71,171,0.3);
+    border-radius: 14px;
+    padding: 13px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 24px rgba(0,71,171,0.35);
   }
-  .logo-badge img { height: 46px; width: auto; display: block; }
+  .logo-badge img { height: 44px; width: auto; display: block; }
 
   h1 {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 900;
     color: #002855;
     letter-spacing: -0.5px;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
   p.subtitle {
-    font-size: 13.5px;
+    font-size: 13px;
     color: #64748b;
     font-weight: 500;
     text-align: center;
   }
 
-  /* Separador */
   .divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-    margin: 28px 0;
+    margin: 24px 0;
   }
 
-  /* Flash de error */
   .flash {
     background: #fff1f2;
     border: 1px solid #fecdd3;
     color: #be123c;
     font-size: 14px;
     font-weight: 600;
-    padding: 12px 16px;
+    padding: 11px 14px;
     border-radius: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     text-align: center;
   }
 
-  /* Labels */
   label {
     display: block;
-    text-align: left;
     font-size: 13px;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
   }
 
-  /* Inputs */
-  .input-wrap {
-    position: relative;
-    margin-bottom: 20px;
-  }
+  .input-wrap { position: relative; margin-bottom: 18px; }
   input[type="password"], input[type="text"] {
     width: 100%;
-    padding: 14px 16px;
+    padding: 13px 16px;
     background: #f8fafc;
     border: 1.5px solid #cbd5e1;
-    border-radius: 12px;
+    border-radius: 11px;
     font-size: 15px;
     font-family: inherit;
     color: #0f172a;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     outline: none;
   }
-  input[type="password"]::placeholder, input[type="text"]::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
-  }
-  input[type="password"]:focus, input[type="text"]:focus {
+  input::placeholder { color: #94a3b8; }
+  input:focus {
     border-color: #0047AB;
     background: #f0f5ff;
     box-shadow: 0 0 0 3px rgba(0,71,171,0.12);
   }
 
-  /* Botón */
   button[type="submit"] {
     width: 100%;
-    padding: 15px;
+    padding: 14px;
     border: none;
     border-radius: 12px;
     background: linear-gradient(135deg, #FFD700 0%, #F59E0B 100%);
@@ -171,50 +196,48 @@
     font-family: inherit;
     font-weight: 800;
     font-size: 16px;
-    letter-spacing: 0.02em;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 16px rgba(245,158,11,0.4);
+    transition: all 0.2s;
+    box-shadow: 0 4px 18px rgba(245,158,11,0.4);
     margin-top: 4px;
   }
   button[type="submit"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(245,158,11,0.5);
+    box-shadow: 0 8px 30px rgba(245,158,11,0.55);
   }
   button[type="submit"]:active { transform: translateY(0); }
 
-  /* Links */
   .links {
-    margin-top: 20px;
+    margin-top: 18px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     text-align: center;
   }
   .links a {
     color: #0047AB;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
     transition: color 0.2s;
   }
   .links a:hover { color: #002855; text-decoration: underline; }
 
-  /* Footer */
   .footer-note {
-    margin-top: 20px;
+    margin-top: 18px;
     font-size: 11px;
     color: #94a3b8;
     text-align: center;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     font-weight: 500;
   }
 
-  /* Error shake */
-  .card:has(.flash) { animation: cardIn 0.6s ease, shakeError 350ms ease-in-out 0.6s; }
+  .card:has(.flash) { animation: cardIn 0.7s ease, shakeError 350ms ease-in-out 0.7s; }
   @keyframes shakeError {
     10%, 90% { transform: translateX(-2px); }
     20%, 80% { transform: translateX(4px); }
@@ -222,127 +245,163 @@
     40%, 60% { transform: translateX(5px); }
   }
 
-  /* ---- Advertencia animada ---- */
+  /* ===================== ADVERTENCIA MUY NOTORIA ===================== */
   .warning-banner {
-    position: absolute;
-    top: 36px;
-    left: 50%;
-    width: 100%;
-    max-width: 500px;
-    z-index: 20;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
     animation:
-      slideDown 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards,
-      attentionShake 4s ease-in-out 1.5s infinite;
+      bannerDrop 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards,
+      bannerShake 4s ease-in-out 2s infinite;
   }
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateX(-50%) translateY(-28px) scale(0.95); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+  @keyframes bannerDrop {
+    from { opacity: 0; transform: translateY(-100%); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes attentionShake {
-    0%, 90%, 100% { transform: translateX(-50%) translateY(0); }
-    91%  { transform: translateX(calc(-50% - 6px)); }
-    93%  { transform: translateX(calc(-50% + 6px)); }
-    95%  { transform: translateX(calc(-50% - 4px)); }
-    97%  { transform: translateX(calc(-50% + 4px)); }
-    99%  { transform: translateX(calc(-50% - 2px)); }
+  @keyframes bannerShake {
+    0%, 88%, 100% { transform: translateY(0); }
+    90%  { transform: translateY(-4px); }
+    92%  { transform: translateY(4px); }
+    94%  { transform: translateY(-3px); }
+    96%  { transform: translateY(3px); }
+    98%  { transform: translateY(-1px); }
   }
   .warning-inner {
-    background: #fffbeb;
-    border: 1.5px solid #fcd34d;
-    border-left: 7px solid #f59e0b;
-    border-radius: 14px;
-    padding: 18px 22px;
+    background: linear-gradient(90deg, #78350f 0%, #92400e 50%, #78350f 100%);
+    background-size: 200% 100%;
+    border-bottom: 4px solid #FFD700;
+    padding: 14px 40px;
     display: flex;
-    gap: 16px;
+    gap: 14px;
     align-items: center;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    animation: glowPulse 1.5s ease-in-out infinite;
+    justify-content: center;
+    animation: bgSlide 3s linear infinite, glowBottom 1.5s ease-in-out infinite;
   }
-  @keyframes glowPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5), 0 8px 32px rgba(0,0,0,0.15); }
-    50%       { box-shadow: 0 0 0 10px rgba(245,158,11,0), 0 8px 32px rgba(0,0,0,0.15); }
+  @keyframes bgSlide {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
   }
-  .warning-icon {
+  @keyframes glowBottom {
+    0%, 100% { border-bottom-color: #FFD700; box-shadow: 0 4px 20px rgba(255,215,0,0.4); }
+    50%       { border-bottom-color: #F59E0B; box-shadow: 0 4px 30px rgba(255,215,0,0.8); }
+  }
+  .warning-icon-anim {
     flex-shrink: 0;
-    animation: iconPop 2s ease-in-out infinite;
+    animation: iconWiggle 1.5s ease-in-out infinite;
   }
-  @keyframes iconPop {
+  @keyframes iconWiggle {
     0%, 100% { transform: scale(1) rotate(0deg); }
-    25%      { transform: scale(1.3) rotate(-10deg); }
-    50%      { transform: scale(1.3) rotate(10deg); }
-    75%      { transform: scale(1.1) rotate(-4deg); }
+    20%      { transform: scale(1.35) rotate(-14deg); }
+    40%      { transform: scale(1.35) rotate(14deg); }
+    60%      { transform: scale(1.15) rotate(-5deg); }
+    80%      { transform: scale(1) rotate(5deg); }
+  }
+  .warning-text strong {
+    font-size: 17px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    display: block;
+    margin-bottom: 3px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .warning-text span {
+    font-size: 14px;
+    color: rgba(255,255,255,0.88);
+    font-weight: 500;
+    line-height: 1.45;
   }
 
+  /* Responsive */
+  @media (max-width: 720px) {
+    .page-wrap { flex-direction: column; gap: 24px; }
+    .brand-col { align-items: center; text-align: center; }
+    .brand-title { font-size: 36px; }
+    .card { max-width: 100%; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .card:has(.flash), .warning-banner, .warning-inner, .warning-icon, .blob { animation: none; }
+    .warning-banner, .warning-inner, .warning-icon-anim, .card, .bg-photo { animation: none; }
   }
 </style>
 </head>
 <body>
 
-  <div class="side-accent"></div>
+  <div class="bg-photo"></div>
+  <div class="bg-overlay"></div>
 
-  <div class="bg-blobs">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
-
-  <!-- Advertencia animada -->
+  <!-- ADVERTENCIA FIJA EN LA PARTE SUPERIOR - MUY NOTORIA -->
   <div class="warning-banner">
     <div class="warning-inner">
-      <div class="warning-icon">
-        <svg style="width:36px;height:36px;color:#d97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div class="warning-icon-anim">
+        <svg style="width:32px;height:32px;color:#FFD700;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       </div>
-      <div style="flex:1;">
-        <strong style="color:#92400e;font-size:15px;display:block;margin-bottom:4px;font-weight:800;">Atención: Credenciales Unificadas</strong>
-        <span style="color:#78350f;font-size:13.5px;font-weight:500;display:block;line-height:1.55;">Para ingresar al Módulo SIAD, es obligatorio utilizar las mismas credenciales de acceso de su cuenta principal de <strong>ABIS</strong>.</span>
+      <div class="warning-text">
+        <strong>⚠ Atención: Credenciales Unificadas</strong>
+        <span>Para ingresar al Módulo SIAD, debe usar las mismas credenciales de su cuenta principal de <strong style="color:#FFD700;">ABIS</strong>.</span>
       </div>
     </div>
   </div>
 
-  <!-- Formulario -->
-  <form class="card" method="post" action="{{ url_for('login') }}">
-    <div class="logo-wrap">
-      <div class="logo-badge">
-        <img src="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}" alt="PDI" style="filter: brightness(0) invert(1);">
+  <!-- Layout de página -->
+  <div class="page-wrap" style="padding-top:100px;">
+
+    <!-- Columna de branding -->
+    <div class="brand-col">
+      <div class="brand-badge">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Sistema Restringido
       </div>
-      <h1>SIAD</h1>
-      <p class="subtitle">Sistema de Análisis Documental &mdash; acceso restringido</p>
+      <div class="brand-title">SIAD<br>PDI</div>
+      <p class="brand-subtitle">Sistema Inteligente de Análisis Documental — Policía de Investigaciones de Chile</p>
     </div>
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="flash">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <!-- Formulario -->
+    <form class="card" method="post" action="{{ url_for('login') }}">
+      <div class="logo-wrap">
+        <div class="logo-badge">
+          <img src="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}" alt="PDI" style="filter: brightness(0) invert(1);">
+        </div>
+        <h1>SIAD</h1>
+        <p class="subtitle">Sistema de Análisis Documental &mdash; acceso restringido</p>
+      </div>
 
-    <div class="divider"></div>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-    <label for="username">Nombre de usuario</label>
-    <div class="input-wrap">
-      <input type="text" id="username" name="username" autofocus required placeholder="Ingrese su usuario">
-    </div>
+      <div class="divider"></div>
 
-    <label for="password">Contraseña</label>
-    <div class="input-wrap">
-      <input type="password" id="password" name="password" required placeholder="Ingrese su contraseña">
-    </div>
+      <label for="username">Nombre de usuario</label>
+      <div class="input-wrap">
+        <input type="text" id="username" name="username" autofocus required placeholder="Ingrese su usuario">
+      </div>
 
-    <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
-    <button type="submit">Ingresar al Sistema</button>
+      <label for="password">Contraseña</label>
+      <div class="input-wrap">
+        <input type="password" id="password" name="password" required placeholder="Ingrese su contraseña">
+      </div>
 
-    <div class="links">
-      <a href="{{ url_for('register') }}">¿No tienes cuenta? Regístrate aquí</a>
-      <a href="{{ url_for('forgot_password') }}">¿Olvidaste tu contraseña?</a>
-    </div>
+      <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+      <button type="submit">Ingresar al Sistema</button>
 
-    <div class="footer-note">Uso interno — Policía de Investigaciones de Chile</div>
-  </form>
+      <div class="links">
+        <a href="{{ url_for('register') }}">¿No tienes cuenta? Regístrate aquí</a>
+        <a href="{{ url_for('forgot_password') }}">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <div class="footer-note">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Uso interno — Policía de Investigaciones de Chile
+      </div>
+    </form>
+
+  </div>
 
 </body>
 </html>
