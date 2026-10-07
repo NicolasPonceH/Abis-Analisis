@@ -336,9 +336,9 @@ def get_stats(dias=None, agrupacion=None):
                 entidades_filter = "WHERE documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 ent_params = [int(dias)]
 
-            cur.execute(f"SELECT (SELECT COUNT(*) FROM entidades_vehiculos {entidades_filter}) as v, (SELECT COUNT(*) FROM entidades_armas {entidades_filter}) as a, (SELECT COUNT(*) FROM entidades_drogas {entidades_filter}) as d", ent_params * 3)
+            cur.execute(f"SELECT (SELECT COUNT(*) FROM entidades_vehiculos {entidades_filter}) as v, (SELECT COUNT(*) FROM entidades_armas {entidades_filter}) as a, (SELECT COUNT(*) FROM entidades_drogas {entidades_filter}) as d, (SELECT COUNT(*) FROM entidades_personas {entidades_filter}) as p", ent_params * 4)
             counts = cur.fetchone()
-            por_categoria = {"vehiculo": counts[0], "arma": counts[1], "droga": counts[2]}
+            por_categoria = {"vehiculo": counts[0], "arma": counts[1], "droga": counts[2], "persona": counts[3]}
 
             def top_valores(tabla, campo, limite=5):
                 where_clause = f"WHERE {campo} IS NOT NULL "
@@ -359,6 +359,7 @@ def get_stats(dias=None, agrupacion=None):
             top_marcas_vehiculos = top_valores("entidades_vehiculos", "marca")
             top_marcas_armas = top_valores("entidades_armas", "marca")
             top_sustancias = top_valores("entidades_drogas", "sustancia")
+            top_nacionalidades = top_valores("entidades_personas", "nacionalidad")
 
             cur.execute(
                 f"SELECT fecha_procesamiento::date AS dia, COUNT(*) FROM documentos "
@@ -402,7 +403,8 @@ def get_stats(dias=None, agrupacion=None):
                     p_date as original_date,
                     (SELECT COUNT(*) FROM entidades_vehiculos ev JOIN documentos d ON ev.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as vehiculos,
                     (SELECT COUNT(*) FROM entidades_armas ea JOIN documentos d ON ea.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as armas,
-                    (SELECT COUNT(*) FROM entidades_drogas ed JOIN documentos d ON ed.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as drogas
+                    (SELECT COUNT(*) FROM entidades_drogas ed JOIN documentos d ON ed.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as drogas,
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as personas
                 FROM series s
                 ORDER BY s.p_date;
             """
@@ -413,7 +415,7 @@ def get_stats(dias=None, agrupacion=None):
             meses_es = {"01": "Ene", "02": "Feb", "03": "Mar", "04": "Abr", "05": "May", "06": "Jun", 
                         "07": "Jul", "08": "Ago", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dic"}
             
-            for orig_date, v, a, d in tendencias_raw:
+            for orig_date, v, a, d, p in tendencias_raw:
                 if agrupacion == "dia":
                     label_final = orig_date.strftime("%d/%m")
                 elif agrupacion == "semana":
@@ -427,7 +429,8 @@ def get_stats(dias=None, agrupacion=None):
                     "label": label_final,
                     "vehiculos": v,
                     "armas": a,
-                    "drogas": d
+                    "drogas": d,
+                    "personas": p
                 })
 
     return {
@@ -436,6 +439,7 @@ def get_stats(dias=None, agrupacion=None):
         "top_marcas_vehiculos": top_marcas_vehiculos,
         "top_marcas_armas": top_marcas_armas,
         "top_sustancias": top_sustancias,
+        "top_nacionalidades": top_nacionalidades,
         "documentos_por_dia": documentos_por_dia,
         "tendencias": tendencias,
     }
