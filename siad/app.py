@@ -732,19 +732,24 @@ def build_summary_options(raw_text, entities=None):
     meta = parse_police_report(raw_text)
     narratives = meta.get("narrativas", [])
     
-    # 1. SÍNTESIS CORTA (Opción A)
-    sintesis_parts = []
+    # Obtener todas las oraciones de las narrativas
+    all_sents = []
     for nar in narratives:
-        sents = split_sentences_safely(nar)
-        if len(sents) > 1:
-            sintesis_parts.append(f"{sents[0]} {sents[-1]}")
-        elif sents:
-            sintesis_parts.append(sents[0])
-            
-    hechos_sinteticos = " ".join(sintesis_parts) if sintesis_parts else "Procedimiento policial ejecutado conforme a las diligencias informadas."
+        all_sents.extend(split_sentences_safely(nar))
+        
+    # 1. SÍNTESIS MUY CORTA (Opción A - Máximo 2 oraciones)
+    if all_sents:
+        hechos_sinteticos = all_sents[0]
+        if len(all_sents) > 1:
+            hechos_sinteticos += " " + all_sents[1]
+    else:
+        hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     
-    # 2. COMPLETO (Opción B)
-    hechos_completos = "<br><br>".join(narratives) if narratives else hechos_sinteticos
+    # 2. RESUMEN NARRATIVO (Opción B - Máximo 6 oraciones)
+    if all_sents:
+        hechos_completos = " ".join(all_sents[:6])
+    else:
+        hechos_completos = hechos_sinteticos
 
     # Devolvemos puramente el relato para no duplicar datos en la tabla del Word
     return {"a": hechos_sinteticos, "b": hechos_completos}
