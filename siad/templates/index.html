@@ -650,6 +650,15 @@
           </button>
           {% endfor %}
         </div>
+        
+        <div class="mb-4 bg-orange-50 dark:bg-orange-900/30 border-l-4 border-orange-400 p-3 flex items-start gap-3 rounded-r shadow-sm">
+          <span class="material-symbols-outlined text-orange-500 text-[20px]">info</span>
+          <div>
+            <p class="text-[12px] text-orange-800 dark:text-orange-200 leading-tight font-medium">
+              Este PDF contiene múltiples documentos separados. Debes revisar y seleccionar tu opción preferida (A o B) <strong>en cada pestaña superior</strong> de forma independiente antes de guardar la selección.
+            </p>
+          </div>
+        </div>
         {% endif %}
 
         <form action="{{ url_for('select_summary', filename=viewing) }}" method="post" id="summary_form">
