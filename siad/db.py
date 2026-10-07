@@ -359,7 +359,7 @@ def get_stats(dias=None, agrupacion=None):
             top_marcas_vehiculos = top_valores("entidades_vehiculos", "marca")
             top_marcas_armas = top_valores("entidades_armas", "marca")
             top_sustancias = top_valores("entidades_drogas", "sustancia")
-            top_nacionalidades = top_valores("entidades_personas", "nacionalidad")
+            top_nacionalidades = top_valores("entidades_personas", "nombre")
 
             cur.execute(
                 f"SELECT fecha_procesamiento::date AS dia, COUNT(*) FROM documentos "
