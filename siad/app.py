@@ -1801,7 +1801,8 @@ def cambiar_password():
     else:
         flash("Debe proporcionar una nueva contraseña.", "error")
     
-    return redirect(url_for("perfil"))
+    redirect_url = request.referrer or url_for("configuracion", section="cuenta")
+    return redirect(redirect_url)
 
 @app.route("/perfil/reporte.xlsx")
 def perfil_reporte():
