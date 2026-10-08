@@ -8,8 +8,8 @@
     
     <!-- Nuevo Usuario (Colapsable) -->
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px;">
-      <div style="background: var(--pdi-navy); border-bottom: 3.5px solid var(--pdi-gold); padding: 16px 24px; color: #ffffff; display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 15px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 15px;">
+        <div style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-user-plus" style="color: #60a5fa;"></i> Alta de Usuarios
         </div>
         <button type="button" id="btn-toggle-nuevo-usuario" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
@@ -44,7 +44,7 @@
         <p id="nuevo-usuario-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 13px; font-weight: 600;"></p>
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
           <button type="button" id="btn-cancelar-nuevo-usuario" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Cancelar</button>
-          <button type="submit" style="background: #001F44; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
+          <button type="submit" style="background: #001F44; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
             <i class="fa-solid fa-user-check"></i> Registrar
           </button>
         </div>
@@ -53,8 +53,8 @@
 
     <!-- Lista de Usuarios -->
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-      <div style="background: var(--pdi-navy); border-bottom: 3.5px solid var(--pdi-gold); padding: 16px 24px; color: #ffffff; display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 15px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 15px;">
+        <div style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-users" style="color: #60a5fa;"></i> Registro Activo
         </div>
         <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
@@ -122,7 +122,7 @@
             <h2 id="admin-modal-title" style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: #0f172a;">Administrar</h2>
             <p id="admin-modal-subtitle" style="margin: 0; color: #64748b; font-size: 13px;"></p>
           </div>
-          <button type="button" onclick="closeAdminModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.2s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8'">&times;</button>
+          <button type="button" onclick="closeAdminModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.2s; width: 32px; height: 32px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8'">&times;</button>
         </div>
 
         <div style="padding: 32px;">
@@ -344,7 +344,7 @@
     </script>
   <% } else { %>
     <div style="background: #fff1f2; border: 1px solid #fecaca; border-left: 4px solid #e11d48; padding: 24px; border-radius: 12px; margin-top: 24px;">
-      <h2 style="color: #be123c; margin: 0 0 8px 0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+      <h2 style="color: #be123c; margin: 0 0 8px 0; font-size: 18px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-lock"></i> Acceso Restringido
       </h2>
       <p style="color: #9f1239; margin: 0; font-size: 15px; line-height: 1.5;">

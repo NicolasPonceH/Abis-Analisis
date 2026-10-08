@@ -100,12 +100,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--pdi-navy);
+  background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   color: #ffffff;
   padding: 16px 24px;
   margin: -24px -24px 24px -24px;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  border-bottom: 3.5px solid var(--pdi-gold);
+  border-bottom: 3.5px solid rgba(255, 209, 0, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1);
 }
 
 .settings-card-title {
@@ -629,4 +632,5 @@
   50% { opacity: 1; }
   100% { transform: scale(1) rotateY(0deg) rotateZ(0deg); opacity: 1; }
 }
+
 
