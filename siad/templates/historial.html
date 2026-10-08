@@ -122,9 +122,19 @@
         <span class="material-symbols-outlined text-[20px]">table_chart</span>
         <h2 class="text-sm font-bold uppercase tracking-widest">Documentos Procesados</h2>
       </div>
-      <button type="submit" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold uppercase tracking-wide px-5 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5" onclick="return confirm('¿Descargar ZIP con los documentos seleccionados?')">
-        <span class="material-symbols-outlined text-[18px]">folder_zip</span> Exportar Masivo
-      </button>
+      <div class="flex items-center gap-4">
+        <span class="text-blue-200 text-xs hidden sm:inline-block italic">Selecciona las casillas de la tabla para exportar</span>
+        <button type="submit" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold uppercase tracking-wide px-5 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5" onclick="
+          var checkboxes = document.querySelectorAll('.doc-checkbox:checked');
+          if(checkboxes.length === 0) {
+            alert('Debes seleccionar al menos un documento usando las casillas de la izquierda.');
+            return false;
+          }
+          return confirm('¿Descargar ZIP con los ' + checkboxes.length + ' documentos seleccionados?');
+        ">
+          <span class="material-symbols-outlined text-[18px]">folder_zip</span> Exportar Masivo
+        </button>
+      </div>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse min-w-[1000px]">
