@@ -779,7 +779,7 @@
     .table-header-bar,
     .chart-header,
     .filters-header,
-    .settings-card-header,
+
     .sheet-workflow-header,
     .sheet-preview-header {
       background: linear-gradient(135deg, rgba(0, 48, 105, 0.85) 0%, rgba(0, 80, 160, 0.7) 100%) !important;
@@ -806,13 +806,13 @@
     .table-header-bar .chart-title,
     .chart-header .chart-title,
     .filters-header .filters-title,
-    .settings-card-header h3,
+
     .sheet-workflow-header h3,
     .sheet-preview-header h3,
         .table-header-bar .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
     .chart-header .chart-title span:not(.badge-primary):not(.badge):not(.chart-badge),
     .filters-header .filters-title span:not(.badge-primary):not(.badge):not(.chart-badge),
-    .settings-card-header .settings-card-title span,
+
     .schedule-clock-title,
     .schedule-clock-time,
     .schedule-next-badge,
@@ -830,7 +830,7 @@
     .table-header-bar svg,
     .chart-header svg,
     .filters-header svg,
-    .settings-card-header svg,
+
     .sheet-workflow-header svg,
     .sheet-preview-header svg,
     /* removed */ .unused-modal-svg {
@@ -841,7 +841,7 @@
     .table-header-bar .btn-secondary,
     .chart-header .btn-secondary,
     .filters-header .btn-secondary,
-    .settings-card-header .btn-secondary,
+
     .sheet-workflow-header .btn-secondary,
     .sheet-preview-header .btn-secondary,
     /* removed */ .unused-modal-btn {
@@ -855,7 +855,7 @@
     .table-header-bar .btn-secondary:hover,
     .chart-header .btn-secondary:hover,
     .filters-header .btn-secondary:hover,
-    .settings-card-header .btn-secondary:hover,
+
     .sheet-workflow-header .btn-secondary:hover,
     .sheet-preview-header .btn-secondary:hover,
     /* removed */ .unused-modal-btn-hover {
@@ -867,7 +867,7 @@
     .table-header-bar .form-control,
     .chart-header .form-control,
     .filters-header .form-control,
-    .settings-card-header .form-control,
+
     .sheet-workflow-header .form-control,
     .sheet-preview-header .form-control,
         .table-header-bar .trend-calendar-box {
@@ -881,7 +881,7 @@
     .table-header-bar .btn-secondary svg,
     .chart-header .btn-secondary svg,
     .filters-header .btn-secondary svg,
-    .settings-card-header .btn-secondary svg,
+
     .sheet-workflow-header .btn-secondary svg,
     .sheet-preview-header .btn-secondary svg,
     /* removed */ .unused-modal-btn-svg {
