@@ -1709,6 +1709,15 @@ def estadisticas():
 
 
 
+@app.route("/configuracion")
+def configuracion():
+    username = session.get("username", "")
+    if not username:
+        return redirect(url_for("login"))
+    user = db.get_user_by_username(username)
+    section = request.args.get("section", "general")
+    return render_template("configuracion.html", user=user, active_page="configuracion", section=section)
+
 @app.route("/perfil")
 def perfil():
     username = session.get("username", "")
