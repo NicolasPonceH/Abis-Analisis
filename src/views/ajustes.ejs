@@ -177,9 +177,6 @@
         <a href="/ajustes/general" class="ajustes-nav-item <%= activeSec === 'general' ? 'active' : '' %>">
           <i class="fa-solid fa-sliders"></i> General
         </a>
-        <a href="/ajustes/horarios" class="ajustes-nav-item <%= activeSec === 'horarios' ? 'active' : '' %>">
-          <i class="fa-solid fa-clock"></i> Horarios
-        </a>
         <a href="/ajustes/cuenta" class="ajustes-nav-item <%= activeSec === 'cuenta' ? 'active' : '' %>">
           <i class="fa-solid fa-user"></i> Cuenta
         </a>
@@ -196,8 +193,6 @@
     <main class="ajustes-content">
       <% if (activeSec === 'general') { %>
         <%- include('partials/ajustes/general') %>
-      <% } else if (activeSec === 'horarios') { %>
-        <%- include('partials/ajustes/horarios') %>
       <% } else if (activeSec === 'cuenta') { %>
         <%- include('partials/ajustes/cuenta') %>
       <% } else if (activeSec === 'administracion') { %>
@@ -205,17 +200,6 @@
       <% } %>
     </main>
   </div>
-
-  <script type="module">
-    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=2';
-    
-    <% if (activeSection === 'horarios') { %>
-      window.addEventListener('DOMContentLoaded', () => {
-        setupScheduleEvents();
-        loadScheduleSettings();
-      });
-    <% } %>
-  </script>
 </body>
 </html>
 

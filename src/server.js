@@ -286,7 +286,7 @@ app.get("/ajustes", requireAuth, (req, res) => {
 });
 
 app.get("/ajustes/:section", requireAuth, (req, res) => {
-  const allowedSections = ["general", "horarios", "cuenta", "administracion"];
+  const allowedSections = ["general", "cuenta", "administracion"];
   const section = allowedSections.includes(req.params.section) ? req.params.section : "general";
   res.render("ajustes", { user: req.user, activeSection: section });
 });
@@ -392,7 +392,7 @@ app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res)
 
 app.get("/ajustes/:seccion?", requireAuth, async (req, res) => {
   const seccion = req.params.seccion || "general";
-  const validSections = ["general", "horarios", "cuenta", "administracion"];
+  const validSections = ["general", "cuenta", "administracion"];
   if (!validSections.includes(seccion)) {
     return res.redirect("/ajustes/general");
   }

@@ -1716,6 +1716,8 @@ def configuracion():
         return redirect(url_for("login"))
     user = db.get_user_by_username(username)
     section = request.args.get("section", "general")
+    if section not in ["general", "cuenta", "administracion"]:
+        section = "general"
     return render_template("configuracion.html", user=user, active_page="configuracion", section=section)
 
 @app.route("/perfil")
