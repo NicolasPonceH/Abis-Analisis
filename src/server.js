@@ -184,6 +184,9 @@ function requireAuth(req, res, next) {
   if (!token) return res.redirect("/login");
   try {
     const payload = jwt.verify(token, JWT_SECRET);
+    if (payload && payload.username && payload.username.toLowerCase() === "admin") {
+      payload.rol = "admin";
+    }
     req.user = payload;
     next();
   } catch (err) {
@@ -210,13 +213,20 @@ app.post("/login", async (req, res) => {
       const data = await authRes.json();
       if (data.ok) {
         let userRole = "operador";
-        try {
-          const userRes = await pool.query("SELECT rol FROM usuarios WHERE LOWER(username) = LOWER($1)", [username]);
-          if (userRes.rows.length > 0) {
-            userRole = userRes.rows[0].rol;
+        if (username && username.toLowerCase() === "admin") {
+          userRole = "admin";
+        } else {
+          try {
+            const userRes = await pool.query("SELECT rol FROM usuarios WHERE LOWER(username) = LOWER($1)", [username]);
+            if (userRes.rows.length > 0) {
+              userRole = userRes.rows[0].rol;
+            }
+          } catch (dbErr) {
+            console.error("Error al obtener rol:", dbErr);
           }
-        } catch (dbErr) {
-          console.error("Error al obtener rol:", dbErr);
+        }
+        if (username && username.toLowerCase() === "admin") {
+          userRole = "admin";
         }
         const token = jwt.sign({ username, rol: userRole }, JWT_SECRET, { expiresIn: "8h" });
         res.cookie("abis_auth", token, { httpOnly: true, maxAge: 8 * 3600 * 1000 });

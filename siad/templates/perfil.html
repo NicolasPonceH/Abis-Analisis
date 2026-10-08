@@ -52,7 +52,9 @@
           
           <div class="flex items-center justify-center gap-3 mt-4">
             <span class="bg-[#002855] text-white text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-md">
-              {{ user.rol if user else session.rol }}
+              {% set p_uname = (user and user.username) or session.get('username', '') %}
+              {% set p_rol = (user and user.rol) or session.get('rol', '') %}
+              {% if p_rol == 'admin' or p_uname == 'admin' %}Administrador Policial{% else %}Operador Autorizado{% endif %}
             </span>
             <span class="bg-gradient-to-r from-emerald-100 to-emerald-50 dark:from-emerald-900/40 dark:to-emerald-800/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800 shadow-sm">
               <span class="material-symbols-outlined text-[14px]">verified</span> Activo

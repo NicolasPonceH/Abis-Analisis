@@ -21,7 +21,7 @@
           </h2>
           <div style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 12px; margin-top: 4px;">
             <span style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
-              <%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %>
+              <%= typeof user !== 'undefined' ? ((user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin')) ? 'Administrador' : 'Operador') : 'Operador' %>
             </span>
             <span style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 6px; color: #059669; font-weight: 700; font-size: 0.92rem; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0;">
               <span style="width: 6px; height: 6px; background: #10B981; border-radius: 50%; display: inline-block; box-shadow: 0 0 4px #10B981;"></span> Activo

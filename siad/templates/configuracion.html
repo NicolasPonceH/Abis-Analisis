@@ -213,11 +213,15 @@
             <div class="flex flex-col gap-3 py-2">
               <div class="flex justify-between items-center text-xs">
                 <span class="text-slate-500 font-medium">Nombre de Usuario:</span>
-                <span class="font-bold text-slate-800 dark:text-slate-100">{{ current_user or 'admin' }}</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ (user and user.username) or current_user or session.get('username') or 'admin' }}</span>
               </div>
               <div class="flex justify-between items-center text-xs">
                 <span class="text-slate-500 font-medium">Rol Asignado:</span>
-                <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold px-2.5 py-0.5 rounded text-[11px] uppercase">Operador Autorizado</span>
+                <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold px-2.5 py-0.5 rounded text-[11px] uppercase">
+                  {% set current_uname = (user and user.username) or current_user or session.get('username') or '' %}
+                  {% set current_urol = (user and user.rol) or session.get('rol') or '' %}
+                  {% if current_urol == 'admin' or current_uname == 'admin' %}Administrador Policial{% else %}Operador Autorizado{% endif %}
+                </span>
               </div>
               <div class="flex justify-between items-center text-xs">
                 <span class="text-slate-500 font-medium">Estado de la Cuenta:</span>
