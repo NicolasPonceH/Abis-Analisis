@@ -265,9 +265,9 @@
       margin-top: 20px;
       border: 0;
       border-radius: 12px;
-      background: #FFD400;
-      box-shadow: 0 4px 12px rgba(255, 212, 0, 0.3);
-      color: #062B57;
+      background: #003B73;
+      box-shadow: 0 4px 12px rgba(0, 59, 115, 0.16);
+      color: #FFD400;
       font-size: 15px;
       font-weight: 800;
       letter-spacing: 0.02em;
@@ -275,7 +275,9 @@
       transition: all 0.2s ease;
     }
 
-    .submit-button:hover { background: #e6bf00; box-shadow: 0 8px 16px rgba(255, 212, 0, 0.4); transform: translateY(-2px); }
+    .submit-button svg { width: 18px; height: 18px; transition: transform 0.2s ease; color: #FFD400; }
+    .submit-button:hover { background: #062B57; box-shadow: 0 8px 16px rgba(0, 59, 115, 0.24); transform: translateY(-2px); }
+    .submit-button:hover svg:last-child { transform: translateX(3px); }
     .submit-button:active { transform: translateY(0); }
     .submit-button:disabled { cursor: wait; opacity: 0.75; transform: none; }
 
@@ -538,7 +540,9 @@
             </div>
 
             <button class="submit-button" type="submit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
               <span>Ingresar a ABIS</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
             </button>
 
             <div class="card-links">
@@ -577,6 +581,7 @@
 
             <button class="submit-button" type="submit">
               <span>Registrar Operador</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
             </button>
 
             <div class="card-links" style="justify-content: center; margin-top: 24px;">
