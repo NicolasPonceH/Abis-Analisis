@@ -16,9 +16,9 @@
       --gold: #ffd100;
       --gold-light: #ffe778;
       --ink: #09233f;
-      --muted: #94a3b8;
-      --line: rgba(255, 255, 255, 0.15);
-      --surface: rgba(3, 19, 35, 0.65);
+      --muted: #607087;
+      --line: rgba(9, 35, 63, 0.14);
+      --surface: rgba(255, 255, 255, 0.94);
     }
 
     * { box-sizing: border-box; }
@@ -89,18 +89,19 @@
 
     .card {
       position: relative;
-      flex: 0 1 480px;
+      flex: 0 1 432px;
       width: 100%;
-      padding: clamp(32px, 5vw, 48px);
+      padding: clamp(28px, 4vw, 42px);
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.72);
       border-radius: 28px;
       background: var(--surface);
-      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      box-shadow: 0 28px 80px rgba(0, 12, 27, 0.34), 0 2px 8px rgba(0, 20, 45, 0.12), inset 0 1px 0 #fff;
       text-align: left;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      animation: cardIn 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      animation: cardIn 800ms cubic-bezier(0.16, 1, 1.3, 1) both;
+      min-height: 520px;
     }
 
     .card::before {
@@ -144,7 +145,7 @@
 
     .brand-name {
       margin: 0;
-      color: #ffffff;
+      color: var(--ink);
       font-size: 19px;
       font-weight: 800;
       letter-spacing: 0.07em;
@@ -154,7 +155,7 @@
 
     h1 {
       margin: 0 0 8px;
-      color: #ffffff;
+      color: var(--ink);
       font-size: clamp(27px, 3vw, 34px);
       font-weight: 800;
       letter-spacing: -0.045em;
@@ -185,7 +186,7 @@
     label {
       display: block;
       margin: 0 0 7px;
-      color: #94a3b8;
+      color: #34506c;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.09em;
@@ -213,19 +214,19 @@
       border: 1px solid var(--line);
       border-radius: 13px;
       outline: none;
-      background: rgba(0, 0, 0, 0.2);
-      color: #ffffff;
+      background: rgba(246, 249, 252, 0.9);
+      color: var(--ink);
       font: inherit;
       font-size: 14px;
       transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
     }
 
-    input[type="password"]::placeholder, input[type="text"]::placeholder { color: #64748b; }
+    input[type="password"]::placeholder, input[type="text"]::placeholder { color: #9aaabd; }
 
     input[type="password"]:focus, input[type="text"]:focus {
-      border-color: var(--gold);
-      background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 0 0 4px rgba(255, 209, 0, 0.12);
+      border-color: #00234c;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(0, 35, 76, 0.12);
     }
 
     .toggle-password {
@@ -258,19 +259,20 @@
       padding: 12px 18px;
       border: 0;
       border-radius: 13px;
-      background: linear-gradient(135deg, #ffd900, #f5bb00);
-      box-shadow: 0 11px 20px rgba(214, 157, 0, 0.24), inset 0 1px 0 rgba(255,255,255,0.6);
-      color: #162f4d;
+      background: #00234c;
+      box-shadow: 0 11px 20px rgba(0, 35, 76, 0.24);
+      color: #ffffff;
       font: inherit;
       font-size: 14px;
       font-weight: 800;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       cursor: pointer;
-      transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
     }
 
-    .submit-button svg { width: 18px; height: 18px; transition: transform 180ms ease; }
-    .submit-button:hover { filter: saturate(1.08) brightness(1.02); box-shadow: 0 15px 25px rgba(214, 157, 0, 0.32); transform: translateY(-2px); }
+    .submit-button svg { width: 18px; height: 18px; transition: transform 180ms ease; color: #ffd100; }
+    .submit-button:hover { background: #001a38; box-shadow: 0 15px 25px rgba(0, 35, 76, 0.32); transform: translateY(-2px); }
     .submit-button:hover svg { transform: translateX(3px); }
     .submit-button:active { transform: translateY(0); }
     .submit-button:disabled { cursor: wait; opacity: 0.75; }
@@ -283,20 +285,20 @@
     }
 
     .card-links a {
-      color: var(--gold-light);
-      font-size: 11px;
+      color: #00234c;
+      font-size: 12px;
       font-weight: 700;
       text-decoration: none;
       transition: color 180ms ease;
     }
 
-    .card-links a:hover { color: #ffffff; text-decoration: underline; }
+    .card-links a:hover { color: #001a38; text-decoration: underline; }
 
     .footer-note {
       margin: 29px 0 0;
       padding-top: 17px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: #64748b;
+      border-top: 1px solid rgba(9, 35, 63, 0.09);
+      color: #91a0b0;
       font-size: 10px;
       line-height: 1.5;
       text-align: center;
@@ -479,7 +481,7 @@
 <body>
   <main class="login-shell">
     <div class="login-layout">
-      <form class="card" method="post" action="/login">
+      <div class="card">
         <div class="brand-row">
           <div class="logo-badge">
             <img src="/assets/logo-pdi.png" alt="PDI">
@@ -490,49 +492,114 @@
           </div>
         </div>
 
-        <div class="card-heading">
-          <h1>Bienvenido</h1>
-          <p class="subtitle">Ingresa tus credenciales para acceder al sistema de enrolamiento biométrico.</p>
-        </div>
-
         <% if (typeof success !== 'undefined' && success) { %>
-          <div class="flash" style="background: #ecfdf5; border-color: #a7f3d0; color: #065f46;"><%= success %></div>
+          <div class="flash" style="background: #ecfdf5; border-color: #a7f3d0; color: #065f46; margin-bottom: 20px;"><%= success %></div>
         <% } %>
         <% if (typeof error !== 'undefined' && error) { %>
-          <div class="flash"><%= error %></div>
+          <div class="flash" style="margin-bottom: 20px;"><%= error %></div>
         <% } %>
 
-        <div class="field">
-          <label for="username">Nombre de usuario</label>
-          <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
-            <input type="text" id="username" name="username" placeholder="Ingresa tu usuario" autocomplete="username" required autofocus>
+        <!-- VISTA: LOGIN -->
+        <div id="view-login">
+          <div class="card-heading">
+            <h1>Bienvenido</h1>
+            <p class="subtitle">Ingresa tus credenciales para acceder al sistema de enrolamiento biométrico.</p>
           </div>
+
+          <form method="post" action="/login" id="form-login">
+            <div class="field">
+              <label for="username">Nombre de usuario</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="username" name="username" placeholder="Ingresa tu usuario" autocomplete="username" required autofocus>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="password">Contraseña</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required>
+                <button class="toggle-password" type="button" aria-label="Mostrar contraseña" aria-pressed="false" onclick="togglePasswordVisibility('password', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <button class="submit-button" type="submit">
+              <span>Ingresar a ABIS</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </button>
+
+            <div class="card-links">
+              <a href="javascript:void(0)" onclick="switchView('register')">Crear una cuenta</a>
+              <a href="javascript:void(0)" onclick="switchView('forgot')">¿Olvidaste tu contraseña?</a>
+            </div>
+          </form>
         </div>
 
-        <div class="field">
-          <label for="password">Contraseña</label>
-          <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required>
-            <button class="toggle-password" type="button" aria-label="Mostrar contraseña" aria-pressed="false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+        <!-- VISTA: REGISTRO -->
+        <div id="view-register" style="display: none;">
+          <div class="card-heading">
+            <h1>Crear Cuenta</h1>
+            <p class="subtitle">Registra un nuevo operador para acceder al sistema ABIS.</p>
+          </div>
+
+          <form method="post" action="/register" id="form-register">
+            <div class="field">
+              <label for="reg-username">Nuevo usuario</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                <input type="text" id="reg-username" name="username" placeholder="Elige un nombre de usuario" required>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="reg-password">Contraseña Segura</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="reg-password" name="password" placeholder="Mínimo 6 caracteres" required>
+                <button class="toggle-password" type="button" aria-label="Mostrar contraseña" aria-pressed="false" onclick="togglePasswordVisibility('reg-password', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <button class="submit-button" type="submit">
+              <span>Registrar Operador</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </button>
+
+            <div class="card-links" style="justify-content: center; margin-top: 24px;">
+              <a href="javascript:void(0)" onclick="switchView('login')"><i class="fa-solid fa-arrow-left"></i> Volver al inicio de sesión</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- VISTA: RECUPERAR CONTRASEÑA -->
+        <div id="view-forgot" style="display: none;">
+          <div class="card-heading">
+            <h1>Recuperar Acceso</h1>
+            <p class="subtitle">Procedimiento institucional de reseteo de credenciales.</p>
+          </div>
+          
+          <div style="background: rgba(0, 35, 76, 0.04); border: 1px solid rgba(0, 35, 76, 0.1); border-left: 4px solid #00234c; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <p style="margin: 0; color: #00234c; font-size: 14px; line-height: 1.6; font-weight: 500;">
+              Por estrictos protocolos de seguridad de la <strong>Policía de Investigaciones de Chile</strong>, la recuperación de credenciales no es un proceso automatizado. 
+              <br><br>
+              Debe comunicarse directamente con el <strong>Administrador del Sistema</strong> o su Oficial Superior a cargo para solicitar un reseteo manual de su clave de acceso al Sistema ABIS.
+            </p>
+          </div>
+
+          <div class="card-links" style="justify-content: center;">
+            <button class="submit-button" style="background: #e2e8f0; color: #0f172a; box-shadow: none;" onclick="switchView('login')">
+              Entendido, volver atrás
             </button>
           </div>
         </div>
 
-        <button class="submit-button" type="submit">
-          <span>Ingresar a ABIS</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-        </button>
-
-        <div class="card-links">
-          <a href="/register">Crear una cuenta</a>
-          <a href="/analisis/forgot-password">¿Olvidaste tu contraseña?</a>
-        </div>
-
         <p class="footer-note">Uso interno · Policía de Investigaciones de Chile</p>
-      </form>
+      </div>
 
       <section class="login-visual" aria-hidden="true">
         <div class="abis-orbit">
@@ -543,9 +610,9 @@
           <div class="abis-core"><span>ABIS</span></div>
         </div>
         <div class="visual-copy">
-          <p class="eyebrow">Acceso seguro · PDI Chile</p>
-          <h2>Identidad que conecta.</h2>
-          <p>Una experiencia de acceso más clara, segura y preparada para el trabajo biométrico.</p>
+          <p class="eyebrow">Plataforma Institucional · PDI</p>
+          <h2>Análisis e Inteligencia.</h2>
+          <p>Plataforma de enrolamiento y verificación biométrica avanzada para la Policía de Investigaciones de Chile.</p>
         </div>
       </section>
     </div>
@@ -574,24 +641,31 @@
   </main>
 
   <script>
-    const form = document.querySelector('.card');
+    const cardEl = document.querySelector('.card');
     const overlay = document.getElementById('scanner-overlay');
     const fp = document.querySelector('.fingerprint-svg');
     const text = document.querySelector('.scanner-text');
     const laser = document.querySelector('.laser');
-    const submitButton = form.querySelector('.submit-button');
-    const passwordInput = document.getElementById('password');
-    const togglePassword = document.querySelector('.toggle-password');
 
-    togglePassword.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      togglePassword.setAttribute('aria-pressed', String(isPassword));
-      togglePassword.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
-    });
+    window.togglePasswordVisibility = function(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(isPassword));
+      btn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    };
 
-    form.addEventListener('submit', (event) => {
+    window.switchView = function(viewName) {
+      document.getElementById('view-login').style.display = 'none';
+      document.getElementById('view-register').style.display = 'none';
+      document.getElementById('view-forgot').style.display = 'none';
+      document.getElementById('view-' + viewName).style.display = 'block';
+    };
+
+    const formLogin = document.getElementById('form-login');
+    formLogin.addEventListener('submit', (event) => {
       event.preventDefault();
+      const submitButton = formLogin.querySelector('.submit-button');
       submitButton.disabled = true;
       overlay.classList.add('is-visible');
       overlay.setAttribute('aria-hidden', 'false');
@@ -601,7 +675,7 @@
         text.innerHTML = '<span style="color: #FFD700;">IDENTIDAD VERIFICADA</span><br><span style="font-size: 18px; color: #ffffff; display: block; margin-top: 12px; font-weight: 800; animation: none; letter-spacing: 0.05em;">BIENVENIDO A ABIS</span>';
         laser.style.display = 'none';
 
-        setTimeout(() => form.submit(), 1600);
+        setTimeout(() => formLogin.submit(), 1600);
       }, 2000);
     });
   </script>
