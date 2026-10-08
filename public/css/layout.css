@@ -45,7 +45,7 @@
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  background: #ffffff;
+  background: var(--bg-surface);
   padding: 3px 6px;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--pdi-gold);
@@ -345,7 +345,7 @@
     display: none !important;
   }
   body {
-    background: #ffffff !important;
+    background: var(--bg-surface) !important;
   }
   .app-container {
     max-width: 100%;
@@ -390,5 +390,7 @@
   height: 18px;
   stroke: #002855;
 }
+
+
 
 

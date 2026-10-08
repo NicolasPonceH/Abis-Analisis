@@ -18,6 +18,43 @@
   <link rel="stylesheet" href="css/styles.css?v=45">
   <!-- Chart.js CDN Oficial -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script>
+    if (typeof Chart === "undefined") {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.2/chart.umd.min.js"><\/script>');
+    }
+  </script>
+<script>
+  (function() {
+    try {
+      // 1. Acento Institucional
+      const accent = localStorage.getItem('pref-accent') || '#FFD100';
+      document.documentElement.style.setProperty('--pdi-gold', accent);
+
+      // 2. Estética de Cristal
+      const glass = localStorage.getItem('pref-glass') !== 'false';
+      if (!glass) {
+        const style = document.createElement('style');
+        style.id = 'style-no-glass';
+        style.innerHTML = `
+          * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+          .settings-card-header, .header-institutional { background: var(--pdi-navy) !important; }
+        `;
+        document.head.appendChild(style);
+      }
+
+      // 3. Transiciones Fluidas
+      const transitions = localStorage.getItem('pref-transitions') !== 'false';
+      if (!transitions) {
+        const style = document.createElement('style');
+        style.id = 'style-no-transitions';
+        style.innerHTML = `
+          * { transition: none !important; animation: none !important; }
+        `;
+        document.head.appendChild(style);
+      }
+    } catch(e) {}
+  })();
+</script>
 </head>
 
 <body>
@@ -216,7 +253,7 @@
       <img src="assets/logo-pdi.png" alt="Logo PDI" style="height: 26px; width: auto; filter: brightness(0) invert(1);" />
       <div style="text-align: left; line-height: 1.2;">
         <div><strong style="font-size: 0.95rem;">Sistema de Gestión ABIS</strong></div>
-        <div style="font-size: 0.75rem; color: #e2e8f0 !important; margin-top: 2px;">Policía de Investigaciones de Chile</div>
+        <div style="font-size: 0.75rem; color: var(--border-subtle) !important; margin-top: 2px;">Policía de Investigaciones de Chile</div>
       </div>
     </div>
     <div style="margin-top: 4px; color: #cbd5e1 !important; font-size: 0.76rem;">
@@ -225,7 +262,9 @@
   </footer>
 
   <!-- Script Principal -->
-  <script type="module" src="js/app.js?v=19"></script>
+  <script type="module" src="js/app.js?v=22"></script>
 </body>
 
 </html>
+
+

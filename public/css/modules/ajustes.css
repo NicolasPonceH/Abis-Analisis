@@ -87,8 +87,8 @@
 }
 
 .settings-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
@@ -187,7 +187,7 @@
   gap: 8px;
   min-height: 38px;
   padding: 8px 10px;
-  background: #f8fafc;
+  background: var(--bg-surface-subtle);
   border: 1px dashed #cbd5e1;
   border-radius: var(--radius-md);
 }
@@ -196,7 +196,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid #bae6fd;
   color: #0369a1;
   padding: 4px 10px;
@@ -227,8 +227,8 @@
 .add-time-box {
   margin-top: 14px;
   padding: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
 }
 
@@ -266,8 +266,8 @@
   flex-direction: column;
   align-items: center;
   padding: 8px 4px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.76rem;
@@ -303,8 +303,8 @@
 
 /* Caja de Info de Canal */
 .channel-info-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   display: flex;
@@ -320,12 +320,12 @@
 }
 
 .channel-info-label {
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .channel-info-val {
-  color: #0f172a;
+  color: var(--text-primary);
   font-weight: 700;
 }
 
@@ -382,8 +382,8 @@
 }
 
 .btn-dest-toggle {
-  background: #f8fafc;
-  color: #334155;
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
   border-color: #cbd5e1;
 }
 .btn-dest-toggle:hover:not(:disabled) {
@@ -474,8 +474,8 @@
 }
 
 .btn-dest-toggle {
-  background: #f8fafc;
-  color: #334155;
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
   border-color: #cbd5e1;
 }
 .btn-dest-toggle:hover:not(:disabled) {
@@ -532,7 +532,7 @@
 }
 
 .toast-modal {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-subtle) 100%);
   border: 1px solid rgba(255, 209, 0, 0.6);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
   border-radius: 14px;
@@ -632,5 +632,7 @@
   50% { opacity: 1; }
   100% { transform: scale(1) rotateY(0deg) rotateZ(0deg); opacity: 1; }
 }
+
+
 
 

@@ -174,8 +174,10 @@ export function renderKPIs(data) {
   const errObj = data.sincronizacion?.find((s) => s.descripcion.toUpperCase().includes("ERROR")) || { total: 0, porcentaje: 0 };
   
   animateValue("kpi-sincronizados", sincObj.total);
-  document.getElementById("kpi-sinc-pct").textContent = `${sincObj.porcentaje}% del total procesado`;
-  document.getElementById("kpi-sinc-bar").style.width = `${Math.min(sincObj.porcentaje, 100)}%`;
+  const sincPct = document.getElementById("kpi-sinc-pct");
+  const sincBar = document.getElementById("kpi-sinc-bar");
+  if (sincPct) sincPct.textContent = `${sincObj.porcentaje}% del total procesado`;
+  if (sincBar) sincBar.style.width = `${Math.min(sincObj.porcentaje, 100)}%`;
   
   const sincTag = document.getElementById("kpi-sinc-tag");
   if (sincTag) {
@@ -185,13 +187,17 @@ export function renderKPIs(data) {
   // Registro Biométrico
   const regObj = data.registro?.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO")) || { total: 0, porcentaje: 0 };
   animateValue("kpi-registrados", regObj.total);
-  document.getElementById("kpi-reg-pct").textContent = `${regObj.porcentaje}% del total procesado`;
-  document.getElementById("kpi-reg-bar").style.width = `${Math.min(regObj.porcentaje, 100)}%`;
+  const regPct = document.getElementById("kpi-reg-pct");
+  const regBar = document.getElementById("kpi-reg-bar");
+  if (regPct) regPct.textContent = `${regObj.porcentaje}% del total procesado`;
+  if (regBar) regBar.style.width = `${Math.min(regObj.porcentaje, 100)}%`;
 
   // Errores / Inconsistencias
   animateValue("kpi-errores", errObj.total);
-  document.getElementById("kpi-err-pct").textContent = `${errObj.porcentaje}% del total procesado`;
-  document.getElementById("kpi-err-bar").style.width = `${Math.min(errObj.porcentaje, 100)}%`;
+  const errPct = document.getElementById("kpi-err-pct");
+  const errBar = document.getElementById("kpi-err-bar");
+  if (errPct) errPct.textContent = `${errObj.porcentaje}% del total procesado`;
+  if (errBar) errBar.style.width = `${Math.min(errObj.porcentaje, 100)}%`;
   
   const errTag = document.getElementById("kpi-err-tag");
   if (errTag) {
@@ -282,6 +288,11 @@ export function updateChartBadges(data) {
 }
 
 export function renderCharts(data) {
+  if (typeof Chart === "undefined") {
+    console.warn("Chart.js no está disponible; se omitirá el renderizado de gráficos.");
+    updateChartBadges(data);
+    return;
+  }
   // Configuración global de Chart.js
   Chart.defaults.color = "#64748b";
   Chart.defaults.borderColor = CHART_PALETTE.gridColor;
@@ -1068,11 +1079,17 @@ export function renderProfesionesChart(data) {
 }
 
 export async function cargarComparacionPeriodos(tipo) {
+  // La comparativa puede no estar presente en versiones antiguas de la vista
+  // o mientras se actualiza el HTML. En ese caso no debe romper el dashboard.
+  const comparisonCards = document.getElementById("benchmarking-cards");
+  if (!comparisonCards) return;
+
   try {
-    document.getElementById("btn-comp-semana").classList.toggle("active", tipo === "semana");
-    document.getElementById("btn-comp-mes").classList.toggle("active", tipo === "mes");
+    document.getElementById("btn-comp-semana")?.classList.toggle("active", tipo === "semana");
+    document.getElementById("btn-comp-mes")?.classList.toggle("active", tipo === "mes");
     
-    document.getElementById("comp-sub-total").textContent = "Calculando...";
+    const totalSub = document.getElementById("comp-sub-total");
+    if (totalSub) totalSub.textContent = "Calculando...";
     
     const res = await fetch(`/api/metricas/comparar?tipo=${tipo}`);
     if (!res.ok) throw new Error("Error en comparador");
@@ -1083,8 +1100,15 @@ export async function cargarComparacionPeriodos(tipo) {
     const fmtPct = n => Number(n).toFixed(1) + "%";
     
     const updateCard = (prefix, valAct, valAnt, variacion, isInverted = false) => {
-      document.getElementById(`comp-kpi-${prefix}`).textContent = prefix === "sla" ? fmtPct(valAct) : fmt(valAct);
+      const valueEl = document.getElementById(`comp-kpi-${prefix}`);
+      if (valueEl) valueEl.textContent = prefix === "sla" ? fmtPct(valAct) : fmt(valAct);
       const deltaEl = document.getElementById(`comp-delta-${prefix}`);
+      const subEl = document.getElementById(`comp-sub-${prefix}`);
+
+      if (!deltaEl) {
+        if (subEl) subEl.textContent = `Anterior: ${prefix === "sla" ? fmtPct(valAnt) : fmt(valAnt)}`;
+        return;
+      }
       
       let sign = variacion > 0 ? "+" : (variacion < 0 ? "-" : "");
       let absVar = Math.abs(variacion);
@@ -1099,7 +1123,7 @@ export async function cargarComparacionPeriodos(tipo) {
         deltaEl.classList.add(isInverted ? "delta-positive" : "delta-negative");
       }
       
-      document.getElementById(`comp-sub-${prefix}`).textContent = `Anterior: ${prefix === "sla" ? fmtPct(valAnt) : fmt(valAnt)}`;
+      if (subEl) subEl.textContent = `Anterior: ${prefix === "sla" ? fmtPct(valAnt) : fmt(valAnt)}`;
     };
 
     updateCard("total", data.actual.total, data.anterior.total, data.variacion.total);
@@ -1115,7 +1139,8 @@ export async function cargarComparacionPeriodos(tipo) {
 
   } catch (e) {
     console.error("[BENCHMARKING ERROR]", e);
-    document.getElementById("comp-sub-total").textContent = "Error al cargar comparativa";
+    const totalSub = document.getElementById("comp-sub-total");
+    if (totalSub) totalSub.textContent = "Error al cargar comparativa";
   }
 }
 
@@ -1164,4 +1189,3 @@ export function filterTableRows(query) {
     row.style.display = text.includes(query) ? "" : "none";
   });
 }
-

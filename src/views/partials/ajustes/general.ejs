@@ -9,52 +9,41 @@
     <!-- Accesibilidad y Apariencia -->
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); grid-column: 1 / -1;">
       <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px;">
-        <i class="fa-solid fa-universal-access" style="color: #60a5fa;"></i> Accesibilidad y Apariencia
+        <i class="fa-solid fa-universal-access" style="color: var(--pdi-gold);"></i> Accesibilidad y Apariencia
       </div>
       
       <div style="padding: 0;">
         <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
           <div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Modo de visualización</div>
-            <div style="color: #64748b; font-size: 13px;">Ajusta el tema global de la interfaz</div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Acento Institucional</div>
+            <div style="color: #64748b; font-size: 13px;">Personaliza el color de acento primario del sistema</div>
           </div>
-          <select id="pref-theme" style="padding: 8px 12px; border-radius: 6px; border: 2px solid #e2e8f0; color: #0f172a; font-weight: 600; font-size: 13px; outline: none; cursor: pointer; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
-            <option value="light">Modo Claro (Por defecto)</option>
-            <option value="dark">Modo Oscuro</option>
-            <option value="auto">Automático (Sistema)</option>
+          <select id="pref-accent" style="padding: 8px 12px; border-radius: 6px; border: 2px solid #e2e8f0; color: #0f172a; font-weight: 600; font-size: 13px; outline: none; cursor: pointer; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
+            <option value="#FFD100">Dorado PDI (Oficial)</option>
+            <option value="#0ea5e9">Azul Táctico</option>
+            <option value="#10b981">Verde Élite</option>
+            <option value="#f43f5e">Rojo Alerta</option>
           </select>
         </div>
 
         <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
           <div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Alto Contraste</div>
-            <div style="color: #64748b; font-size: 13px;">Activar modo de alto contraste para mejorar legibilidad</div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Estética de Cristal (Glassmorphism)</div>
+            <div style="color: #64748b; font-size: 13px;">Habilita transparencias y desenfoques premium en los paneles</div>
           </div>
           <label class="toggle-switch" style="cursor: pointer;">
-            <input type="checkbox" id="pref-contrast">
+            <input type="checkbox" id="pref-glass">
             <span class="toggle-slider"></span>
           </label>
         </div>
 
-        <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
-          <div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Tamaño de Fuente</div>
-            <div style="color: #64748b; font-size: 13px;">Ajusta la escala de lectura de textos</div>
-          </div>
-          <select id="pref-fontsize" style="padding: 8px 12px; border-radius: 6px; border: 2px solid #e2e8f0; color: #0f172a; font-weight: 600; font-size: 13px; outline: none; cursor: pointer; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
-            <option value="14px">Normal (14px)</option>
-            <option value="16px">Grande (16px)</option>
-            <option value="18px">Extra Grande (18px)</option>
-          </select>
-        </div>
-
         <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Reducir animaciones</div>
-            <div style="color: #64748b; font-size: 13px;">Desactivar transiciones y animaciones decorativas</div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 4px;">Transiciones Fluidas</div>
+            <div style="color: #64748b; font-size: 13px;">Activa animaciones suaves al interactuar con los elementos</div>
           </div>
           <label class="toggle-switch" style="cursor: pointer;">
-            <input type="checkbox" id="pref-animations">
+            <input type="checkbox" id="pref-transitions">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -64,7 +53,7 @@
     <!-- Información del Sistema -->
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); grid-column: 1 / -1;">
       <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px;">
-        <i class="fa-solid fa-server" style="color: #60a5fa;"></i> Información Técnica
+        <i class="fa-solid fa-server" style="color: var(--pdi-gold);"></i> Información Técnica
       </div>
       
       <div style="padding: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
@@ -96,47 +85,77 @@
 
 <script>
   function loadPreferences() {
-    const theme = localStorage.getItem('pref-theme') || 'light';
-    const contrast = localStorage.getItem('pref-contrast') === 'true';
-    const fontsize = localStorage.getItem('pref-fontsize') || '14px';
-    const animations = localStorage.getItem('pref-animations') === 'true';
+    const accent = localStorage.getItem('pref-accent') || '#FFD100';
+    const glass = localStorage.getItem('pref-glass') !== 'false'; // Default true
+    const transitions = localStorage.getItem('pref-transitions') !== 'false'; // Default true
 
-    document.getElementById('pref-theme').value = theme;
-    document.getElementById('pref-contrast').checked = contrast;
-    document.getElementById('pref-fontsize').value = fontsize;
-    document.getElementById('pref-animations').checked = animations;
+    const accentEl = document.getElementById('pref-accent');
+    const glassEl = document.getElementById('pref-glass');
+    const transEl = document.getElementById('pref-transitions');
+    
+    if(accentEl) accentEl.value = accent;
+    if(glassEl) glassEl.checked = glass;
+    if(transEl) transEl.checked = transitions;
   }
 
   function savePreferences() {
-    localStorage.setItem('pref-theme', document.getElementById('pref-theme').value);
-    localStorage.setItem('pref-contrast', document.getElementById('pref-contrast').checked);
-    localStorage.setItem('pref-fontsize', document.getElementById('pref-fontsize').value);
-    localStorage.setItem('pref-animations', document.getElementById('pref-animations').checked);
+    localStorage.setItem('pref-accent', document.getElementById('pref-accent').value);
+    localStorage.setItem('pref-glass', document.getElementById('pref-glass').checked);
+    localStorage.setItem('pref-transitions', document.getElementById('pref-transitions').checked);
     
     applyPreferences();
   }
 
   function applyPreferences() {
-    const fontsize = localStorage.getItem('pref-fontsize') || '14px';
-    document.documentElement.style.fontSize = fontsize;
-    
-    if (localStorage.getItem('pref-contrast') === 'true') {
-      document.body.classList.add('high-contrast');
+    // 1. Acento Institucional
+    const accent = localStorage.getItem('pref-accent') || '#FFD100';
+    document.documentElement.style.setProperty('--pdi-gold', accent);
+
+    // 2. Estética de Cristal
+    const glass = localStorage.getItem('pref-glass') !== 'false';
+    if (!glass) {
+      if (!document.getElementById('style-no-glass')) {
+        const style = document.createElement('style');
+        style.id = 'style-no-glass';
+        style.innerHTML = `
+          * {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+          }
+          .settings-card-header, .header-institutional {
+            background: var(--pdi-navy) !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
     } else {
-      document.body.classList.remove('high-contrast');
+      const style = document.getElementById('style-no-glass');
+      if (style) style.remove();
     }
 
-    if (localStorage.getItem('pref-theme') === 'dark') {
-      document.body.classList.add('dark-theme');
+    // 3. Transiciones Fluidas
+    const transitions = localStorage.getItem('pref-transitions') !== 'false';
+    if (!transitions) {
+      if (!document.getElementById('style-no-transitions')) {
+        const style = document.createElement('style');
+        style.id = 'style-no-transitions';
+        style.innerHTML = `
+          * {
+            transition: none !important;
+            animation: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
     } else {
-      document.body.classList.remove('dark-theme');
+      const style = document.getElementById('style-no-transitions');
+      if (style) style.remove();
     }
   }
 
-  document.getElementById('pref-theme')?.addEventListener('change', savePreferences);
-  document.getElementById('pref-contrast')?.addEventListener('change', savePreferences);
-  document.getElementById('pref-fontsize')?.addEventListener('change', savePreferences);
-  document.getElementById('pref-animations')?.addEventListener('change', savePreferences);
+  document.getElementById('pref-accent')?.addEventListener('change', savePreferences);
+  document.getElementById('pref-glass')?.addEventListener('change', savePreferences);
+  document.getElementById('pref-transitions')?.addEventListener('change', savePreferences);
 
   // En caso de que se navegue mediante AJAX o tabs
   loadPreferences();

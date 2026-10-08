@@ -1,14 +1,14 @@
 <div style="max-width: 1200px; margin: 0 auto; padding-bottom: 40px;">
   <div style="margin-bottom: 32px;">
-    <h1 style="font-size: 28px; font-weight: 800; color: #001F44; margin: 0 0 8px 0; letter-spacing: -0.02em;">Panel de Administración</h1>
-    <p style="color: #64748b; font-size: 15px; margin: 0;">Gestiona usuarios, roles y credenciales del Sistema ABIS de forma segura.</p>
+    <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; letter-spacing: -0.02em;">Panel de Administración</h1>
+    <p style="color: var(--text-muted); font-size: 1.07rem; margin: 0;">Gestiona usuarios, roles y credenciales del Sistema ABIS de forma segura.</p>
   </div>
 
   <% if (typeof user !== 'undefined' && user.rol === 'admin') { %>
     
     <!-- Nuevo Usuario (Colapsable) -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px;">
-      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 15px;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px;">
+      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 1.07rem;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-user-plus" style="color: var(--pdi-gold);"></i> Añadir usuarios
         </div>
@@ -17,12 +17,12 @@
       <form id="form-nuevo-usuario" style="padding: 24px;" novalidate>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 16px;">
           <div>
-            <label for="nuevo-usuario" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nombre de usuario</label>
-            <input type="text" id="nuevo-usuario" minlength="3" maxlength="80" autocomplete="off" required style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
+            <label for="nuevo-usuario" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nombre de usuario</label>
+            <input type="text" id="nuevo-usuario" minlength="3" maxlength="80" autocomplete="off" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
           </div>
           <div>
-            <label for="nuevo-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nivel de Acceso</label>
-            <select id="nuevo-rol" required style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; cursor: pointer; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
+            <label for="nuevo-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nivel de Acceso</label>
+            <select id="nuevo-rol" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; cursor: pointer; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
               <option value="operador">Operador (Estándar)</option>
               <option value="admin">Administrador (Total)</option>
             </select>
@@ -30,17 +30,17 @@
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
           <div>
-            <label for="nuevo-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña Inicial</label>
-            <input type="password" id="nuevo-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
+            <label for="nuevo-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña Inicial</label>
+            <input type="password" id="nuevo-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
           </div>
           <div>
-            <label for="nuevo-password-confirm" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmar Contraseña</label>
-            <input type="password" id="nuevo-password-confirm" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
+            <label for="nuevo-password-confirm" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmar Contraseña</label>
+            <input type="password" id="nuevo-password-confirm" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
           </div>
         </div>
-        <p id="nuevo-usuario-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 13px; font-weight: 600;"></p>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-          <button type="submit" style="background: #001F44; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
+        <p id="nuevo-usuario-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 0.92rem; font-weight: 600;"></p>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+          <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
             <i class="fa-solid fa-user-plus"></i> Añadir
           </button>
         </div>
@@ -48,54 +48,54 @@
     </div>
 
     <!-- Lista de Usuarios -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 15px;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 1.07rem;">
         <div style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-users" style="color: var(--pdi-gold);"></i> Registro Activo
         </div>
-        <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+        <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;">
           <%= typeof dbUsers !== 'undefined' ? dbUsers.length : 0 %> Registros
         </span>
       </div>
 
       <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; min-width: 760px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 1rem; min-width: 760px;">
           <thead>
-            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em;">Usuario</th>
-              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em;">Rol</th>
-              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em;">Estado</th>
-              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em;">Último acceso</th>
-              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; text-align: right;">Acciones</th>
+            <tr style="background: var(--bg-surface-subtle); border-bottom: 2px solid var(--border-subtle);">
+              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Usuario</th>
+              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Rol</th>
+              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Estado</th>
+              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Último acceso</th>
+              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; text-align: right;">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <% if (typeof dbUsers !== 'undefined' && dbUsers.length > 0) { %>
               <% dbUsers.forEach(u => { %>
-                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.1s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                  <td style="padding: 16px 24px; font-weight: 700; color: #0f172a;">
+                <tr style="border-bottom: 1px solid var(--bg-surface-hover); transition: background 0.1s;" onmouseover="this.style.background='var(--bg-surface-subtle)'" onmouseout="this.style.background='transparent'">
+                  <td style="padding: 16px 24px; font-weight: 700; color: var(--text-primary);">
                     <i class="fa-solid <%= u.rol === 'admin' ? 'fa-user-shield' : 'fa-user' %>" style="color: <%= u.rol === 'admin' ? '#0284c7' : '#94a3b8' %>; margin-right: 12px;"></i>
                     <%= u.username %>
                   </td>
                   <td style="padding: 16px 24px;" id="td-rol-<%= u.id %>">
-                    <span style="background: <%= u.rol === 'admin' ? '#eff6ff' : '#f1f5f9' %>; color: <%= u.rol === 'admin' ? '#1e40af' : '#475569' %>; border: 1px solid <%= u.rol === 'admin' ? '#bfdbfe' : '#e2e8f0' %>; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <span style="background: <%= u.rol === 'admin' ? '#eff6ff' : 'var(--bg-surface-hover)' %>; color: <%= u.rol === 'admin' ? '#1e40af' : '#475569' %>; border: 1px solid <%= u.rol === 'admin' ? '#bfdbfe' : 'var(--border-subtle)' %>; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
                       <%= u.rol === 'operador' ? 'Operador' : 'Admin' %>
                     </span>
                   </td>
                   <td style="padding: 16px 24px;">
-                    <span style="display: inline-flex; align-items: center; gap: 6px; color: #059669; font-weight: 700; font-size: 13px; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0;">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; color: #059669; font-weight: 700; font-size: 0.92rem; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0;">
                       <span style="width: 6px; height: 6px; background: #10B981; border-radius: 50%; box-shadow: 0 0 4px #10B981;"></span> Activo
                     </span>
                   </td>
-                  <td style="padding: 16px 24px; color: #64748b; font-size: 13px;">
+                  <td style="padding: 16px 24px; color: var(--text-muted); font-size: 0.92rem;">
                     <%= u.ultimo_ingreso ? new Date(u.ultimo_ingreso).toLocaleString('es-CL') : 'Nunca' %>
                   </td>
                   <td style="padding: 16px 24px; text-align: right;">
                     <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                      <button type="button" onclick="openRoleModal(<%= u.id %>, '<%= u.rol %>')" style="background: #f1f5f9; color: #0f172a; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
-                        <i class="fa-solid fa-pen" style="color: #64748b;"></i> Rol
+                      <button type="button" onclick="openRoleModal(<%= u.id %>, '<%= u.rol %>')" style="background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">
+                        <i class="fa-solid fa-pen" style="color: var(--text-muted);"></i> Rol
                       </button>
-                      <button type="button" data-username="<%= u.username %>" onclick="openPasswordModal(<%= u.id %>, this)" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                      <button type="button" data-username="<%= u.username %>" onclick="openPasswordModal(<%= u.id %>, this)" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
                         <i class="fa-solid fa-key" style="color: #ef4444;"></i> Clave
                       </button>
                     </div>
@@ -103,7 +103,7 @@
                 </tr>
               <% }) %>
             <% } else { %>
-              <tr><td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8; font-weight: 600;"><i class="fa-solid fa-folder-open" style="font-size: 24px; display: block; margin-bottom: 12px; color: #cbd5e1;"></i> No hay usuarios registrados</td></tr>
+              <tr><td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8; font-weight: 600;"><i class="fa-solid fa-folder-open" style="font-size: 24px; display: block; margin-bottom: 12px; color: var(--border-medium);"></i> No hay usuarios registrados</td></tr>
             <% } %>
           </tbody>
         </table>
@@ -112,46 +112,46 @@
 
     <!-- Modals de Acción (Ocultos por defecto) -->
     <div id="admin-action-modal" style="position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
-      <div style="background: #ffffff; width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden; transform: scale(0.95); transition: transform 0.2s;">
-        <div style="padding: 24px 32px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+      <div style="background: var(--bg-surface); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden; transform: scale(0.95); transition: transform 0.2s;">
+        <div style="padding: 24px 32px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h2 id="admin-modal-title" style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: #0f172a;">Administrar</h2>
-            <p id="admin-modal-subtitle" style="margin: 0; color: #64748b; font-size: 13px;"></p>
+            <h2 id="admin-modal-title" style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: var(--text-primary);">Administrar</h2>
+            <p id="admin-modal-subtitle" style="margin: 0; color: var(--text-muted); font-size: 0.92rem;"></p>
           </div>
-          <button type="button" onclick="closeAdminModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.2s; width: 32px; height: 32px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8'">&times;</button>
+          <button type="button" onclick="closeAdminModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.2s; width: 32px; height: 32px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--bg-surface-hover)'; this.style.color='var(--text-primary)'" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8'">&times;</button>
         </div>
 
         <div style="padding: 32px;">
           <!-- Form Role -->
           <form id="form-editar-rol" hidden>
             <div style="margin-bottom: 24px;">
-              <label for="editar-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Asignar Privilegios</label>
-              <select id="editar-rol" style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; cursor: pointer; transition: border-color 0.2s;" onfocus="this.style.borderColor='#001F44'" onblur="this.style.borderColor='#e2e8f0'">
+              <label for="editar-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Asignar Privilegios</label>
+              <select id="editar-rol" style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; cursor: pointer; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
                 <option value="operador">Operador</option>
                 <option value="admin">Administrador</option>
               </select>
             </div>
-            <p id="editar-rol-feedback" style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600;"></p>
+            <p id="editar-rol-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
-              <button type="button" onclick="closeAdminModal()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Cancelar</button>
-              <button type="submit" style="background: #001F44; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,31,68,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">Actualizar Rol</button>
+              <button type="button" onclick="closeAdminModal()" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">Cancelar</button>
+              <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,31,68,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">Actualizar Rol</button>
             </div>
           </form>
 
           <!-- Form Password -->
           <form id="form-cambiar-password-admin" hidden novalidate>
             <div style="margin-bottom: 16px;">
-              <label for="admin-nueva-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva Contraseña Fuerte</label>
-              <input type="password" id="admin-nueva-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='#e2e8f0'">
+              <label for="admin-nueva-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva Contraseña Fuerte</label>
+              <input type="password" id="admin-nueva-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='var(--border-subtle)'">
             </div>
             <div style="margin-bottom: 24px;">
-              <label for="admin-confirmar-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Repetir Contraseña</label>
-              <input type="password" id="admin-confirmar-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 14px; color: #0f172a; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='#e2e8f0'">
+              <label for="admin-confirmar-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Repetir Contraseña</label>
+              <input type="password" id="admin-confirmar-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='var(--border-subtle)'">
             </div>
-            <p id="admin-password-feedback" style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600;"></p>
+            <p id="admin-password-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
-              <button type="button" onclick="closeAdminModal()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Cancelar</button>
-              <button type="submit" style="background: #DC2626; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 6px rgba(220,38,38,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(220,38,38,0.25)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(220,38,38,0.15)'">Forzar Cambio</button>
+              <button type="button" onclick="closeAdminModal()" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">Cancelar</button>
+              <button type="submit" style="background: #DC2626; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(220,38,38,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(220,38,38,0.25)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(220,38,38,0.15)'">Forzar Cambio</button>
             </div>
           </form>
         </div>
@@ -328,9 +328,12 @@
       <h2 style="color: #be123c; margin: 0 0 8px 0; font-size: 18px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-lock"></i> Acceso Restringido
       </h2>
-      <p style="color: #9f1239; margin: 0; font-size: 15px; line-height: 1.5;">
+      <p style="color: #9f1239; margin: 0; font-size: 1.07rem; line-height: 1.5;">
         Esta área es exclusiva para cuentas con nivel de <strong>Administrador</strong>. Por favor, comunícate con el soporte técnico si consideras que necesitas acceso a este módulo.
       </p>
     </div>
   <% } %>
 </div>
+
+
+

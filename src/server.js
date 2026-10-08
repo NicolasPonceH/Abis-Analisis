@@ -273,6 +273,9 @@ app.get("/", requireAuth, (req, res) => {
 
 app.post("/api/user/change-password", requireAuth, express.json(), async (req, res) => {
   const { password } = req.body;
+  if (typeof password !== "string" || password.length < 6) {
+    return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres." });
+  }
   if (!password) return res.status(400).json({ error: "Falta la nueva contraseña." });
   
   try {
@@ -294,6 +297,9 @@ app.post("/api/user/change-password", requireAuth, express.json(), async (req, r
 app.post("/api/admin/reset-password", requireAuth, express.json(), async (req, res) => {
   if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
   const { id, password } = req.body;
+  if (typeof password !== "string" || password.length < 6) {
+    return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres." });
+  }
   if (!id || !password) return res.status(400).json({ error: "Faltan datos." });
   
   try {
@@ -318,6 +324,10 @@ app.post("/api/admin/reset-password", requireAuth, express.json(), async (req, r
 app.post("/api/admin/create-user", requireAuth, express.json(), async (req, res) => {
   if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
   const { username, password, rol } = req.body;
+  const normalizedUsername = typeof username === "string" ? username.trim() : "";
+  if (normalizedUsername.length < 3 || typeof password !== "string" || password.length < 6 || !["admin", "operador"].includes(rol)) {
+    return res.status(400).json({ error: "Usuario, contraseña o rol no válidos." });
+  }
   if (!username || !password || !rol) return res.status(400).json({ error: "Faltan datos." });
   
   try {
@@ -325,12 +335,12 @@ app.post("/api/admin/create-user", requireAuth, express.json(), async (req, res)
     const createRes = await fetch(`${siadUrl}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, nombre_completo: username })
+      body: JSON.stringify({ username: normalizedUsername, password, nombre_completo: normalizedUsername })
     });
     const data = await createRes.json();
     
     if (data.ok) {
-      await pool.query("UPDATE usuarios SET rol = $1 WHERE username = $2", [rol, username]);
+      await pool.query("UPDATE usuarios SET rol = $1 WHERE LOWER(username) = LOWER($2)", [rol, normalizedUsername]);
       return res.json({ ok: true });
     }
     return res.status(400).json({ error: data.error || "Error al crear usuario." });
@@ -348,6 +358,9 @@ app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res)
   if (!id || !rol) {
     return res.status(400).json({ error: "Faltan datos." });
   }
+  if (!["admin", "operador"].includes(rol)) {
+    return res.status(400).json({ error: "Rol no válido." });
+  }
   try {
     await pool.query("UPDATE usuarios SET rol = $1 WHERE id = $2", [rol, id]);
     res.json({ ok: true });
@@ -359,7 +372,7 @@ app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res)
 
 app.get("/ajustes/:seccion?", requireAuth, async (req, res) => {
   const seccion = req.params.seccion || "general";
-  const validSections = ["general", "horarios", "cuenta", "seguridad", "administracion"];
+  const validSections = ["general", "horarios", "cuenta", "administracion"];
   if (!validSections.includes(seccion)) {
     return res.redirect("/ajustes/general");
   }

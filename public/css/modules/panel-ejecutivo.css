@@ -164,7 +164,7 @@ select.form-control {
 }
 
 .form-control:focus {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-color: var(--border-focus);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
@@ -520,7 +520,7 @@ select.form-control {
 }
 
 .chart-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-top: 3px solid var(--pdi-navy);
   border-radius: var(--radius-lg);
@@ -574,7 +574,7 @@ select.form-control {
 .chart-title {
   font-size: 0.93rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -584,8 +584,8 @@ select.form-control {
 .chart-badge {
   font-size: 0.72rem;
   padding: 3px 10px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   color: #475569;
   font-weight: 600;
@@ -648,11 +648,11 @@ select.form-control {
 
 .trend-calendar-box:hover {
   border-color: var(--border-focus, #2563eb);
-  background: #ffffff;
+  background: var(--bg-surface);
 }
 
 .trend-calendar-box:focus-within {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-color: var(--border-focus, #2563eb);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
@@ -724,7 +724,7 @@ select.form-control {
 }
 
 .data-table tbody tr:nth-child(even) td {
-  background-color: #f8fafc;
+  background-color: var(--bg-surface-subtle);
 }
 
 .data-table tr:hover td { background: rgba(255, 209, 0, 0.25) !important; color: var(--pdi-navy); }
@@ -824,7 +824,7 @@ select.form-control {
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--text-muted);
   letter-spacing: 0.5px;
   margin-bottom: 6px;
 }
@@ -832,7 +832,7 @@ select.form-control {
 .trend-kpi-val {
   font-size: 1.65rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
   line-height: 1.15;
 }
@@ -845,8 +845,8 @@ select.form-control {
 
 /* Toolbar de Tendencias */
 .trend-toolbar-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 14px 20px;
   margin-bottom: 20px;
@@ -880,7 +880,7 @@ select.form-control {
 .trend-granularity-toggle {
   display: inline-flex;
   background: #ffd100;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   padding: 2px;
 }
@@ -888,7 +888,7 @@ select.form-control {
 .granularity-btn {
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.76rem;
   font-weight: 600;
   padding: 4px 12px;
@@ -898,7 +898,7 @@ select.form-control {
 }
 
 .granularity-btn.active {
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--pdi-navy);
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -932,7 +932,9 @@ select.form-control {
 
 .delta-neutral {
   background: #ffd100;
-  color: #64748b;
+  color: var(--text-muted);
 }
+
+
 
 
