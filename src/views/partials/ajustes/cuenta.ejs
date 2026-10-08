@@ -36,36 +36,16 @@
       <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.07rem;">
         <i class="fa-solid fa-shield-halved" style="color: var(--pdi-gold);"></i> Seguridad de Acceso
       </div>
-      <div style="padding: 32px 24px; flex: 1; display: flex; flex-direction: column; justify-content: center;" id="mi-contrasena-inicial">
+      <div style="padding: 32px 24px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
         <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
           <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin: 0;">
             Mantén tu cuenta protegida actualizando tu contraseña periódicamente. Se recomienda usar al menos 6 caracteres.
           </p>
         </div>
-        <button type="button" id="btn-mostrar-mi-contrasena" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15); width: 100%;">
+        <button type="button" onclick="document.getElementById('modal-mi-contrasena').hidden = false" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15); width: 100%;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
           <i class="fa-solid fa-key"></i> Modificar Contraseña
         </button>
       </div>
-
-      <form id="form-mi-contrasena" style="padding: 24px;" hidden novalidate>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div>
-            <label for="mi-nueva-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva contraseña</label>
-            <input type="password" id="mi-nueva-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
-          </div>
-          <div>
-            <label for="mi-confirmar-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmar contraseña</label>
-            <input type="password" id="mi-confirmar-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
-          </div>
-        </div>
-        <p id="mi-contrasena-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 0.92rem; font-weight: 600;"></p>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-          <button type="button" id="btn-cancelar-mi-contrasena" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">Cancelar</button>
-          <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
-            <i class="fa-solid fa-floppy-disk"></i> Guardar
-          </button>
-        </div>
-      </form>
     </div>
 
     <!-- Sesión (Grid Full Width) -->
@@ -91,12 +71,11 @@
     const form = document.getElementById('form-mi-contrasena');
     if (!form) return;
 
-    const initialState = document.getElementById('mi-contrasena-inicial');
-    const showButton = document.getElementById('btn-mostrar-mi-contrasena');
-    const cancelButton = document.getElementById('btn-cancelar-mi-contrasena');
+    const modal = document.getElementById('modal-mi-contrasena');
     const feedback = document.getElementById('mi-contrasena-feedback');
     
     const setFeedback = (message, type) => {
+      if (!feedback) return;
       feedback.textContent = message;
       if (type === 'error') {
         feedback.style.color = '#dc2626';
@@ -116,19 +95,12 @@
         feedback.style.background = 'transparent';
       }
     };
-
-    showButton?.addEventListener('click', () => {
-      initialState.hidden = true;
-      form.hidden = false;
-      document.getElementById('mi-nueva-contrasena')?.focus();
-    });
-
-    cancelButton?.addEventListener('click', () => {
+    // Función para cerrar modal desde botón Cancelar o la X
+    window.closeMiContrasenaModal = () => {
       form.reset();
-      form.hidden = true;
-      initialState.hidden = false;
       setFeedback('', '');
-    });
+      if (modal) modal.hidden = true;
+    };
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -154,9 +126,7 @@
         form.reset();
         setFeedback('Contraseña actualizada correctamente.', 'success');
         setTimeout(() => {
-          form.hidden = true;
-          initialState.hidden = false;
-          setFeedback('', '');
+          if (window.closeMiContrasenaModal) window.closeMiContrasenaModal();
         }, 3000);
       } catch (error) {
         setFeedback(error.message || 'No se pudo actualizar la contraseña.', 'error');
@@ -167,6 +137,35 @@
     });
   })();
 </script>
+
+<!-- Modal Mi Contraseña -->
+<div id="modal-mi-contrasena" class="settings-modal" hidden>
+  <div class="settings-modal-card" style="width: min(500px, 100%);">
+    <div class="settings-modal-header">
+      <h2><i class="fa-solid fa-key" style="color: var(--pdi-gold);"></i> Modificar Contraseña</h2>
+      <button type="button" class="settings-close-btn" onclick="closeMiContrasenaModal()"><i class="fa-solid fa-times"></i></button>
+    </div>
+    <form id="form-mi-contrasena" novalidate>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <label for="mi-nueva-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva contraseña</label>
+          <input type="password" id="mi-nueva-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+        </div>
+        <div>
+          <label for="mi-confirmar-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmar contraseña</label>
+          <input type="password" id="mi-confirmar-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+        </div>
+      </div>
+      <p id="mi-contrasena-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 0.92rem; font-weight: 600;"></p>
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+        <button type="button" onclick="closeMiContrasenaModal()" style="background: transparent; border: 1px solid var(--border-medium); color: var(--text-primary); padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;">Cancelar</button>
+        <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 
 
