@@ -271,6 +271,10 @@ app.get("/", requireAuth, (req, res) => {
   res.render("index", { user: req.user });
 });
 
+app.get("/ajustes", requireAuth, (req, res) => {
+  res.render("ajustes", { user: req.user });
+});
+
 app.post("/api/user/change-password", requireAuth, express.json(), async (req, res) => {
   const { password } = req.body;
   if (typeof password !== "string" || password.length < 6) {
