@@ -169,7 +169,7 @@
 }
 
 .crypto-tool-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 22px;
@@ -229,7 +229,7 @@
   padding: 22px 14px;
   text-align: center;
   cursor: pointer;
-  background: #f8fafc;
+  background: var(--bg-surface-subtle);
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -313,7 +313,7 @@
 }
 
 .ingesta-mode-btn.active {
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--pdi-navy);
   border-color: rgba(0, 35, 76, 0.12);
   box-shadow: 0 2px 8px rgba(0, 35, 76, 0.08);
@@ -484,7 +484,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #ffffff;
+  background: var(--bg-surface);
   padding: 7px 14px;
   border-radius: 8px;
   font-size: 0.82rem;
@@ -509,7 +509,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid rgba(0, 35, 76, 0.15);
-  background: #ffffff;
+  background: var(--bg-surface);
   font-size: 0.8rem;
   font-family: inherit;
   resize: vertical;
@@ -595,7 +595,7 @@
   overflow: auto;
   border-radius: 8px;
   border: 1px solid rgba(0, 35, 76, 0.12);
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -634,7 +634,7 @@
 
 .sheet-table td {
   padding: 6px 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-subtle);
   border-right: 1px solid #f1f5f9;
   white-space: nowrap;
   color: var(--text-primary);
@@ -644,14 +644,14 @@
 }
 
 .sheet-table tr:hover td {
-  background: #f8fafc;
+  background: var(--bg-surface-subtle);
 }
 
 .sheet-table td.cell-index {
   text-align: center;
   font-weight: 700;
   color: var(--text-muted);
-  background: #f8fafc;
+  background: var(--bg-surface-subtle);
   user-select: none;
 }
 
@@ -665,7 +665,7 @@
 }
 
 .sheet-table td.cell-editable:focus {
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: inset 0 0 0 2px #2563eb;
   z-index: 2;
 }
@@ -845,7 +845,7 @@
     .sheet-workflow-header .btn-secondary,
     .sheet-preview-header .btn-secondary,
     /* removed */ .unused-modal-btn {
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       color: #00234c !important;
       border: 1px solid rgba(255, 209, 0, 0.8) !important;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
@@ -859,7 +859,7 @@
     .sheet-workflow-header .btn-secondary:hover,
     .sheet-preview-header .btn-secondary:hover,
     /* removed */ .unused-modal-btn-hover {
-      background: #f8fafc !important;
+      background: var(--bg-surface-subtle) !important;
       border-color: #ffd100 !important;
       transform: translateY(-1px) !important;
     }
@@ -957,7 +957,7 @@
     }
 
     .ingesta-mode-btn.active {
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       color: #00234c !important;
       border-color: rgba(0, 35, 76, 0.12) !important;
       box-shadow: 0 4px 14px rgba(0, 35, 76, 0.08) !important;
@@ -1042,7 +1042,7 @@
     }
 
     .sheet-stat-label {
-      color: #64748b !important;
+      color: var(--text-muted) !important;
       font-size: 0.8rem !important;
     }
 
@@ -1100,7 +1100,7 @@
 
     .paste-zone-desc {
       font-size: 0.9rem !important;
-      color: #64748b !important;
+      color: var(--text-muted) !important;
       max-width: 580px !important;
       margin: 0 auto 16px !important;
       line-height: 1.5 !important;
@@ -1119,7 +1119,7 @@
       display: inline-flex !important;
       align-items: center !important;
       gap: 8px !important;
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       padding: 7px 14px !important;
       border-radius: 8px !important;
       font-size: 0.82rem !important;
@@ -1163,7 +1163,7 @@
       backdrop-filter: blur(10px) !important;
       font-family: inherit !important;
       font-size: 0.84rem !important;
-      color: #0f172a !important;
+      color: var(--text-primary) !important;
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03) !important;
       resize: none !important;
       outline: none !important;
@@ -1174,7 +1174,7 @@
 
     .sheet-paste-textarea:focus {
       border-color: #0284c7 !important;
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
     }
 
@@ -1244,7 +1244,7 @@
       overflow: auto !important;
       border-radius: 10px !important;
       border: 1px solid rgba(0, 35, 76, 0.12) !important;
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03) !important;
     }
 
@@ -1299,8 +1299,8 @@
     .sheet-table td.cell-index {
       text-align: center !important;
       font-weight: 700 !important;
-      color: #64748b !important;
-      background: #f8fafc !important;
+      color: var(--text-muted) !important;
+      background: var(--bg-surface-subtle) !important;
       user-select: none !important;
     }
 
@@ -1314,7 +1314,7 @@
     }
 
     .sheet-table td.cell-editable:focus {
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       box-shadow: inset 0 0 0 2px #0284c7 !important;
       z-index: 2 !important;
     }
@@ -1352,7 +1352,7 @@
       display: flex !important;
       align-items: center !important;
       gap: 8px !important;
-      color: #64748b !important;
+      color: var(--text-muted) !important;
       font-size: 0.82rem !important;
       max-width: 600px !important;
     }
@@ -1401,7 +1401,7 @@
     }
 
     .btn-secondary:hover {
-      background: #ffffff !important;
+      background: var(--bg-surface) !important;
       border-color: #00234c !important;
       transform: translateY(-1.5px) !important;
       box-shadow: 0 4px 14px rgba(0, 35, 76, 0.12) !important;
@@ -1472,5 +1472,7 @@
       border: 1px solid rgba(245, 158, 11, 0.25) !important;
     }
   
+
+
 
 

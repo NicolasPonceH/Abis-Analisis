@@ -8,9 +8,12 @@
   --bg-app: #f4f6f9;
   --bg-surface: #ffffff;
   --bg-surface-subtle: #f8fafc;
-  --bg-surface-hover: #f1f5f9;
-  
-  /* Bordes y Divisiones */
+  /* Fondos Globales Mejorados */
+  --bg-app-base-1: #eaf0f7;
+  --bg-app-base-2: #f8fafc;
+  --bg-app-gradient-1: rgba(0, 35, 76, 0.12);
+  --bg-app-gradient-2: rgba(2, 132, 199, 0.15);
+  --bg-app-gradient-3: rgba(255, 209, 0, 0.1);
   --border-subtle: #e2e8f0;
   --border-medium: #cbd5e1;
   --border-focus: #00234c;
@@ -194,10 +197,11 @@ h1, h2, h3, h4, h5, h6,
 /* Fondo Mesh Gradient con orbes de color para resaltar el efecto cristal */
 body {
   background: 
-    radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%),
-    radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%),
-    radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%),
-    linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%) !important;
+  background: 
+    radial-gradient(circle at 15% 50%, var(--bg-app-gradient-1), transparent 30%),
+    radial-gradient(circle at 85% 20%, var(--bg-app-gradient-2), transparent 30%),
+    radial-gradient(circle at 50% 90%, var(--bg-app-gradient-3), transparent 35%),
+    linear-gradient(135deg, var(--bg-app-base-1) 0%, var(--bg-app-base-2) 100%) !important;
   background-attachment: fixed !important;
 }
 
@@ -293,6 +297,12 @@ body {
   --pdi-navy: #001229;
   --pdi-navy-light: #0d2847;
   --pdi-gold-subtle: #3d3100;
+  
+  --bg-app-base-1: #0a1128;
+  --bg-app-base-2: #0f172a;
+  --bg-app-gradient-1: rgba(14, 165, 233, 0.1);
+  --bg-app-gradient-2: rgba(255, 215, 0, 0.08);
+  --bg-app-gradient-3: rgba(3, 105, 161, 0.12);
 }
 
 :root.dark-theme .card,
