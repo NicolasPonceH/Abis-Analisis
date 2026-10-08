@@ -272,7 +272,13 @@ app.get("/", requireAuth, (req, res) => {
 });
 
 app.get("/ajustes", requireAuth, (req, res) => {
-  res.render("ajustes", { user: req.user });
+  res.render("ajustes", { user: req.user, activeSection: "general" });
+});
+
+app.get("/ajustes/:section", requireAuth, (req, res) => {
+  const allowedSections = ["general", "horarios", "cuenta", "administracion"];
+  const section = allowedSections.includes(req.params.section) ? req.params.section : "general";
+  res.render("ajustes", { user: req.user, activeSection: section });
 });
 
 app.post("/api/user/change-password", requireAuth, express.json(), async (req, res) => {

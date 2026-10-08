@@ -162,6 +162,7 @@
     </div>
   </header>
 
+  <% const activeSec = (typeof activeSection !== 'undefined' && activeSection) ? activeSection : 'general'; %>
   <div class="ajustes-container">
     <aside class="ajustes-sidebar">
       <div class="ajustes-sidebar-header">
@@ -173,33 +174,33 @@
       </div>
 
       <nav class="ajustes-nav">
-        <a href="/ajustes/general" class="ajustes-nav-item <%= activeSection === 'general' ? 'active' : '' %>">
+        <a href="/ajustes/general" class="ajustes-nav-item <%= activeSec === 'general' ? 'active' : '' %>">
           <i class="fa-solid fa-sliders"></i> General
         </a>
-        <a href="/ajustes/horarios" class="ajustes-nav-item <%= activeSection === 'horarios' ? 'active' : '' %>">
+        <a href="/ajustes/horarios" class="ajustes-nav-item <%= activeSec === 'horarios' ? 'active' : '' %>">
           <i class="fa-solid fa-clock"></i> Horarios
         </a>
-        <a href="/ajustes/cuenta" class="ajustes-nav-item <%= activeSection === 'cuenta' ? 'active' : '' %>">
+        <a href="/ajustes/cuenta" class="ajustes-nav-item <%= activeSec === 'cuenta' ? 'active' : '' %>">
           <i class="fa-solid fa-user"></i> Cuenta
         </a>
       </nav>
 
       <div class="ajustes-section-title">ADMINISTRACIÓN</div>
       <nav class="ajustes-nav">
-        <a href="/ajustes/administracion" class="ajustes-nav-item <%= activeSection === 'administracion' ? 'active' : '' %>">
+        <a href="/ajustes/administracion" class="ajustes-nav-item <%= activeSec === 'administracion' ? 'active' : '' %>">
           <i class="fa-solid fa-users-gear"></i> Administración
         </a>
       </nav>
     </aside>
 
     <main class="ajustes-content">
-      <% if (activeSection === 'general') { %>
+      <% if (activeSec === 'general') { %>
         <%- include('partials/ajustes/general') %>
-      <% } else if (activeSection === 'horarios') { %>
+      <% } else if (activeSec === 'horarios') { %>
         <%- include('partials/ajustes/horarios') %>
-      <% } else if (activeSection === 'cuenta') { %>
+      <% } else if (activeSec === 'cuenta') { %>
         <%- include('partials/ajustes/cuenta') %>
-      <% } else if (activeSection === 'administracion') { %>
+      <% } else if (activeSec === 'administracion') { %>
         <%- include('partials/ajustes/administracion') %>
       <% } %>
     </main>
