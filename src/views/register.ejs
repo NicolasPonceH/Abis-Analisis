@@ -21,10 +21,9 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   .card {
-    position: relative;
     position: absolute;
     z-index: 2;
-    top: clamp(24px, 14vh, 132px);
+    top: 50%;
     left: clamp(24px, 8vw, 128px);
     width: 100%;
     max-width: 480px;
@@ -161,7 +160,7 @@
   .auth-visual .visual-copy .eyebrow { margin: 0 0 8px; color: #ffe778; font-size: 10px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; }
   .auth-visual .visual-copy h2 { margin: 0; color: #fff; font-size: clamp(24px, 3vw, 40px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.03; }
   .auth-visual .visual-copy p { margin: 10px 0 0; color: rgba(255,255,255,0.82); font-size: 12px; line-height: 1.5; }
-  @keyframes cardIn { from { opacity: 0; transform: translate3d(-24px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+  @keyframes cardIn { from { opacity: 0; transform: translate3d(-24px, -50%, 0); } to { opacity: 1; transform: translate3d(0, -50%, 0); } }
   @keyframes visualIn { from { opacity: 0; transform: translate3d(30px, -50%, 0) scale(0.96); } to { opacity: 1; transform: translate3d(0, -50%, 0) scale(1); } }
   @keyframes breathe { 0%, 100% { opacity: 0.55; transform: scale(0.94); } 50% { opacity: 1; transform: scale(1.08); } }
   @keyframes ringSpin { from { transform: rotateX(58deg) rotateZ(0deg); } to { transform: rotateX(58deg) rotateZ(360deg); } }
