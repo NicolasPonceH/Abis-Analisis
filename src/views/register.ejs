@@ -10,41 +10,68 @@
   body {
     margin: 0;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #002855; /* Fondo Azul Navy ABIS */
-    background-image: radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.05), transparent 30%), radial-gradient(circle at 85% 20%, rgba(255, 215, 0, 0.05), transparent 30%);
+    min-height: 100svh;
+    position: relative;
+    display: block;
+    overflow: auto;
+    background:
+      linear-gradient(90deg, rgba(2, 15, 29, 0.91) 0%, rgba(3, 19, 35, 0.72) 31%, rgba(3, 19, 35, 0.18) 68%, rgba(3, 19, 35, 0.34) 100%),
+      linear-gradient(180deg, rgba(2, 18, 34, 0.08), rgba(2, 18, 34, 0.42)),
+      url('https://res.cloudinary.com/dirgawanf/image/upload/v1791467374/fondo_login_abis_uagfhe.png') center center / cover no-repeat;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   .card {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: clamp(24px, 8vw, 128px);
     width: 100%;
-    max-width: 400px;
-    background: #ffffff;
-    border-radius: 16px;
+    max-width: 480px;
+    background: rgba(3, 19, 35, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 28px;
     padding: 36px 32px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    text-align: center;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-align: left;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    animation: cardIn 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    overflow: hidden;
+  }
+  .card::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    content: '';
+    background: linear-gradient(90deg, #ffd100, #f8b900 55%, transparent);
   }
   .logo-badge {
-    display: inline-flex;
+    display: grid;
+    width: 92px;
+    height: 58px;
+    flex: 0 0 92px;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    margin-bottom: 12px;
+    background: linear-gradient(145deg, #f8fafc, #e9eef5);
+    border: 1px solid rgba(0, 35, 76, 0.1);
+    border-radius: 16px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    box-shadow: 0 8px 18px rgba(0, 35, 76, 0.1), inset 0 1px 0 rgba(255,255,255,0.9);
   }
-  .logo-badge img { height: 44px; width: auto; display: block; border-radius: 6px; }
+  .logo-badge img { width: 78px; height: auto; max-width: 100%; display: block; }
   h1 {
-    font-size: 20px;
+    font-size: 28px;
     font-weight: 800;
-    color: #002855;
-    margin: 0 0 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    color: #ffffff;
+    margin: 0 0 8px;
+    letter-spacing: -0.04em;
   }
   p.subtitle {
     font-size: 13px;
-    color: #6b7280;
+    color: #94a3b8;
     margin: 0 0 24px;
   }
   .flash {
@@ -70,19 +97,22 @@
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: #43474f;
+    color: #94a3b8;
     margin-bottom: 6px;
   }
   input[type="password"], input[type="text"] {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #c4c6d0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    color: #ffffff;
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
     margin-bottom: 18px;
+    transition: all 0.2s ease;
   }
-  input[type="password"]:focus, input[type="text"]:focus { outline: none; border-color: #002855; box-shadow: 0 0 0 3px rgba(0, 40, 85, 0.1); }
+  input[type="password"]:focus, input[type="text"]:focus { outline: none; border-color: #ffd100; background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.12); }
   button {
     width: 100%;
     padding: 12px;
@@ -101,9 +131,40 @@
   button:hover { background: #e9c400; }
   .footer-note {
     margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 11px;
-    color: #9ca3af;
+    color: #64748b;
+    text-align: center;
   }
+  .auth-visual {
+    position: fixed;
+    top: 50%;
+    right: clamp(44px, 11vw, 210px);
+    z-index: 1;
+    width: min(38vw, 430px);
+    height: min(62vh, 540px);
+    color: #fff;
+    pointer-events: none;
+    transform: translateY(-50%);
+    animation: visualIn 900ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .auth-visual .orbit-glow { position: absolute; inset: 12%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 213, 0, 0.3), rgba(31, 122, 190, 0.12) 42%, transparent 70%); filter: blur(20px); animation: breathe 3.8s ease-in-out infinite; }
+  .auth-visual .orbit-ring { position: absolute; inset: 12%; border: 1px solid rgba(255, 224, 93, 0.6); border-radius: 50%; transform: rotateX(58deg); animation: ringSpin 11s linear infinite; }
+  .auth-visual .ring-two { inset: 4%; border-color: rgba(137, 213, 255, 0.35); animation-duration: 15s; animation-direction: reverse; transform: rotateX(67deg) rotateZ(18deg); }
+  .auth-visual .ring-three { inset: 18%; border-color: rgba(255,255,255,0.28); animation-duration: 9s; transform: rotateY(67deg) rotateZ(-18deg); }
+  .auth-visual .orbit-ring::after { position: absolute; top: 9%; left: 50%; width: 9px; height: 9px; content: ''; border-radius: 50%; background: #ffd100; box-shadow: 0 0 15px 5px rgba(255,209,0,0.72); transform: translateX(-50%); }
+  .auth-visual .abis-core { position: absolute; inset: 27%; display: grid; place-items: center; border: 1px solid rgba(255, 232, 125, 0.72); border-radius: 31% 69% 58% 42% / 42% 37% 63% 58%; background: linear-gradient(145deg, rgba(21, 103, 158, 0.78), rgba(4, 28, 61, 0.96)); box-shadow: inset 10px 10px 24px rgba(154,226,255,0.16), inset -14px -15px 28px rgba(0,0,0,0.28), 0 0 30px rgba(56,170,221,0.22); transform-style: preserve-3d; animation: coreFloat 5.5s ease-in-out infinite; }
+  .auth-visual .abis-core span { color: #fff; font-size: clamp(27px, 4vw, 50px); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 3px 15px rgba(0,0,0,0.38); }
+  .auth-visual .visual-copy { position: absolute; right: 0; bottom: 1%; width: 330px; text-align: right; text-shadow: 0 3px 20px rgba(0,15,31,0.62); }
+  .auth-visual .visual-copy .eyebrow { margin: 0 0 8px; color: #ffe778; font-size: 10px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; }
+  .auth-visual .visual-copy h2 { margin: 0; color: #fff; font-size: clamp(24px, 3vw, 40px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.03; }
+  .auth-visual .visual-copy p { margin: 10px 0 0; color: rgba(255,255,255,0.82); font-size: 12px; line-height: 1.5; }
+  @keyframes cardIn { from { opacity: 0; transform: translate3d(-24px, -50%, 0); } to { opacity: 1; transform: translate3d(0, -50%, 0); } }
+  @keyframes visualIn { from { opacity: 0; transform: translate3d(30px, -50%, 0) scale(0.96); } to { opacity: 1; transform: translate3d(0, -50%, 0) scale(1); } }
+  @keyframes breathe { 0%, 100% { opacity: 0.55; transform: scale(0.94); } 50% { opacity: 1; transform: scale(1.08); } }
+  @keyframes ringSpin { from { transform: rotateX(58deg) rotateZ(0deg); } to { transform: rotateX(58deg) rotateZ(360deg); } }
+  @keyframes coreFloat { 0%, 100% { transform: rotateX(12deg) rotateY(-18deg) translate3d(0, 8px, 20px); } 50% { transform: rotateX(-10deg) rotateY(16deg) translate3d(0, -10px, 34px); } }
   .card:has(.flash) { animation: shakeError 350ms ease-in-out; }
   @keyframes shakeError {
     10%, 90% { transform: translateX(-1px); }
@@ -114,12 +175,17 @@
   @media (prefers-reduced-motion: reduce) {
     .card:has(.flash) { animation: none; }
   }
+  @media (max-width: 560px) {
+    .card { position: relative; top: auto; left: auto; margin: 16px; padding: 30px 22px 24px; border-radius: 22px; }
+    .auth-visual { right: -65px; width: 310px; height: 410px; opacity: 0.42; }
+    .card > div[style] { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  }
 </style>
 </head>
 <body>
   <form class="card" method="post" action="/register">
     <div class="logo-badge">
-      <img src="/analisis/static/img/pdi-logo.jpg" alt="PDI">
+      <img src="/assets/logo-pdi.png" alt="PDI">
     </div>
     <h1>Registro ABIS</h1>
     <p class="subtitle">Creación de credencial de operador</p>
@@ -151,5 +217,17 @@
 
     <div class="footer-note">Uso interno — Policía de Investigaciones de Chile</div>
   </form>
+  <aside class="auth-visual" aria-hidden="true">
+    <div class="orbit-glow"></div>
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring ring-two"></div>
+    <div class="orbit-ring ring-three"></div>
+    <div class="abis-core"><span>ABIS</span></div>
+    <div class="visual-copy">
+      <p class="eyebrow">Acceso seguro · PDI Chile</p>
+      <h2>Identidad que conecta.</h2>
+      <p>Una plataforma preparada para el trabajo biométrico.</p>
+    </div>
+  </aside>
 </body>
 </html>

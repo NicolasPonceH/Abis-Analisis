@@ -100,18 +100,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 14px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #ffffff;
+  padding: 16px 24px;
+  margin: -24px -24px 24px -24px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-bottom: 3.5px solid rgba(255, 209, 0, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1);
 }
 
 .settings-card-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--pdi-navy);
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* Toggle Switch */
@@ -626,3 +632,5 @@
   50% { opacity: 1; }
   100% { transform: scale(1) rotateY(0deg) rotateZ(0deg); opacity: 1; }
 }
+
+

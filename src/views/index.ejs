@@ -76,15 +76,7 @@
           </svg>
           <span>Bitácora & Auditoría</span>
         </button>
-        <button class="tab-button" data-tab="ajustes">
-          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-            stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          <span>Ajustes & Horarios</span>
-        </button>
+        
       </nav>
 
       <!-- Contenedor alineado a la derecha para el botón -->
@@ -103,19 +95,18 @@
             <%= typeof user !== 'undefined' ? user.username.charAt(0) : 'U' %>
           </div>
           <div style="display: flex; flex-direction: column; line-height: 1.2;">
-            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Operador</span>
+            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;"><%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %></span>
             <span style="color: #ffffff; font-weight: 600; font-size: 14px; text-transform: capitalize; letter-spacing: 0.02em;">
               <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
             </span>
           </div>
         </div>
 
-        <!-- Botón Logout (Solo Icono / Cuadrado Rojo Sólido) -->
-        <a href="/logout" title="Cerrar Sesión" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #ef4444; color: #ffffff; border: none; border-radius: 8px; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 10px rgba(239, 68, 68, 0.5)';" onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(239, 68, 68, 0.4)';">
+        <!-- Botón Ajustes (Tuerca) -->
+        <a href="/ajustes" title="Ajustes" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 8px; text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(45deg)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='rotate(0)';">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </a>
       </div>
@@ -132,7 +123,7 @@
 <%- include('partials/tab-ingesta') %>
 <%- include('partials/tab-tendencias') %>
 <%- include('partials/tab-auditoria') %>
-<%- include('partials/tab-ajustes') %>
+
 
   </main>
 

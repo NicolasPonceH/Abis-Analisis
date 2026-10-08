@@ -1,4 +1,4 @@
-﻿import { state } from './core/state.js';
+import { state } from './core/state.js';
 import { escapeHtml } from './core/utils.js';
 import { bklitDataLabelsPlugin } from './components/charts.js';
 import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportExcel, exportCurrentReportCsv, sendReportToTelegram } from './components/export.js';
@@ -335,9 +335,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // Plugin de etiquetas numÃ©ricas directas y mÃ©tricas visuales estilo amigable y limpio
-
-Chart.register(bklitDataLabelsPlugin);
-
+if (typeof Chart !== 'undefined') {
+  Chart.register(bklitDataLabelsPlugin);
+}
 // Actualiza los badges en las cabeceras de las tarjetas de grÃ¡ficos con los nÃºmeros relacionados
 
 
@@ -536,86 +536,7 @@ state.telegramBotLink = "https://t.me/AbisSystemBot";
 
 
 // Enviar prueba individual
-window.probarDestinatarioIndividual = async function(id, nombre, btn) {
-  const dest = (state.telegramDestinatarios || []).find((d) => d.id === id);
-  const feedback = document.getElementById("dest-feedback");
-
-  if (dest && !dest.activo) {
-    if (feedback) {
-      feedback.className = "crypto-feedback-box error";
-      feedback.style.display = "block";
-      feedback.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          <span>Destinatario Pausado</span>
-        </div>
-        No es posible enviar prueba a '${nombre}' porque estÃ¡ pausado. Debe activarlo primero.
-      `;
-      setTimeout(() => { feedback.style.display = "none"; }, 5000);
-    }
-    return;
-  }
-
-  const originalHtml = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px; vertical-align:middle;"></span> Enviando...`;
-
-  try {
-    const res = await fetch(`/api/telegram/destinatarios/${id}/probar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await res.json();
-    if (!res.ok || !data.ok) {
-      throw new Error(data.error || "No se pudo enviar el mensaje.");
-    }
-
-    if (typeof window.showTelegramPopup === "function") {
-      const formattedDate = new Date().toLocaleDateString("es-CL", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      window.showTelegramPopup(`Se ha enviado la verificaciÃ³n exitosamente a ${nombre}.`, formattedDate);
-    } else if (feedback) {
-      feedback.className = "crypto-feedback-box success";
-      feedback.style.display = "block";
-      feedback.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Mensaje de VerificaciÃ³n Enviado</span>
-        </div>
-        ${data.mensaje}
-      `;
-      setTimeout(() => { feedback.style.display = "none"; }, 6000);
-    }
-  } catch (err) {
-    if (feedback) {
-      feedback.className = "crypto-feedback-box error";
-      feedback.style.display = "block";
-      feedback.innerHTML = `
-        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#dc2626; margin-bottom:4px;">
-          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          <span>Error al Enviar Prueba a ${nombre}</span>
-        </div>
-        ${err.message}
-      `;
-    }
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
-  }
-};
-
-// Solicitar cambio de estado (Toggle)
-window.solicitarToggleDestinatario = function(id, nombre, chatId, estadoActual) {
-  const nuevoEstado = !estadoActual;
-  promptAuthModal({ id, nombre, chatId, nuevoEstado }, "destinatario_toggle");
-};
-
-// Solicitar eliminaciÃ³n de destinatario
-window.solicitarEliminarDestinatario = function(id, nombre, chatId) {
-  if (!confirm(`Â¿EstÃ¡ seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
-    return;
-  }
-  promptAuthModal({ id, nombre, chatId }, "destinatario_eliminar");
-};
+// telegram functions moved to ajustes.js
 
 // EjecuciÃ³n autorizada para agregar destinatario
 
