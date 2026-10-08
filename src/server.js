@@ -271,13 +271,41 @@ app.get("/", requireAuth, (req, res) => {
   res.render("index", { user: req.user });
 });
 
-app.get("/ajustes/:seccion?", requireAuth, (req, res) => {
+app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res) => {
+  if (req.user.rol !== "admin") {
+    return res.status(403).json({ error: "No tienes permisos de administrador." });
+  }
+  const { id, rol } = req.body;
+  if (!id || !rol) {
+    return res.status(400).json({ error: "Faltan datos." });
+  }
+  try {
+    await pool.query("UPDATE usuarios SET rol = $1 WHERE id = $2", [rol, id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error updating user role:", err);
+    res.status(500).json({ error: "Error de base de datos." });
+  }
+});
+
+app.get("/ajustes/:seccion?", requireAuth, async (req, res) => {
   const seccion = req.params.seccion || "general";
   const validSections = ["general", "horarios", "cuenta", "seguridad", "administracion"];
   if (!validSections.includes(seccion)) {
     return res.redirect("/ajustes/general");
   }
-  res.render("ajustes", { user: req.user, activeSection: seccion });
+
+  let dbUsers = [];
+  if (seccion === "administracion" && req.user.rol === "admin") {
+    try {
+      const usersRes = await pool.query("SELECT id, username, rol, ultimo_ingreso FROM usuarios ORDER BY id ASC");
+      dbUsers = usersRes.rows;
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  }
+
+  res.render("ajustes", { user: req.user, activeSection: seccion, dbUsers });
 });
 
 // Servir archivos estáticos del frontend (Dashboard Web)

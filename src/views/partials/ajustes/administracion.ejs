@@ -22,31 +22,63 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Fila de ejemplo (Visual solamente) -->
-          <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 14px 16px; font-weight: 600; color: #0f172a;"><i class="fa-solid fa-user-shield" style="color: #0B5ED7; margin-right: 8px;"></i> Nicolas</td>
-            <td style="padding: 14px 16px;"><span style="background: #eff6ff; color: #0B5ED7; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">Administrador</span></td>
-            <td style="padding: 14px 16px;"><span style="color: #10B981; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; vertical-align: middle;"></i> Activo</span></td>
-            <td style="padding: 14px 16px; color: #64748b;">Hoy, 14:30</td>
-            <td style="padding: 14px 16px; text-align: right;">
-              <button style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Editar Roles"><i class="fa-solid fa-pen"></i></button>
-              <button style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;" title="Restablecer Contraseña"><i class="fa-solid fa-key"></i></button>
-            </td>
-          </tr>
-          <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 14px 16px; font-weight: 600; color: #0f172a;"><i class="fa-solid fa-user" style="color: #64748b; margin-right: 8px;"></i> Ashley</td>
-            <td style="padding: 14px 16px;"><span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">Operador</span></td>
-            <td style="padding: 14px 16px;"><span style="color: #10B981; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; vertical-align: middle;"></i> Activo</span></td>
-            <td style="padding: 14px 16px; color: #64748b;">Hoy, 10:15</td>
-            <td style="padding: 14px 16px; text-align: right;">
-              <button style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;"><i class="fa-solid fa-pen"></i></button>
-              <button style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;"><i class="fa-solid fa-key"></i></button>
-            </td>
-          </tr>
+          <% if (typeof dbUsers !== 'undefined' && dbUsers.length > 0) { %>
+            <% dbUsers.forEach(u => { %>
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 14px 16px; font-weight: 600; color: #0f172a;">
+                  <i class="fa-solid <%= u.rol === 'admin' ? 'fa-user-shield' : 'fa-user' %>" style="color: <%= u.rol === 'admin' ? '#0B5ED7' : '#64748b' %>; margin-right: 8px;"></i>
+                  <%= u.username %>
+                </td>
+                <td style="padding: 14px 16px;" id="td-rol-<%= u.id %>">
+                  <span class="role-badge" style="background: <%= u.rol === 'admin' ? '#eff6ff' : '#f1f5f9' %>; color: <%= u.rol === 'admin' ? '#0B5ED7' : '#475569' %>; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; text-transform: capitalize;">
+                    <%= u.rol === 'operador' ? 'Operador' : 'Administrador' %>
+                  </span>
+                </td>
+                <td style="padding: 14px 16px;"><span style="color: #10B981; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; vertical-align: middle;"></i> Activo</span></td>
+                <td style="padding: 14px 16px; color: #64748b;">
+                  <%= u.ultimo_ingreso ? new Date(u.ultimo_ingreso).toLocaleString('es-CL') : 'Nunca' %>
+                </td>
+                <td style="padding: 14px 16px; text-align: right;">
+                  <button onclick="changeUserRole(<%= u.id %>, '<%= u.rol %>')" style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Editar Roles"><i class="fa-solid fa-pen"></i></button>
+                  <button style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;" title="Restablecer Contraseña"><i class="fa-solid fa-key"></i></button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">No se encontraron usuarios</td>
+            </tr>
+          <% } %>
         </tbody>
       </table>
     </div>
   </div>
+
+  <script>
+    async function changeUserRole(userId, currentRole) {
+      const newRole = currentRole === 'admin' ? 'operador' : 'admin';
+      const conf = confirm(`¿Estás seguro de cambiar el rol a ${newRole}?`);
+      if (!conf) return;
+
+      try {
+        const res = await fetch('/api/admin/update-role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: userId, rol: newRole })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert('Rol actualizado con éxito.');
+          window.location.reload();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Ocurrió un error al intentar actualizar el rol.');
+      }
+    }
+  </script>
 <% } else { %>
   <div class="ajustes-card" style="border-left: 4px solid #DC2626;">
     <div style="display: flex; align-items: flex-start; gap: 16px;">

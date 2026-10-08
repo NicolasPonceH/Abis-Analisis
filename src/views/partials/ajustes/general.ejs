@@ -6,10 +6,10 @@
   <div class="info-row">
     <span class="info-label">Modo de visualización</span>
     <span class="info-value">
-      <select style="padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 600;">
-        <option>Modo Claro (Por defecto)</option>
-        <option>Modo Oscuro</option>
-        <option>Automático (Sistema)</option>
+      <select id="pref-theme" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 600;">
+        <option value="light">Modo Claro (Por defecto)</option>
+        <option value="dark">Modo Oscuro</option>
+        <option value="auto">Automático (Sistema)</option>
       </select>
     </span>
   </div>
@@ -17,7 +17,7 @@
     <span class="info-label">Alto Contraste</span>
     <span class="info-value">
       <label class="toggle-switch" title="Activar modo de alto contraste para mejorar legibilidad">
-        <input type="checkbox">
+        <input type="checkbox" id="pref-contrast">
         <span class="toggle-slider"></span>
       </label>
     </span>
@@ -25,10 +25,10 @@
   <div class="info-row">
     <span class="info-label">Tamaño de Fuente</span>
     <span class="info-value">
-      <select style="padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 600;">
-        <option>Normal (14px)</option>
-        <option>Grande (16px)</option>
-        <option>Extra Grande (18px)</option>
+      <select id="pref-fontsize" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 600;">
+        <option value="14px">Normal (14px)</option>
+        <option value="16px">Grande (16px)</option>
+        <option value="18px">Extra Grande (18px)</option>
       </select>
     </span>
   </div>
@@ -36,7 +36,7 @@
     <span class="info-label">Reducir animaciones</span>
     <span class="info-value">
       <label class="toggle-switch" title="Desactivar transiciones y animaciones">
-        <input type="checkbox">
+        <input type="checkbox" id="pref-animations">
         <span class="toggle-slider"></span>
       </label>
     </span>
@@ -62,3 +62,57 @@
     <span class="info-value"><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Producción</span></span>
   </div>
 </div>
+
+<script>
+  function loadPreferences() {
+    const theme = localStorage.getItem('pref-theme') || 'light';
+    const contrast = localStorage.getItem('pref-contrast') === 'true';
+    const fontsize = localStorage.getItem('pref-fontsize') || '14px';
+    const animations = localStorage.getItem('pref-animations') === 'true';
+
+    document.getElementById('pref-theme').value = theme;
+    document.getElementById('pref-contrast').checked = contrast;
+    document.getElementById('pref-fontsize').value = fontsize;
+    document.getElementById('pref-animations').checked = animations;
+  }
+
+  function savePreferences() {
+    localStorage.setItem('pref-theme', document.getElementById('pref-theme').value);
+    localStorage.setItem('pref-contrast', document.getElementById('pref-contrast').checked);
+    localStorage.setItem('pref-fontsize', document.getElementById('pref-fontsize').value);
+    localStorage.setItem('pref-animations', document.getElementById('pref-animations').checked);
+    
+    applyPreferences();
+  }
+
+  function applyPreferences() {
+    const fontsize = localStorage.getItem('pref-fontsize') || '14px';
+    document.documentElement.style.fontSize = fontsize;
+    
+    if (localStorage.getItem('pref-contrast') === 'true') {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+
+    if (localStorage.getItem('pref-theme') === 'dark') {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }
+
+  document.getElementById('pref-theme').addEventListener('change', savePreferences);
+  document.getElementById('pref-contrast').addEventListener('change', savePreferences);
+  document.getElementById('pref-fontsize').addEventListener('change', savePreferences);
+  document.getElementById('pref-animations').addEventListener('change', savePreferences);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadPreferences();
+    applyPreferences();
+  });
+  
+  // En caso de que se navegue mediante AJAX o tabs
+  loadPreferences();
+  applyPreferences();
+</script>
