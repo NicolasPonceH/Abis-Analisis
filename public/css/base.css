@@ -252,3 +252,88 @@ body {
 }
 
 
+
+/* ==========================================================================
+   THEME OVERRIDES
+   ========================================================================== */
+
+/* DARK THEME */
+:root.dark-theme {
+  --bg-app: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-subtle: #0f172a;
+  --bg-surface-hover: #334155;
+  
+  --border-subtle: #334155;
+  --border-medium: #475569;
+  --border-focus: #38bdf8;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --text-on-dark: #f8fafc;
+
+  --status-success-bg: #064e3b;
+  --status-success-border: #047857;
+  --status-success: #34d399;
+  
+  --status-warning-bg: #451a03;
+  --status-warning-border: #78350f;
+  --status-warning: #fbbf24;
+  
+  --status-danger-bg: #450a0a;
+  --status-danger-border: #7f1d1d;
+  --status-danger: #f87171;
+  
+  --status-info-bg: #082f49;
+  --status-info-border: #0369a1;
+  --status-info: #38bdf8;
+  
+  --pdi-navy: #001229;
+  --pdi-navy-light: #0d2847;
+  --pdi-gold-subtle: #3d3100;
+}
+
+:root.dark-theme .card,
+:root.dark-theme .settings-card,
+:root.dark-theme .stat-card {
+  background: var(--bg-surface);
+  border-color: var(--border-medium);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.4);
+}
+
+:root.dark-theme select,
+:root.dark-theme input {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+/* HIGH CONTRAST */
+:root.high-contrast {
+  --text-primary: #000000 !important;
+  --text-secondary: #000000 !important;
+  --text-muted: #000000 !important;
+  --border-subtle: #000000 !important;
+  --border-medium: #000000 !important;
+}
+
+:root.dark-theme.high-contrast {
+  --text-primary: #ffffff !important;
+  --text-secondary: #ffffff !important;
+  --text-muted: #ffffff !important;
+  --border-subtle: #ffffff !important;
+  --border-medium: #ffffff !important;
+}
+
+/* REDUCE ANIMATIONS */
+:root.reduce-animations *,
+:root.reduce-animations *::before,
+:root.reduce-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+

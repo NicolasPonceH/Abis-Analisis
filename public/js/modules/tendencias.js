@@ -113,6 +113,7 @@ export function updateTrendView() {
 }
 
 export function renderTrendChart(items, canvasId = "chart-tendencia-historica") {
+  if (typeof Chart === "undefined") return;
   destroyChart(canvasId);
   const canvas = document.getElementById(canvasId);
   const ctx = canvas?.getContext("2d");
@@ -544,4 +545,3 @@ export function exportTrendCsv() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-

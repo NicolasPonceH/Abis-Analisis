@@ -3,7 +3,7 @@ import { escapeHtml } from './core/utils.js';
 import { bklitDataLabelsPlugin } from './components/charts.js';
 import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportExcel, exportCurrentReportCsv, sendReportToTelegram } from './components/export.js';
 import { promptAuthModal } from './modules/auth-modal.js';
-import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js';
+import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js?v=22';
 import { setupDragAndDrop, initSpreadsheetIngest } from './modules/ingesta.js';
 import { loadTrendData, setupTrendControls } from './modules/tendencias.js';
 import { auditState, cargarBitacoraAuditoria } from './modules/auditoria.js';

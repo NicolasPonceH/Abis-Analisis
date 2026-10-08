@@ -319,6 +319,17 @@ body.splash-disabled #pdi-splash-overlay,
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 {% block extra_head %}{% endblock %}
+<script>
+  (function() {
+    try {
+      const fs = localStorage.getItem('pref-fontsize') || '14px';
+      document.documentElement.style.fontSize = fs;
+      if (localStorage.getItem('pref-contrast') === 'true') document.documentElement.classList.add('high-contrast');
+      if (localStorage.getItem('pref-theme') === 'dark') document.documentElement.classList.add('dark-theme');
+      if (localStorage.getItem('pref-animations') === 'true') document.documentElement.classList.add('reduce-animations');
+    } catch(e) {}
+  })();
+</script>
 </head>
 <body class="font-sans bg-background dark:bg-slate-950 font-body-md text-on-background dark:text-slate-100 min-h-screen flex flex-col antialiased">
 
@@ -686,3 +697,4 @@ body.splash-disabled #pdi-splash-overlay,
 {% endif %}
 </body>
 </html>
+

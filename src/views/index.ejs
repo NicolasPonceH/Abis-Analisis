@@ -18,6 +18,22 @@
   <link rel="stylesheet" href="css/styles.css?v=45">
   <!-- Chart.js CDN Oficial -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script>
+    if (typeof Chart === "undefined") {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.2/chart.umd.min.js"><\/script>');
+    }
+  </script>
+<script>
+  (function() {
+    try {
+      const fs = localStorage.getItem('pref-fontsize') || '14px';
+      document.documentElement.style.fontSize = fs;
+      if (localStorage.getItem('pref-contrast') === 'true') document.documentElement.classList.add('high-contrast');
+      if (localStorage.getItem('pref-theme') === 'dark') document.documentElement.classList.add('dark-theme');
+      if (localStorage.getItem('pref-animations') === 'true') document.documentElement.classList.add('reduce-animations');
+    } catch(e) {}
+  })();
+</script>
 </head>
 
 <body>
@@ -225,7 +241,8 @@
   </footer>
 
   <!-- Script Principal -->
-  <script type="module" src="js/app.js?v=19"></script>
+  <script type="module" src="js/app.js?v=22"></script>
 </body>
 
 </html>
+
