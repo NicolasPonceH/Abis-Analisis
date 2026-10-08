@@ -97,7 +97,7 @@
   {% if not viewing %}
 
   <div
-    class="rounded-2xl shadow-md border border-slate-200 backdrop-blur-md p-8 flex flex-col items-center" style="background: radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%), radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%), radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%), linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%);">
+    class="max-w-4xl mx-auto w-full rounded-2xl shadow-md border border-slate-200 backdrop-blur-md p-8 flex flex-col items-center" style="background: radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%), radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%), radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%), linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%);">
     <div class="flex flex-col items-center mb-6 text-center">
 
       <h2 class="text-xl font-extrabold text-[#00234c] tracking-tight">Cargar documentos para análisis</h2>
@@ -144,12 +144,13 @@
       </div>
 
       <div id="pdf-file-chips-row"
-        class="hidden flex-col gap-3 mt-4 bg-white/10 dark:bg-slate-800 p-4 rounded-xl border border-white/20 dark:border-slate-700">
-        <div class="flex items-center justify-between border-b border-white/20 dark:border-slate-700 pb-2 mb-1">
-          <span class="text-[10px] font-bold text-[#00234c] dark:text-slate-400 uppercase tracking-widest">En cola para
-            procesar</span>
+        class="hidden flex-col gap-3 mt-4 bg-[#0047AB] p-6 rounded-2xl border-4 border-blue-300/30 shadow-[0_10px_40px_rgba(0,71,171,0.3)]">
+        <div class="flex items-center justify-between border-b border-white/20 pb-3 mb-2">
+          <span class="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-blue-200">queue</span> En cola para procesar
+          </span>
           <button type="button" id="pdf-file-clear"
-            class="text-red-500 hover:bg-red-50 transition-colors px-2 py-1 rounded text-[11px] flex items-center gap-1 font-bold uppercase tracking-wider">
+            class="text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-wider hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0">
             <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar todo
           </button>
         </div>
@@ -199,13 +200,41 @@
 
           chipsBox.innerHTML = '';
           acumulados.forEach(function (archivo, indice) {
+            var ext = archivo.name.split('.').pop().toLowerCase();
+            var borderColorClass = 'border-slate-300 hover:border-slate-500';
+            var textColorClass = 'text-[#00234c]';
+            var iconHTML = '<span class="material-symbols-outlined text-[16px] text-slate-400">draft</span>';
+            
+            if (ext === 'pdf') {
+              borderColorClass = 'border-red-400 hover:border-red-500';
+              textColorClass = 'text-red-700';
+              iconHTML = '<span class="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>';
+            } else if (ext === 'doc' || ext === 'docx') {
+              borderColorClass = 'border-blue-400 hover:border-blue-500';
+              textColorClass = 'text-blue-700';
+              iconHTML = '<span class="material-symbols-outlined text-[16px] text-blue-500">description</span>';
+            } else if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') {
+              borderColorClass = 'border-emerald-400 hover:border-emerald-500';
+              textColorClass = 'text-emerald-700';
+              iconHTML = '<span class="material-symbols-outlined text-[16px] text-emerald-500">table</span>';
+            }
+            
             var chip = document.createElement('span');
-            chip.className = 'anim-in inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 px-2.5 py-1.5 rounded-md text-[11px] font-bold border border-slate-200 dark:border-slate-700 shadow-sm';
-            chip.textContent = archivo.name;
+            chip.className = 'anim-in inline-flex items-center gap-2 bg-white ' + textColorClass + ' px-4 py-2.5 rounded-lg text-[13px] font-extrabold border-2 ' + borderColorClass + ' shadow-md transition-all hover:shadow-lg';
+            
+            var nameSpan = document.createElement('span');
+            nameSpan.textContent = archivo.name;
+            
+            var iconWrapper = document.createElement('div');
+            iconWrapper.className = 'flex items-center';
+            iconWrapper.innerHTML = iconHTML;
+            
+            chip.appendChild(iconWrapper);
+            chip.appendChild(nameSpan);
             var quitar = document.createElement('button');
             quitar.type = 'button';
             quitar.title = 'Quitar';
-            quitar.className = 'material-symbols-outlined text-[14px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors ml-1 leading-none p-0.5';
+            quitar.className = 'material-symbols-outlined text-[16px] text-slate-400 dark:text-slate-500 hover:text-white hover:bg-red-500 rounded transition-colors ml-1 leading-none p-0.5';
             quitar.textContent = 'close';
             quitar.addEventListener('click', function () {
               acumulados.splice(indice, 1);
@@ -282,7 +311,7 @@
   </div>
 
   <div
-    class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 mt-6">
+    class="max-w-4xl mx-auto w-full bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 mt-6">
     <div
       class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-blue-900/50 pb-4 gap-4 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 -mx-6 -mt-6 rounded-t-2xl">
       <div class="flex items-center gap-2 text-white">
@@ -333,7 +362,7 @@
   <!-- 2. Cabecera Operativa Forense -->
   <div
     class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-3 border-b border-slate-200 dark:border-slate-700 bg-transparent">
-    <div>
+    <div class="ml-2 sm:ml-6">
       <div class="flex items-center gap-3">
         <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Procesamiento</h1>
         <span
@@ -391,7 +420,7 @@
       <div class="flex flex-col items-end ml-2">
         <div class="flex items-center gap-2">
           <button type="button" onclick="mostrarVistaPrevia()"
-            class="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-900/30 font-bold text-sm tracking-wide shadow-sm transition-all uppercase"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 border border-blue-200 dark:border-slate-600 text-blue-700 dark:text-blue-300 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:shadow-md font-extrabold text-sm tracking-widest shadow-sm transition-all uppercase"
             {{ 'disabled' if not extracted_text else '' }}>
             <span class="material-symbols-outlined text-[20px]">preview</span> Vista Previa
           </button>
@@ -432,7 +461,7 @@
   <div class="flex flex-col lg:flex-row gap-5 items-stretch mt-2" id="split-container">
 
     <!-- 3. Panel Izquierdo (Documento Original y OCR) -->
-    <div class="flex flex-col gap-6 w-full lg:w-[25%] flex-shrink-0" id="split-left">
+    <div class="flex flex-col gap-6 w-full lg:w-[20%] flex-shrink-0" id="split-left">
 
       <!-- Visor Documento Original -->
       <div
@@ -443,8 +472,11 @@
             <span class="material-symbols-outlined text-[18px]">document_scanner</span>
             <span class="text-[11px] font-bold uppercase tracking-widest">Documento Original (PDF)</span>
           </div>
+          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-blue-200 transition-colors flex items-center justify-center p-1 rounded hover:bg-white/10" title="Abrir en pestaña nueva">
+            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+          </a>
         </div>
-        <iframe src="{{ url_for('serve_upload', filename=viewing) }}" class="w-full h-[75vh] border-0"></iframe>
+        <iframe src="{{ url_for('serve_upload', filename=viewing) }}" class="w-full h-[60vh] border-0"></iframe>
         <div
           class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
           <span class="truncate max-w-[300px]">{{ viewing }}</span>
@@ -598,25 +630,36 @@
         {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
         
         {% if summary_options|length > 1 %}
-        <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto mb-6 custom-scrollbar">
+        <div class="flex flex-wrap gap-3 mb-6">
           {% set tab_colors = [
-            {'active': 'border-blue-500 text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20', 'inactive': 'border-transparent text-slate-500 hover:text-blue-600 dark:hover:text-blue-300'},
-            {'active': 'border-emerald-500 text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20', 'inactive': 'border-transparent text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-300'},
-            {'active': 'border-purple-500 text-purple-700 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-900/20', 'inactive': 'border-transparent text-slate-500 hover:text-purple-600 dark:hover:text-purple-300'},
-            {'active': 'border-orange-500 text-orange-700 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-900/20', 'inactive': 'border-transparent text-slate-500 hover:text-orange-600 dark:hover:text-orange-300'},
-            {'active': 'border-pink-500 text-pink-700 dark:text-pink-400 bg-pink-50/50 dark:bg-pink-900/20', 'inactive': 'border-transparent text-slate-500 hover:text-pink-600 dark:hover:text-pink-300'}
+            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
+            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
+            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
+            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
+            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'}
           ] %}
           {% for opt in summary_options %}
           {% set c = tab_colors[loop.index0 % tab_colors|length] %}
           <button type="button" 
                   onclick="switchTab('resumen', parseInt(this.dataset.index))" 
-                  class="resumen-tab-btn px-4 py-2.5 border-b-2 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors {{ c.active if loop.first else c.inactive }}" 
+                  class="resumen-tab-btn px-5 py-2.5 rounded-full font-extrabold text-[12px] uppercase tracking-wider whitespace-nowrap transition-all duration-300 {{ c.active if loop.first else c.inactive }}" 
                   data-index="{{ loop.index0 }}"
                   data-active-class="{{ c.active }}"
                   data-inactive-class="{{ c.inactive }}">
             📄 {{ opt.filename | default('Doc ' ~ loop.index) }}
           </button>
           {% endfor %}
+        </div>
+        
+        <div class="mb-5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-3.5 flex items-start gap-3 rounded-xl shadow-sm">
+          <div class="bg-amber-100 dark:bg-amber-900/50 p-1.5 rounded-full text-amber-600 dark:text-amber-400 flex-shrink-0">
+            <span class="material-symbols-outlined text-[18px]">info</span>
+          </div>
+          <div class="pt-0.5">
+            <p class="text-[12.5px] text-amber-900 dark:text-amber-200 leading-snug font-medium">
+              Este PDF contiene múltiples documentos separados. Debes revisar y seleccionar tu opción preferida (A o B) <strong>en cada pestaña superior</strong> de forma independiente antes de guardar la selección.
+            </p>
+          </div>
         </div>
         {% endif %}
 
@@ -629,11 +672,6 @@
               <!-- Caja Metadatos -->
               {% if doc_data %}
               <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
-                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
-                  <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-500 text-[18px]">list_alt</span> Metadatos Extraídos
-                  </h4>
-                </div>
                 <div class="p-4 flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- Card Unidad -->
@@ -713,7 +751,7 @@
                       </div>
                     </div>
                     
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Extracto directo más la enumeración estructurada de los elementos clave detectados.</p>
+
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
                     <div class="editor-wrapper mt-auto">
@@ -742,7 +780,7 @@
                       </div>
                     </div>
                     
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Resumen en narrativa preservando la intención del parte policial original.</p>
+
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
                     <div class="editor-wrapper mt-auto">
@@ -788,272 +826,6 @@
         {% endif %}
         </div>
       </div>
-
-      </div>
-
-    <!-- 4 & 5. Módulos de Inteligencia (8 Columnas) -->
-    <!-- Barra redimensionable (oculta en móviles) -->
-    <div class="hidden xl:flex w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-blue-500 dark:hover:bg-blue-400 cursor-col-resize rounded-full mx-1 transition-colors self-stretch" id="resizer"></div>
-
-    <!-- 4. Panel Derecho (Entidades y Resumen) -->
-    <div class="flex flex-col gap-6 w-full xl:flex-1" id="split-right">
-
-      <!-- Alertas Cruzadas -->
-      {% if cross_references %}
-      <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3 shadow-sm animate-pulse-soft">
-        <div class="flex items-start gap-3">
-          <div class="w-7 h-7 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 shrink-0 shadow-inner mt-0.5">
-            <span class="material-symbols-outlined text-[16px]">warning</span>
-          </div>
-          <div class="w-full">
-            <h3 class="text-red-800 dark:text-red-200 font-bold text-sm tracking-tight">Alerta de Inteligencia: Coincidencias en Historial</h3>
-            <p class="text-[11px] text-red-700 dark:text-red-300 mt-0.5 mb-2 font-medium leading-relaxed">Se detectaron identificadores que ya existen en investigaciones previas.</p>
-            <div class="flex flex-col gap-1.5">
-              {% for ref in cross_references %}
-              <div class="flex items-center justify-between bg-white/60 dark:bg-slate-900/40 px-3 py-1.5 rounded-md border border-red-100/50 dark:border-red-800/30 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-red-700 dark:text-red-400 text-xs font-mono tracking-tight">{{ ref.valor }}</span>
-                  <span class="text-[9px] bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-widest">{{ ref.categoria }}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">DOC-{{ "%04d" % ref.documento_id }} ({{ ref.fecha.strftime('%d-%m-%Y') }})</span>
-                  <a href="{{ url_for('historial_detalle', documento_id=ref.documento_id, return_to=url_for('view_pdf', filename=viewing), highlight=ref.valor) }}" class="flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 uppercase tracking-wide transition-colors bg-white dark:bg-slate-800 px-2 py-1 rounded border border-red-200 dark:border-red-800 hover:border-red-300 shadow-sm">
-                    <span class="material-symbols-outlined text-[12px]">open_in_new</span> Revisar
-                  </a>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Módulo de Resúmenes Inteligentes -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700">
-        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 flex items-center justify-between border-b border-blue-900/50">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-blue-100">
-              <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
-            </div>
-            <h3 class="text-[17px] font-semibold text-white tracking-wide">Resumen Asistido por IA</h3>
-          </div>
-
-          <div class="flex items-center gap-2">
-            {% if summary_options %}
-            <button type="submit" form="summary_form"
-              class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm border border-blue-600">
-              <span class="material-symbols-outlined text-[16px]">save</span>
-              <span>Guardar Selección</span>
-            </button>
-            {% endif %}
-
-            {% if extracted_text %}
-            <form action="{{ url_for('summarize', filename=viewing) }}" method="post" class="js-processing-form m-0">
-              <button type="submit"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-blue-700 hover:bg-blue-50 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
-                <span class="material-symbols-outlined text-[16px]">refresh</span>
-                <span class="js-btn-label">{{ 'Generar' if not summary_options else 'Regenerar' }}</span>
-              </button>
-            </form>
-            {% endif %}
-          </div>
-        </div>
-        <div class="p-6">
-        <!-- Incluir librerías de Quill -->
-        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-        {% if summary_options %}
-        
-        <!-- Metadatos Extraídos -->
-        {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
-        
-        {% if summary_options|length > 1 %}
-        <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto mb-6 custom-scrollbar">
-          {% for opt in summary_options %}
-          <button type="button" onclick="switchTab('resumen', parseInt(this.dataset.index))" class="resumen-tab-btn px-4 py-2.5 border-b-2 {{ 'border-blue-500 text-blue-700 dark:text-blue-400' if loop.first else 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }} font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors" data-index="{{ loop.index0 }}">
-            📄 {{ opt.filename | default('Doc ' ~ loop.index) }}
-          </button>
-          {% endfor %}
-        </div>
-        {% endif %}
-
-        <form action="{{ url_for('select_summary', filename=viewing) }}" method="post" id="summary_form">
-        <div class="flex flex-col gap-4 relative">
-          {% for opt in summary_options %}
-            {% set doc_data = docs_to_render[loop.index0] if docs_to_render|length > loop.index0 else None %}
-            <div id="resumen_pane_{{ loop.index0 }}" class="resumen-pane {{ 'hidden' if not loop.first }}">
-              
-              <!-- Caja Metadatos -->
-              {% if doc_data %}
-              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
-                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-500 text-[20px]">list_alt</span> Metadatos Extraídos
-                  </h4>
-                </div>
-                <div class="p-5 flex flex-col gap-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <!-- Card Unidad -->
-                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-3.5 flex items-center gap-3">
-                    <div class="text-blue-500 dark:text-blue-400 flex-shrink-0 bg-blue-100/50 dark:bg-blue-900/50 rounded-lg p-1.5">
-                      <span class="material-symbols-outlined text-[20px]">local_police</span>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">Unidad Policial</span>
-                      <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Card Delito -->
-                  <div class="bg-orange-50/80 dark:bg-orange-900/20 rounded-xl p-3.5 flex items-center gap-3">
-                    <div class="text-orange-500 dark:text-orange-400 flex-shrink-0 bg-orange-100/50 dark:bg-orange-900/50 rounded-lg p-1.5">
-                      <span class="material-symbols-outlined text-[20px]">warning</span>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">Motivo o Delito</span>
-                      <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-indigo-500 text-[20px]">groups</span>
-                    Detenidos Identificados
-                  </h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
-                      {% for detenido in doc_data.personas.detenidos %}
-                      <!-- Avatar Card -->
-                      <div class="flex items-center gap-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl">
-                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
-                          <span class="material-symbols-outlined text-[24px]">face</span>
-                        </div>
-                        <div class="flex flex-col">
-                          {% set partes = detenido.split(',') %}
-                          <span class="text-[13px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(detenido) }}</span>
-                          <span class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Sin más datos' }}</span>
-                        </div>
-                      </div>
-                      {% endfor %}
-                    {% else %}
-                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
-                        No se registran detenidos.
-                      </div>
-                    {% endif %}
-                  </div>
-                </div>
-                </div>
-                </div>
-              </div>
-              {% endif %}
-
-              <!-- Caja Resumen -->
-              {% if opt %}
-              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-                <div class="bg-slate-50/50 dark:bg-slate-800/50 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-                  <h4 class="text-[14px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-500 text-[20px]">auto_awesome</span> Opciones de Resumen
-                  </h4>
-                </div>
-                <div class="p-5">
-                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                <!-- Opción A -->
-                <label for="radio_a_{{ loop.index0 }}" class="cursor-pointer">
-                  <div class="relative flex flex-col border-2 transition-all duration-300 rounded-xl p-5 has-[:checked]:border-blue-500 has-[:checked]:bg-gradient-to-b has-[:checked]:from-blue-50/50 has-[:checked]:to-transparent has-[:checked]:shadow-[0_0_25px_rgba(59,130,246,0.2)] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 group h-full">
-                    
-                    <input type="radio" name="opcion_{{ loop.index0 }}" id="radio_a_{{ loop.index0 }}" value="a" class="peer hidden" {% if opt.get('selected', 'a') == 'a' %}checked{% endif %} required />
-                    
-                    <div class="absolute top-5 right-5 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
-                      <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
-                    </div>
-
-                    <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
-                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">A</span>
-                      </div>
-                      <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Técnica</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Acta Estructurada</span>
-                      </div>
-                    </div>
-                    
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Extracto directo más la enumeración estructurada de los elementos clave detectados.</p>
-                    
-                    <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
-                    <div class="editor-wrapper mt-auto">
-                      <div id="editor_{{ loop.index0 }}_a" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
-                    </div>
-                  </div>
-                </label>
-
-                <!-- Opción B -->
-                <label for="radio_b_{{ loop.index0 }}" class="cursor-pointer">
-                  <div class="relative flex flex-col border-2 transition-all duration-300 rounded-xl p-5 has-[:checked]:border-blue-500 has-[:checked]:bg-gradient-to-b has-[:checked]:from-blue-50/50 has-[:checked]:to-transparent has-[:checked]:shadow-[0_0_25px_rgba(59,130,246,0.2)] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 group h-full">
-                    
-                    <input type="radio" name="opcion_{{ loop.index0 }}" id="radio_b_{{ loop.index0 }}" value="b" class="peer hidden" {% if opt.get('selected') == 'b' %}checked{% endif %} required />
-                    
-                    <div class="absolute top-5 right-5 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
-                      <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
-                    </div>
-
-                    <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
-                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">B</span>
-                      </div>
-                      <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Narrativa</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Resumen Fluido</span>
-                      </div>
-                    </div>
-                    
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4 ml-1">Resumen en narrativa preservando la intención del parte policial original.</p>
-                    
-                    <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
-                    <div class="editor-wrapper mt-auto">
-                      <div id="editor_{{ loop.index0 }}_b" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
-                    </div>
-                  </div>
-                </label>
-                  </div>
-                </div>
-              </div>
-              {% endif %}
-
-            </div>
-          {% endfor %}
-        </div>
-        </form>
-        
-        <!-- AVISO DE EDICIÓN -->
-        <div class="mt-5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-start gap-3 shadow-sm">
-          <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px] mt-0.5">lightbulb</span>
-          <div>
-            <p class="text-[13px] text-blue-800 dark:text-blue-200 leading-relaxed">
-              <strong>Tip de uso:</strong> Los datos de arriba y las entidades detectadas se añadirán <strong>automáticamente</strong> a la tabla de tu archivo Word. El texto editable de arriba corresponde exclusivamente a la celda <strong>"Resumen Diligencia"</strong>.
-            </p>
-          </div>
-        </div>
-        {% elif summary_text %}
-        <div class="max-h-[400px] overflow-y-auto pr-2 bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg border border-slate-200 dark:border-slate-700">
-          <div class="text-[14px] text-slate-700 dark:text-slate-200 leading-relaxed ql-editor" style="padding:0;">
-            {{ summary_text | safe }}
-          </div>
-        </div>
-        {% elif extracted_text %}
-        <div
-          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
-          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">No hay resúmenes generados aún. Haz
-            clic en "Generar".</p>
-        </div>
-        {% else %}
-        <div
-          class="py-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700">
-          <p class="text-sm text-slate-400 dark:text-slate-500 font-medium italic">Requiere extracción OCR primero.</p>
-        </div>
-        {% endif %}
-        </div>
 
       <!-- Módulo de Extracción y Clasificación de Entidades -->
       <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden xl:col-span-2"
@@ -1085,16 +857,16 @@
           </div>
         </div>
         
-        <div class="p-6">
+        <div class="p-3">
         {% if entities_data %}
-        {% macro campo_valor(label, valores, color_class) %}
+        {% macro campo_valor(label, valores, base_color) %}
         {% if valores and valores|length > 0 %}
         <div class="flex items-start sm:items-center gap-2 py-1.5 border-b border-white/50 last:border-0 min-h-[32px]">
           <span class="text-slate-600 dark:text-slate-300 font-semibold text-xs min-w-[80px]">{{ label }}:</span>
           <div class="flex flex-wrap gap-1.5">
             {% for v in valores %}
             <span
-              class="font-bold {{ color_class }} bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm px-2 py-0.5 rounded text-[11px]">{{
+              class="font-bold text-{{ base_color }}-700 bg-white dark:bg-slate-900 border border-{{ base_color }}-200 dark:border-{{ base_color }}-700 shadow-sm px-2 py-0.5 rounded text-[11px]">{{
               v }}</span>
             {% endfor %}
           </div>
@@ -1105,103 +877,94 @@
         <div class="flex flex-col gap-4">
         {% set doc_data = entities_data %}
         <div id="entidades_pane" class="entidades-pane">
-          <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-5 flex flex-col gap-5">
+          <div class="flex flex-col gap-5">
 
             <div class="grid grid-cols-1 gap-5 items-start">
               <!-- Vehículos -->
               {% set v_count = doc_data.vehiculos.values() | map('length') | sum if doc_data.vehiculos else 0 %}
-              <div class="border rounded-xl p-5 transition-opacity {{ 'border-blue-200 dark:border-blue-900/50 bg-blue-50/30' if v_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
-                <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-blue-100 dark:border-blue-900/50' if v_count > 0 else 'border-slate-200' }}">
-                  <div class="flex items-center gap-2 {{ 'text-blue-700' if v_count > 0 else 'text-slate-400' }}">
+              {% if v_count > 0 %}
+              <div class="border rounded-xl p-5 border-blue-200 dark:border-blue-900/50 bg-blue-50/30">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-100 dark:border-blue-900/50">
+                  <div class="flex items-center gap-2 text-blue-700">
                     <span class="material-symbols-outlined text-[20px]">directions_car</span>
                     <h4 class="font-bold text-[13px] uppercase tracking-wide">Vehículos</h4>
                   </div>
-                  <span
-                    class="bg-white dark:bg-slate-900 border {{ 'border-blue-200 dark:border-blue-900/50 text-blue-600' if v_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
-                    v_count }} Datos</span>
+                  <span class="bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-900/50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{ v_count }} Datos</span>
                 </div>
-                {% if v_count > 0 %}
                 <div class="space-y-1">
-                  {{ campo_valor('Marcas', doc_data.vehiculos.marcas, 'text-blue-700') }}
-                  {{ campo_valor('Modelos', doc_data.vehiculos.modelos, 'text-blue-700') }}
-                  {{ campo_valor('Colores', doc_data.vehiculos.colores, 'text-blue-700') }}
-                  {{ campo_valor('Años', doc_data.vehiculos.anios, 'text-blue-700') }}
-                  {{ campo_valor('Patentes', doc_data.vehiculos.patentes, 'text-blue-700') }}
+                  {{ campo_valor('Marcas', doc_data.vehiculos.marcas, 'blue') }}
+                  {{ campo_valor('Modelos', doc_data.vehiculos.modelos, 'blue') }}
+                  {{ campo_valor('Colores', doc_data.vehiculos.colores, 'blue') }}
+                  {{ campo_valor('Años', doc_data.vehiculos.anios, 'blue') }}
+                  {{ campo_valor('Patentes', doc_data.vehiculos.patentes, 'blue') }}
                 </div>
-                {% else %}
-                <div class="text-center py-2"><span class="text-[11px] text-blue-400/80 font-medium italic">No se detectaron vehículos.</span></div>
-                {% endif %}
               </div>
+              {% endif %}
 
               <!-- Armas -->
               {% set a_count = doc_data.armas.values() | map('length') | sum if doc_data.armas else 0 %}
-              <div class="border rounded-xl p-5 transition-opacity {{ 'border-red-200 bg-red-50/30' if a_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
-                <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-red-100' if a_count > 0 else 'border-slate-200' }}">
-                  <div class="flex items-center gap-2 {{ 'text-red-600' if a_count > 0 else 'text-slate-400' }}">
+              {% if a_count > 0 %}
+              <div class="border rounded-xl p-5 border-red-200 bg-red-50/30">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-red-100">
+                  <div class="flex items-center gap-2 text-red-600">
                     <span class="material-symbols-outlined text-[20px]">warning</span>
                     <h4 class="font-bold text-[13px] uppercase tracking-wide">Armamento</h4>
                   </div>
-                  <span
-                    class="bg-white dark:bg-slate-900 border {{ 'border-red-200 text-red-600' if a_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
-                    a_count }} Datos</span>
+                  <span class="bg-white dark:bg-slate-900 border border-red-200 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{ a_count }} Datos</span>
                 </div>
-                {% if a_count > 0 %}
                 <div class="space-y-1">
-                  {{ campo_valor('Tipos', doc_data.armas.tipos, 'text-red-700') }}
-                  {{ campo_valor('Marcas', doc_data.armas.marcas, 'text-red-700') }}
-                  {{ campo_valor('Calibres', doc_data.armas.calibres, 'text-red-700') }}
-                  {{ campo_valor('Series', doc_data.armas.series, 'text-red-700') }}
+                  {{ campo_valor('Tipos', doc_data.armas.tipos, 'red') }}
+                  {{ campo_valor('Marcas', doc_data.armas.marcas, 'red') }}
+                  {{ campo_valor('Calibres', doc_data.armas.calibres, 'red') }}
+                  {{ campo_valor('Series', doc_data.armas.series, 'red') }}
                 </div>
-                {% else %}
-                <div class="text-center py-2"><span class="text-[11px] text-red-400/80 font-medium italic">No se detectó armamento.</span></div>
-                {% endif %}
               </div>
+              {% endif %}
 
               <!-- Drogas -->
               {% set d_count = doc_data.drogas.values() | map('length') | sum if doc_data.drogas else 0 %}
-              <div class="border rounded-xl p-5 transition-opacity {{ 'border-yellow-200 bg-yellow-50/30' if d_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
-                <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-yellow-100' if d_count > 0 else 'border-slate-200' }}">
-                  <div class="flex items-center gap-2 {{ 'text-yellow-700' if d_count > 0 else 'text-slate-400' }}">
-                    <span class="material-symbols-outlined text-[20px]">science</span>
-                  <h4 class="font-bold text-[13px] uppercase tracking-wide">Drogas / Sustancias</h4>
-                </div>
-                <span
-                  class="bg-white dark:bg-slate-900 border {{ 'border-yellow-200 text-yellow-700' if d_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
-                  d_count }} Datos</span>
-              </div>
               {% if d_count > 0 %}
-              <div class="space-y-1">
-                {{ campo_valor('Sustancias', doc_data.drogas.sustancias, 'text-yellow-700') }}
-                {{ campo_valor('Pesajes', doc_data.drogas.medidas, 'text-yellow-700') }}
-              </div>
-              {% else %}
-              <div class="text-center py-2"><span class="text-[11px] text-yellow-600/60 font-medium italic">No se detectaron drogas.</span></div>
-              {% endif %}
-            </div>
-
-            <!-- Personas -->
-            {% set p_count = doc_data.personas.values() | map('length') | sum if doc_data.personas else 0 %}
-            <div class="border rounded-xl p-5 transition-opacity {{ 'border-purple-200 bg-purple-50/30' if p_count > 0 else 'border-slate-200 bg-slate-50/50 opacity-60 grayscale' }}">
-              <div class="flex items-center justify-between mb-4 pb-2 border-b {{ 'border-purple-100' if p_count > 0 else 'border-slate-200' }}">
-                <div class="flex items-center gap-2 {{ 'text-purple-700' if p_count > 0 else 'text-slate-400' }}">
-                  <span class="material-symbols-outlined text-[20px]">person_search</span>
-                  <h4 class="font-bold text-[13px] uppercase tracking-wide">Personas / Identidad</h4>
+              <div class="border rounded-xl p-5 border-yellow-200 bg-yellow-50/30">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-yellow-100">
+                  <div class="flex items-center gap-2 text-yellow-700">
+                    <span class="material-symbols-outlined text-[20px]">science</span>
+                    <h4 class="font-bold text-[13px] uppercase tracking-wide">Drogas / Sustancias</h4>
+                  </div>
+                  <span class="bg-white dark:bg-slate-900 border border-yellow-200 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{ d_count }} Datos</span>
                 </div>
-                <span
-                  class="bg-white dark:bg-slate-900 border {{ 'border-purple-200 text-purple-600' if p_count > 0 else 'border-slate-200 text-slate-400' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{
-                  p_count }} Datos</span>
+                <div class="space-y-1">
+                  {{ campo_valor('Sustancias', doc_data.drogas.sustancias, 'yellow') }}
+                  {{ campo_valor('Pesajes', doc_data.drogas.medidas, 'yellow') }}
+                </div>
               </div>
-              {% if p_count > 0 %}
-              <div class="space-y-1">
-                {{ campo_valor('Nombres', doc_data.personas.detenidos, 'text-purple-700') }}
-                {{ campo_valor('RUTs / Identificación (Ext)', doc_data.personas.ruts, 'text-purple-700') }}
-                {{ campo_valor('Teléfonos', doc_data.personas.telefonos, 'text-purple-700') }}
-                {{ campo_valor('Direcciones', doc_data.personas.direcciones, 'text-purple-700') }}
-              </div>
-              {% else %}
-              <div class="text-center py-2"><span class="text-[11px] text-purple-400/80 font-medium italic">No se detectaron personas.</span></div>
               {% endif %}
-            </div>
+
+              <!-- Personas -->
+              {% set p_count = doc_data.personas.values() | map('length') | sum if doc_data.personas else 0 %}
+              {% if p_count > 0 %}
+              <div class="border rounded-xl p-7 border-indigo-200 bg-indigo-50/30">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-indigo-100">
+                  <div class="flex items-center gap-2 text-indigo-700">
+                    <span class="material-symbols-outlined text-[20px]">person_search</span>
+                    <h4 class="font-bold text-[13px] uppercase tracking-wide">Personas / Identidad</h4>
+                  </div>
+                  <span class="bg-white dark:bg-slate-900 border border-indigo-200 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{ p_count }} Datos</span>
+                </div>
+                <div class="space-y-3">
+                  {{ campo_valor('Nombres', doc_data.personas.detenidos, 'indigo') }}
+                  {{ campo_valor('RUTs / Identificación (Ext)', doc_data.personas.ruts, 'indigo') }}
+                  {{ campo_valor('Teléfonos', doc_data.personas.telefonos, 'indigo') }}
+                  {{ campo_valor('Direcciones', doc_data.personas.direcciones, 'indigo') }}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if v_count == 0 and a_count == 0 and d_count == 0 and p_count == 0 %}
+              <div class="py-10 flex flex-col items-center justify-center text-center">
+                <span class="material-symbols-outlined text-[48px] text-slate-300 mb-4">search_off</span>
+                <p class="text-sm text-slate-500 font-medium">No se extrajeron entidades estructuradas relevantes.</p>
+              </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -1225,9 +988,6 @@
       
     </div> <!-- Cierra split-right -->
   {% endif %}
-</div>
-  </div>
-</div>
 </div>
 
 <!-- Modal Pegar Texto -->

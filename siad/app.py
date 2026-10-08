@@ -139,24 +139,6 @@ def verify_password():
         print(f"Error verificando password: {e}")
     return {"ok": False}
 
-@app.route("/api/update_password", methods=["POST"])
-def api_update_password():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-    if not username or not password:
-        return {"ok": False, "error": "Faltan datos obligatorios"}, 400
-    
-    try:
-        if not db.get_user_by_username(username):
-            return {"ok": False, "error": "El usuario no existe"}
-            
-        db.update_password(username, generate_password_hash(password))
-        return {"ok": True}
-    except Exception as e:
-        print(f"Error actualizando contraseña: {e}")
-        return {"ok": False, "error": str(e)}, 500
-
 @app.route("/api/register", methods=["POST"])
 def api_register():
     data = request.get_json()
@@ -750,20 +732,49 @@ def build_summary_options(raw_text, entities=None):
     meta = parse_police_report(raw_text)
     narratives = meta.get("narrativas", [])
     
-    # 1. SÍNTESIS CORTA (Opción A)
-    sintesis_parts = []
+    # Obtener todas las oraciones de las narrativas
+    all_sents = []
     for nar in narratives:
-        sents = split_sentences_safely(nar)
-        if len(sents) > 1:
-            sintesis_parts.append(f"{sents[0]} {sents[-1]}")
-        elif sents:
-            sintesis_parts.append(sents[0])
-            
-    hechos_sinteticos = " ".join(sintesis_parts) if sintesis_parts else "Procedimiento policial ejecutado conforme a las diligencias informadas."
+        all_sents.extend(split_sentences_safely(nar))
+        
+    # 1. SÍNTESIS INTELIGENTE (Opción A - Info más importante, ultra corta)
+    full_narrative = " ".join(all_sents)
+    hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
+    hechos_completos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     
-    # 2. COMPLETO (Opción B)
-    hechos_completos = "<br><br>".join(narratives) if narratives else hechos_sinteticos
+    if full_narrative:
+        try:
+            doc = _nlp(full_narrative)
+            
+            # Opción A: Ultra corta (max 1 oracion, max ~6 líneas = ~320 chars)
+            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=10, limit_sentences=1)]
+            if tr_sents_a:
+                ordered_a = sorted(tr_sents_a, key=lambda s: full_narrative.find(s))
+                hechos_sinteticos = " ".join(ordered_a)
+            else:
+                hechos_sinteticos = full_narrative
+                
+            # Truncado estricto si sigue siendo muy largo (para forzar <= 6 líneas visuales)
+            if len(hechos_sinteticos) > 320:
+                hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
 
+            # Opción B: Resumen fluido (max 3 oraciones, resume pero no deja original)
+            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=20, limit_sentences=3)]
+            if tr_sents_b:
+                ordered_b = sorted(tr_sents_b, key=lambda s: full_narrative.find(s))
+                hechos_completos = " ".join(ordered_b)
+            else:
+                hechos_completos = full_narrative
+                
+            if len(hechos_completos) > 1200:
+                hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
+                
+        except Exception:
+            hechos_sinteticos = " ".join(all_sents[:1])
+            if len(hechos_sinteticos) > 320:
+                hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
+            hechos_completos = " ".join(all_sents[:3])
+    
     # Devolvemos puramente el relato para no duplicar datos en la tabla del Word
     return {"a": hechos_sinteticos, "b": hechos_completos}
 

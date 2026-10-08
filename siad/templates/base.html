@@ -6,6 +6,7 @@
 <meta name="description" content="Sistema Inteligente de Análisis Documental y Forense (SIAD) para el procesamiento de archivos, OCR y correlación de inteligencia criminal."/>
 <title>{% block title %}SIAD - PDI{% endblock %}</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
     @layer base {
       html, body { margin: 0; padding: 0; }
@@ -214,6 +215,17 @@ body.splash-disabled #pdi-splash-overlay,
   }
 })();</script>
 
+<script>
+  (function() {
+    var originalWarn = console.warn;
+    console.warn = function() {
+      if (arguments[0] && typeof arguments[0] === 'string' && arguments[0].includes('cdn.tailwindcss.com should not be used in production')) {
+        return;
+      }
+      originalWarn.apply(console, arguments);
+    };
+  })();
+</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
     tailwind.config = {
@@ -337,7 +349,7 @@ body.splash-disabled #pdi-splash-overlay,
 <div class="flex items-center gap-xs">
 <a href="{{ url_for('index') }}" class="flex items-center gap-xs group hover:opacity-90 transition-opacity">
   <img alt="PDI" class="h-9 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
-  <span class="font-headline-md text-[20px] font-bold text-white tracking-tight ml-2 hidden sm:inline-block drop-shadow-md">Análisis Documental PDI</span>
+  <span class="text-[25px] font-bold text-white ml-2 hidden sm:inline-block drop-shadow-md" style="font-family: 'Playfair Display', serif; letter-spacing: 0.5px; padding-top: 2px;">Análisis Documental</span>
 </a>
 </div>
 <nav class="hidden md:flex items-center gap-2 h-full py-2">
