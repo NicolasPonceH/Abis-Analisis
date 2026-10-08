@@ -1,70 +1,124 @@
 <h1 class="ajustes-page-title">Mi Cuenta</h1>
-<p class="ajustes-page-subtitle">Gestiona tu perfil y preferencias personales.</p>
+<p class="ajustes-page-subtitle">Administra tus datos personales y el acceso a tu cuenta.</p>
 
-<div class="ajustes-card" style="display: flex; align-items: center; gap: 24px;">
-  <div style="width: 80px; height: 80px; background: #001F44; border-radius: 50%; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; border: 4px solid #E6EDF7;">
-    <%= typeof user !== 'undefined' ? user.username.charAt(0).toUpperCase() : 'U' %>
-  </div>
-  <div style="flex: 1;">
-    <h2 style="margin: 0 0 4px 0; font-size: 24px; color: #001F44; text-transform: capitalize;">
-      <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
-    </h2>
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-      <span style="background: #e2e8f0; color: #475569; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-        <%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %>
-      </span>
-      <span style="display: flex; align-items: center; gap: 6px; color: #10B981; font-weight: 600; font-size: 13px;">
-        <span style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; display: inline-block;"></span> Activo
-      </span>
+<div class="account-grid">
+  <section class="ajustes-card" style="margin-bottom: 0; min-height: 250px; display: flex; flex-direction: column; justify-content: center;">
+    <div class="ajustes-card-header"><i class="fa-solid fa-id-card"></i> Perfil actual</div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <div style="width: 76px; height: 76px; flex: 0 0 76px; background: #001F44; border-radius: 50%; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; border: 4px solid #E6EDF7;">
+        <%= typeof user !== 'undefined' ? user.username.charAt(0).toUpperCase() : 'U' %>
+      </div>
+      <div style="min-width: 0;">
+        <h2 style="margin: 0 0 8px 0; font-size: 23px; color: #001F44; text-transform: capitalize; overflow-wrap: anywhere;">
+          <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
+        </h2>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="background: #e2e8f0; color: #475569; padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+            <%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %>
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px; color: #047857; font-weight: 700; font-size: 12px;">
+            <span style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; display: inline-block;"></span> Activo
+          </span>
+        </div>
+      </div>
     </div>
-    <div style="color: #64748b; font-size: 14px;">
-      <i class="fa-solid fa-id-badge" style="margin-right: 4px;"></i> Sistema ABIS
+  </section>
+
+  <section class="ajustes-card" style="margin-bottom: 0; min-height: 250px;">
+    <div class="ajustes-card-header"><i class="fa-solid fa-key"></i> Cambiar contraseña</div>
+    <div id="mi-contrasena-inicial" style="display: flex; flex-direction: column; justify-content: center; min-height: 158px; gap: 18px;">
+      <p style="color: #475569; font-size: 14px; line-height: 1.5; margin: 0;">Actualiza tu contraseña cuando lo necesites para mantener tu cuenta protegida.</p>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" id="btn-mostrar-mi-contrasena" style="background: #001F44; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;">
+          <i class="fa-solid fa-key"></i> Cambiar contraseña
+        </button>
+      </div>
     </div>
-  </div>
-</div>
+    <form id="form-mi-contrasena" class="settings-form" hidden novalidate>
+      <div class="settings-form-row">
+        <div>
+          <label for="mi-nueva-contrasena">Nueva contraseña</label>
+          <input type="password" id="mi-nueva-contrasena" class="form-control" minlength="6" autocomplete="new-password" required>
+        </div>
+        <div>
+          <label for="mi-confirmar-contrasena">Confirmar contraseña</label>
+          <input type="password" id="mi-confirmar-contrasena" class="form-control" minlength="6" autocomplete="new-password" required>
+        </div>
+      </div>
+      <p id="mi-contrasena-feedback" class="form-feedback" aria-live="polite"></p>
+      <div style="display: flex; justify-content: flex-end;">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="btn-cancelar-mi-contrasena" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;">Cancelar</button>
+          <button type="submit" style="background: #001F44; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;"><i class="fa-solid fa-floppy-disk"></i> Guardar contraseña</button>
+        </div>
+      </div>
+    </form>
+  </section>
 
-<div class="ajustes-card">
-  <div class="ajustes-card-header"><i class="fa-solid fa-key"></i> Seguridad de la cuenta</div>
-  <p style="color: #475569; font-size: 14px; margin-bottom: 24px;">Mantén tu cuenta segura actualizando tu contraseña periódicamente. El sistema te guiará para crear una contraseña fuerte.</p>
-  
-  <button onclick="solicitarCambioContrasena()" style="display: inline-flex; align-items: center; gap: 8px; background: #001F44; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;">
-    <i class="fa-solid fa-lock"></i> Cambiar Contraseña
-  </button>
-</div>
-
-<div class="ajustes-card">
-  <div class="ajustes-card-header"><i class="fa-solid fa-right-from-bracket"></i> Sesión</div>
-  <p style="color: #475569; font-size: 14px; margin-bottom: 24px;">Si iniciaste sesión en un dispositivo público, asegúrate de cerrar sesión al terminar.</p>
-  
-  <a href="/logout" style="display: inline-flex; align-items: center; gap: 8px; background: #DC2626; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; transition: background 0.2s;">
-    <i class="fa-solid fa-power-off"></i> Cerrar sesión
-  </a>
+  <section class="ajustes-card" style="grid-column: 1 / -1; margin-bottom: 0;">
+    <div class="ajustes-card-header"><i class="fa-solid fa-right-from-bracket"></i> Sesión</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+      <p style="color: #475569; font-size: 14px; margin: 0;">Cierra la sesión cuando termines de utilizar el sistema.</p>
+      <a href="/logout" style="background: #DC2626; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;">
+        <i class="fa-solid fa-power-off"></i> Cerrar sesión
+      </a>
+    </div>
+  </section>
 </div>
 
 <script>
-  async function solicitarCambioContrasena() {
-    const newPass = prompt("Ingresa tu nueva contraseña:");
-    if (!newPass) return;
-    if (newPass.length < 6) {
-      alert("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
+  (() => {
+    const form = document.getElementById('form-mi-contrasena');
+    if (!form) return;
 
-    try {
-      const res = await fetch('/api/user/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: newPass })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        alert("Contraseña actualizada con éxito.");
-      } else {
-        alert("Error: " + data.error);
+    const initialState = document.getElementById('mi-contrasena-inicial');
+    const showButton = document.getElementById('btn-mostrar-mi-contrasena');
+    const cancelButton = document.getElementById('btn-cancelar-mi-contrasena');
+    const feedback = document.getElementById('mi-contrasena-feedback');
+    const setFeedback = (message, type) => {
+      feedback.textContent = message;
+      feedback.className = `form-feedback ${type || ''}`;
+    };
+
+    showButton?.addEventListener('click', () => {
+      initialState.hidden = true;
+      form.hidden = false;
+      document.getElementById('mi-nueva-contrasena')?.focus();
+    });
+
+    cancelButton?.addEventListener('click', () => {
+      form.reset();
+      form.hidden = true;
+      initialState.hidden = false;
+      setFeedback('', '');
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const password = document.getElementById('mi-nueva-contrasena').value;
+      const confirmation = document.getElementById('mi-confirmar-contrasena').value;
+      const submit = form.querySelector('button[type="submit"]');
+
+      if (password.length < 6) return setFeedback('La contraseña debe tener al menos 6 caracteres.', 'error');
+      if (password !== confirmation) return setFeedback('Las contraseñas no coinciden.', 'error');
+
+      submit.disabled = true;
+      setFeedback('Guardando contraseña...', '');
+      try {
+        const response = await fetch('/api/user/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'No se pudo actualizar la contraseña.');
+        form.reset();
+        setFeedback('Contraseña actualizada correctamente.', 'success');
+      } catch (error) {
+        setFeedback(error.message || 'No se pudo actualizar la contraseña.', 'error');
+      } finally {
+        submit.disabled = false;
       }
-    } catch (e) {
-      console.error(e);
-      alert("Error al intentar cambiar la contraseña.");
-    }
-  }
+    });
+  })();
 </script>
