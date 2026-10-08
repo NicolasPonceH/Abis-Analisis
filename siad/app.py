@@ -139,6 +139,24 @@ def verify_password():
         print(f"Error verificando password: {e}")
     return {"ok": False}
 
+@app.route("/api/update_password", methods=["POST"])
+def api_update_password():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    if not username or not password:
+        return {"ok": False, "error": "Faltan datos obligatorios"}, 400
+    
+    try:
+        if not db.get_user_by_username(username):
+            return {"ok": False, "error": "El usuario no existe"}
+            
+        db.update_password(username, generate_password_hash(password))
+        return {"ok": True}
+    except Exception as e:
+        print(f"Error actualizando contraseña: {e}")
+        return {"ok": False, "error": str(e)}, 500
+
 @app.route("/api/register", methods=["POST"])
 def api_register():
     data = request.get_json()

@@ -271,6 +271,75 @@ app.get("/", requireAuth, (req, res) => {
   res.render("index", { user: req.user });
 });
 
+app.post("/api/user/change-password", requireAuth, express.json(), async (req, res) => {
+  const { password } = req.body;
+  if (!password) return res.status(400).json({ error: "Falta la nueva contraseña." });
+  
+  try {
+    const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+    const updateRes = await fetch(`${siadUrl}/api/update_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: req.user.username, password })
+    });
+    const data = await updateRes.json();
+    if (data.ok) return res.json({ ok: true });
+    return res.status(400).json({ error: data.error || "Error al actualizar la contraseña." });
+  } catch (err) {
+    console.error("Error in change-password:", err);
+    return res.status(500).json({ error: "Error de conexión con el sistema de validación." });
+  }
+});
+
+app.post("/api/admin/reset-password", requireAuth, express.json(), async (req, res) => {
+  if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
+  const { id, password } = req.body;
+  if (!id || !password) return res.status(400).json({ error: "Faltan datos." });
+  
+  try {
+    const userRes = await pool.query("SELECT username FROM usuarios WHERE id = $1", [id]);
+    if (userRes.rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado." });
+    
+    const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+    const updateRes = await fetch(`${siadUrl}/api/update_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: userRes.rows[0].username, password })
+    });
+    const data = await updateRes.json();
+    if (data.ok) return res.json({ ok: true });
+    return res.status(400).json({ error: data.error || "Error al actualizar la contraseña." });
+  } catch (err) {
+    console.error("Error in reset-password:", err);
+    return res.status(500).json({ error: "Error de servidor." });
+  }
+});
+
+app.post("/api/admin/create-user", requireAuth, express.json(), async (req, res) => {
+  if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
+  const { username, password, rol } = req.body;
+  if (!username || !password || !rol) return res.status(400).json({ error: "Faltan datos." });
+  
+  try {
+    const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+    const createRes = await fetch(`${siadUrl}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password, nombre_completo: username })
+    });
+    const data = await createRes.json();
+    
+    if (data.ok) {
+      await pool.query("UPDATE usuarios SET rol = $1 WHERE username = $2", [rol, username]);
+      return res.json({ ok: true });
+    }
+    return res.status(400).json({ error: data.error || "Error al crear usuario." });
+  } catch (err) {
+    console.error("Error in create-user:", err);
+    return res.status(500).json({ error: "Error de servidor." });
+  }
+});
+
 app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res) => {
   if (req.user.rol !== "admin") {
     return res.status(403).json({ error: "No tienes permisos de administrador." });

@@ -24,6 +24,15 @@
 </div>
 
 <div class="ajustes-card">
+  <div class="ajustes-card-header"><i class="fa-solid fa-key"></i> Seguridad de la cuenta</div>
+  <p style="color: #475569; font-size: 14px; margin-bottom: 24px;">Mantén tu cuenta segura actualizando tu contraseña periódicamente. El sistema te guiará para crear una contraseña fuerte.</p>
+  
+  <button onclick="solicitarCambioContrasena()" style="display: inline-flex; align-items: center; gap: 8px; background: #001F44; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;">
+    <i class="fa-solid fa-lock"></i> Cambiar Contraseña
+  </button>
+</div>
+
+<div class="ajustes-card">
   <div class="ajustes-card-header"><i class="fa-solid fa-right-from-bracket"></i> Sesión</div>
   <p style="color: #475569; font-size: 14px; margin-bottom: 24px;">Si iniciaste sesión en un dispositivo público, asegúrate de cerrar sesión al terminar.</p>
   
@@ -31,3 +40,31 @@
     <i class="fa-solid fa-power-off"></i> Cerrar sesión
   </a>
 </div>
+
+<script>
+  async function solicitarCambioContrasena() {
+    const newPass = prompt("Ingresa tu nueva contraseña:");
+    if (!newPass) return;
+    if (newPass.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPass })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert("Contraseña actualizada con éxito.");
+      } else {
+        alert("Error: " + data.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error al intentar cambiar la contraseña.");
+    }
+  }
+</script>

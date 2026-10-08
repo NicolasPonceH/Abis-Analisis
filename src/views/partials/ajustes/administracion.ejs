@@ -5,7 +5,7 @@
   <div class="ajustes-card" style="border-top: 4px solid #D4AF37;">
     <div class="ajustes-card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0;">
       <div><i class="fa-solid fa-users" style="color: #001F44;"></i> Gestión de Usuarios</div>
-      <button style="background: #001F44; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+      <button onclick="createNewUser()" style="background: #001F44; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
         <i class="fa-solid fa-plus"></i> Nuevo Usuario
       </button>
     </div>
@@ -40,7 +40,7 @@
                 </td>
                 <td style="padding: 14px 16px; text-align: right;">
                   <button onclick="changeUserRole(<%= u.id %>, '<%= u.rol %>')" style="background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;" title="Editar Roles"><i class="fa-solid fa-pen"></i></button>
-                  <button style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;" title="Restablecer Contraseña"><i class="fa-solid fa-key"></i></button>
+                  <button onclick="resetUserPassword(<%= u.id %>, '<%= u.username %>')" style="background: none; border: none; color: #DC2626; cursor: pointer; padding: 4px;" title="Restablecer Contraseña"><i class="fa-solid fa-key"></i></button>
                 </td>
               </tr>
             <% }) %>
@@ -76,6 +76,61 @@
       } catch (e) {
         console.error(e);
         alert('Ocurrió un error al intentar actualizar el rol.');
+      }
+    }
+
+    async function resetUserPassword(userId, username) {
+      const newPass = prompt(`Ingresa la nueva contraseña para el usuario ${username}:`);
+      if (!newPass) return;
+      if (newPass.length < 6) {
+        alert("La contraseña debe tener al menos 6 caracteres.");
+        return;
+      }
+      try {
+        const res = await fetch('/api/admin/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: userId, password: newPass })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`Contraseña de ${username} actualizada con éxito.`);
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Error al intentar cambiar la contraseña.");
+      }
+    }
+
+    async function createNewUser() {
+      const username = prompt("Ingresa el nombre del nuevo usuario:");
+      if (!username) return;
+      const password = prompt("Ingresa la contraseña para el nuevo usuario:");
+      if (!password || password.length < 6) {
+        alert("La contraseña es requerida y debe tener al menos 6 caracteres.");
+        return;
+      }
+      const conf = confirm(`Se creará el usuario '${username}'. ¿Continuar?`);
+      if (!conf) return;
+
+      try {
+        const res = await fetch('/api/admin/create-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, rol: 'operador' })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert("Usuario creado exitosamente.");
+          window.location.reload();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Error al intentar crear el usuario.");
       }
     }
   </script>
