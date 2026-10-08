@@ -496,6 +496,30 @@ def get_user_by_username(username):
             return dict(zip(columns, row))
 
 
+def get_all_users():
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, username, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios ORDER BY id ASC"
+            )
+            columns = [desc.name for desc in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def update_user_role(user_id, rol):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE usuarios SET rol = %s WHERE id = %s", (rol, user_id))
+        conn.commit()
+
+
+def update_user_password_by_id(user_id, password_hash):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE usuarios SET password_hash = %s WHERE id = %s", (password_hash, user_id))
+        conn.commit()
+
+
 def create_user(username, password_hash, rol='operador', nombre_completo=None):
     with get_connection() as conn:
         with conn.cursor() as cur:

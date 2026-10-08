@@ -224,35 +224,132 @@
       </div>
 
       {% elif section == 'administracion' %}
-      <!-- ==================== SECCIÓN 4: ADMINISTRACIÓN ==================== -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-md p-8 lg:p-10 flex flex-col gap-8">
-        <div class="flex items-center justify-between pb-6 border-b-2 border-slate-100 dark:border-slate-800">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-red-100 dark:bg-red-950/70 text-red-600 dark:text-red-400 flex items-center justify-center font-black shrink-0">
-              <span class="material-symbols-outlined text-[30px]">admin_panel_settings</span>
-            </div>
-            <div>
-              <h3 class="font-black text-slate-900 dark:text-slate-100 text-2xl lg:text-3xl">Administración Institucional</h3>
-              <p class="text-sm lg:text-base text-slate-500 dark:text-slate-400 mt-0.5">Control de privilegios y seguridad del sistema ABIS / SIAD</p>
-            </div>
-          </div>
-          <span class="bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 font-black px-4 py-2 rounded-xl text-xs lg:text-sm border-2 border-red-300 dark:border-red-700">Nivel Administrador</span>
+      <!-- ==================== SECCIÓN 3: ADMINISTRACIÓN ==================== -->
+      <div class="flex flex-col gap-8">
+
+        <!-- Banner Titulo de Administracion -->
+        <div class="mb-2">
+          <h2 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Panel de Administración</h2>
+          <p class="text-sm lg:text-base text-slate-500 dark:text-slate-400 mt-1">Gestiona usuarios, roles y credenciales del Sistema ABIS / SIAD de forma segura.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-slate-50 dark:bg-slate-800/60 p-6 lg:p-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
-            <span class="text-sm font-extrabold text-slate-500 block mb-2">Cuentas Registradas</span>
-            <span class="text-3xl lg:text-4xl font-black text-slate-900 dark:text-slate-100">1 Unificada</span>
+        <!-- Tarjeta 1: Añadir usuarios -->
+        <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
+          <div class="bg-gradient-to-r from-[#003069] to-[#0050a0] border-b-4 border-amber-400 p-5 px-8 text-white flex items-center gap-3 font-extrabold text-lg">
+            <span class="material-symbols-outlined text-amber-300 text-[26px]">person_add</span>
+            <span>Añadir usuarios</span>
           </div>
-          <div class="bg-slate-50 dark:bg-slate-800/60 p-6 lg:p-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
-            <span class="text-sm font-extrabold text-slate-500 block mb-2">Integración ABIS</span>
-            <span class="text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-400">Sincronizado</span>
+
+          <form id="form-nuevo-usuario-siad" class="p-8 flex flex-col gap-6" onsubmit="crearUsuarioAdminSIAD(event)">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="siad-nuevo-usuario" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nombre de Usuario</label>
+                <input type="text" id="siad-nuevo-usuario" required placeholder="ej: jgonzalez" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+
+              <div>
+                <label for="siad-nuevo-rol" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nivel de Acceso</label>
+                <select id="siad-nuevo-rol" required class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer">
+                  <option value="operador">Operador (Estándar)</option>
+                  <option value="admin">Administrador (Total)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="siad-nuevo-password" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Contraseña Inicial</label>
+                <input type="password" id="siad-nuevo-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+
+              <div>
+                <label for="siad-nuevo-password-confirm" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Confirmar Contraseña</label>
+                <input type="password" id="siad-nuevo-password-confirm" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+            </div>
+
+            <div id="siad-feedback-usuario" class="hidden text-sm font-bold p-4 rounded-xl"></div>
+
+            <div class="flex justify-end pt-4 border-t-2 border-slate-100 dark:border-slate-800">
+              <button type="submit" class="bg-[#00234c] hover:bg-[#003366] text-white font-black text-sm lg:text-base py-3.5 px-8 rounded-2xl shadow-lg transition-all flex items-center gap-3 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[22px]">person_add</span>
+                Añadir
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tarjeta 2: Registro Activo de Usuarios -->
+        <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
+          <div class="bg-gradient-to-r from-[#003069] to-[#0050a0] border-b-4 border-amber-400 p-5 px-8 text-white flex items-center justify-between font-extrabold text-lg">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-amber-300 text-[26px]">group</span>
+              <span>Registro Activo</span>
+            </div>
+            <span class="bg-white/20 text-white font-black text-xs lg:text-sm px-4 py-1.5 rounded-full border border-white/30">
+              {{ db_users|length if db_users else 0 }} Registros
+            </span>
           </div>
-          <div class="bg-slate-50 dark:bg-slate-800/60 p-6 lg:p-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
-            <span class="text-sm font-extrabold text-slate-500 block mb-2">Módulo SIAD</span>
-            <span class="text-3xl lg:text-4xl font-black text-blue-600 dark:text-blue-400">v2.4 Activo</span>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-slate-800/60 border-b-2 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-wider">
+                  <th class="py-4 px-6">Usuario</th>
+                  <th class="py-4 px-6">Rol</th>
+                  <th class="py-4 px-6">Estado</th>
+                  <th class="py-4 px-6">Último Acceso</th>
+                  <th class="py-4 px-6 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm lg:text-base">
+                {% if db_users and db_users|length > 0 %}
+                  {% for u in db_users %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td class="py-4 px-6 font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[24px] {% if u.rol == 'admin' %}text-sky-500{% else %}text-slate-400{% endif %}">
+                          {% if u.rol == 'admin' %}admin_panel_settings{% else %}person{% endif %}
+                        </span>
+                        {{ u.username }}
+                      </td>
+                      <td class="py-4 px-6">
+                        <span class="{% if u.rol == 'admin' %}bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300 border-sky-300{% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300{% endif %} font-black px-3.5 py-1 rounded-xl text-xs uppercase tracking-wider border">
+                          {{ 'Admin' if u.rol == 'admin' else 'Operador' }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-6">
+                        <span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700 font-extrabold px-3 py-1 rounded-xl text-xs inline-flex items-center gap-1.5">
+                          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Activo
+                        </span>
+                      </td>
+                      <td class="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium text-xs lg:text-sm">
+                        {{ u.last_login or 'Nunca' }}
+                      </td>
+                      <td class="py-4 px-6 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                          <button onclick="cambiarRolSIAD({{ u.id }}, '{{ u.rol }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px]">edit</span> Rol
+                          </button>
+                          <button onclick="cambiarPasswordSIAD({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-red-200 dark:border-red-800 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px]">key</span> Clave
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="py-12 text-center text-slate-400 font-bold">
+                      <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">folder_open</span>
+                      No hay usuarios registrados
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
           </div>
         </div>
+
       </div>
       {% endif %}
 
@@ -289,6 +386,85 @@
       });
     }
   })();
+
+  async function crearUsuarioAdminSIAD(e) {
+    e.preventDefault();
+    var u = document.getElementById('siad-nuevo-usuario').value;
+    var r = document.getElementById('siad-nuevo-rol').value;
+    var p1 = document.getElementById('siad-nuevo-password').value;
+    var p2 = document.getElementById('siad-nuevo-password-confirm').value;
+    var fb = document.getElementById('siad-feedback-usuario');
+
+    if (p1 !== p2) {
+      fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
+      fb.textContent = 'Las contraseñas no coinciden.';
+      fb.classList.remove('hidden');
+      return;
+    }
+
+    try {
+      var res = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p1, rol: r })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        fb.className = 'text-sm font-bold p-4 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300';
+        fb.textContent = 'Usuario registrado exitosamente en el sistema.';
+        fb.classList.remove('hidden');
+        setTimeout(function() { location.reload(); }, 1000);
+      } else {
+        fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
+        fb.textContent = data.error || 'No se pudo registrar el usuario.';
+        fb.classList.remove('hidden');
+      }
+    } catch (err) {
+      fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
+      fb.textContent = 'Error de conexión con el servidor.';
+      fb.classList.remove('hidden');
+    }
+  }
+
+  async function cambiarRolSIAD(id, currentRol) {
+    var nuevoRol = currentRol === 'admin' ? 'operador' : 'admin';
+    if (!confirm('¿Desea cambiar el rol de este usuario a ' + nuevoRol.toUpperCase() + '?')) return;
+    try {
+      var res = await fetch('/api/admin/update-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, rol: nuevoRol })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        location.reload();
+      } else {
+        alert(data.error || 'Error al modificar rol');
+      }
+    } catch (err) {
+      alert('Error de conexión');
+    }
+  }
+
+  async function cambiarPasswordSIAD(id, username) {
+    var p = prompt('Ingrese la nueva contraseña para el usuario "' + username + '" (mínimo 6 caracteres):');
+    if (!p || p.length < 6) return;
+    try {
+      var res = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, password: p })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        alert('Contraseña actualizada correctamente.');
+      } else {
+        alert(data.error || 'Error al actualizar contraseña.');
+      }
+    } catch (err) {
+      alert('Error de conexión');
+    }
+  }
 </script>
 
 {% endblock %}

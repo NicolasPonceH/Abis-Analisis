@@ -1718,7 +1718,62 @@ def configuracion():
     section = request.args.get("section", "general")
     if section not in ["general", "cuenta", "administracion"]:
         section = "general"
-    return render_template("configuracion.html", user=user, active_page="configuracion", section=section)
+    db_users = []
+    if section == "administracion":
+        try:
+            db_users = db.get_all_users()
+        except Exception:
+            db_users = []
+    return render_template("configuracion.html", user=user, active_page="configuracion", section=section, db_users=db_users)
+
+
+@app.route("/api/admin/create-user", methods=["POST"])
+def api_admin_create_user():
+    data = request.get_json() or {}
+    username = (data.get("username") or "").strip()
+    password = data.get("password") or ""
+    rol = data.get("rol") or "operador"
+    
+    if len(username) < 3 or len(password) < 6 or rol not in ["admin", "operador"]:
+        return {"ok": False, "error": "Datos inválidos (mínimo 3 caracteres usuario y 6 en contraseña)"}, 400
+        
+    existing = db.get_user_by_username(username)
+    if existing:
+        return {"ok": False, "error": "El usuario ya existe en el registro policial"}, 400
+        
+    try:
+        user_id = db.create_user(username, generate_password_hash(password), rol=rol, nombre_completo=username)
+        return {"ok": True, "user_id": user_id}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
+
+@app.route("/api/admin/update-role", methods=["POST"])
+def api_admin_update_role():
+    data = request.get_json() or {}
+    user_id = data.get("id")
+    rol = data.get("rol")
+    if not user_id or rol not in ["admin", "operador"]:
+        return {"ok": False, "error": "Datos inválidos"}, 400
+    try:
+        db.update_user_role(user_id, rol)
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
+
+@app.route("/api/admin/reset-password", methods=["POST"])
+def api_admin_reset_password():
+    data = request.get_json() or {}
+    user_id = data.get("id")
+    password = data.get("password")
+    if not user_id or not password or len(password) < 6:
+        return {"ok": False, "error": "Contraseña inválida (mínimo 6 caracteres)"}, 400
+    try:
+        db.update_user_password_by_id(user_id, generate_password_hash(password))
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
 
 @app.route("/perfil")
 def perfil():
