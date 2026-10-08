@@ -91,15 +91,13 @@
       position: relative;
       flex: 0 1 432px;
       width: 100%;
-      padding: clamp(28px, 4vw, 42px);
+      padding: clamp(32px, 4vw, 48px) clamp(28px, 4vw, 42px);
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.72);
-      border-radius: 28px;
-      background: var(--surface);
-      box-shadow: 0 28px 80px rgba(0, 12, 27, 0.34), 0 2px 8px rgba(0, 20, 45, 0.12), inset 0 1px 0 #fff;
+      border: 1px solid #D5DFEA;
+      border-radius: 24px;
+      background: #FFFFFF;
+      box-shadow: 0 16px 40px rgba(0, 12, 27, 0.08);
       text-align: left;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
       animation: cardIn 800ms cubic-bezier(0.16, 1, 1.3, 1) both;
       min-height: 520px;
     }
@@ -111,63 +109,68 @@
       width: 100%;
       height: 4px;
       content: '';
-      background: linear-gradient(90deg, var(--gold), #f8b900 55%, transparent);
+      background: linear-gradient(90deg, #FFD400 0%, #FFD400 60px, transparent 60px);
     }
 
     .brand-row {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 30px;
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .logo-badge {
-      display: grid;
-      width: 58px;
-      height: 58px;
-      place-items: center;
-      border: 1px solid rgba(0, 35, 76, 0.1);
-      border-radius: 16px;
-      background: linear-gradient(145deg, #f8fafc, #e9eef5);
-      box-shadow: 0 8px 18px rgba(0, 35, 76, 0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
     }
 
-    .logo-badge img { display: block; width: auto; height: 42px; }
+    .logo-badge img { display: block; width: auto; height: 44px; }
 
     .brand-kicker {
-      margin: 0 0 3px;
-      color: var(--muted);
+      margin: 0 0 2px;
+      color: #64748B;
       font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.16em;
+      font-weight: 700;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
     .brand-name {
       margin: 0;
-      color: var(--ink);
-      font-size: 19px;
-      font-weight: 800;
-      letter-spacing: 0.07em;
+      color: #062B57;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
     }
 
-    .card-heading { margin-bottom: 27px; }
+    .card-heading {
+      margin-bottom: 32px;
+    }
+
+    .card-heading::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 3px;
+      background: #1769AA;
+      border-radius: 2px;
+      margin-bottom: 12px;
+    }
 
     h1 {
-      margin: 0 0 8px;
-      color: var(--ink);
-      font-size: clamp(27px, 3vw, 34px);
+      margin: 0 0 6px;
+      color: #062B57;
+      font-size: 28px;
       font-weight: 800;
-      letter-spacing: -0.045em;
-      line-height: 1.08;
+      letter-spacing: -0.03em;
     }
 
     p.subtitle {
-      max-width: 300px;
+      max-width: 320px;
       margin: 0;
-      color: var(--muted);
+      color: #64748B;
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
     .flash {
@@ -181,15 +184,17 @@
       line-height: 1.4;
     }
 
-    .field { margin-bottom: 18px; }
+    .field { margin-bottom: 20px; }
 
     label {
-      display: block;
-      margin: 0 0 7px;
-      color: #34506c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 8px;
+      color: #64748B;
       font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.09em;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
@@ -198,10 +203,10 @@
     .input-icon {
       position: absolute;
       top: 50%;
-      left: 15px;
-      width: 17px;
-      height: 17px;
-      color: #758aa2;
+      left: 16px;
+      width: 18px;
+      height: 18px;
+      color: #94A3B8;
       pointer-events: none;
       transform: translateY(-50%);
     }
@@ -211,28 +216,29 @@
       height: 52px;
       margin: 0;
       padding: 0 44px;
-      border: 1px solid var(--line);
-      border-radius: 13px;
+      border: 1px solid #D5DFEA;
+      border-radius: 12px;
       outline: none;
-      background: rgba(246, 249, 252, 0.9);
-      color: var(--ink);
+      background: #F8FAFC;
+      color: #062B57;
       font: inherit;
       font-size: 14px;
-      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
+      font-weight: 500;
+      transition: all 0.2s ease;
     }
 
-    input[type="password"]::placeholder, input[type="text"]::placeholder { color: #9aaabd; }
+    input[type="password"]::placeholder, input[type="text"]::placeholder { color: #94A3B8; font-weight: 400; }
 
     input[type="password"]:focus, input[type="text"]:focus {
-      border-color: #00234c;
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(0, 35, 76, 0.12);
+      border-color: #003B73;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 4px rgba(0, 59, 115, 0.1);
     }
 
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 11px;
+      right: 12px;
       display: grid;
       width: 32px;
       height: 32px;
@@ -240,42 +246,39 @@
       place-items: center;
       border: 0;
       background: transparent;
-      color: #71869d;
+      color: #94A3B8;
       cursor: pointer;
       transform: translateY(-50%);
     }
 
-    .toggle-password:hover { color: var(--navy-800); }
-    .toggle-password svg { width: 17px; height: 17px; }
+    .toggle-password:hover { color: #062B57; }
+    .toggle-password svg { width: 18px; height: 18px; }
 
     .submit-button {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       width: 100%;
-      min-height: 54px;
-      margin-top: 5px;
-      padding: 12px 18px;
+      height: 54px;
+      margin-top: 24px;
       border: 0;
-      border-radius: 13px;
-      background: #00234c;
-      box-shadow: 0 11px 20px rgba(0, 35, 76, 0.24);
-      color: #ffffff;
-      font: inherit;
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      border-radius: 12px;
+      background: #003B73;
+      box-shadow: 0 8px 20px rgba(0, 59, 115, 0.24);
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      transition: all 0.2s ease;
     }
 
-    .submit-button svg { width: 18px; height: 18px; transition: transform 180ms ease; color: #ffd100; }
-    .submit-button:hover { background: #001a38; box-shadow: 0 15px 25px rgba(0, 35, 76, 0.32); transform: translateY(-2px); }
+    .submit-button svg { width: 18px; height: 18px; transition: transform 0.2s ease; }
+    .submit-button:hover { background: #062B57; box-shadow: 0 12px 24px rgba(0, 59, 115, 0.32); transform: translateY(-2px); }
     .submit-button:hover svg { transform: translateX(3px); }
     .submit-button:active { transform: translateY(0); }
-    .submit-button:disabled { cursor: wait; opacity: 0.75; }
+    .submit-button:disabled { cursor: wait; opacity: 0.75; transform: none; }
 
     .card-links {
       display: flex;
@@ -295,13 +298,16 @@
     .card-links a:hover { color: #001a38; text-decoration: underline; }
 
     .footer-note {
-      margin: 29px 0 0;
-      padding-top: 17px;
-      border-top: 1px solid rgba(9, 35, 63, 0.09);
-      color: #91a0b0;
-      font-size: 10px;
-      line-height: 1.5;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      color: #64748B;
+      font-size: 11px;
+      font-weight: 500;
     }
 
     .login-visual {
@@ -482,12 +488,16 @@
   <main class="login-shell">
     <div class="login-layout">
       <div class="card">
+        <!-- Decoraciones geométricas -->
+        <svg style="position: absolute; top: 16px; right: 24px; width: 44px; height: 44px; opacity: 0.15;" viewBox="0 0 100 100" aria-hidden="true"><path d="M45 0 L80 0 L35 100 L0 100 Z" fill="#64748B"/><path d="M90 0 L125 0 L80 100 L45 100 Z" fill="#64748B"/></svg>
+        <svg style="position: absolute; bottom: 16px; left: 24px; width: 44px; height: 44px; opacity: 0.15;" viewBox="0 0 100 100" aria-hidden="true"><path d="M45 0 L80 0 L35 100 L0 100 Z" fill="#64748B"/><path d="M90 0 L125 0 L80 100 L45 100 Z" fill="#64748B"/></svg>
+
         <div class="brand-row">
           <div class="logo-badge">
             <img src="/assets/logo-pdi.png" alt="PDI">
           </div>
           <div>
-            <p class="brand-kicker">Plataforma institucional</p>
+            <p class="brand-kicker">PLATAFORMA INSTITUCIONAL</p>
             <p class="brand-name">SISTEMA ABIS</p>
           </div>
         </div>
@@ -508,7 +518,7 @@
 
           <form method="post" action="/login" id="form-login">
             <div class="field">
-              <label for="username">Nombre de usuario</label>
+              <label for="username"><i class="fa-solid fa-user"></i> NOMBRE DE USUARIO</label>
               <div class="input-wrap">
                 <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
                 <input type="text" id="username" name="username" placeholder="Ingresa tu usuario" autocomplete="username" required autofocus>
@@ -516,7 +526,7 @@
             </div>
 
             <div class="field">
-              <label for="password">Contraseña</label>
+              <label for="password"><i class="fa-solid fa-lock"></i> CONTRASEÑA</label>
               <div class="input-wrap">
                 <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required>
@@ -527,13 +537,14 @@
             </div>
 
             <button class="submit-button" type="submit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
               <span>Ingresar a ABIS</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
             </button>
 
             <div class="card-links">
-              <a href="javascript:void(0)" onclick="switchView('register')">Crear una cuenta</a>
-              <a href="javascript:void(0)" onclick="switchView('forgot')">¿Olvidaste tu contraseña?</a>
+              <a href="javascript:void(0)" onclick="switchView('register')"><i class="fa-solid fa-user-plus"></i> Crear una cuenta</a>
+              <a href="javascript:void(0)" onclick="switchView('forgot')"><i class="fa-regular fa-circle-question"></i> ¿Olvidaste tu contraseña?</a>
             </div>
           </form>
         </div>
@@ -598,7 +609,9 @@
           </div>
         </div>
 
-        <p class="footer-note">Uso interno · Policía de Investigaciones de Chile</p>
+        <div class="footer-note">
+          <i class="fa-solid fa-shield-halved"></i> Uso interno – Policía de Investigaciones de Chile
+        </div>
       </div>
 
       <section class="login-visual" aria-hidden="true">
