@@ -726,9 +726,29 @@ def parse_police_report(raw_text):
     data["narrativas"] = narratives
     return data
 
-def build_summary_options(raw_text, entities=None):
+
+def get_user_learned_weights(username):
+    if not username:
+        return {}
+    try:
+        feedback = db.get_summary_feedback_by_user(username, limit=20)
+        if not feedback:
+            return {}
+        term_freq = {}
+        for item in feedback:
+            edited_text = (item.get("resumen_editado") or "").lower()
+            words = set(re.findall(r'\b[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]{3,}\b', edited_text))
+            for w in words:
+                term_freq[w] = term_freq.get(w, 0) + 1
+        return term_freq
+    except Exception:
+        return {}
+
+
+def build_summary_options(raw_text, entities_data=None, username=None):
     """Genera dos opciones de resumen limpias y fluidas para el parte policial,
-       exclusivas para el campo 'Resumen Diligencia' del Word."""
+       exclusivas para el campo 'Resumen Diligencia' del Word. Incorpora aprendizaje continuo
+       basado en las preferencias aprendidas del usuario."""
     meta = parse_police_report(raw_text)
     narratives = meta.get("narrativas", [])
     
@@ -737,31 +757,46 @@ def build_summary_options(raw_text, entities=None):
     for nar in narratives:
         all_sents.extend(split_sentences_safely(nar))
         
-    # 1. SÍNTESIS INTELIGENTE (Opción A - Info más importante, ultra corta)
     full_narrative = " ".join(all_sents)
     hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     hechos_completos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     
+    # Ponderación por aprendizaje de usuario
+    user_weights = get_user_learned_weights(username or session.get("username"))
+
     if full_narrative:
         try:
             doc = _nlp(full_narrative)
             
-            # Opción A: Ultra corta (max 1 oracion, max ~6 líneas = ~320 chars)
-            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=10, limit_sentences=1)]
+            # Opción A: Ultra corta (max 1 oracion)
+            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=15, limit_sentences=5)]
             if tr_sents_a:
-                ordered_a = sorted(tr_sents_a, key=lambda s: full_narrative.find(s))
+                if user_weights:
+                    def sent_score(s):
+                        words = set(re.findall(r'\b[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]{3,}\b', s.lower()))
+                        return sum(user_weights.get(w, 0) for w in words)
+                    tr_sents_a = sorted(tr_sents_a, key=sent_score, reverse=True)
+                
+                selected_a = tr_sents_a[:1]
+                ordered_a = sorted(selected_a, key=lambda s: full_narrative.find(s))
                 hechos_sinteticos = " ".join(ordered_a)
             else:
                 hechos_sinteticos = full_narrative
                 
-            # Truncado estricto si sigue siendo muy largo (para forzar <= 6 líneas visuales)
             if len(hechos_sinteticos) > 320:
                 hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
 
-            # Opción B: Resumen fluido (max 3 oraciones, resume pero no deja original)
-            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=20, limit_sentences=3)]
+            # Opción B: Resumen fluido (max 3 oraciones)
+            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=25, limit_sentences=7)]
             if tr_sents_b:
-                ordered_b = sorted(tr_sents_b, key=lambda s: full_narrative.find(s))
+                if user_weights:
+                    def sent_score(s):
+                        words = set(re.findall(r'\b[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]{3,}\b', s.lower()))
+                        return sum(user_weights.get(w, 0) for w in words)
+                    tr_sents_b = sorted(tr_sents_b, key=sent_score, reverse=True)
+                
+                selected_b = tr_sents_b[:3]
+                ordered_b = sorted(selected_b, key=lambda s: full_narrative.find(s))
                 hechos_completos = " ".join(ordered_b)
             else:
                 hechos_completos = full_narrative
@@ -775,7 +810,6 @@ def build_summary_options(raw_text, entities=None):
                 hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
             hechos_completos = " ".join(all_sents[:3])
     
-    # Devolvemos puramente el relato para no duplicar datos en la tabla del Word
     return {"a": hechos_sinteticos, "b": hechos_completos}
 
 def summarize_text(raw_text, limit_sentences=3):
@@ -1488,10 +1522,19 @@ def select_summary(filename):
             
         texto_editado = request.form.get(f"texto_{i}_{opcion_elegida}") or request.form.get(f"texto_{opcion_elegida}")
         if texto_editado:
+            original_text = opt.get(opcion_elegida, "")
             opt["selected"] = opcion_elegida
             cleaned_text = re.sub(r'</p>|<br\s*/?>', '\n', texto_editado)
             cleaned_text = re.sub(r'<[^>]+>', '', cleaned_text).strip()
             opt[opcion_elegida] = cleaned_text
+            
+            # Aprendizaje adaptativo continuo: registrar feedback de edición
+            username = session.get("username", "")
+            if username and cleaned_text:
+                try:
+                    db.save_summary_feedback(username, None, original_text, cleaned_text)
+                except Exception as e:
+                    print(f"Error guardando feedback de resumen: {e}")
             
     with open(options_path, "w", encoding="utf-8") as f:
         json.dump(summary_options, f, ensure_ascii=False, indent=2)
@@ -1724,7 +1767,12 @@ def configuracion():
             db_users = db.get_all_users()
         except Exception:
             db_users = []
-    return render_template("configuracion.html", user=user, active_page="configuracion", section=section, db_users=db_users)
+    learned_count = 0
+    try:
+        learned_count = db.get_summary_feedback_count(username)
+    except Exception:
+        learned_count = 0
+    return render_template("configuracion.html", user=user, active_page="configuracion", section=section, db_users=db_users, learned_count=learned_count)
 
 
 @app.route("/api/admin/create-user", methods=["POST"])

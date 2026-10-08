@@ -586,3 +586,37 @@ def get_all_docs_by_user(username):
             )
             columns = [desc.name for desc in cur.description]
             return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def save_summary_feedback(username, documento_id, resumen_original, resumen_editado):
+    if not username or not resumen_editado:
+        return None
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO resumenes_feedback (usuario_username, documento_id, resumen_original, resumen_editado) "
+                "VALUES (%s, %s, %s, %s) RETURNING id",
+                (username, documento_id, resumen_original, resumen_editado)
+            )
+            feedback_id = cur.fetchone()[0]
+        conn.commit()
+    return feedback_id
+
+
+def get_summary_feedback_by_user(username, limit=10):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, resumen_original, resumen_editado, creado_en FROM resumenes_feedback "
+                "WHERE usuario_username = %s ORDER BY creado_en DESC LIMIT %s",
+                (username, limit)
+            )
+            columns = [desc.name for desc in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def get_summary_feedback_count(username):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM resumenes_feedback WHERE usuario_username = %s", (username,))
+            return cur.fetchone()[0]
