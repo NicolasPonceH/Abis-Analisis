@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Ingresar - SIAD</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -53,43 +53,130 @@
     padding: 20px;
   }
 
-  /* Columna izquierda: branding */
+  /* Columna izquierda: branding super premium */
   .brand-col {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-    padding: 20px 0;
+    gap: 20px;
+    padding: 44px;
+    background: rgba(2, 18, 44, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 28px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
   }
-  .brand-title {
-    font-size: 52px;
-    font-weight: 900;
-    color: #ffffff;
-    line-height: 1.05;
-    letter-spacing: -1.5px;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+
+  .brand-col::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 40%);
+    pointer-events: none;
   }
-  .brand-subtitle {
-    font-size: 16px;
-    color: rgba(255,255,255,0.7);
-    font-weight: 500;
-    line-height: 1.6;
-    max-width: 340px;
-  }
+
   .brand-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,215,0,0.15);
-    border: 1px solid rgba(255,215,0,0.4);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.5);
     color: #FFD700;
     font-size: 12px;
-    font-weight: 700;
-    padding: 6px 14px;
+    font-weight: 800;
+    padding: 7px 16px;
     border-radius: 999px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
+  }
+
+  .brand-badge .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #10B981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10B981;
+    animation: pulseGlow 2s infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  .brand-title {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .brand-title .text-siad {
+    background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 50%, #94A3B8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  }
+
+  .brand-title .text-pdi {
+    background: linear-gradient(135deg, #FFF5C0 0%, #FFD700 50%, #F59E0B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.4));
+  }
+
+  .brand-subtitle {
+    font-size: 15px;
+    color: rgba(226, 232, 240, 0.85);
+    font-weight: 500;
+    line-height: 1.6;
+    max-width: 360px;
+  }
+
+  .brand-features {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .feature-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #60A5FA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   /* Tarjeta de login */
@@ -397,14 +484,35 @@
   <!-- Layout de página -->
   <div class="page-wrap" style="padding-top:100px;">
 
-    <!-- Columna de branding -->
+    <!-- Columna de branding super premium -->
     <div class="brand-col">
       <div class="brand-badge">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-        Sistema Restringido
+        <span class="pulse-dot"></span>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Sistema Restringido PDI
       </div>
-      <div class="brand-title">SIAD<br>PDI</div>
-      <p class="brand-subtitle">Sistema Inteligente de Análisis Documental — Policía de Investigaciones de Chile</p>
+
+      <div class="brand-title">
+        <span class="text-siad">SIAD</span>
+        <span class="text-pdi">PDI</span>
+      </div>
+
+      <p class="brand-subtitle">Sistema Inteligente de Análisis Documental para la Policía de Investigaciones de Chile</p>
+
+      <div class="brand-features">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <span>Análisis Documental Automatizado</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon" style="background:rgba(255,215,0,0.15); border-color:rgba(255,215,0,0.3); color:#FFD700;">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <span>Validación Segura con Motor ABIS</span>
+        </div>
+      </div>
     </div>
 
     <!-- Formulario -->
