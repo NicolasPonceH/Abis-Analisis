@@ -209,7 +209,16 @@ app.post("/login", async (req, res) => {
     if (authRes.ok) {
       const data = await authRes.json();
       if (data.ok) {
-        const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "8h" });
+        let userRole = "operador";
+        try {
+          const userRes = await pool.query("SELECT rol FROM usuarios WHERE LOWER(username) = LOWER($1)", [username]);
+          if (userRes.rows.length > 0) {
+            userRole = userRes.rows[0].rol;
+          }
+        } catch (dbErr) {
+          console.error("Error al obtener rol:", dbErr);
+        }
+        const token = jwt.sign({ username, rol: userRole }, JWT_SECRET, { expiresIn: "8h" });
         res.cookie("abis_auth", token, { httpOnly: true, maxAge: 8 * 3600 * 1000 });
         return res.redirect("/");
       }
