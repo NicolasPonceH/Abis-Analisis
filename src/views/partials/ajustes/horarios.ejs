@@ -1,244 +1,439 @@
-<h1 class="ajustes-page-title">Horarios y Automatización</h1><p class="ajustes-page-subtitle">Configura los horarios de sincronización y envíos automáticos.</p>
-    <!-- ========================================== -->
-    <!-- TAB 5: AJUSTES & GESTIÓN DE HORARIOS -->
-    <!-- ========================================== -->
-    <div class="ajustes-horarios-container">
+<style>
+  /* Variables locales de tema PDI Dashboard */
+  .pdi-dash {
+    --bg: #EEF3F9;
+    --navy: #062B57;
+    --primary: #155A96;
+    --secondary: #2B7BBB;
+    --gold: #FFD000;
+    --text-main: #082B50;
+    --text-muted: #64748B;
+    --active: #10B981;
+    --border: #DCE5EF;
+  }
+  .ajustes-horarios-container {
+    background: var(--bg, #EEF3F9);
+    padding: 24px;
+    border-radius: 16px;
+  }
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .dash-status-indicator {
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main, #082B50);
+    box-shadow: 0 2px 8px rgba(6,43,87,0.05);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #DCE5EF;
+  }
+  .dash-layout {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+  }
+  .dash-card {
+    background: #FFFFFF;
+    border: 1px solid #DCE5EF;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(6,43,87,0.03);
+    margin-bottom: 20px;
+  }
+  .dash-card-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-muted, #64748B);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Server Status Compact */
+  .server-status-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F8FAFC;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #DCE5EF;
+  }
+  /* Timeline */
+  .timeline-wrapper {
+    overflow-x: auto;
+    padding: 30px 10px;
+    margin: 10px 0;
+  }
+  #time-chips-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: 0;
+  }
+  #time-chips-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #E2E8F0;
+    z-index: 1;
+    transform: translateY(-50%);
+  }
+  .time-chip {
+    position: relative;
+    z-index: 2;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    color: var(--text-main, #082B50) !important;
+    box-shadow: none !important;
+  }
+  .time-chip::before {
+    content: '●';
+    color: var(--primary, #155A96);
+    font-size: 28px;
+    line-height: 0;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px white;
+    margin-bottom: 12px;
+  }
+  .time-chip::after {
+    content: 'Reporte automático';
+    position: absolute;
+    bottom: -22px;
+    font-size: 10px;
+    color: var(--text-muted, #64748B);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .time-chip span {
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: -0.02em;
+  }
+  .time-chip button {
+    position: absolute;
+    top: -15px;
+    right: 15px;
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .time-chip:hover button {
+    opacity: 1;
+  }
+  /* Agregar Horario Compacto */
+  .add-time-compact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F8FAFC;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #DCE5EF;
+  }
+  .add-time-compact input {
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy, #062B57);
+    outline: none;
+  }
+  .btn-gold {
+    background: var(--gold, #FFD000);
+    color: var(--navy, #062B57);
+    font-weight: 800;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255,208,0,0.3);
+    transition: transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-gold:hover { transform: translateY(-2px); }
+  
+  /* Dias */
+  .days-grid {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .day-checkbox-label {
+    flex: 1;
+    margin: 0;
+  }
+  .day-checkbox-label input:checked + span {
+    background: #EFF6FF !important;
+    color: var(--secondary, #2B7BBB) !important;
+    border-color: #BFDBFE !important;
+    font-weight: 800;
+  }
+  .day-checkbox-label span {
+    display: block;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #DCE5EF;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted, #64748B);
+    transition: all 0.2s;
+  }
+  /* Telegram Inner Card */
+  .telegram-inner {
+    background: #F8FAFC;
+    border: 1px solid #DCE5EF;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  /* Miniaturas */
+  .preview-grid a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #F8FAFC;
+    border: 1px solid #DCE5EF;
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--text-main, #082B50);
+    font-weight: 700;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .preview-grid a:hover {
+    border-color: var(--primary, #155A96);
+    background: white;
+    box-shadow: 0 4px 12px rgba(21,90,150,0.1);
+  }
+  .preview-grid a::before {
+    content: 'PREVISUALIZAR';
+    font-size: 9px;
+    color: var(--text-muted, #64748B);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .btn-blue-primary {
+    background: var(--primary, #155A96);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(21,90,150,0.2);
+  }
+  .btn-blue-primary:hover { transform: translateY(-2px); }
+</style>
 
-      <!-- Banner de Estado y Horario Oficial PDI -->
-      <div class="schedule-status-banner">
-        <div class="schedule-status-left">
-          <div class="schedule-clock-icon">
-            <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: var(--pdi-navy);">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-          </div>
+<div class="pdi-dash ajustes-horarios-container">
+  
+  <!-- 1. ENCABEZADO -->
+  <div class="dash-header">
+    <div>
+      <h1 style="color: var(--navy); font-size: 26px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em;">Horarios y Automatización</h1>
+      <p style="color: var(--text-muted); font-size: 15px; margin: 0;">Configura los horarios de sincronización y envíos automáticos.</p>
+    </div>
+    <div class="dash-status-indicator">
+      <span style="color: var(--active);">●</span> Sistema operativo
+    </div>
+  </div>
+
+  <!-- 11. LAYOUT GENERAL -->
+  <div class="dash-layout">
+    
+    <!-- COLUMNA IZQUIERDA -->
+    <div class="left-col">
+      
+      <!-- 2. BARRA DE ESTADO DEL SERVIDOR -->
+      <div class="dash-card server-status-box">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-regular fa-clock" style="font-size: 24px; color: var(--secondary);"></i>
           <div>
-            <div class="schedule-clock-title">Reloj del Servidor & Automatización PDI</div>
-            <div class="schedule-clock-time" id="schedule-clock-display">Zona Horaria: America/Santiago (Chile) &bull;
-              Sincronizando...</div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--navy);">Reloj del Servidor & Automatización PDI</div>
+            <div id="schedule-clock-display" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Zona Horaria: America/Santiago (Chile) &bull; Sincronizando...</div>
           </div>
         </div>
-        <div class="schedule-status-right">
-          <div class="schedule-next-badge" id="schedule-next-badge">
-            <span class="status-dot"></span>
-            <span id="schedule-next-text">Próximo Envío: Calculando...</span>
+        <div style="text-align: right; background: white; padding: 10px 16px; border-radius: 8px; border: 1px solid #DCE5EF;">
+          <div style="font-size: 11px; font-weight: 800; color: var(--active); display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-bottom: 4px;">
+            <span style="display:inline-block; width:8px; height:8px; background:var(--active); border-radius:50%; box-shadow: 0 0 4px var(--active);"></span> PRÓXIMO ENVÍO
+          </div>
+          <div id="schedule-next-badge">
+            <span id="schedule-next-text" style="font-size: 14px; font-weight: 800; color: var(--navy);">Calculando...</span>
           </div>
         </div>
       </div>
 
-      <!-- Grid de Configuración de Horarios y Canal -->
-      <div class="settings-grid">
-
-        <!-- Tarjeta 1: Gestión de Horas y Frecuencia de Envío -->
-        <div class="settings-card">
-          <div class="settings-card-header">
-            <div class="settings-card-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <span>Programación de Horarios de Reporte</span>
-            </div>
-            <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
-              <input type="checkbox" id="schedule-enabled-toggle" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="settings-card-body">
-
-            <!-- Estado del Switch -->
-            <div class="schedule-enabled-alert" id="schedule-enabled-alert">
-              <span id="schedule-enabled-text" style="display:inline-flex; align-items:center; gap:6px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
-              </span>
-            </div>
-
-            <!-- Horarios Configurados Actualmente -->
-            <div class="form-group" style="margin-top: 16px;">
-              <label class="filter-label">Horarios Programados Activos (Formato 24 Horas):</label>
-              <div class="time-chips-container" id="time-chips-container">
-                <!-- Se poblará dinámicamente con chips: 08:30 hrs ×, 19:00 hrs × -->
-              </div>
-            </div>
-
-            <!-- Agregar Nuevo Horario -->
-            <div class="add-time-box">
-              <label class="filter-label" for="input-new-time">Añadir nueva hora de envío:</label>
-              <div class="add-time-row">
-                <input type="time" id="input-new-time" class="form-control" value="12:00">
-                <button type="button" id="btn-add-time" class="btn btn-primary">
-                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  <span>Agregar Hora</span>
-                </button>
-              </div>
-            </div>
-
-
-            <!-- Días de la Semana -->
-            <div class="form-group" style="margin-top: 18px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label class="filter-label" style="margin-bottom:0;">Días de Envío Semanal:</label>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" class="btn-link-action" id="btn-select-weekdays">Lunes a Viernes</button>
-                  <span style="color:#cbd5e1;">&bull;</span>
-                  <button type="button" class="btn-link-action" id="btn-select-all-days">Todos los Días</button>
-                </div>
-              </div>
-              <div class="days-selector-grid">
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked>
-                  <span>Lun</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked>
-                  <span>Mar</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked>
-                  <span>Mié</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked>
-                  <span>Jue</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked>
-                  <span>Vie</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked>
-                  <span>Sáb</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked>
-                  <span>Dom</span></label>
-              </div>
-            </div>
-
-            <!-- Formato del Reporte -->
-            <div class="form-group" style="margin-top: 18px;">
-              <label class="filter-label" for="schedule-report-type">Estructura del Reporte a Despachar:</label>
-              <select id="schedule-report-type" class="form-control">
-                <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)
-                </option>
-                <option value="resumen">Resumen Ejecutivo Compacto (KPIs Rápidos)</option>
-              </select>
-            </div>
-
-            <!-- Botón Guardar Cambios -->
-            <button type="button" id="btn-save-schedule" class="btn btn-primary"
-              style="width: 100%; margin-top: 20px; padding: 12px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                <polyline points="17 21 17 13 7 13 7 21" />
-                <polyline points="7 3 7 8 15 8" />
-              </svg>
-              <span>Guardar Ajustes de Programación</span>
-            </button>
-            <div id="schedule-save-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
-
-          </div>
+      <!-- 3. PANEL DE HORARIOS & 4. AGREGAR HORARIO -->
+      <div class="dash-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div class="dash-card-title" style="margin: 0;"><i class="fa-solid fa-list-check" style="color: var(--secondary);"></i> Programación de Envíos</div>
+          <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
+            <input type="checkbox" id="schedule-enabled-toggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
         </div>
 
-        <!-- Tarjeta 2: Canal de Notificaciones & Prueba Inmediata -->
-        <div class="settings-card">
-          <div class="settings-card-header">
-            <div class="settings-card-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
-                <path d="m22 2-7 20-4-9-9-4Z" />
-                <path d="M22 2 11 13" />
-              </svg>
-              <span>Canal de Notificaciones (Telegram Oficial)</span>
-            </div>
-          </div>
+        <div id="schedule-enabled-alert" style="display: none;"></div>
+        <span id="schedule-enabled-text" style="display: none;"></span>
 
-          <div class="settings-card-body">
-
-
-            <div class="channel-info-box">
-              <div class="channel-info-row">
-                <span class="channel-info-label">Bot Institucional:</span>
-                <span class="channel-info-val" id="telegram-bot-badge">@AbisSystemBot &bull; Enclave Activo</span>
-              </div>
-              <div class="channel-info-row">
-                <span class="channel-info-label">Chat ID Destino:</span>
-                <span class="channel-info-val" id="telegram-chat-id-display">Cargando...</span>
-              </div>
-              <div class="channel-info-row">
-                <span class="channel-info-label">Frecuencia Activa:</span>
-                <span class="channel-info-val" id="schedule-freq-summary">2 envíos al día</span>
-              </div>
-            </div>
-
-            <!-- Sección de Prueba Manual -->
-            <div class="test-dispatch-box" style="margin-top: 20px;">
-
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label for="test-report-modo"
-                  style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); margin-bottom: 6px; display: block;">
-                  Tipo de Reporte a Probar:
-                </label>
-                <select id="test-report-modo" class="form-control form-control-sm"
-                  style="font-size: 0.85rem; padding: 6px;">
-                  <option value="">Automático según el día de hoy (Diario)</option>
-                  <option value="fds">Forzar Reporte de Fin de Semana (4 fotos)</option>
-                </select>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="test-report-adjuntos" checked style="cursor: pointer;">
-                <label for="test-report-adjuntos"
-                  style="font-size: 0.82rem; color: var(--pdi-navy); margin: 0; cursor: pointer;">
-                  Incluir botones de descarga (Word/Excel)
-                </label>
-              </div>
-
-              <button type="button" id="btn-trigger-test-schedule" class="btn btn-telegram" style="width: 100%;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                  <path d="m22 2-7 20-4-9-9-4Z" />
-                  <path d="M22 2 11 13" />
-                </svg>
-                <span>Enviar Reporte de Prueba a Telegram Ahora</span>
-              </button>
-              <div id="schedule-test-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;">
-              </div>
-
-              <!-- Selector de Previsualización de las 4 Capturas Oficiales -->
-              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-light);">
-                <label
-                  style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
-                  <span>Previsualizar las 4 Capturas Institucionales (PNG):</span>
-                </label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                  <a href="/api/reportes/captura-preview?tipo=fds_matriz" target="_blank" rel="noopener"
-                    class="btn btn-secondary btn-sm"
-                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
-                    Foto 1: Matriz FDS
-                  </a>
-                  <a href="/api/reportes/captura-preview?tipo=fds_enrolados" target="_blank" rel="noopener"
-                    class="btn btn-secondary btn-sm"
-                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
-                    Foto 2: Acum. Enrolados
-                  </a>
-                  <a href="/api/reportes/captura-preview?tipo=fds_distribucion" target="_blank" rel="noopener"
-                    class="btn btn-secondary btn-sm"
-                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
-                    Foto 3: Dist. FDS
-                  </a>
-                  <a href="/api/reportes/captura-preview?tipo=fds_registros" target="_blank" rel="noopener"
-                    class="btn btn-secondary btn-sm"
-                    style="font-size: 0.75rem; text-decoration: none; justify-content: center; padding: 5px 8px;">
-                    Foto 4: Acum. Registros
-                  </a>
-                </div>
-              </div>
-            </div>
-
-
-          </div>
+        <div class="timeline-wrapper">
+          <div id="time-chips-container"></div>
         </div>
 
+        <div style="margin-top: 32px;">
+          <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Añadir Nueva Hora</div>
+          <div class="add-time-compact">
+            <input type="time" id="input-new-time" value="12:00">
+            <button type="button" id="btn-add-time" class="btn-gold"><i class="fa-solid fa-plus"></i> Agregar horario</button>
+          </div>
+        </div>
       </div>
+
+      <!-- 5. DÍAS DE ENVÍO -->
+      <div class="dash-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="dash-card-title" style="margin: 0;"><i class="fa-regular fa-calendar-days" style="color: var(--secondary);"></i> Días Activos</div>
+          <div style="display: flex; gap: 12px; font-size: 12px;">
+            <a href="#" id="btn-select-weekdays" style="color: var(--secondary); text-decoration: none; font-weight: 700;">Lunes a Viernes</a>
+            <a href="#" id="btn-select-all-days" style="color: var(--secondary); text-decoration: none; font-weight: 700;">Todos los Días</a>
+          </div>
+        </div>
+        <div class="days-grid">
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked style="display:none;"><span>Lun</span></label>
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked style="display:none;"><span>Mar</span></label>
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked style="display:none;"><span>Mié</span></label>
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked style="display:none;"><span>Jue</span></label>
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked style="display:none;"><span>Vie</span></label>
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked style="display:none;"><span>Sáb</span></label>
+          <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked style="display:none;"><span>Dom</span></label>
+        </div>
+      </div>
+
+      <!-- 6. ESTRUCTURA DEL REPORTE -->
+      <div class="dash-card">
+        <div class="dash-card-title"><i class="fa-solid fa-file-invoice" style="color: var(--secondary);"></i> Estructura del Reporte</div>
+        <select id="schedule-report-type" style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #DCE5EF; font-size: 14px; font-weight: 700; color: var(--navy); outline: none; background: #F8FAFC; cursor: pointer;">
+          <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)</option>
+          <option value="resumen">Resumen Ejecutivo Compacto (KPIs Rápidos)</option>
+        </select>
+      </div>
+
+      <!-- 10. GUARDAR -->
+      <button type="button" id="btn-save-schedule" class="btn-gold" style="width: 100%; justify-content: center; padding: 16px; font-size: 14px; margin-top: 8px;">
+        <i class="fa-solid fa-floppy-disk"></i> GUARDAR AJUSTES DE PROGRAMACIÓN
+      </button>
+      <div id="schedule-save-feedback" style="display: none; margin-top: 12px; font-size: 13px; font-weight: 700; text-align: center;"></div>
+
+    </div>
+
+    <!-- COLUMNA DERECHA -->
+    <div class="right-col">
+      
+      <!-- 7. TELEGRAM -->
+      <div class="dash-card">
+        <div class="dash-card-title"><i class="fa-brands fa-telegram" style="color: #2BA3DD; font-size: 16px;"></i> Canal de Notificaciones</div>
+        <div class="telegram-inner">
+          <div style="font-size: 11px; font-weight: 800; color: var(--active); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <span style="display:inline-block; width:8px; height:8px; background:var(--active); border-radius:50%; box-shadow: 0 0 4px var(--active);"></span> CONEXIÓN ACTIVA
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted); font-weight: 600;">Bot institucional:</span>
+              <span id="telegram-bot-badge" style="font-weight: 800; color: var(--navy);">@AbisSystemBot</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted); font-weight: 600;">Chat destino:</span>
+              <span id="telegram-chat-id-display" style="font-weight: 800; color: var(--navy);">Cargando...</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted); font-weight: 600;">Frecuencia:</span>
+              <span id="schedule-freq-summary" style="font-weight: 800; color: var(--navy);">Calculando...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. REPORTE DE PRUEBA -->
+      <div class="dash-card">
+        <div class="dash-card-title"><i class="fa-solid fa-vial-circle-check" style="color: var(--secondary);"></i> Reporte de Prueba Inmediata</div>
+        
+        <div style="margin-bottom: 16px;">
+          <label for="test-report-modo" style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase;">Tipo de Reporte a Probar</label>
+          <select id="test-report-modo" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #DCE5EF; font-size: 13px; font-weight: 700; color: var(--navy); background: #F8FAFC; outline: none; cursor: pointer;">
+            <option value="">Automático según el día de hoy (Diario)</option>
+            <option value="fds">Forzar Reporte de Fin de Semana (4 fotos)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <input type="checkbox" id="test-report-adjuntos" checked style="width: 16px; height: 16px; cursor: pointer;">
+          <label for="test-report-adjuntos" style="font-size: 13px; font-weight: 700; color: var(--navy); margin: 0; cursor: pointer;">Incluir botones de descarga (Word/Excel)</label>
+        </div>
+
+        <button type="button" id="btn-trigger-test-schedule" class="btn-blue-primary">
+          <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i> Enviar Reporte de Prueba a Telegram Ahora
+        </button>
+        <div id="schedule-test-feedback" style="display: none; margin-top: 12px; font-size: 13px; font-weight: 700; text-align: center;"></div>
+      </div>
+
+      <!-- 9. CAPTURAS -->
+      <div class="dash-card">
+        <div class="dash-card-title"><i class="fa-regular fa-image" style="color: var(--secondary);"></i> Capturas Institucionales</div>
+        <div class="preview-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <a href="/api/reportes/captura-preview?tipo=fds_matriz" target="_blank" rel="noopener">
+            <i class="fa-solid fa-border-all" style="font-size: 24px; color: var(--secondary); margin-bottom: 12px;"></i>
+            Matriz FDS
+          </a>
+          <a href="/api/reportes/captura-preview?tipo=fds_enrolados" target="_blank" rel="noopener">
+            <i class="fa-solid fa-users" style="font-size: 24px; color: var(--secondary); margin-bottom: 12px;"></i>
+            Acum. Enrolados
+          </a>
+          <a href="/api/reportes/captura-preview?tipo=fds_distribucion" target="_blank" rel="noopener">
+            <i class="fa-solid fa-chart-pie" style="font-size: 24px; color: var(--secondary); margin-bottom: 12px;"></i>
+            Dist. FDS
+          </a>
+          <a href="/api/reportes/captura-preview?tipo=fds_registros" target="_blank" rel="noopener">
+            <i class="fa-solid fa-address-card" style="font-size: 24px; color: var(--secondary); margin-bottom: 12px;"></i>
+            Acum. Registros
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
       <!-- Tarjeta: Gestión de Destinatarios y Oficiales de Telegram (Almacenamiento Seguro PostgreSQL) -->
       <div class="table-card" style="margin-top: 24px;" id="card-destinatarios-telegram">
