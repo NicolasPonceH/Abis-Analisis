@@ -1,4 +1,4 @@
-﻿import { state } from './core/state.js';
+import { state } from './core/state.js';
 import { escapeHtml } from './core/utils.js';
 import { bklitDataLabelsPlugin } from './components/charts.js';
 import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportExcel, exportCurrentReportCsv, sendReportToTelegram } from './components/export.js';
@@ -335,9 +335,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // Plugin de etiquetas numÃ©ricas directas y mÃ©tricas visuales estilo amigable y limpio
-
-Chart.register(bklitDataLabelsPlugin);
-
+if (typeof Chart !== 'undefined') {
+  Chart.register(bklitDataLabelsPlugin);
+}
 // Actualiza los badges en las cabeceras de las tarjetas de grÃ¡ficos con los nÃºmeros relacionados
 
 
