@@ -215,13 +215,24 @@
     text-align: center;
   }
   .links a {
-    color: #0047AB;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    color: #002855;
+    background: #f1f5f9;
+    border-radius: 10px;
     text-decoration: none;
     font-size: 13.5px;
-    font-weight: 600;
-    transition: color 0.2s;
+    font-weight: 700;
+    transition: all 0.2s;
+    border: 1px solid #e2e8f0;
   }
-  .links a:hover { color: #002855; text-decoration: underline; }
+  .links a:hover { 
+    background: #e2e8f0; 
+    color: #000000;
+  }
 
   .footer-note {
     margin-top: 18px;
