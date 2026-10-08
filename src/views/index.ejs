@@ -26,11 +26,32 @@
 <script>
   (function() {
     try {
-      const fs = localStorage.getItem('pref-fontsize') || '14px';
-      document.documentElement.style.fontSize = fs;
-      if (localStorage.getItem('pref-contrast') === 'true') document.documentElement.classList.add('high-contrast');
-      if (localStorage.getItem('pref-theme') === 'dark') document.documentElement.classList.add('dark-theme');
-      if (localStorage.getItem('pref-animations') === 'true') document.documentElement.classList.add('reduce-animations');
+      // 1. Acento Institucional
+      const accent = localStorage.getItem('pref-accent') || '#FFD100';
+      document.documentElement.style.setProperty('--pdi-gold', accent);
+
+      // 2. Estética de Cristal
+      const glass = localStorage.getItem('pref-glass') !== 'false';
+      if (!glass) {
+        const style = document.createElement('style');
+        style.id = 'style-no-glass';
+        style.innerHTML = `
+          * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+          .settings-card-header, .header-institutional { background: var(--pdi-navy) !important; }
+        `;
+        document.head.appendChild(style);
+      }
+
+      // 3. Transiciones Fluidas
+      const transitions = localStorage.getItem('pref-transitions') !== 'false';
+      if (!transitions) {
+        const style = document.createElement('style');
+        style.id = 'style-no-transitions';
+        style.innerHTML = `
+          * { transition: none !important; animation: none !important; }
+        `;
+        document.head.appendChild(style);
+      }
     } catch(e) {}
   })();
 </script>
