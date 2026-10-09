@@ -699,13 +699,7 @@
           </div>
 
           <div class="flex items-center gap-3">
-            {% if summary_options %}
-            <button type="submit" form="summary_form"
-              class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg border-b-2 border-amber-600">
-              <span class="material-symbols-outlined text-[18px]">save</span>
-              <span>Guardar Selección</span>
-            </button>
-            {% endif %}
+            <!-- Botón Guardar Selección movido sobre las opciones -->
 
             {% if extracted_text %}
             <form action="{{ url_for('summarize', filename=viewing) }}" method="post" class="js-processing-form m-0">
@@ -762,6 +756,15 @@
         {% endif %}
 
         <form action="{{ url_for('select_summary', filename=viewing) }}" method="post" id="summary_form">
+        
+        <div class="flex justify-center lg:justify-end mb-6 w-full">
+          <button type="submit"
+            class="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-b from-[#ffd100] to-[#f5b800] hover:from-[#ffe566] hover:to-[#ffd100] text-[#00234c] font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:shadow-xl border-b-4 border-amber-600 active:scale-95 transform hover:-translate-y-1 ring-4 ring-amber-400/20">
+            <span class="material-symbols-outlined text-[22px] font-black">save</span>
+            <span class="drop-shadow-sm">Guardar Selección</span>
+          </button>
+        </div>
+
         <div class="flex flex-col gap-4 relative">
           {% for opt in summary_options %}
             {% set doc_data = docs_to_render[loop.index0] if docs_to_render|length > loop.index0 else None %}
