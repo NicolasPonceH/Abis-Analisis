@@ -363,18 +363,18 @@ body.splash-disabled #pdi-splash-overlay,
   <span class="text-[23px] font-black text-white ml-2 hidden sm:inline-block drop-shadow-md tracking-tight">Análisis Documental</span>
 </a>
 </div>
-<nav class="hidden md:flex items-center gap-2 h-full py-2">
+<nav class="hidden md:flex items-center gap-3 h-full py-2">
 
-<a class="{{ 'bg-white/15 text-white font-bold shadow-inner' if active_page == 'procesar' or not active_page else 'text-slate-300 hover:bg-white/10 hover:text-white' }} px-4 py-2 rounded-lg text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('index') }}">
-  <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+<a class="{{ 'bg-white/20 text-white font-extrabold shadow-inner border border-white/20' if active_page == 'procesar' or not active_page else 'text-slate-200 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2.5 rounded-xl text-base tracking-wide uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('index') }}">
+  <span class="material-symbols-outlined text-[22px]">document_scanner</span>
   Procesamiento OCR
 </a>
-<a class="{{ 'bg-white/15 text-white font-bold shadow-inner' if active_page == 'historial' else 'text-slate-300 hover:bg-white/10 hover:text-white' }} px-4 py-2 rounded-lg text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('historial') }}">
-  <span class="material-symbols-outlined text-[18px]">history</span>
+<a class="{{ 'bg-white/20 text-white font-extrabold shadow-inner border border-white/20' if active_page == 'historial' else 'text-slate-200 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2.5 rounded-xl text-base tracking-wide uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('historial') }}">
+  <span class="material-symbols-outlined text-[22px]">history</span>
   Historial
 </a>
-<a class="{{ 'bg-white/15 text-white font-bold shadow-inner' if active_page == 'estadisticas' else 'text-slate-300 hover:bg-white/10 hover:text-white' }} px-4 py-2 rounded-lg text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('estadisticas') }}">
-  <span class="material-symbols-outlined text-[18px]">bar_chart</span>
+<a class="{{ 'bg-white/20 text-white font-extrabold shadow-inner border border-white/20' if active_page == 'estadisticas' else 'text-slate-200 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2.5 rounded-xl text-base tracking-wide uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('estadisticas') }}">
+  <span class="material-symbols-outlined text-[22px]">bar_chart</span>
   Estadísticas
 </a>
 </nav>
