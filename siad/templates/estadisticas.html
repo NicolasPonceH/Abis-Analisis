@@ -185,44 +185,47 @@
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
   
   <!-- Line Chart -->
-  <div id="cardTendencias" class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col relative overflow-hidden">
-    <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex justify-between items-start z-10 border-b border-blue-900/50">
+  <div id="cardTendencias" class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col relative overflow-hidden transition-all">
+    <div class="bg-[#00234c] border-b-4 border-[#ffd100] px-6 py-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10">
       <div>
-        <div class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-1">HISTÓRICO MULTIVARIABLE</div>
-        <h3 class="text-xl font-bold text-white leading-tight">Tendencias Históricas de<br>Procesamiento Documental</h3>
-        <p class="text-[11px] text-blue-200 mt-2 max-w-[320px] leading-relaxed">Evolución en 12 meses correlacionando entidades detectadas en partes policiales.</p>
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-900/60 border border-blue-400/30 text-[10px] font-bold text-[#ffd100] uppercase tracking-widest mb-1.5">
+          <span class="material-symbols-outlined text-[12px]">show_chart</span> HISTÓRICO MULTIVARIABLE
+        </div>
+        <h3 class="text-xl font-black text-white leading-tight">Tendencias Históricas de Procesamiento Documental</h3>
+        <p class="text-xs text-slate-300 mt-1 max-w-md leading-relaxed">Evolución periódica correlacionando entidades detectadas en partes policiales.</p>
       </div>
-      <div class="flex flex-col items-end gap-3">
-        <div class="bg-white rounded-lg px-5 py-2.5 flex items-center gap-5 text-[13px] font-extrabold text-blue-900 shadow-md">
-          <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-[#0047AB]"></span>Vehículos</div>
-          <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-red-500"></span>Armamento</div>
-          <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-yellow-500"></span>Sustancias</div>
+      <div class="flex flex-col items-end gap-3 w-full md:w-auto">
+        <div class="bg-slate-900/40 backdrop-blur-md rounded-xl p-1.5 flex flex-wrap items-center gap-2 text-xs font-bold text-white border border-white/10 shadow-inner">
+          <span class="px-2.5 py-1 rounded-lg bg-[#0047AB]/20 text-blue-200 border border-[#0047AB]/40 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#0047AB]"></span>Vehículos</span>
+          <span class="px-2.5 py-1 rounded-lg bg-yellow-500/20 text-yellow-200 border border-yellow-500/40 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>Sustancias</span>
+          <span class="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-200 border border-red-500/40 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>Armamento</span>
+          <span class="px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-200 border border-purple-500/40 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>Personas</span>
         </div>
         <div class="flex items-center gap-2">
           <!-- Dropdown Agrupación -->
           <div class="relative">
-            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border-0 rounded-lg text-[11px] font-bold tracking-wide uppercase transition-colors shadow-md">
-                <span class="material-symbols-outlined text-[14px]">bar_chart</span> 
+            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-md">
+                <span class="material-symbols-outlined text-[16px] text-[#ffd100]">bar_chart</span> 
                 {% if agrupacion_actual == 'ano' %}Anual
                 {% elif agrupacion_actual == 'semana' %}Semanal
                 {% elif agrupacion_actual == 'mes' %}Mensual
                 {% else %}Diaria{% endif %}
-                <span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
             </button>
-            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg py-1 z-50 border border-slate-100 text-left">
+            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white rounded-xl shadow-xl py-1 z-50 border border-slate-100 text-left">
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'semana' }}">Semanal</a>
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'mes' }}">Mensual</a>
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'ano' }}">Anual</a>
             </div>
           </div>
-          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border-0 rounded-lg text-[11px] font-bold tracking-wide uppercase transition-colors shadow-md">
-            <span class="material-symbols-outlined text-[14px]">download</span> Descargar PNG
+          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="flex items-center gap-1.5 px-3.5 py-2 bg-[#ffd100] text-[#00234c] hover:bg-yellow-400 border-0 rounded-xl text-xs font-black tracking-wide uppercase transition-all shadow-md active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">download</span> Exportar PNG
           </button>
         </div>
       </div>
     </div>
-    <div class="w-full relative h-[320px] p-6 bg-white dark:bg-slate-900/50 flex flex-col justify-center">
+    <div class="w-full relative h-[340px] p-6 bg-white dark:bg-slate-900/50 flex flex-col justify-center">
       {% if stats and stats.tendencias and stats.tendencias|length > 0 %}
       <canvas id="chartTendencias"></canvas>
       {% else %}
@@ -233,22 +236,24 @@
       </div>
       {% endif %}
     </div>
-    <div class="flex justify-between items-center mt-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-4 uppercase">
-      <span>Fuente: Base de Datos SIAD</span>
-      <span>Actualización en tiempo real</span>
+    <div class="flex justify-between items-center px-6 py-3.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 uppercase bg-slate-50/50 dark:bg-slate-900/50">
+      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-600"></span> Fuente: Base de Datos SIAD</span>
+      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Actualización en tiempo real</span>
     </div>
   </div>
 
   <!-- Donut Chart -->
-  <div id="cardDistribucion" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col relative overflow-hidden">
-    <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex justify-between items-start z-10 w-full border-b border-blue-900/50">
+  <div id="cardDistribucion" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col relative overflow-hidden transition-all">
+    <div class="bg-[#00234c] border-b-4 border-[#ffd100] px-6 py-5 flex justify-between items-center z-10 w-full">
       <div>
-        <div class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mb-1">DESGLOSE CONSOLIDADO</div>
-        <h3 class="text-lg font-bold text-white leading-tight">Distribución de Entidades</h3>
-        <p class="text-[11px] text-blue-200 mt-2 max-w-[200px] leading-relaxed">Composición relativa de hallazgos verificados en el periodo.</p>
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-900/60 border border-blue-400/30 text-[10px] font-bold text-[#ffd100] uppercase tracking-widest mb-1.5">
+          <span class="material-symbols-outlined text-[12px]">pie_chart</span> DESGLOSE CONSOLIDADO
+        </div>
+        <h3 class="text-lg font-black text-white leading-tight">Distribución de Entidades</h3>
+        <p class="text-xs text-slate-300 mt-1 max-w-[200px] leading-relaxed">Composición relativa de hallazgos en el periodo.</p>
       </div>
-      <button onclick="descargarGrafico('cardDistribucion', 'Distribucion_Entidades.png')" class="flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 border-0 rounded-lg text-[11px] font-bold tracking-wide uppercase transition-colors shrink-0 shadow-md">
-        <span class="material-symbols-outlined text-[14px]">download</span> Descargar PNG
+      <button onclick="descargarGrafico('cardDistribucion', 'Distribucion_Entidades.png')" class="flex items-center gap-1.5 px-3.5 py-2 bg-[#ffd100] text-[#00234c] hover:bg-yellow-400 border-0 rounded-xl text-xs font-black tracking-wide uppercase transition-all shrink-0 shadow-md active:scale-95">
+        <span class="material-symbols-outlined text-[16px]">download</span> PNG
       </button>
     </div>
     
@@ -533,26 +538,45 @@
   Chart.defaults.color = "#64748b"; // slate-500
 
   // Datos dinámicos desde el backend
-  const tendenciasData = JSON.parse(document.getElementById("tendencias-data").textContent);
+  const rawTendencias = JSON.parse(document.getElementById("tendencias-data").textContent);
+
+  // Trimear meses iniciales sin datos (donde la suma de todas las entidades sea 0)
+  let firstNonZeroIndex = rawTendencias.findIndex(d => 
+    ((d.vehiculos || 0) + (d.drogas || 0) + (d.armas || 0) + (d.personas || 0)) > 0
+  );
+
+  let tendenciasData = rawTendencias;
+  if (firstNonZeroIndex > 0) {
+    const startIndex = Math.max(0, firstNonZeroIndex - 1);
+    tendenciasData = rawTendencias.slice(startIndex);
+  } else if (firstNonZeroIndex === -1 && rawTendencias.length > 0) {
+    tendenciasData = rawTendencias.slice(-1);
+  }
+
   const labelsMeses = tendenciasData.length > 0 ? tendenciasData.map(d => d.label) : ["No hay datos"];
-  const dataVehiculos = tendenciasData.map(d => d.vehiculos);
-  const dataSustancias = tendenciasData.map(d => d.drogas);
-  const dataArmamento = tendenciasData.map(d => d.armas);
+  const dataVehiculos = tendenciasData.map(d => d.vehiculos || 0);
+  const dataSustancias = tendenciasData.map(d => d.drogas || 0);
+  const dataArmamento = tendenciasData.map(d => d.armas || 0);
+  const dataPersonas = tendenciasData.map(d => d.personas || 0);
   
   const ctxTendencias = document.getElementById("chartTendencias").getContext("2d");
   
   // Crear gradientes para el efecto "Shadcn / bklit-ui"
   const gradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.2)');
+  gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.25)');
   gradientVehiculos.addColorStop(1, 'rgba(0, 71, 171, 0)');
   
   const gradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.1)');
+  gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.2)');
   gradientSustancias.addColorStop(1, 'rgba(234, 179, 8, 0)');
 
   const gradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
+  gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
   gradientArmamento.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+  const gradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 400);
+  gradientPersonas.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
+  gradientPersonas.addColorStop(1, 'rgba(168, 85, 247, 0)');
 
   const agrupacionActual = "{{ agrupacion_actual or 'dia' }}";
   let chartType = "bar";
@@ -575,11 +599,12 @@
           data: dataVehiculos,
           backgroundColor: isArea ? gradientVehiculos : "#0047AB",
           borderColor: isLine ? "#0047AB" : "transparent",
-          borderWidth: isLine ? 2 : 0,
-          borderRadius: isLine ? 0 : 4,
+          borderWidth: isLine ? 2.5 : 0,
+          borderRadius: isLine ? 0 : 6,
           fill: isArea,
-          tension: 0,
-          pointRadius: isLine ? 3 : 0,
+          tension: 0.3,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: 6,
           pointBackgroundColor: "#0047AB"
         },
         {
@@ -587,11 +612,12 @@
           data: dataSustancias,
           backgroundColor: isArea ? gradientSustancias : "#eab308",
           borderColor: isLine ? "#eab308" : "transparent",
-          borderWidth: isLine ? 2 : 0,
-          borderRadius: isLine ? 0 : 4,
+          borderWidth: isLine ? 2.5 : 0,
+          borderRadius: isLine ? 0 : 6,
           fill: isArea,
-          tension: 0,
-          pointRadius: isLine ? 3 : 0,
+          tension: 0.3,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: 6,
           pointBackgroundColor: "#eab308"
         },
         {
@@ -599,23 +625,25 @@
           data: dataArmamento,
           backgroundColor: isArea ? gradientArmamento : "#ef4444",
           borderColor: isLine ? "#ef4444" : "transparent",
-          borderWidth: isLine ? 2 : 0,
-          borderRadius: isLine ? 0 : 4,
+          borderWidth: isLine ? 2.5 : 0,
+          borderRadius: isLine ? 0 : 6,
           fill: isArea,
-          tension: 0,
-          pointRadius: isLine ? 3 : 0,
+          tension: 0.3,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: 6,
           pointBackgroundColor: "#ef4444"
         },
         {
           label: "Personas",
-          data: tendenciasData.map(d => d.personas || 0),
-          backgroundColor: isArea ? "rgba(168, 85, 247, 0.1)" : "#a855f7",
+          data: dataPersonas,
+          backgroundColor: isArea ? gradientPersonas : "#a855f7",
           borderColor: isLine ? "#a855f7" : "transparent",
-          borderWidth: isLine ? 2 : 0,
-          borderRadius: isLine ? 0 : 4,
+          borderWidth: isLine ? 2.5 : 0,
+          borderRadius: isLine ? 0 : 6,
           fill: isArea,
-          tension: 0,
-          pointRadius: isLine ? 3 : 0,
+          tension: 0.3,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: 6,
           pointBackgroundColor: "#a855f7"
         }
       ]
