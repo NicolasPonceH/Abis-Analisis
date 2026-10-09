@@ -642,30 +642,16 @@
       <div
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
         <div
-          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-4 py-3 flex items-center justify-between text-white shadow-sm flex-wrap gap-2">
-          <div class="flex items-center gap-2.5">
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center justify-between text-white shadow-sm">
+          <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
               <span class="material-symbols-outlined text-[18px]">document_scanner</span>
             </div>
             <span class="text-xs font-black uppercase tracking-wider text-white">Documento Original (PDF)</span>
           </div>
-
-          <!-- Controles Zoom PDF -->
-          <div class="flex items-center gap-1 bg-white/10 p-1 rounded-lg border border-white/20">
-            <button type="button" onclick="cambiarZoomPdf(-15)" title="Disminuir zoom PDF"
-              class="w-6 h-6 rounded flex items-center justify-center text-white hover:bg-white/20 font-black text-xs transition-colors">
-              <span class="material-symbols-outlined text-[14px]">remove</span>
-            </button>
-            <span id="pdf-zoom-level" onclick="resetearZoomPdf()" title="Restablecer a 100%"
-              class="text-[10px] font-black text-[#ffd100] cursor-pointer hover:underline px-1 select-none">100%</span>
-            <button type="button" onclick="cambiarZoomPdf(15)" title="Aumentar zoom PDF"
-              class="w-6 h-6 rounded flex items-center justify-center text-white hover:bg-white/20 font-black text-xs transition-colors">
-              <span class="material-symbols-outlined text-[14px]">add</span>
-            </button>
-            <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="w-6 h-6 rounded flex items-center justify-center text-white hover:text-[#ffd100] hover:bg-white/20 transition-colors ml-0.5" title="Abrir en pestaña nueva">
-              <span class="material-symbols-outlined text-[14px]">open_in_new</span>
-            </a>
-          </div>
+          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10" title="Abrir en pestaña nueva">
+            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+          </a>
         </div>
         <div class="overflow-auto custom-scrollbar relative w-full bg-slate-800" style="height: 65vh;">
           <iframe id="pdf-viewer-iframe" src="{{ url_for('serve_upload', filename=viewing) }}#toolbar=0&navpanes=0&view=FitH" class="w-full h-full border-0 transition-transform duration-200"></iframe>
@@ -1694,32 +1680,7 @@
               }
           }
       });
-  let currentPdfZoom = 100;
-  function cambiarZoomPdf(delta) {
-      currentPdfZoom = Math.min(250, Math.max(50, currentPdfZoom + delta));
-      const iframe = document.getElementById('pdf-viewer-iframe');
-      const zoomLabel = document.getElementById('pdf-zoom-level');
-      if (iframe) {
-          let rawUrl = iframe.getAttribute('data-raw-src');
-          if (!rawUrl) {
-              rawUrl = iframe.src.split('#')[0];
-              iframe.setAttribute('data-raw-src', rawUrl);
-          }
-          iframe.src = `${rawUrl}#toolbar=0&navpanes=0&zoom=${currentPdfZoom}`;
-          const scaleVal = currentPdfZoom / 100;
-          iframe.style.transform = `scale(${scaleVal})`;
-          iframe.style.transformOrigin = '0 0';
-          iframe.style.width = `${100 / scaleVal}%`;
-          iframe.style.height = `${100 / scaleVal}%`;
-      }
-      if (zoomLabel) {
-          zoomLabel.innerText = `${currentPdfZoom}%`;
-      }
-  }
-  function resetearZoomPdf() {
-      currentPdfZoom = 100;
-      cambiarZoomPdf(0);
-  }
+
 
   let currentOcrFontSize = 12;
   function cambiarTamanoTextoOcr(delta) {
