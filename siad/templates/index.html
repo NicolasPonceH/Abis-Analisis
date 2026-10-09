@@ -636,24 +636,40 @@
   <div class="flex flex-col lg:flex-row gap-5 items-stretch mt-2" id="split-container">
 
     <!-- 3. Panel Izquierdo (Documento Original y OCR) -->
-    <div class="flex flex-col gap-6 w-full lg:w-[20%] flex-shrink-0" id="split-left">
+    <div class="flex flex-col gap-6 w-full lg:w-[32%] flex-shrink-0" id="split-left">
 
       <!-- Visor Documento Original -->
       <div
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
         <div
-          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center justify-between text-white shadow-sm">
-          <div class="flex items-center gap-3">
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-4 py-3 flex items-center justify-between text-white shadow-sm flex-wrap gap-2">
+          <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
               <span class="material-symbols-outlined text-[18px]">document_scanner</span>
             </div>
             <span class="text-xs font-black uppercase tracking-wider text-white">Documento Original (PDF)</span>
           </div>
-          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10" title="Abrir en pestaña nueva">
-            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
-          </a>
+
+          <!-- Controles Zoom PDF -->
+          <div class="flex items-center gap-1 bg-white/10 p-1 rounded-lg border border-white/20">
+            <button type="button" onclick="cambiarZoomPdf(-15)" title="Disminuir zoom PDF"
+              class="w-6 h-6 rounded flex items-center justify-center text-white hover:bg-white/20 font-black text-xs transition-colors">
+              <span class="material-symbols-outlined text-[14px]">remove</span>
+            </button>
+            <span id="pdf-zoom-level" onclick="resetearZoomPdf()" title="Restablecer a 100%"
+              class="text-[10px] font-black text-[#ffd100] cursor-pointer hover:underline px-1 select-none">100%</span>
+            <button type="button" onclick="cambiarZoomPdf(15)" title="Aumentar zoom PDF"
+              class="w-6 h-6 rounded flex items-center justify-center text-white hover:bg-white/20 font-black text-xs transition-colors">
+              <span class="material-symbols-outlined text-[14px]">add</span>
+            </button>
+            <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="w-6 h-6 rounded flex items-center justify-center text-white hover:text-[#ffd100] hover:bg-white/20 transition-colors ml-0.5" title="Abrir en pestaña nueva">
+              <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+            </a>
+          </div>
         </div>
-        <iframe src="{{ url_for('serve_upload', filename=viewing) }}#toolbar=0&navpanes=0&view=FitH" class="w-full h-[60vh] border-0"></iframe>
+        <div class="overflow-auto custom-scrollbar relative w-full bg-slate-800" style="height: 65vh;">
+          <iframe id="pdf-viewer-iframe" src="{{ url_for('serve_upload', filename=viewing) }}#toolbar=0&navpanes=0&view=FitH" class="w-full h-full border-0 transition-transform duration-200"></iframe>
+        </div>
         <div
           class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
           <span class="truncate max-w-[300px]">{{ viewing }}</span>
@@ -677,6 +693,13 @@
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
+            <!-- Controles Aumento de Texto OCR -->
+            <div class="flex items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/20">
+              <button type="button" onclick="cambiarTamanoTextoOcr(-1)" title="Disminuir tamaño de texto"
+                class="px-1.5 py-0.5 text-white hover:bg-white/20 rounded font-black text-[11px] transition-colors">A-</button>
+              <button type="button" onclick="cambiarTamanoTextoOcr(1)" title="Aumentar tamaño de texto"
+                class="px-1.5 py-0.5 text-[#ffd100] hover:bg-white/20 rounded font-black text-[11px] transition-colors">A+</button>
+            </div>
             <form action="{{ url_for('extract', filename=viewing) }}" method="post"
               class="js-processing-form m-0 hidden sm:block">
               <button type="submit" title="{{ 'Reextraer' if extracted_text else 'Extraer' }}"
@@ -1678,8 +1701,35 @@
               }
           }
       });
+  let currentPdfZoom = 100;
+  function cambiarZoomPdf(delta) {
+      currentPdfZoom = Math.min(220, Math.max(70, currentPdfZoom + delta));
+      const iframe = document.getElementById('pdf-viewer-iframe');
+      const zoomLabel = document.getElementById('pdf-zoom-level');
+      if (iframe) {
+          iframe.style.zoom = `${currentPdfZoom}%`;
+          iframe.style.transform = `scale(${currentPdfZoom / 100})`;
+          iframe.style.transformOrigin = 'top left';
+          iframe.style.width = `${(100 * 100) / currentPdfZoom}%`;
+          iframe.style.height = `${(100 * 100) / currentPdfZoom}%`;
+      }
+      if (zoomLabel) {
+          zoomLabel.innerText = `${currentPdfZoom}%`;
+      }
+  }
+  function resetearZoomPdf() {
+      currentPdfZoom = 100;
+      cambiarZoomPdf(0);
   }
 
+  let currentOcrFontSize = 12;
+  function cambiarTamanoTextoOcr(delta) {
+      currentOcrFontSize = Math.min(24, Math.max(10, currentOcrFontSize + delta));
+      const container = document.getElementById('ocr-raw-content');
+      if (container) {
+          container.style.fontSize = `${currentOcrFontSize}px`;
+      }
+  }
 
 </script>
 
