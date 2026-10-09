@@ -1171,14 +1171,14 @@
 
 <!-- Modal Pegar Texto -->
 <dialog id="pasteModal"
-  class="p-0 rounded-3xl shadow-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/60 backdrop:backdrop-blur-md w-full max-w-2xl overflow-hidden m-auto">
+  class="p-0 rounded-3xl shadow-2xl border-4 border-[#00234c] bg-white dark:bg-slate-900 backdrop:bg-slate-900/60 backdrop:backdrop-blur-md w-full max-w-2xl overflow-hidden m-auto">
   <form action="{{ url_for('upload_pasted_text') }}" method="post" class="flex flex-col h-full m-0 js-processing-form">
     
     <!-- Cabecera Institucional PDI (Azul Marino + Franja Amarilla + Texto Blanco) -->
-    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-5 flex justify-between items-center text-white shadow-sm">
+    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-5 flex justify-between items-center text-white shadow-md">
       <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
-          <span class="material-symbols-outlined text-[24px]">content_paste</span>
+        <div class="w-11 h-11 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border-2 border-amber-400">
+          <span class="material-symbols-outlined text-[26px]">content_paste</span>
         </div>
         <div>
           <h3 class="font-black text-xl text-white leading-tight flex items-center gap-2">
@@ -1188,48 +1188,55 @@
         </div>
       </div>
       <button type="button" onclick="document.getElementById('pasteModal').close()"
-        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex items-center justify-center font-black">
+        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex items-center justify-center font-black border border-white/20 hover:scale-105">
         <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </div>
 
     <!-- Cuerpo del Modal -->
-    <div class="p-6 flex flex-col gap-5 max-h-[75vh] overflow-y-auto">
+    <div class="p-6 flex flex-col gap-5 max-h-[75vh] overflow-y-auto bg-slate-50/50 dark:bg-slate-950">
       
       <!-- Bloque Título General -->
-      <div class="bg-slate-50 dark:bg-slate-800/60 p-4.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex flex-col gap-2 shadow-sm">
-        <label class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px] text-[#4d82bc]">topic</span> Título General del Expediente (Opcional)
+      <div class="bg-gradient-to-r from-blue-50/90 to-amber-50/50 dark:from-slate-800 dark:to-slate-800/80 p-5 rounded-2xl border-2 border-blue-200 dark:border-slate-700 flex flex-col gap-2.5 shadow-md">
+        <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-[#00234c] text-[#ffd100] flex items-center justify-center font-black shadow-sm shrink-0">
+            <span class="material-symbols-outlined text-[15px]">topic</span>
+          </span>
+          Título General del Expediente (Opcional)
         </label>
-        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Nombre identificador con el que se agruparán los mensajes ingresados.</p>
+        <p class="text-[11px] text-slate-600 dark:text-slate-400 font-bold">Nombre identificador con el que se agruparán los mensajes ingresados.</p>
         <input type="text" name="titulo_general" maxlength="60"
-          class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:ring-4 focus:ring-[#4d82bc]/15 transition-all shadow-sm placeholder:text-slate-400 placeholder:font-normal"
+          class="w-full bg-white dark:bg-slate-900 border-2 border-blue-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400 placeholder:font-normal"
           placeholder="Ej: Reportes Operativos WhatsApp - BICRIM Arica">
       </div>
 
       <!-- Contenedor de Mensajes -->
-      <div id="textAreasContainer" class="flex flex-col gap-4">
+      <div id="textAreasContainer" class="flex flex-col gap-5">
         <!-- Primer Mensaje -->
-        <div class="report-block relative bg-slate-50/90 dark:bg-slate-800/50 p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700/80 hover:border-[#4d82bc]/60 transition-all flex flex-col gap-3 shadow-sm">
-          <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-700 pb-2.5">
-            <span class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-[#00234c] text-[#ffd100] text-[11px] font-black flex items-center justify-center">1</span>
+        <div class="report-block bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4">
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 py-3 -mx-5 -mt-5 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
+            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] text-xs font-black flex items-center justify-center shadow-inner">1</span>
               Mensaje Principal #1
             </span>
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">Texto Base</span>
+            <span class="text-[10px] font-black uppercase tracking-wider bg-[#ffd100] text-[#00234c] px-3 py-1 rounded-lg border border-amber-400 shadow-sm">Texto Base</span>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Sub-Título o Unidad de Origen (Opcional)</label>
+            <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
+            </label>
             <input type="text" name="pasted_title" maxlength="60"
-              class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:ring-4 focus:ring-[#4d82bc]/15 transition-all shadow-sm placeholder:text-slate-400"
+              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400"
               placeholder="Sub-Título (Ej: Minuta BICRIM Arica)">
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Contenido del Mensaje</label>
+            <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-blue-600">edit_note</span> Contenido del Mensaje
+            </label>
             <textarea name="pasted_text" rows="5"
-              class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:ring-4 focus:ring-[#4d82bc]/15 transition-all resize-y shadow-inner placeholder:text-slate-400"
+              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-semibold"
               placeholder="Pega el texto del mensaje o acta policial aquí..."></textarea>
           </div>
         </div>
@@ -1237,25 +1244,25 @@
 
       <!-- Botón Agregar Otro Mensaje -->
       <button type="button" onclick="addTextArea()"
-        class="w-full py-3 rounded-2xl border-2 border-dashed border-[#4d82bc]/60 hover:border-[#4d82bc] bg-blue-50/50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-800 text-[#00234c] dark:text-blue-300 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md active:scale-[0.99]">
-        <span class="material-symbols-outlined text-[18px] text-[#4d82bc]">add_circle</span>
+        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white border-2 border-[#ffd100] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+        <span class="material-symbols-outlined text-[20px] text-[#ffd100]">add_circle</span>
         <span>Agregar Otro Mensaje al Lote</span>
       </button>
 
     </div>
 
     <!-- Footer del Modal -->
-    <div class="p-4 px-6 border-t-2 border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/80 dark:bg-slate-900/80">
-      <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-[16px] text-amber-500">info</span> Se aplicará OCR y extracción NER a todos los bloques ingresados
+    <div class="p-4 px-6 border-t-2 border-blue-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-slate-100 via-blue-50/60 to-slate-100 dark:from-slate-900 dark:to-slate-800 shadow-inner">
+      <span class="text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[18px] text-amber-600">info</span> Se aplicará OCR y extracción NER a todos los bloques ingresados
       </span>
       <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
         <button type="button" onclick="document.getElementById('pasteModal').close()"
-          class="px-4 py-2.5 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all">
+          class="px-4 py-2.5 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-300 dark:border-slate-700">
           Cancelar
         </button>
         <button type="submit"
-          class="bg-[#00234c] hover:bg-[#003366] text-white text-xs font-black uppercase tracking-wider px-6 py-2.5 rounded-xl border-b-2 border-[#ffd100] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white text-xs font-black uppercase tracking-wider px-7 py-3 rounded-xl border-b-4 border-[#ffd100] shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
           <span class="material-symbols-outlined text-[18px] text-[#ffd100]">bolt</span>
           <span class="js-btn-label">Procesar Texto Directo</span>
         </button>
@@ -1304,24 +1311,28 @@
     const container = document.getElementById('textAreasContainer');
     const count = container.querySelectorAll('.report-block').length + 1;
     const div = document.createElement('div');
-    div.className = 'report-block relative bg-slate-50/90 dark:bg-slate-800/50 p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700/80 hover:border-[#4d82bc]/60 transition-all flex flex-col gap-3 shadow-sm anim-in mt-2';
+    div.className = 'report-block bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4 anim-in mt-2';
     div.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-700 pb-2.5">
-          <span class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg bg-[#00234c] text-[#ffd100] text-[11px] font-black flex items-center justify-center">${count}</span>
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 py-3 -mx-5 -mt-5 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
+          <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] text-xs font-black flex items-center justify-center shadow-inner">${count}</span>
             Mensaje Adicional #${count}
           </span>
-          <button type="button" onclick="this.closest('.report-block').remove()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 p-1 rounded-lg transition-colors flex items-center gap-1 text-[11px] font-extrabold uppercase">
-            <span class="material-symbols-outlined text-[18px]">delete</span> Eliminar
+          <button type="button" onclick="this.closest('.report-block').remove()" class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 text-[10px] font-black uppercase px-2.5 py-1 rounded-md shadow-sm transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">delete</span> Eliminar
           </button>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Sub-Título o Unidad de Origen (Opcional)</label>
-          <input type="text" name="pasted_title" maxlength="60" class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:ring-4 focus:ring-[#4d82bc]/15 transition-all shadow-sm placeholder:text-slate-400" placeholder="Sub-Título (Ej: Minuta BRIDEC Arica)">
+          <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
+          </label>
+          <input type="text" name="pasted_title" maxlength="60" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400" placeholder="Sub-Título (Ej: Minuta BRIDEC Arica)">
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Contenido del Mensaje</label>
-          <textarea name="pasted_text" rows="5" class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:ring-4 focus:ring-[#4d82bc]/15 transition-all resize-y shadow-inner placeholder:text-slate-400" placeholder="Pega el texto del mensaje aquí..."></textarea>
+          <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">edit_note</span> Contenido del Mensaje
+          </label>
+          <textarea name="pasted_text" rows="5" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-semibold" placeholder="Pega el texto del mensaje aquí..."></textarea>
         </div>
     `;
     container.appendChild(div);
