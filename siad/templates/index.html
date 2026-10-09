@@ -693,13 +693,6 @@
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
-            <!-- Controles Aumento de Texto OCR -->
-            <div class="flex items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/20">
-              <button type="button" onclick="cambiarTamanoTextoOcr(-1)" title="Disminuir tamaño de texto"
-                class="px-1.5 py-0.5 text-white hover:bg-white/20 rounded font-black text-[11px] transition-colors">A-</button>
-              <button type="button" onclick="cambiarTamanoTextoOcr(1)" title="Aumentar tamaño de texto"
-                class="px-1.5 py-0.5 text-[#ffd100] hover:bg-white/20 rounded font-black text-[11px] transition-colors">A+</button>
-            </div>
             <form action="{{ url_for('extract', filename=viewing) }}" method="post"
               class="js-processing-form m-0 hidden sm:block">
               <button type="submit" title="{{ 'Reextraer' if extracted_text else 'Extraer' }}"
@@ -804,15 +797,6 @@
           </div>
 
           <div class="flex items-center gap-3">
-            <!-- Controles Aumento de Texto Resumen -->
-            <div class="flex items-center gap-1 bg-white/10 p-1 rounded-lg border border-white/20">
-              <button type="button" onclick="cambiarTamanoTextoResumen(-1)" title="Disminuir tamaño de letra en resumen"
-                class="px-2 py-0.5 text-white hover:bg-white/20 rounded font-black text-xs transition-colors">A-</button>
-              <span id="resumen-font-size-label" class="text-[11px] font-black text-[#ffd100] px-1 select-none">16px</span>
-              <button type="button" onclick="cambiarTamanoTextoResumen(1)" title="Aumentar tamaño de letra en resumen"
-                class="px-2 py-0.5 text-[#ffd100] hover:bg-white/20 rounded font-black text-xs transition-colors">A+</button>
-            </div>
-
             {% if summary_options %}
             <button type="submit" form="summary_form"
               class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg border-b-2 border-amber-600">
