@@ -35,13 +35,13 @@
 
   <!-- Controles Superiores (Barra de Filtros Avanzada) -->
   <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl">
-    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-8 py-5 flex items-center gap-4 text-slate-900 dark:text-white">
-      <div class="w-12 h-12 rounded-2xl badge-brand-blue flex items-center justify-center font-black shadow-sm shrink-0">
+    <div class="bg-gradient-to-r from-[#4d82bc] to-[#3b6899] border-b-2 border-[#376293] px-8 py-5 flex items-center gap-4 text-white shadow-sm">
+      <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center font-black shadow-inner shrink-0 border border-white/30">
         <span class="material-symbols-outlined text-[26px]">tune</span>
       </div>
       <div>
-        <h3 class="text-xl font-black text-slate-900 dark:text-white leading-tight">Buscador y Filtros de Inteligencia</h3>
-        <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Filtra por identificador de expediente, rango de fechas o categoría de hallazgo</p>
+        <h3 class="text-xl font-black text-white leading-tight">Buscador y Filtros de Inteligencia</h3>
+        <p class="text-xs text-blue-100 font-medium mt-0.5">Filtra por identificador de expediente, rango de fechas o categoría de hallazgo</p>
       </div>
     </div>
 
@@ -146,20 +146,20 @@
   <!-- Contenedor Principal Tabla de Documentos Procesados -->
   <form method="POST" action="{{ url_for('exportar_masivo') }}" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col flex-1 transition-all duration-300 hover:shadow-2xl">
     
-    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-slate-900 dark:text-white">
+    <div class="bg-gradient-to-r from-[#4d82bc] to-[#3b6899] border-b-2 border-[#376293] px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white shadow-sm">
       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 flex items-center justify-center font-black shadow-sm shrink-0 border border-amber-200/80 dark:border-amber-800">
+        <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center font-black shadow-inner shrink-0 border border-white/30">
           <span class="material-symbols-outlined text-[26px]">article</span>
         </div>
         <div>
-          <h2 class="text-xl font-black text-slate-900 dark:text-white leading-tight">Documentos Procesados</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Listado maestro de expedientes e informes periciales indexados</p>
+          <h2 class="text-xl font-black text-white leading-tight">Documentos Procesados</h2>
+          <p class="text-xs text-blue-100 font-medium mt-0.5">Listado maestro de expedientes e informes periciales indexados</p>
         </div>
       </div>
 
       <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-        <span class="text-slate-500 dark:text-slate-400 text-xs hidden lg:inline-block font-semibold italic">Selecciona las casillas para exportar en lote</span>
-        <button type="submit" class="w-full sm:w-auto bg-[#4d82bc] hover:bg-[#3b6899] text-white text-xs font-black uppercase tracking-wider px-6 py-3 rounded-2xl shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 border-b-4 border-[#ffd100]" onclick="
+        <span class="text-blue-100 text-xs hidden lg:inline-block font-semibold italic">Selecciona las casillas para exportar en lote</span>
+        <button type="submit" class="w-full sm:w-auto bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] text-xs font-black uppercase tracking-wider px-6 py-3 rounded-2xl shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 border-b-4 border-amber-600" onclick="
           var checkboxes = document.querySelectorAll('.doc-checkbox:checked');
           if(checkboxes.length === 0) {
             alert('Debes seleccionar al menos un documento usando las casillas de la izquierda.');
@@ -167,7 +167,7 @@
           }
           return confirm('¿Descargar paquete ZIP con los ' + checkboxes.length + ' documentos seleccionados?');
         ">
-          <span class="material-symbols-outlined text-[20px] text-[#ffd100]">folder_zip</span>
+          <span class="material-symbols-outlined text-[20px] text-[#00234c]">folder_zip</span>
           <span>EXPORTAR MASIVO</span>
         </button>
       </div>
