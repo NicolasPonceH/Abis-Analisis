@@ -72,69 +72,69 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <!-- Apariencia -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all">
+        <div class="bg-gradient-to-br from-white via-indigo-50/40 to-indigo-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-indigo-600 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
           <div>
-            <div class="flex items-center gap-4 mb-5 pb-4 border-b-2 border-slate-100 dark:border-slate-800">
-              <div class="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0">
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-indigo-500/20">
                 <span class="material-symbols-outlined text-[30px]">dark_mode</span>
               </div>
               <div>
                 <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Modo Oscuro</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Invierte colores para entornos con poca luz</p>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Invierte colores para entornos con poca luz</p>
               </div>
             </div>
-            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">Reduce la fatiga visual en turnos nocturnos o de monitoreo continuo de análisis policial.</p>
+            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">Reduce la fatiga visual en turnos nocturnos o de monitoreo continuo de análisis policial.</p>
           </div>
-          <div class="flex items-center justify-between pt-4 border-t-2 border-slate-100 dark:border-slate-800">
-            <span class="text-sm lg:text-base font-extrabold text-slate-800 dark:text-slate-200">Activar Tema Oscuro</span>
+          <div class="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Activar Tema Oscuro</span>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
-              <div class="w-14 h-8 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+              <div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
             </label>
           </div>
         </div>
 
         <!-- Accesibilidad y Zoom -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all">
+        <div class="bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-emerald-500 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
           <div>
-            <div class="flex items-center gap-4 mb-5 pb-4 border-b-2 border-slate-100 dark:border-slate-800">
-              <div class="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shrink-0">
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-emerald-500/20">
                 <span class="material-symbols-outlined text-[30px]">text_fields</span>
               </div>
               <div>
                 <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Tamaño de la Fuente</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Ajuste de lectura global</p>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Ajuste de lectura global</p>
               </div>
             </div>
             <div class="flex items-center justify-between mb-4">
-              <span class="text-sm lg:text-base font-extrabold text-slate-700 dark:text-slate-300">Nivel de Zoom</span>
-              <span id="font-size-value" class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-black px-4 py-1.5 rounded-xl text-sm border-2 border-emerald-300 dark:border-emerald-700">100%</span>
+              <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Nivel de Zoom</span>
+              <span id="font-size-value" class="bg-emerald-600 text-white font-black px-4 py-1.5 rounded-xl text-sm shadow-md">100%</span>
             </div>
           </div>
-          <div class="flex items-center gap-4 pt-4">
-            <span class="font-black text-slate-400 text-sm">80%</span>
+          <div class="flex items-center gap-4 pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="font-black text-slate-400 text-xs uppercase">80%</span>
             <input type="range" id="font-size-slider" min="80" max="140" step="5" value="100" class="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-xl appearance-none cursor-pointer accent-emerald-600">
-            <span class="font-black text-slate-800 dark:text-slate-200 text-lg">140%</span>
+            <span class="font-black text-slate-800 dark:text-slate-200 text-sm">140%</span>
           </div>
         </div>
 
         <!-- Motor IA y OCR -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all">
+        <div class="bg-gradient-to-br from-white via-purple-50/40 to-purple-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-purple-600 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
           <div>
-            <div class="flex items-center gap-4 mb-5 pb-4 border-b-2 border-slate-100 dark:border-slate-800">
-              <div class="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-950/70 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black shrink-0">
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-purple-500/20">
                 <span class="material-symbols-outlined text-[30px]">psychology</span>
               </div>
               <div>
                 <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Inteligencia Documental</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Extracción spaCy & TextRank</p>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Extracción spaCy & TextRank</p>
               </div>
             </div>
-            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">El motor analiza automáticamente RUTs, nombres, fechas y ubicaciones en documentos escaneados.</p>
+            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">El motor analiza automáticamente RUTs, nombres, fechas y ubicaciones en documentos escaneados.</p>
           </div>
-          <div class="flex items-center justify-between pt-4 border-t-2 border-slate-100 dark:border-slate-800">
-            <span class="text-sm lg:text-base font-extrabold text-slate-800 dark:text-slate-200">Resumen Automático</span>
-            <span class="bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-extrabold px-4 py-2 rounded-xl text-xs lg:text-sm border-2 border-purple-300 dark:border-purple-700 flex items-center gap-2">
+          <div class="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Resumen Automático</span>
+            <span class="bg-purple-600 text-white font-black px-4 py-2 rounded-xl text-xs lg:text-sm shadow-md flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
               Aprendizaje Adaptativo: {{ learned_count if learned_count else 0 }} Ediciones Aprendidas
             </span>
@@ -142,22 +142,22 @@
         </div>
 
         <!-- Exportación de Actas -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all">
+        <div class="bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-amber-500 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
           <div>
-            <div class="flex items-center gap-4 mb-5 pb-4 border-b-2 border-slate-100 dark:border-slate-800">
-              <div class="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0">
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-lg shadow-amber-500/20">
                 <span class="material-symbols-outlined text-[30px]">description</span>
               </div>
               <div>
                 <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Actas Oficiales RF-07</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Formato predeterminado de Word</p>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Formato predeterminado de Word</p>
               </div>
             </div>
-            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">Genera documentos institucionales formateados según los estándares institucionales de la PDI.</p>
+            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">Genera documentos institucionales formateados según los estándares institucionales de la PDI.</p>
           </div>
-          <div class="flex items-center justify-between pt-4 border-t-2 border-slate-100 dark:border-slate-800">
-            <span class="text-sm lg:text-base font-extrabold text-slate-800 dark:text-slate-200">Plantilla</span>
-            <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-extrabold px-4 py-2 rounded-xl text-xs lg:text-sm border-2 border-amber-300 dark:border-amber-700">RF-07 Oficial</span>
+          <div class="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Plantilla</span>
+            <span class="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs lg:text-sm shadow-md">RF-07 Oficial</span>
           </div>
         </div>
 
