@@ -1,196 +1,240 @@
 {% extends "base.html" %}
-{% block title %}Historial de Registros - SIAD
-<script>
-  document.getElementById('checkAll').addEventListener('change', function() {
-    var checkboxes = document.querySelectorAll('.doc-checkbox');
-    for (var checkbox of checkboxes) {
-      checkbox.checked = this.checked;
-    }
-  });
-</script>
+{% block title %}Historial de Registros - SIAD PDI{% endblock %}
 
-{% endblock %}
 {% block content %}
 
+<!-- Fondo general decorativo para la página -->
+<div class="fixed inset-0 pointer-events-none z-[-1] bg-[#f8fafc] dark:bg-slate-950">
+  <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/10 blur-[100px]"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/10 blur-[100px]"></div>
+</div>
+
 {% if db_error %}
-  <div class="bg-red-50 text-red-700 rounded-lg px-4 py-3 text-sm flex items-center gap-2 mb-4 border border-red-200 max-w-[1720px] mx-auto w-full mt-6">
-    <span class="material-symbols-outlined text-[20px]">error</span>
-    <span><strong>Error de conexión:</strong> {{ db_error }} Revisa que PostgreSQL esté corriendo.</span>
+  <div class="bg-red-50 dark:bg-red-950/80 text-red-700 dark:text-red-300 rounded-2xl px-6 py-4 text-sm flex items-center gap-3 mb-6 border border-red-200 dark:border-red-800 max-w-[1720px] mx-auto w-full mt-6 shadow-md">
+    <span class="material-symbols-outlined text-[24px]">error</span>
+    <span><strong>Error de conexión:</strong> {{ db_error }} Revisa que el servicio PostgreSQL esté activo.</span>
   </div>
 {% endif %}
 
-<div class="px-6 lg:px-margin-desktop py-8 max-w-[1720px] mx-auto w-full flex flex-col gap-6">
+<div class="px-6 lg:px-12 py-8 max-w-[1720px] mx-auto w-full flex flex-col gap-8 relative z-10">
   
-  <!-- Encabezado de Página -->
-  <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 mb-2">
-    <div class="flex items-center gap-4">
-      <button onclick="history.back()" class="flex items-center gap-2 bg-[#002855] text-white px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wide hover:bg-[#0047AB] transition-all shadow-md group" title="Volver atrás">
-        <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">arrow_back</span>
-        Volver
-      </button>
-      <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Registro</h1>
-    </div>
-  </div>
-
-  <!-- Controles Superiores (Barra de Filtros) -->
-  <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
-    <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex items-center gap-2 border-b border-blue-900/50">
-      <span class="material-symbols-outlined text-[20px] text-white">search</span>
-      <h3 class="text-[13px] font-bold text-white uppercase tracking-widest">Buscador y Filtros</h3>
-    </div>
-    <div class="p-5 flex flex-col gap-5">
-    <form method="get" action="{{ url_for('historial') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-      
-      <!-- Buscador -->
-      <div class="md:col-span-4 flex flex-col gap-1.5">
-        <label class="text-xs font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Búsqueda Libre</label>
-        <div class="relative group">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400 text-[18px] group-focus-within:text-blue-700 transition-colors">search</span>
-          <input type="text" name="palabra_clave" value="{{ palabra_clave }}" placeholder="ID de documento, extracto, patentes..." class="w-full bg-blue-50/30 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-[15px] text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-blue-300 font-medium shadow-sm">
-        </div>
-      </div>
-
-      <!-- Filtro Fechas -->
-      <div class="md:col-span-2 flex flex-col gap-1.5">
-        <label class="text-xs font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Fecha Desde</label>
-        <div class="relative group">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400 text-[16px] group-focus-within:text-blue-700 transition-colors">calendar_today</span>
-          <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="w-full bg-blue-50/30 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg py-2.5 pl-9 pr-3 text-[15px] text-blue-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium shadow-sm">
-        </div>
-      </div>
-      <div class="md:col-span-2 flex flex-col gap-1.5">
-        <label class="text-xs font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Fecha Hasta</label>
-        <div class="relative group">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400 text-[16px] group-focus-within:text-blue-700 transition-colors">calendar_today</span>
-          <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="w-full bg-blue-50/30 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg py-2.5 pl-9 pr-3 text-[15px] text-blue-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium shadow-sm">
-        </div>
-      </div>
-
-      <!-- Filtro Entidades -->
-      <div class="md:col-span-3 flex flex-col gap-1.5">
-        <label class="text-xs font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Categoría Detectada</label>
-        <div class="relative group">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400 text-[18px] group-focus-within:text-blue-700 transition-colors">category</span>
-          <select name="categoria" class="w-full bg-blue-50/30 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg py-2.5 pl-10 pr-8 text-[15px] text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium appearance-none cursor-pointer shadow-sm">
-            <option value="" {{ 'selected' if not categoria }}>Todas las Entidades (Vehículos, Armas...)</option>
-            <option value="vehiculo" {{ 'selected' if categoria == 'vehiculo' }}>Vehículos</option>
-            <option value="arma" {{ 'selected' if categoria == 'arma' }}>Armamento</option>
-            <option value="droga" {{ 'selected' if categoria == 'droga' }}>Sustancias Ilícitas</option>
-          </select>
-          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-[18px] pointer-events-none">expand_more</span>
-        </div>
-      </div>
-
-      <!-- Botones Acción -->
-      <div class="md:col-span-1 flex items-end justify-end h-full">
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wide px-4 py-2.5 rounded-lg shadow-md transition-all flex items-center justify-center gap-1.5 transform hover:-translate-y-0.5 h-[42px]">
-          <span class="material-symbols-outlined text-[16px]">filter_list</span>
-        </button>
-      </div>
-    </form>
+  <!-- Cabecera Institucional PDI -->
+  <div class="bg-[#00234c] text-white rounded-3xl shadow-2xl border-b-4 border-[#ffd100] p-6 lg:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
     
-    <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
-      <div class="flex items-center gap-3">
-        <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tune</span> Filtros Activos:</span>
-        {% if categoria or palabra_clave or fecha_desde or fecha_hasta %}
-          <div class="flex flex-wrap gap-2">
-            {% if categoria %}
-              <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 text-[11px] font-bold px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-900/50 flex items-center gap-1 shadow-sm">Categoría: {{ categoria|capitalize }}</span>
-            {% endif %}
-            {% if palabra_clave %}
-              <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 text-[11px] font-bold px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-900/50 flex items-center gap-1 shadow-sm">Búsqueda: "{{ palabra_clave }}"</span>
-            {% endif %}
-            {% if fecha_desde or fecha_hasta %}
-              <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 text-[11px] font-bold px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-900/50 flex items-center gap-1 shadow-sm">Fechas aplicadas</span>
-            {% endif %}
-            <a href="{{ url_for('historial') }}" class="text-red-500 hover:bg-red-50 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded transition-colors ml-2 flex items-center">Limpiar</a>
-          </div>
-        {% else %}
-          <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium italic">Ninguno aplicado</span>
-        {% endif %}
-      </div>
-      <div class="flex items-center gap-1.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]"></span>
-        <span>postgres://forensic-chile.pdi.cl/chain_ledger</span>
+    <div class="flex items-center gap-5 relative z-10">
+      <button onclick="history.back()" class="w-12 h-12 rounded-2xl bg-white/10 hover:bg-[#ffd100] hover:text-[#00234c] text-white flex items-center justify-center transition-all duration-300 shadow-md group shrink-0 border border-white/20" title="Volver atrás">
+        <span class="material-symbols-outlined text-[24px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+      </button>
+      <div class="flex flex-col gap-1">
+        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-white flex flex-wrap items-center gap-3">
+          Registro Forense de Documentos
+          <span class="text-xs font-extrabold uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/50 px-3 py-1 rounded-full">Chain Ledger PDI</span>
+        </h1>
+        <p class="text-xs lg:text-sm text-blue-200/90 font-medium">Búsqueda avanzada, trazabilidad de evidencia digital e inteligencia documental criminal.</p>
       </div>
     </div>
   </div>
 
-  <form method="POST" action="{{ url_for('exportar_masivo') }}" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col flex-1 mt-4">
-    <div class="px-6 py-4 flex justify-between items-center bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 border-b border-blue-900/50">
-      <div class="flex items-center gap-2 text-white">
-        <span class="material-symbols-outlined text-[20px]">table_chart</span>
-        <h2 class="text-sm font-bold uppercase tracking-widest">Documentos Procesados</h2>
+  <!-- Controles Superiores (Barra de Filtros Avanzada) -->
+  <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl">
+    <div class="bg-[#00234c] border-b-4 border-[#ffd100] px-8 py-4 flex items-center gap-3 text-white">
+      <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0">
+        <span class="material-symbols-outlined text-[22px]">tune</span>
       </div>
+      <div>
+        <h3 class="text-lg font-black text-white leading-tight">Buscador y Filtros de Inteligencia</h3>
+        <p class="text-xs text-blue-200">Filtra por identificador de expediente, rango de fechas o categoría de hallazgo</p>
+      </div>
+    </div>
+    
+    <div class="p-6 lg:p-8 flex flex-col gap-6">
+      <form method="get" action="{{ url_for('historial') }}" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
+        
+        <!-- Buscador Libre -->
+        <div class="md:col-span-4 flex flex-col gap-2">
+          <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">search</span> Búsqueda Libre
+          </label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 text-[20px] transition-colors">manage_search</span>
+            <input type="text" name="palabra_clave" value="{{ palabra_clave }}" placeholder="ID de documento, extracto, patentes, RUT..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold placeholder:text-slate-400 shadow-sm">
+          </div>
+        </div>
+
+        <!-- Fecha Desde -->
+        <div class="md:col-span-2 flex flex-col gap-2">
+          <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">calendar_today</span> Fecha Desde
+          </label>
+          <div class="relative group">
+            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold shadow-sm">
+          </div>
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div class="md:col-span-2 flex flex-col gap-2">
+          <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">event</span> Fecha Hasta
+          </label>
+          <div class="relative group">
+            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold shadow-sm">
+          </div>
+        </div>
+
+        <!-- Categoría Detectada -->
+        <div class="md:col-span-3 flex flex-col gap-2">
+          <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">category</span> Categoría Detectada
+          </label>
+          <div class="relative group">
+            <select name="categoria" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 pl-4 pr-10 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold appearance-none cursor-pointer shadow-sm">
+              <option value="" {{ 'selected' if not categoria }}>Todas las Entidades (Vehículos, Armas...)</option>
+              <option value="vehiculo" {{ 'selected' if categoria == 'vehiculo' }}>Vehículos</option>
+              <option value="arma" {{ 'selected' if categoria == 'arma' }}>Armamento</option>
+              <option value="droga" {{ 'selected' if categoria == 'droga' }}>Sustancias Ilícitas</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px] pointer-events-none">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Botón Aplicar Filtros -->
+        <div class="md:col-span-1 flex items-end justify-end">
+          <button type="submit" class="w-full bg-[#00234c] hover:bg-[#003366] text-white rounded-2xl h-[46px] border-b-4 border-[#ffd100] shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 font-black group" title="Aplicar Filtros">
+            <span class="material-symbols-outlined text-[22px] text-[#ffd100] group-hover:scale-110 transition-transform">filter_alt</span>
+          </button>
+        </div>
+      </form>
+      
+      <!-- Estado de Filtros Activos & Cadena de Conexión DB -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-slate-200/80 dark:border-slate-800 pt-5 gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-amber-500">filter_list</span> Filtros Activos:
+          </span>
+          {% if categoria or palabra_clave or fecha_desde or fecha_hasta %}
+            <div class="flex flex-wrap gap-2">
+              {% if categoria %}
+                <span class="bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-300 text-xs font-black px-3 py-1 rounded-xl border border-blue-200 dark:border-blue-800 flex items-center gap-1 shadow-sm">
+                  Categoría: {{ categoria|capitalize }}
+                </span>
+              {% endif %}
+              {% if palabra_clave %}
+                <span class="bg-indigo-100 dark:bg-indigo-950/70 text-indigo-900 dark:text-indigo-300 text-xs font-black px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800 flex items-center gap-1 shadow-sm">
+                  Búsqueda: "{{ palabra_clave }}"
+                </span>
+              {% endif %}
+              {% if fecha_desde or fecha_hasta %}
+                <span class="bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 text-xs font-black px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-800 flex items-center gap-1 shadow-sm">
+                  Rango de Fechas
+                </span>
+              {% endif %}
+              <a href="{{ url_for('historial') }}" class="bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-100 text-xs font-black uppercase tracking-wider px-3 py-1 rounded-xl border border-red-200 dark:border-red-800 transition-colors flex items-center gap-1 no-underline">
+                <span class="material-symbols-outlined text-[14px]">close</span> Limpiar
+              </a>
+            </div>
+          {% else %}
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-semibold italic">Ningún filtro aplicado</span>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+          <span>postgres://forensic-chile.pdi.cl/chain_ledger</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal Tabla de Documentos Procesados -->
+  <form method="POST" action="{{ url_for('exportar_masivo') }}" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col flex-1 transition-all duration-300 hover:shadow-2xl">
+    
+    <div class="bg-[#00234c] border-b-4 border-[#ffd100] px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white">
       <div class="flex items-center gap-4">
-        <span class="text-blue-200 text-xs hidden sm:inline-block italic">Selecciona las casillas de la tabla para exportar</span>
-        <button type="submit" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold uppercase tracking-wide px-5 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5" onclick="
+        <div class="w-12 h-12 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0">
+          <span class="material-symbols-outlined text-[26px]">article</span>
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-white leading-tight">Documentos Procesados</h2>
+          <p class="text-xs text-blue-200 mt-0.5">Listado maestro de expedientes e informes periciales indexados</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+        <span class="text-blue-200 text-xs hidden lg:inline-block font-medium italic">Selecciona las casillas para exportar en lote</span>
+        <button type="submit" class="w-full sm:w-auto bg-[#ffd100] hover:bg-amber-400 text-[#00234c] text-xs font-black uppercase tracking-wider px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 border-b-2 border-amber-600" onclick="
           var checkboxes = document.querySelectorAll('.doc-checkbox:checked');
           if(checkboxes.length === 0) {
             alert('Debes seleccionar al menos un documento usando las casillas de la izquierda.');
             return false;
           }
-          return confirm('¿Descargar ZIP con los ' + checkboxes.length + ' documentos seleccionados?');
+          return confirm('¿Descargar paquete ZIP con los ' + checkboxes.length + ' documentos seleccionados?');
         ">
-          <span class="material-symbols-outlined text-[18px]">folder_zip</span> Exportar Masivo
+          <span class="material-symbols-outlined text-[20px]">folder_zip</span>
+          <span>EXPORTAR MASIVO</span>
         </button>
       </div>
     </div>
+
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse min-w-[1000px]">
-        <thead class="sticky top-0 z-20 backdrop-blur-md bg-slate-50/80 dark:bg-slate-800/80">
-          <tr class="border-b border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest shadow-sm">
-            <th class="px-4 py-4 w-10 text-center"><input type="checkbox" id="checkAll" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"></th>
-            <th class="px-6 py-4 w-32 whitespace-nowrap"><div class="flex items-center gap-1">Fecha Ingreso <span class="material-symbols-outlined text-[12px] text-blue-500">arrow_downward</span></div></th>
-            <th class="px-6 py-4 w-40">Identificador</th>
-            <th class="px-6 py-4 w-56">Evidencia Digital</th>
+      <table class="w-full text-left border-collapse min-w-[1100px]">
+        <thead>
+          <tr class="bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200/90 dark:border-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest shadow-sm">
+            <th class="px-4 py-4 w-12 text-center">
+              <input type="checkbox" id="checkAll" class="rounded-md border-slate-300 text-blue-700 focus:ring-blue-600 cursor-pointer w-4 h-4">
+            </th>
+            <th class="px-6 py-4 w-36 whitespace-nowrap">
+              <div class="flex items-center gap-1">Fecha Ingreso <span class="material-symbols-outlined text-[14px] text-blue-600 font-black">arrow_downward</span></div>
+            </th>
+            <th class="px-6 py-4 w-44">Identificador</th>
+            <th class="px-6 py-4 w-60">Evidencia Digital</th>
             <th class="px-6 py-4 max-w-sm">Síntesis Inteligente (IA)</th>
             <th class="px-6 py-4">Hallazgos Estructurados</th>
-            <th class="px-6 py-4 w-40 text-center">Estado</th>
+            <th class="px-6 py-4 w-36 text-center">Estado</th>
             <th class="px-6 py-4 w-32 text-center">Operador</th>
-            <th class="px-6 py-4 w-16 text-center">Acción</th>
+            <th class="px-6 py-4 w-20 text-center">Acción</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
           {% for r in registros %}
-            <!-- Las filas de "Alerta" (con armas o errores) se pintan distinto. -->
-            <tr class="group cursor-pointer transition-all duration-300 {{ get_user_row_classes(r.usuario_username) }} hover:shadow-md relative hover:z-10 transform hover:-translate-y-0.5 border-l-4 hover:border-l-4" data-url="{{ url_for('historial_detalle', documento_id=r.id) }}" onclick="window.location.href=this.getAttribute('data-url');">
+            <tr class="group cursor-pointer transition-all duration-200 {{ get_user_row_classes(r.usuario_username) }} hover:bg-blue-50/50 dark:hover:bg-slate-800/70 relative border-l-4 hover:border-l-blue-600" data-url="{{ url_for('historial_detalle', documento_id=r.id) }}" onclick="window.location.href=this.getAttribute('data-url');">
               
               <!-- CHECKBOX -->
               <td class="px-4 py-5 align-middle text-center" onclick="event.stopPropagation();">
-                <input type="checkbox" name="document_ids" value="{{ r.id }}" class="doc-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                <input type="checkbox" name="document_ids" value="{{ r.id }}" class="doc-checkbox rounded-md border-slate-300 text-blue-700 focus:ring-blue-600 cursor-pointer w-4 h-4">
               </td>
+              
               <!-- TIMESTAMP -->
               <td class="px-6 py-5 align-top">
                 <div class="flex flex-col gap-0.5">
-                  <span class="text-[14px] font-bold text-slate-800 dark:text-slate-100">{{ r.fecha_procesamiento.strftime('%d-%m-%Y') }}</span>
-                  <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">{{ r.fecha_procesamiento.strftime('%H:%M:%S') }}</span>
+                  <span class="text-sm font-black text-slate-900 dark:text-slate-100 font-mono">{{ r.fecha_procesamiento.strftime('%d-%m-%Y') }}</span>
+                  <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 font-mono">{{ r.fecha_procesamiento.strftime('%H:%M:%S') }}</span>
                 </div>
               </td>
               
               <!-- ID DOCUMENTO -->
               <td class="px-6 py-5 align-top">
-                <div class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-bold text-[15px]">
-                  <span class="material-symbols-outlined text-[18px] text-blue-600">description</span>
-                  <span class="font-mono tracking-tight">DOC-{{ "%04d" % r.id }}-{{ r.nombre_archivo[:1]|upper if r.nombre_archivo else 'X' }}</span>
+                <div class="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/70 text-blue-900 dark:text-blue-300 px-3 py-1.5 rounded-xl border border-blue-200/80 dark:border-blue-800 shadow-sm font-mono font-black text-xs">
+                  <span class="material-symbols-outlined text-[16px] text-blue-600">description</span>
+                  <span>DOC-{{ "%04d" % r.id }}-{{ r.nombre_archivo[:1]|upper if r.nombre_archivo else 'X' }}</span>
                 </div>
               </td>
 
               <!-- METADATOS TÉCNICOS -->
               <td class="px-6 py-5 align-top">
                 <div class="flex flex-col gap-1">
-                  <span class="text-[14px] font-bold text-slate-700 dark:text-slate-200 truncate" title="{{ r.nombre_archivo }}">{{ r.nombre_archivo }}</span>
+                  <span class="text-sm font-black text-slate-900 dark:text-slate-100 truncate max-w-[220px]" title="{{ r.nombre_archivo }}">{{ r.nombre_archivo }}</span>
                   <div class="flex items-center gap-2">
-                    <span class="text-xs text-slate-400 dark:text-slate-500 font-mono font-medium">SYS_ID: {{ r.id }}</span>
-                    <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-500">Guardado</span>
+                    <span class="text-xs text-slate-400 font-mono font-bold">SYS_ID: {{ r.id }}</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    <span class="text-[11px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">GUARDADO</span>
                   </div>
                 </div>
               </td>
 
               <!-- SÍNTESIS NARRATIVA -->
               <td class="px-6 py-5 align-top max-w-sm">
-                <p class="text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2" title="{{ (r.resumen|striptags) if r.resumen else 'Sin resumen disponible' }}">
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium line-clamp-2" title="{{ (r.resumen|striptags) if r.resumen else 'Sin resumen disponible' }}">
                   {{ (r.resumen|striptags|replace('&nbsp;', ' ')) if r.resumen else 'Pendiente de generación de síntesis narrativa.' }}
                 </p>
               </td>
@@ -200,29 +244,29 @@
                 <div class="flex flex-wrap gap-1.5">
                   {% for e in r.entidades_preview %}
                     {% if e.categoria == 'vehiculo' %}
-                      <span class="inline-flex items-center gap-1 bg-[#f0f7ff] text-blue-700 px-2 py-0.5 rounded text-[11px] font-bold border border-blue-200 dark:border-blue-900/50 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                        <span class="material-symbols-outlined text-[14px]">directions_car</span> {{ e.valor|truncate(15, True, '...') }}
+                      <span class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-xl text-xs font-black border border-blue-200/80 dark:border-blue-800 shadow-sm">
+                        <span class="material-symbols-outlined text-[15px]">directions_car</span> {{ e.valor|truncate(15, True, '...') }}
                       </span>
                     {% elif e.categoria == 'arma' %}
-                      <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 px-2 py-0.5 rounded text-[11px] font-bold border border-red-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                        <span class="material-symbols-outlined text-[14px]">military_tech</span> {{ e.valor|truncate(15, True, '...') }}
+                      <span class="inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-950/70 text-red-700 dark:text-red-300 px-2.5 py-1 rounded-xl text-xs font-black border border-red-200/80 dark:border-red-800 shadow-sm">
+                        <span class="material-symbols-outlined text-[15px]">military_tech</span> {{ e.valor|truncate(15, True, '...') }}
                       </span>
                     {% elif e.categoria == 'droga' %}
-                      <span class="inline-flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded text-[11px] font-bold border border-yellow-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                        <span class="material-symbols-outlined text-[14px]">science</span> {{ e.valor|truncate(15, True, '...') }}
+                      <span class="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-xl text-xs font-black border border-amber-200/80 dark:border-amber-800 shadow-sm">
+                        <span class="material-symbols-outlined text-[15px]">science</span> {{ e.valor|truncate(15, True, '...') }}
                       </span>
                     {% elif e.categoria == 'persona' %}
-                      <span class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-[11px] font-bold border border-purple-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                        <span class="material-symbols-outlined text-[14px]">person</span> {{ e.valor|truncate(15, True, '...') }}
+                      <span class="inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 px-2.5 py-1 rounded-xl text-xs font-black border border-purple-200/80 dark:border-purple-800 shadow-sm">
+                        <span class="material-symbols-outlined text-[15px]">person</span> {{ e.valor|truncate(15, True, '...') }}
                       </span>
                     {% elif e.categoria == 'rut' %}
-                      <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-bold border border-slate-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                        <span class="material-symbols-outlined text-[14px]">badge</span> {{ e.valor|truncate(15, True, '...') }}
+                      <span class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-xl text-xs font-black border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <span class="material-symbols-outlined text-[15px]">badge</span> {{ e.valor|truncate(15, True, '...') }}
                       </span>
                     {% endif %}
                   {% endfor %}
                   {% if not r.entidades_preview %}
-                    <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium italic border border-slate-100 dark:border-slate-800 px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-800">Sin coincidencias</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium italic border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800/50">Sin coincidencias</span>
                   {% endif %}
                 </div>
               </td>
@@ -230,12 +274,12 @@
               <!-- ESTADO ANÁLISIS -->
               <td class="px-6 py-5 align-middle text-center">
                 {% if r.entidades_preview|selectattr('categoria', 'equalto', 'arma')|list|length > 0 %}
-                  <div class="inline-flex items-center justify-center gap-1 bg-red-50 text-red-700 px-3 py-1.5 rounded-full text-[10px] font-bold border border-red-200 uppercase tracking-wider w-full shadow-sm">
-                    <span class="material-symbols-outlined text-[14px]">report</span> Crítico
+                  <div class="inline-flex items-center justify-center gap-1.5 bg-red-50 dark:bg-red-950/70 text-red-700 dark:text-red-300 px-3.5 py-1.5 rounded-full text-xs font-black border border-red-200 dark:border-red-800 uppercase tracking-wider shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Crítico
                   </div>
                 {% else %}
-                  <div class="inline-flex items-center justify-center gap-1 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-bold border border-emerald-200 uppercase tracking-wider w-full shadow-sm">
-                    <span class="material-symbols-outlined text-[14px]">verified_user</span> Verificado
+                  <div class="inline-flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 px-3.5 py-1.5 rounded-full text-xs font-black border border-emerald-200 dark:border-emerald-800 uppercase tracking-wider shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Verificado
                   </div>
                 {% endif %}
               </td>
@@ -243,31 +287,31 @@
               <!-- OPERADOR -->
               <td class="px-6 py-5 align-middle text-center">
                 {% if r.usuario_username %}
-                  <span class="inline-flex items-center gap-1 {{ get_user_color_classes(r.usuario_username) }} px-2 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wide shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                    <span class="material-symbols-outlined text-[12px]">person</span> {{ r.usuario_username }}
+                  <span class="inline-flex items-center gap-1.5 {{ get_user_color_classes(r.usuario_username) }} px-3 py-1.5 rounded-xl text-xs font-black border uppercase tracking-wider shadow-sm">
+                    <span class="material-symbols-outlined text-[14px]">person</span> {{ r.usuario_username }}
                   </span>
                 {% else %}
-                  <span class="text-slate-400 dark:text-slate-500 text-[11px] italic font-medium">Sistema</span>
+                  <span class="text-slate-400 dark:text-slate-500 text-xs italic font-semibold">Sistema</span>
                 {% endif %}
               </td>
               
-              <!-- ACCIONES -->
+              <!-- ACCIÓN -->
               <td class="px-6 py-5 align-middle text-center">
-                <a href="{{ url_for('historial_detalle', documento_id=r.id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 dark:text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm border border-transparent group-hover:border-blue-700" title="Ver Detalles" onclick="event.stopPropagation()">
-                  <span class="material-symbols-outlined text-[18px]">visibility</span>
+                <a href="{{ url_for('historial_detalle', documento_id=r.id) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-[#00234c] group-hover:text-white transition-all duration-300 shadow-sm border border-slate-200 dark:border-slate-700 group-hover:border-[#00234c]" title="Ver Detalles" onclick="event.stopPropagation()">
+                  <span class="material-symbols-outlined text-[20px]">visibility</span>
                 </a>
               </td>
 
             </tr>
           {% else %}
             <tr>
-              <td colspan="7" class="px-6 py-20 text-center">
-                <div class="flex flex-col items-center justify-center gap-3">
-                  <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-500 border border-slate-100 dark:border-slate-800">
-                    <span class="material-symbols-outlined text-[32px]">search_off</span>
+              <td colspan="9" class="px-6 py-20 text-center">
+                <div class="flex flex-col items-center justify-center gap-4">
+                  <div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 shadow-inner">
+                    <span class="material-symbols-outlined text-[40px]">search_off</span>
                   </div>
-                  <p class="text-slate-500 dark:text-slate-400 font-semibold text-sm">No se encontraron registros forenses.</p>
-                  <p class="text-slate-400 dark:text-slate-500 text-xs max-w-sm">Intenta ajustar los filtros de búsqueda o limpia los filtros activos para ver todo el historial.</p>
+                  <p class="text-slate-800 dark:text-slate-200 font-black text-lg">No se encontraron registros forenses</p>
+                  <p class="text-slate-400 dark:text-slate-500 text-xs max-w-md font-medium">Intenta ajustar los criterios de búsqueda o remueve los filtros activos para examinar todo el historial.</p>
                 </div>
               </td>
             </tr>
@@ -277,23 +321,35 @@
     </div>
 
     <!-- Paginación Footer -->
-    <div class="bg-slate-50/80 border-t border-slate-200 dark:border-slate-700 px-6 py-3.5 flex items-center justify-between">
-      <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Total <span class="text-slate-700 dark:text-slate-200">{{ total_count if total_count is defined else registros|length }}</span> registros procesados</span>
+    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-t border-slate-200/80 dark:border-slate-800 px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span class="text-xs text-slate-600 dark:text-slate-400 font-black uppercase tracking-wider">
+        Total <span class="text-slate-900 dark:text-slate-100 font-mono text-sm px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700">{{ total_count if total_count is defined else registros|length }}</span> registros procesados
+      </span>
       
       {% if total_pages is defined and total_pages > 1 %}
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-2">
         {% if page > 1 %}
-          <a href="{{ url_for('historial', page=page-1, categoria=categoria, palabra_clave=palabra_clave, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 px-3 py-1.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm hover:bg-slate-50 transition-colors uppercase tracking-wider">Anterior</a>
+          <a href="{{ url_for('historial', page=page-1, categoria=categoria, palabra_clave=palabra_clave, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}" class="text-xs font-black text-slate-700 dark:text-slate-300 hover:text-blue-600 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm hover:bg-slate-50 transition-colors uppercase tracking-wider no-underline">
+            Anterior
+          </a>
         {% else %}
-          <button disabled class="text-xs font-bold text-slate-400 dark:text-slate-500 px-3 py-1.5 rounded border border-transparent cursor-not-allowed uppercase tracking-wider">Anterior</button>
+          <button disabled class="text-xs font-black text-slate-400 dark:text-slate-600 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 cursor-not-allowed uppercase tracking-wider opacity-60">
+            Anterior
+          </button>
         {% endif %}
         
-        <button class="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold text-sm shadow-md flex items-center justify-center ring-2 ring-blue-600/20">{{ page }}</button>
+        <button class="w-9 h-9 rounded-xl bg-[#00234c] text-white font-black text-sm shadow-md flex items-center justify-center border-b-2 border-[#ffd100]">
+          {{ page }}
+        </button>
         
         {% if page < total_pages %}
-          <a href="{{ url_for('historial', page=page+1, categoria=categoria, palabra_clave=palabra_clave, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 px-3 py-1.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm hover:bg-slate-50 transition-colors uppercase tracking-wider">Siguiente</a>
+          <a href="{{ url_for('historial', page=page+1, categoria=categoria, palabra_clave=palabra_clave, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}" class="text-xs font-black text-slate-700 dark:text-slate-300 hover:text-blue-600 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm hover:bg-slate-50 transition-colors uppercase tracking-wider no-underline">
+            Siguiente
+          </a>
         {% else %}
-          <button disabled class="text-xs font-bold text-slate-500 dark:text-slate-400 px-3 py-1.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm uppercase tracking-wider cursor-not-allowed opacity-50">Siguiente</button>
+          <button disabled class="text-xs font-black text-slate-400 dark:text-slate-600 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 cursor-not-allowed uppercase tracking-wider opacity-60">
+            Siguiente
+          </button>
         {% endif %}
       </div>
       {% endif %}
@@ -301,7 +357,6 @@
   </form>
 
 </div>
-
 
 <script>
   document.getElementById('checkAll').addEventListener('change', function() {
