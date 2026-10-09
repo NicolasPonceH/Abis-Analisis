@@ -356,7 +356,7 @@ body.splash-disabled #pdi-splash-overlay,
 
 <!-- 1. Header de Navegación Institucional PDI -->
 <header id="page-header" class="fixed top-0 w-full z-50 bg-[#00234c] text-white shadow-md border-b-[3px] border-[#ffd100]">
-<div class="h-16 w-full px-6 lg:px-margin-desktop flex items-center justify-between">
+<div class="h-16 w-full px-4 lg:px-6 flex items-center justify-between">
 <div class="flex items-center gap-xs">
 <a href="{{ url_for('index') }}" class="flex items-center gap-xs group hover:opacity-90 transition-opacity">
   <img alt="PDI" class="h-9 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
@@ -377,29 +377,29 @@ body.splash-disabled #pdi-splash-overlay,
   <span class="material-symbols-outlined text-[22px]">bar_chart</span>
   Estadísticas
 </a>
-<div id="live-clock" class="hidden lg:flex items-center gap-2.5 text-white bg-black/40 border border-blue-400/50 px-5 py-2 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.3)] ml-6 shrink-0" title="Hora del Sistema">
+<div id="live-clock" class="hidden lg:flex items-center gap-2.5 text-white bg-black/40 border border-blue-400/50 px-5 py-2 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.3)] ml-4 shrink-0" title="Hora del Sistema">
   <span class="material-symbols-outlined text-[22px] text-[#ffd100]">schedule</span>
   <span class="text-[18px] font-mono font-black tracking-widest drop-shadow-md" id="clock-time">--:--:--</span>
 </div>
 </nav>
 <div class="flex items-center gap-3">
-  <a class="hidden md:flex mr-1 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-bold px-4 py-2 rounded-lg text-sm tracking-wide uppercase items-center gap-2 transition-all duration-200 shadow-md transform hover:-translate-y-0.5 border border-[#e6bc00]" href="/">
+  <a class="hidden md:flex bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-bold px-4 py-2 rounded-xl text-sm tracking-wide uppercase items-center gap-2 transition-all duration-200 shadow-md transform hover:-translate-y-0.5 border border-[#e6bc00]" href="/">
     <span class="material-symbols-outlined text-[18px]">fingerprint</span>
     Sistema ABIS
   </a>
   {% if current_user %}
-  <div class="flex items-center mr-1">
+  <div class="flex items-center ml-1 mr-1">
     <span class="text-white font-bold tracking-wide text-sm uppercase drop-shadow-sm">{{ current_user }}</span>
   </div>
-  <div class="flex items-center gap-2">
-    <a href="{{ url_for('configuracion') }}" class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-sm hover:bg-white/20 hover:scale-105 transition-all duration-200" title="Ajustes del Sistema">
-      <span class="material-symbols-outlined text-[20px]">settings</span>
+  <div class="flex items-center gap-2.5">
+    <a href="{{ url_for('configuracion') }}" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-amber-400/25 text-white hover:text-amber-300 border border-white/20 hover:border-amber-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ajustes del Sistema">
+      <span class="material-symbols-outlined text-[22px]">settings</span>
     </a>
-    <a href="{{ url_for('perfil') }}" class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-sm hover:bg-white/20 hover:scale-105 transition-all duration-200" title="Ver Perfil">
-      <span class="material-symbols-outlined text-[20px]">person</span>
+    <a href="{{ url_for('perfil') }}" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-sky-400/25 text-white hover:text-sky-300 border border-white/20 hover:border-sky-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ver Perfil">
+      <span class="material-symbols-outlined text-[22px]">person</span>
     </a>
-    <a href="{{ url_for('logout') }}" class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-sm hover:bg-[#93000a] hover:border-[#93000a] hover:scale-105 transition-all duration-200" title="Cerrar sesión">
-      <span class="material-symbols-outlined text-[20px]">logout</span>
+    <a href="{{ url_for('logout') }}" class="w-10 h-10 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white border border-red-400/40 hover:border-red-500 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Cerrar sesión">
+      <span class="material-symbols-outlined text-[22px]">logout</span>
     </a>
   </div>
   {% else %}
