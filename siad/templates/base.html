@@ -366,7 +366,7 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 
 <!-- 1. Header de Navegación Institucional PDI -->
-<header id="page-header" class="fixed top-0 w-full z-50 bg-[#00234c] text-white shadow-md border-b-[3px] border-[#ffd100]">
+<header id="page-header" class="fixed top-0 w-full z-50 bg-gradient-to-r from-[#0a182e] via-[#102746] to-[#0a182e] text-white shadow-xl border-b-2 border-[#ffd100]/70 backdrop-blur-md">
 <div class="h-16 w-full px-2 lg:px-4 flex items-center justify-between">
 <div class="flex items-center gap-xs -ml-1">
 <a href="{{ url_for('index') }}" class="flex items-center gap-xs group hover:opacity-90 transition-opacity">
@@ -376,21 +376,21 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 <nav class="hidden md:flex items-center gap-3 h-full py-2">
 
-<a class="{{ 'bg-white/20 text-white font-extrabold shadow-inner border border-white/20' if active_page == 'procesar' or not active_page else 'text-slate-200 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2.5 rounded-xl text-base tracking-wide uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('index') }}">
-  <span class="material-symbols-outlined text-[22px]">document_scanner</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-md border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-blue-100 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2 rounded-xl text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('index') }}">
+  <span class="material-symbols-outlined text-[20px]">document_scanner</span>
   Procesamiento OCR
 </a>
-<a class="{{ 'bg-white/20 text-white font-extrabold shadow-inner border border-white/20' if active_page == 'historial' else 'text-slate-200 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2.5 rounded-xl text-base tracking-wide uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('historial') }}">
-  <span class="material-symbols-outlined text-[22px]">history</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-md border-b-2 border-amber-600' if active_page == 'historial' else 'text-blue-100 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2 rounded-xl text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('historial') }}">
+  <span class="material-symbols-outlined text-[20px]">history</span>
   Historial
 </a>
-<a class="{{ 'bg-white/20 text-white font-extrabold shadow-inner border border-white/20' if active_page == 'estadisticas' else 'text-slate-200 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2.5 rounded-xl text-base tracking-wide uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('estadisticas') }}">
-  <span class="material-symbols-outlined text-[22px]">bar_chart</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-md border-b-2 border-amber-600' if active_page == 'estadisticas' else 'text-blue-100 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2 rounded-xl text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('estadisticas') }}">
+  <span class="material-symbols-outlined text-[20px]">bar_chart</span>
   Estadísticas
 </a>
-<div id="live-clock" class="hidden lg:flex items-center gap-2.5 text-white bg-black/40 border border-blue-400/50 px-5 py-2 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.3)] ml-4 shrink-0" title="Hora del Sistema">
-  <span class="material-symbols-outlined text-[22px] text-[#ffd100]">schedule</span>
-  <span class="text-[18px] font-mono font-black tracking-widest drop-shadow-md" id="clock-time">--:--:--</span>
+<div id="live-clock" class="hidden lg:flex items-center gap-2 text-amber-300 bg-slate-900/60 border border-amber-400/40 px-4 py-1.5 rounded-xl shadow-inner ml-3 shrink-0" title="Hora del Sistema">
+  <span class="material-symbols-outlined text-[18px] text-[#ffd100]">schedule</span>
+  <span class="text-[16px] font-mono font-black tracking-widest drop-shadow-md" id="clock-time">--:--:--</span>
 </div>
 </nav>
 <div class="flex items-center gap-3">
