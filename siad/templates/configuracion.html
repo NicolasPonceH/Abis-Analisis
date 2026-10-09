@@ -264,11 +264,19 @@
               </div>
 
               <div>
-                <label for="siad-nuevo-rol" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nivel de Acceso</label>
-                <select id="siad-nuevo-rol" required class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer">
-                  <option value="operador">Operador (Estándar)</option>
-                  <option value="admin">Administrador (Total)</option>
-                </select>
+                <label class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nivel de Acceso</label>
+                <input type="hidden" id="siad-nuevo-rol" value="operador">
+                
+                <div class="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-inner">
+                  <button type="button" id="btn-rol-operador" onclick="seleccionarRolUI('operador')" class="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all bg-[#00234c] text-white shadow-md border-b-2 border-[#ffd100]">
+                    <span class="material-symbols-outlined text-[20px] text-[#ffd100]">person</span>
+                    <span>Operador (Estándar)</span>
+                  </button>
+                  <button type="button" id="btn-rol-admin" onclick="seleccionarRolUI('admin')" class="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70">
+                    <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                    <span>Administrador (Total)</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -402,6 +410,20 @@
       });
     }
   })();
+
+  function seleccionarRolUI(rol) {
+    document.getElementById('siad-nuevo-rol').value = rol;
+    var btnOp = document.getElementById('btn-rol-operador');
+    var btnAd = document.getElementById('btn-rol-admin');
+    
+    if (rol === 'operador') {
+      btnOp.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all bg-[#00234c] text-white shadow-md border-b-2 border-[#ffd100]";
+      btnAd.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70";
+    } else {
+      btnAd.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all bg-[#00234c] text-white shadow-md border-b-2 border-[#ffd100]";
+      btnOp.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70";
+    }
+  }
 
   async function crearUsuarioAdminSIAD(e) {
     e.preventDefault();
