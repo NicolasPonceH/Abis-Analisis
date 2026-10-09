@@ -566,21 +566,38 @@
   
   const ctxTendencias = document.getElementById("chartTendencias").getContext("2d");
   
-  // Crear gradientes para el efecto "Shadcn / bklit-ui"
+  // Gradientes verticales para las barras
+  const barGradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+  barGradientVehiculos.addColorStop(0, '#0052cc');
+  barGradientVehiculos.addColorStop(1, '#001a35');
+
+  const barGradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+  barGradientSustancias.addColorStop(0, '#fbbf24');
+  barGradientSustancias.addColorStop(1, '#b45309');
+
+  const barGradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+  barGradientArmamento.addColorStop(0, '#f87171');
+  barGradientArmamento.addColorStop(1, '#991b1b');
+
+  const barGradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+  barGradientPersonas.addColorStop(0, '#c084fc');
+  barGradientPersonas.addColorStop(1, '#6b21a8');
+
+  // Gradientes para modo Área / Línea
   const gradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.25)');
+  gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.3)');
   gradientVehiculos.addColorStop(1, 'rgba(0, 71, 171, 0)');
   
   const gradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.2)');
+  gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.25)');
   gradientSustancias.addColorStop(1, 'rgba(234, 179, 8, 0)');
 
   const gradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+  gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.25)');
   gradientArmamento.addColorStop(1, 'rgba(239, 68, 68, 0)');
 
   const gradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientPersonas.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
+  gradientPersonas.addColorStop(0, 'rgba(168, 85, 247, 0.25)');
   gradientPersonas.addColorStop(1, 'rgba(168, 85, 247, 0)');
 
   const agrupacionActual = "{{ agrupacion_actual or 'dia' }}";
@@ -602,53 +619,61 @@
         {
           label: "Vehículos",
           data: dataVehiculos,
-          backgroundColor: isArea ? gradientVehiculos : "#0047AB",
+          backgroundColor: isArea ? gradientVehiculos : (isLine ? "#0047AB" : barGradientVehiculos),
           borderColor: isLine ? "#0047AB" : "transparent",
           borderWidth: isLine ? 2.5 : 0,
-          borderRadius: isLine ? 0 : 6,
+          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.3,
+          tension: 0.4,
           pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 2,
+          pointBorderColor: "#ffffff",
           pointBackgroundColor: "#0047AB"
         },
         {
           label: "Sustancias",
           data: dataSustancias,
-          backgroundColor: isArea ? gradientSustancias : "#eab308",
+          backgroundColor: isArea ? gradientSustancias : (isLine ? "#eab308" : barGradientSustancias),
           borderColor: isLine ? "#eab308" : "transparent",
           borderWidth: isLine ? 2.5 : 0,
-          borderRadius: isLine ? 0 : 6,
+          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.3,
+          tension: 0.4,
           pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 2,
+          pointBorderColor: "#ffffff",
           pointBackgroundColor: "#eab308"
         },
         {
           label: "Armamento",
           data: dataArmamento,
-          backgroundColor: isArea ? gradientArmamento : "#ef4444",
+          backgroundColor: isArea ? gradientArmamento : (isLine ? "#ef4444" : barGradientArmamento),
           borderColor: isLine ? "#ef4444" : "transparent",
           borderWidth: isLine ? 2.5 : 0,
-          borderRadius: isLine ? 0 : 6,
+          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.3,
+          tension: 0.4,
           pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 2,
+          pointBorderColor: "#ffffff",
           pointBackgroundColor: "#ef4444"
         },
         {
           label: "Personas",
           data: dataPersonas,
-          backgroundColor: isArea ? gradientPersonas : "#a855f7",
+          backgroundColor: isArea ? gradientPersonas : (isLine ? "#a855f7" : barGradientPersonas),
           borderColor: isLine ? "#a855f7" : "transparent",
           borderWidth: isLine ? 2.5 : 0,
-          borderRadius: isLine ? 0 : 6,
+          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.3,
+          tension: 0.4,
           pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 2,
+          pointBorderColor: "#ffffff",
           pointBackgroundColor: "#a855f7"
         }
       ]
@@ -656,43 +681,59 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      barPercentage: 0.7,
+      categoryPercentage: 0.65,
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart'
+      },
       plugins: { 
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#ffffff',
-          titleColor: '#0f172a',
-          bodyColor: '#64748b',
-          borderColor: '#e2e8f0',
+          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          titleColor: '#ffd100',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(255, 255, 255, 0.15)',
           borderWidth: 1,
-          padding: 12,
+          padding: 14,
           titleFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
-          bodyFont: { size: 12, weight: 'bold' },
+          bodyFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
           displayColors: true,
           usePointStyle: true,
           boxWidth: 8,
           boxHeight: 8,
-          cornerRadius: 8,
+          cornerRadius: 12,
           mode: 'index',
-          intersect: false
+          intersect: false,
+          callbacks: {
+            title: function(items) {
+              return '📅 FECHA: ' + items[0].label;
+            },
+            label: function(context) {
+              let val = context.raw || 0;
+              return ` ${context.dataset.label}: ${val} ${val === 1 ? 'registro' : 'registros'}`;
+            }
+          }
         }
       },
       scales: { 
         x: { 
           grid: { display: false, drawBorder: false },
-          ticks: { font: { weight: 'bold', size: 11 }, padding: 8 }
+          ticks: { font: { weight: 'bold', size: 11 }, padding: 8, color: '#64748b' }
         },
         y: { 
           beginAtZero: true,
           ticks: { 
             font: { weight: 'bold', size: 11 },
-            padding: 8,
+            color: '#64748b',
+            padding: 10,
             callback: function(value) {
               if (value >= 1000) return (value/1000) + 'k';
               return value;
             }
           },
           border: { display: false },
-          grid: { color: '#f8fafc', drawBorder: false }
+          grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false }
         } 
       },
       interaction: {
@@ -711,9 +752,9 @@
           ctx.beginPath();
           ctx.moveTo(x, yAxis.top);
           ctx.lineTo(x, yAxis.bottom);
-          ctx.lineWidth = 1;
-          ctx.strokeStyle = '#cbd5e1'; // slate-300
-          ctx.setLineDash([4, 4]);
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = 'rgba(0, 35, 76, 0.3)';
+          ctx.setLineDash([5, 5]);
           ctx.stroke();
           ctx.restore();
         }
