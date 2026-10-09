@@ -36,7 +36,7 @@
   <!-- Controles Superiores (Barra de Filtros Avanzada) -->
   <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl">
     <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-8 py-5 flex items-center gap-4 text-slate-900 dark:text-white">
-      <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/80 text-[#00234c] dark:text-blue-300 flex items-center justify-center font-black shadow-sm shrink-0 border border-blue-200/80 dark:border-blue-800">
+      <div class="w-12 h-12 rounded-2xl badge-brand-blue flex items-center justify-center font-black shadow-sm shrink-0">
         <span class="material-symbols-outlined text-[26px]">tune</span>
       </div>
       <div>
@@ -51,41 +51,41 @@
         <!-- Buscador Libre -->
         <div class="md:col-span-4 flex flex-col gap-2">
           <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px] text-blue-600">search</span> Búsqueda Libre
+            <span class="material-symbols-outlined text-[16px] text-[#4d82bc]">search</span> Búsqueda Libre
           </label>
           <div class="relative group">
-            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 text-[20px] transition-colors">manage_search</span>
-            <input type="text" name="palabra_clave" value="{{ palabra_clave }}" placeholder="ID de documento, extracto, patentes, RUT..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold placeholder:text-slate-400 shadow-sm">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4d82bc] text-[20px] transition-colors">manage_search</span>
+            <input type="text" name="palabra_clave" value="{{ palabra_clave }}" placeholder="ID de documento, extracto, patentes, RUT..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-[#4d82bc]/10 transition-all font-semibold placeholder:text-slate-400 shadow-sm">
           </div>
         </div>
 
         <!-- Fecha Desde -->
         <div class="md:col-span-2 flex flex-col gap-2">
           <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px] text-blue-600">calendar_today</span> Fecha Desde
+            <span class="material-symbols-outlined text-[16px] text-[#4d82bc]">calendar_today</span> Fecha Desde
           </label>
           <div class="relative group">
-            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold shadow-sm">
+            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-[#4d82bc]/10 transition-all font-semibold shadow-sm">
           </div>
         </div>
 
         <!-- Fecha Hasta -->
         <div class="md:col-span-2 flex flex-col gap-2">
           <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px] text-blue-600">event</span> Fecha Hasta
+            <span class="material-symbols-outlined text-[16px] text-[#4d82bc]">event</span> Fecha Hasta
           </label>
           <div class="relative group">
-            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold shadow-sm">
+            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-[#4d82bc]/10 transition-all font-semibold shadow-sm">
           </div>
         </div>
 
         <!-- Categoría Detectada -->
         <div class="md:col-span-3 flex flex-col gap-2">
           <label class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px] text-blue-600">category</span> Categoría Detectada
+            <span class="material-symbols-outlined text-[16px] text-[#4d82bc]">category</span> Categoría Detectada
           </label>
           <div class="relative group">
-            <select name="categoria" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 pl-4 pr-10 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all font-semibold appearance-none cursor-pointer shadow-sm">
+            <select name="categoria" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 pl-4 pr-10 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4d82bc] focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-[#4d82bc]/10 transition-all font-semibold appearance-none cursor-pointer shadow-sm">
               <option value="" {{ 'selected' if not categoria }}>Todas las Entidades (Vehículos, Armas...)</option>
               <option value="vehiculo" {{ 'selected' if categoria == 'vehiculo' }}>Vehículos</option>
               <option value="arma" {{ 'selected' if categoria == 'arma' }}>Armamento</option>
@@ -97,7 +97,7 @@
 
         <!-- Botón Aplicar Filtros -->
         <div class="md:col-span-1 flex items-end justify-end">
-          <button type="submit" class="w-full bg-[#00234c] hover:bg-[#003366] text-white rounded-2xl h-[46px] border-b-4 border-[#ffd100] shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 font-black group" title="Aplicar Filtros">
+          <button type="submit" class="w-full bg-[#4d82bc] hover:bg-[#3b6899] text-white rounded-2xl h-[46px] border-b-4 border-[#ffd100] shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 font-black group" title="Aplicar Filtros">
             <span class="material-symbols-outlined text-[22px] text-[#ffd100] group-hover:scale-110 transition-transform">filter_alt</span>
           </button>
         </div>
@@ -112,7 +112,7 @@
           {% if categoria or palabra_clave or fecha_desde or fecha_hasta %}
             <div class="flex flex-wrap gap-2">
               {% if categoria %}
-                <span class="bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-300 text-xs font-black px-3 py-1 rounded-xl border border-blue-200 dark:border-blue-800 flex items-center gap-1 shadow-sm">
+                <span class="badge-brand-blue text-xs font-black px-3 py-1 rounded-xl flex items-center gap-1 shadow-sm">
                   Categoría: {{ categoria|capitalize }}
                 </span>
               {% endif %}

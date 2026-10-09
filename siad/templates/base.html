@@ -48,6 +48,23 @@
       transition: opacity 0.16s cubic-bezier(0.4, 0, 0.2, 1), transform 0.16s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
+    /* Color azul personalizado #4d82bc para insignias, botones y acentos de tarjetas */
+    .bg-brand-blue { background-color: #4d82bc !important; }
+    .hover\:bg-brand-blue-hover:hover { background-color: #3b6899 !important; }
+    .text-brand-blue { color: #4d82bc !important; }
+    .text-brand-blue-dark { color: #1e3c63 !important; }
+    .border-brand-blue { border-color: #4d82bc !important; }
+    .badge-brand-blue {
+      background-color: rgba(77, 130, 188, 0.15) !important;
+      color: #1e3c63 !important;
+      border: 1px solid rgba(77, 130, 188, 0.35) !important;
+    }
+    .dark .badge-brand-blue {
+      background-color: rgba(77, 130, 188, 0.25) !important;
+      color: #b4d2f5 !important;
+      border: 1px solid rgba(77, 130, 188, 0.5) !important;
+    }
+
     .flash-banner{animation:flashIn .18s ease-out;}
     @keyframes flashIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
     @media (prefers-reduced-motion:reduce){.flash-banner{animation:flashFadeOnly .18s ease-out;}}
