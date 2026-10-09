@@ -225,9 +225,9 @@
         </div>
       </div>
     </div>
-    <div class="w-full relative h-[340px] p-6 bg-white dark:bg-slate-900/50 flex flex-col justify-center">
+    <div class="w-full relative flex-1 min-h-[380px] p-6 bg-white dark:bg-slate-900/50 flex flex-col justify-center">
       {% if stats and stats.tendencias and stats.tendencias|length > 0 %}
-      <canvas id="chartTendencias"></canvas>
+      <canvas id="chartTendencias" class="w-full h-full"></canvas>
       {% else %}
       <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-10 w-full">
         <span class="material-symbols-outlined text-[48px] mb-3 opacity-30">query_stats</span>
