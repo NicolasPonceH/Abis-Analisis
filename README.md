@@ -7,6 +7,7 @@ Este repositorio contiene la integración completa del **Sistema ABIS (Enrolamie
 - `src/` y `public/`: Contienen el frontend y backend principal en Node.js (Sistema ABIS).
 - `siad/`: Contiene el sub-módulo de Análisis Documental desarrollado en Python (Flask).
 - `Abis_OCR_backup.sql`: Backup completo de la base de datos unificada para restaurar el entorno local.
+- `CHANGELOG_ACTUALIZACIONES.md`: Documentación detallada de cambios en BD, backend, UI y Aprendizaje Adaptativo en la rama `avances_ashley`.
 - `docs/`: Contiene las capturas de pantalla de la plataforma integrada.
 
 ---
