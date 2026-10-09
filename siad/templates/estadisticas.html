@@ -98,86 +98,116 @@
   </div>
 </div>
 
-<!-- 4 KPI Cards -->
+<!-- 5 Summary KPI Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
   <!-- Doc Procesados -->
-  <div class="bg-blue-50/30 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-blue-100 dark:border-blue-900/50 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+  <div class="bg-gradient-to-br from-white via-blue-50/40 to-blue-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl shadow-md hover:shadow-xl border-l-4 border-l-[#0047AB] border-y border-r border-slate-200/80 dark:border-slate-800 p-5 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
     <div class="flex justify-between items-start">
-      <span class="text-[13px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-widest">Documentos procesados</span>
-      <div class="bg-blue-50 dark:bg-blue-900/30 text-[#0047AB] p-1.5 rounded shadow-sm border border-blue-100 dark:border-blue-900/50"><span class="material-symbols-outlined text-[20px]">description</span></div>
-    </div>
-    <div class="mt-3">
-      <div class="flex items-baseline gap-1">
-        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.total_documentos) if stats else '0' }}</span>
-        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">expedientes</span>
+      <div>
+        <span class="text-[11px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider block">Documentos Procesados</span>
+        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 block">Partes Policiales</span>
       </div>
-      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">trending_up</span> Actividad Reciente</div>
+      <div class="w-10 h-10 rounded-xl bg-[#0047AB] text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+        <span class="material-symbols-outlined text-[20px]">description</span>
+      </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-[#0047AB]"></div>
+    <div class="mt-4">
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{{ '{:,}'.format(stats.total_documentos) if stats else '0' }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">expedientes</span>
+      </div>
+      <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[10px] font-extrabold border border-blue-200/60 dark:border-blue-900/60">
+        <span class="material-symbols-outlined text-[14px] text-emerald-500">trending_up</span> Actividad Reciente
+      </div>
+    </div>
   </div>
 
   <!-- Vehículos -->
-  <div class="bg-sky-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-sky-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+  <div class="bg-gradient-to-br from-white via-sky-50/40 to-sky-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl shadow-md hover:shadow-xl border-l-4 border-l-sky-500 border-y border-r border-slate-200/80 dark:border-slate-800 p-5 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
     <div class="flex justify-between items-start">
-      <span class="text-[13px] font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-widest">Vehículos detectados</span>
-      <div class="bg-sky-50 text-sky-600 p-1.5 rounded shadow-sm border border-sky-100"><span class="material-symbols-outlined text-[20px]">commute</span></div>
-    </div>
-    <div class="mt-3">
-      <div class="flex items-baseline gap-1">
-        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.vehiculo) if stats else '0' }}</span>
-        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">unidades</span>
+      <div>
+        <span class="text-[11px] font-black text-sky-900 dark:text-sky-300 uppercase tracking-wider block">Vehículos Detectados</span>
+        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 block">Unidades Motorizadas</span>
       </div>
-      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">trending_up</span> Registros vehiculares</div>
+      <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-md shadow-sky-500/20 shrink-0">
+        <span class="material-symbols-outlined text-[20px]">directions_car</span>
+      </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-sky-500"></div>
+    <div class="mt-4">
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{{ '{:,}'.format(stats.por_categoria.vehiculo) if stats else '0' }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">unidades</span>
+      </div>
+      <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-[10px] font-extrabold border border-sky-200/60 dark:border-sky-900/60">
+        <span class="material-symbols-outlined text-[14px] text-emerald-500">trending_up</span> Registros Vehiculares
+      </div>
+    </div>
   </div>
 
   <!-- Armas -->
-  <div class="bg-red-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-red-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+  <div class="bg-gradient-to-br from-white via-red-50/40 to-red-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl shadow-md hover:shadow-xl border-l-4 border-l-red-600 border-y border-r border-slate-200/80 dark:border-slate-800 p-5 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
     <div class="flex justify-between items-start">
-      <span class="text-[13px] font-extrabold text-red-600 dark:text-red-400 uppercase tracking-widest">Armamento identificado</span>
-      <div class="bg-red-50 text-red-500 p-1.5 rounded shadow-sm border border-red-100"><span class="material-symbols-outlined text-[20px]">military_tech</span></div>
-    </div>
-    <div class="mt-3">
-      <div class="flex items-baseline gap-1">
-        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.arma) if stats else '0' }}</span>
-        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">armas de fuego</span>
+      <div>
+        <span class="text-[11px] font-black text-red-900 dark:text-red-300 uppercase tracking-wider block">Armamento Identificado</span>
+        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 block">Armas y Municiones</span>
       </div>
-      <div class="text-red-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">trending_up</span> Hallazgos balísticos</div>
+      <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/20 shrink-0">
+        <span class="material-symbols-outlined text-[20px]">crisis_alert</span>
+      </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-red-600"></div>
+    <div class="mt-4">
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{{ '{:,}'.format(stats.por_categoria.arma) if stats else '0' }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">armamentos</span>
+      </div>
+      <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[10px] font-extrabold border border-red-200/60 dark:border-red-900/60">
+        <span class="material-symbols-outlined text-[14px] text-red-500">radar</span> Hallazgos Balísticos
+      </div>
+    </div>
   </div>
 
   <!-- Drogas -->
-  <div class="bg-yellow-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-yellow-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+  <div class="bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl shadow-md hover:shadow-xl border-l-4 border-l-amber-500 border-y border-r border-slate-200/80 dark:border-slate-800 p-5 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
     <div class="flex justify-between items-start">
-      <span class="text-[13px] font-extrabold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">Sustancias ilícitas</span>
-      <div class="bg-yellow-50 text-yellow-600 p-1.5 rounded shadow-sm border border-yellow-100"><span class="material-symbols-outlined text-[20px]">biotech</span></div>
-    </div>
-    <div class="mt-3">
-      <div class="flex items-baseline gap-1">
-        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.droga) if stats else '0' }}</span>
-        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">incautaciones</span>
+      <div>
+        <span class="text-[11px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider block">Sustancias Ilícitas</span>
+        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 block">Drogas e Insumos</span>
       </div>
-      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">task_alt</span> Extracción verificada</div>
+      <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0 font-black">
+        <span class="material-symbols-outlined text-[20px]">medication</span>
+      </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-yellow-500"></div>
+    <div class="mt-4">
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{{ '{:,}'.format(stats.por_categoria.droga) if stats else '0' }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">incautaciones</span>
+      </div>
+      <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold border border-amber-200/60 dark:border-amber-900/60">
+        <span class="material-symbols-outlined text-[14px] text-amber-600">task_alt</span> Extracción Verificada
+      </div>
+    </div>
   </div>
 
   <!-- Personas -->
-  <div class="bg-purple-50/40 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-purple-100 p-6 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+  <div class="bg-gradient-to-br from-white via-purple-50/40 to-purple-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl shadow-md hover:shadow-xl border-l-4 border-l-purple-600 border-y border-r border-slate-200/80 dark:border-slate-800 p-5 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
     <div class="flex justify-between items-start">
-      <span class="text-[13px] font-extrabold text-purple-600 dark:text-purple-400 uppercase tracking-widest">Personas Identificadas</span>
-      <div class="bg-purple-50 text-purple-600 p-1.5 rounded shadow-sm border border-purple-100"><span class="material-symbols-outlined text-[20px]">group</span></div>
-    </div>
-    <div class="mt-3">
-      <div class="flex items-baseline gap-1">
-        <span class="text-4xl font-black text-slate-800 dark:text-slate-100">{{ '{:,}'.format(stats.por_categoria.persona) if stats else '0' }}</span>
-        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 ml-1">individuos</span>
+      <div>
+        <span class="text-[11px] font-black text-purple-900 dark:text-purple-300 uppercase tracking-wider block">Personas Identificadas</span>
+        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 block">Sujetos e Imputados</span>
       </div>
-      <div class="text-emerald-500 text-[11px] font-bold mt-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">how_to_reg</span> Verificación biométrica</div>
+      <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 shrink-0">
+        <span class="material-symbols-outlined text-[20px]">group</span>
+      </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-purple-500"></div>
+    <div class="mt-4">
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{{ '{:,}'.format(stats.por_categoria.persona) if stats else '0' }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">individuos</span>
+      </div>
+      <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] font-extrabold border border-purple-200/60 dark:border-purple-900/60">
+        <span class="material-symbols-outlined text-[14px] text-purple-500">fingerprint</span> Verificación Biométrica
+      </div>
+    </div>
   </div>
 </div>
 
