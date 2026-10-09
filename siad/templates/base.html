@@ -22,6 +22,32 @@
     #page-content,#page-header{transition:all .25s cubic-bezier(0.23, 1, 0.32, 1);}
     html{transition:zoom .2s ease-out;}
 
+    @view-transition {
+      navigation: auto;
+    }
+
+    @keyframes pageFadeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-page-enter {
+      animation: pageFadeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: opacity, transform;
+    }
+
+    .page-leaving {
+      opacity: 0 !important;
+      transform: translateY(-6px) !important;
+      transition: opacity 0.16s cubic-bezier(0.4, 0, 0.2, 1), transform 0.16s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
     .flash-banner{animation:flashIn .18s ease-out;}
     @keyframes flashIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
     @media (prefers-reduced-motion:reduce){.flash-banner{animation:flashFadeOnly .18s ease-out;}}
@@ -420,7 +446,7 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 </header>
 
-<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px]">
+<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px] animate-page-enter">
   <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
     <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
@@ -460,6 +486,38 @@ body.splash-disabled #pdi-splash-overlay,
       if (fontSize) root.style.zoom = fontSize + '%';
     }, 2450);
   }
+
+  // Transición suave e instantánea al hacer clic en pestañas y enlaces de navegación
+  document.addEventListener('DOMContentLoaded', function () {
+    var pageContent = document.getElementById('page-content');
+    if (!pageContent) return;
+
+    document.querySelectorAll('header a[href], nav a[href]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var href = this.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:') || this.target === '_blank') return;
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        
+        try {
+          var targetUrl = new URL(this.href, window.location.origin);
+          if (window.location.pathname === targetUrl.pathname && window.location.search === targetUrl.search) return;
+        } catch (err) {}
+
+        e.preventDefault();
+        pageContent.classList.add('page-leaving');
+        setTimeout(function () {
+          window.location.href = href;
+        }, 130);
+      });
+    });
+  });
+
+  window.addEventListener('pageshow', function () {
+    var pageContent = document.getElementById('page-content');
+    if (pageContent) {
+      pageContent.classList.remove('page-leaving');
+    }
+  });
 
   // Controlador para reproducir bajo demanda (ej: botón en Configuración)
   window.triggerPdiSplash = function () {
