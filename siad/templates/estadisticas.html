@@ -242,27 +242,31 @@
           </span>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
-          <!-- Dropdown Agrupación -->
-          <div class="relative">
-            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-md">
-                <span class="material-symbols-outlined text-[16px] text-[#ffd100]">bar_chart</span> 
-                {% if agrupacion_actual == 'ano' %}Anual
-                {% elif agrupacion_actual == 'semana' %}Semanal
-                {% elif agrupacion_actual == 'mes' %}Mensual
-                {% else %}Diaria{% endif %}
+        <div class="flex flex-col items-end gap-2 shrink-0 w-full sm:w-auto">
+          <!-- Botón Exportar PNG arriba -->
+          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-[#ffd100] text-[#00234c] hover:bg-yellow-400 border-0 rounded-xl text-xs font-black tracking-wide uppercase transition-all shadow-md active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">download</span> Exportar PNG
+          </button>
+
+          <!-- Dropdown Agrupación Abajo -->
+          <div class="relative w-full sm:w-auto">
+            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="w-full flex items-center justify-between gap-2 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-md">
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[15px] text-[#ffd100]">bar_chart</span> 
+                  {% if agrupacion_actual == 'ano' %}Anual
+                  {% elif agrupacion_actual == 'semana' %}Semanal
+                  {% elif agrupacion_actual == 'mes' %}Mensual
+                  {% else %}Diaria{% endif %}
+                </span>
                 <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
             </button>
-            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white rounded-xl shadow-xl py-1 z-50 border border-slate-100 text-left">
+            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-xl py-1 z-50 border border-slate-100 text-left">
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'semana' }}">Semanal</a>
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'mes' }}">Mensual</a>
                 <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'ano' }}">Anual</a>
             </div>
           </div>
-          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="flex items-center gap-1.5 px-3.5 py-2 bg-[#ffd100] text-[#00234c] hover:bg-yellow-400 border-0 rounded-xl text-xs font-black tracking-wide uppercase transition-all shadow-md active:scale-95">
-            <span class="material-symbols-outlined text-[16px]">download</span> Exportar PNG
-          </button>
         </div>
       </div>
     </div>
