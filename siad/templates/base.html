@@ -366,8 +366,8 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 
 <!-- 1. Header de Navegación Institucional PDI -->
-<header id="page-header" class="fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100]">
-<div class="h-16 w-full px-2 lg:px-4 flex items-center justify-between">
+<header id="page-header" class="header-institutional fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100] h-[67.33px] flex items-center">
+<div class="h-full w-full px-2 lg:px-4 flex items-center justify-between">
 <div class="flex items-center gap-xs -ml-1">
 <a href="{{ url_for('index') }}" class="flex items-center gap-xs group hover:opacity-90 transition-opacity">
   <img alt="PDI" class="h-9 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
@@ -420,7 +420,7 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 </header>
 
-<div id="page-content" class="w-full flex-grow flex flex-col pt-16">
+<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px]">
   <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
     <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
