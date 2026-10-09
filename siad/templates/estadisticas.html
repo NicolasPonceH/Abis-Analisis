@@ -216,43 +216,43 @@
   
   <!-- Line Chart -->
   <div id="cardTendencias" class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col relative overflow-hidden transition-all">
-    <div class="bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#1d4ed8] border-b-4 border-[#ffd100] px-6 py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 z-10">
+    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-6 py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 z-10">
       <div>
-        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-900/60 border border-blue-400/30 text-[10px] font-bold text-[#ffd100] uppercase tracking-widest mb-1">
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800 text-[10px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-widest mb-1">
           <span class="material-symbols-outlined text-[12px]">show_chart</span> HISTÓRICO MULTIVARIABLE
         </div>
-        <h3 class="text-xl font-black text-white leading-tight">Tendencias Históricas de Procesamiento</h3>
-        <p class="text-xs text-slate-300 mt-1 max-w-md leading-relaxed">Evolución periódica correlacionando entidades detectadas en partes policiales.</p>
+        <h3 class="text-xl font-black text-slate-900 dark:text-white leading-tight">Tendencias Históricas de Procesamiento</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md font-medium leading-relaxed">Evolución periódica correlacionando entidades detectadas en partes policiales.</p>
       </div>
       
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0 w-full lg:w-auto justify-between lg:justify-end">
         <!-- Leyenda Inline en 1 sola línea horizontal -->
-        <div class="flex items-center gap-2 whitespace-nowrap bg-slate-900/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 shadow-inner overflow-x-auto max-w-full">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/30 text-blue-100 border border-blue-400/40 text-xs font-extrabold shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.8)]"></span> Vehículos
+        <div class="flex items-center gap-2 whitespace-nowrap bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto max-w-full">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-black shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Vehículos
           </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/30 text-amber-100 border border-amber-400/40 text-xs font-extrabold shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]"></span> Sustancias
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-black shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Sustancias
           </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600/30 text-red-100 border border-red-400/40 text-xs font-extrabold shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.8)]"></span> Armamento
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 dark:bg-red-950/70 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800 text-xs font-black shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Armamento
           </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/30 text-purple-100 border border-purple-400/40 text-xs font-extrabold shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_6px_rgba(192,132,252,0.8)]"></span> Personas
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-black shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Personas
           </span>
         </div>
 
         <div class="flex flex-col items-end gap-2 shrink-0 w-full sm:w-auto">
           <!-- Botón Exportar PNG arriba -->
-          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-[#ffd100] text-[#00234c] hover:bg-yellow-400 border-0 rounded-xl text-xs font-black tracking-wide uppercase transition-all shadow-md active:scale-95">
-            <span class="material-symbols-outlined text-[16px]">download</span> Exportar PNG
+          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-[#00234c] hover:bg-[#003366] text-white rounded-xl text-xs font-black tracking-wide uppercase transition-all shadow-md border-b-2 border-[#ffd100] active:scale-95">
+            <span class="material-symbols-outlined text-[16px] text-[#ffd100]">download</span> Exportar PNG
           </button>
 
           <!-- Dropdown Agrupación Abajo -->
           <div class="relative w-full sm:w-auto">
-            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="w-full flex items-center justify-between gap-2 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-md">
+            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="w-full flex items-center justify-between gap-2 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
                 <span class="flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[15px] text-[#ffd100]">bar_chart</span> 
+                  <span class="material-symbols-outlined text-[15px] text-blue-600">bar_chart</span> 
                   {% if agrupacion_actual == 'ano' %}Anual
                   {% elif agrupacion_actual == 'semana' %}Semanal
                   {% elif agrupacion_actual == 'mes' %}Mensual
@@ -260,11 +260,11 @@
                 </span>
                 <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
             </button>
-            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-xl py-1 z-50 border border-slate-100 text-left">
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'semana' }}">Semanal</a>
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'mes' }}">Mensual</a>
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano') }}" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 {{ 'font-bold bg-slate-50' if agrupacion_actual == 'ano' }}">Anual</a>
+            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl py-1 z-50 border border-slate-200 dark:border-slate-700 text-left">
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'semana' }}">Semanal</a>
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'mes' }}">Mensual</a>
+                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'ano' }}">Anual</a>
             </div>
           </div>
         </div>
@@ -289,16 +289,16 @@
 
   <!-- Donut Chart -->
   <div id="cardDistribucion" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col relative overflow-hidden transition-all">
-    <div class="bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#1d4ed8] border-b-4 border-[#ffd100] px-6 py-5 flex justify-between items-center z-10 w-full">
+    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-6 py-5 flex justify-between items-center z-10 w-full">
       <div>
-        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-900/60 border border-blue-400/30 text-[10px] font-bold text-[#ffd100] uppercase tracking-widest mb-1.5">
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800 text-[10px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-widest mb-1.5">
           <span class="material-symbols-outlined text-[12px]">pie_chart</span> DESGLOSE CONSOLIDADO
         </div>
-        <h3 class="text-lg font-black text-white leading-tight">Distribución de Entidades</h3>
-        <p class="text-xs text-slate-300 mt-1 max-w-[200px] leading-relaxed">Composición relativa de hallazgos en el periodo.</p>
+        <h3 class="text-lg font-black text-slate-900 dark:text-white leading-tight">Distribución de Entidades</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[200px] font-semibold leading-relaxed">Composición relativa de hallazgos en el periodo.</p>
       </div>
-      <button onclick="descargarGrafico('cardDistribucion', 'Distribucion_Entidades.png')" class="flex items-center gap-1.5 px-3.5 py-2 bg-[#ffd100] text-[#00234c] hover:bg-yellow-400 border-0 rounded-xl text-xs font-black tracking-wide uppercase transition-all shrink-0 shadow-md active:scale-95">
-        <span class="material-symbols-outlined text-[16px]">download</span> PNG
+      <button onclick="descargarGrafico('cardDistribucion', 'Distribucion_Entidades.png')" class="flex items-center gap-1.5 px-3.5 py-2 bg-[#00234c] hover:bg-[#003366] text-white border-b-2 border-[#ffd100] rounded-xl text-xs font-black tracking-wide uppercase transition-all shrink-0 shadow-md active:scale-95">
+        <span class="material-symbols-outlined text-[16px] text-[#ffd100]">download</span> PNG
       </button>
     </div>
     

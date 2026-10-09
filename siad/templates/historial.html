@@ -18,32 +18,30 @@
 
 <div class="px-6 lg:px-12 py-8 max-w-[1720px] mx-auto w-full flex flex-col gap-8 relative z-10">
   <!-- Cabecera Institucional PDI -->
-  <div class="bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#1d4ed8] text-white rounded-3xl shadow-2xl border-b-4 border-[#ffd100] p-6 lg:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
-    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-    
+  <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-l-8 border-l-[#00234c] border-y border-r border-slate-200/80 dark:border-slate-800 p-6 lg:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
     <div class="flex items-center gap-5 relative z-10">
-      <button onclick="history.back()" class="w-12 h-12 rounded-2xl bg-white/10 hover:bg-[#ffd100] hover:text-[#00234c] text-white flex items-center justify-center transition-all duration-300 shadow-md group shrink-0 border border-white/20" title="Volver atrás">
+      <button onclick="history.back()" class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-[#00234c] hover:text-white text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all duration-300 shadow-sm group shrink-0 border border-slate-200 dark:border-slate-700" title="Volver atrás">
         <span class="material-symbols-outlined text-[24px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
       </button>
       <div class="flex flex-col gap-1">
-        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-white flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex flex-wrap items-center gap-3">
           Registro Forense de Documentos
-          <span class="text-xs font-extrabold uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/50 px-3 py-1 rounded-full">Chain Ledger PDI</span>
+          <span class="text-xs font-extrabold uppercase tracking-widest bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full">Chain Ledger PDI</span>
         </h1>
-        <p class="text-xs lg:text-sm text-blue-200/90 font-medium">Búsqueda avanzada, trazabilidad de evidencia digital e inteligencia documental criminal.</p>
+        <p class="text-xs lg:text-sm text-slate-500 dark:text-slate-400 font-semibold">Búsqueda avanzada, trazabilidad de evidencia digital e inteligencia documental criminal.</p>
       </div>
     </div>
   </div>
 
   <!-- Controles Superiores (Barra de Filtros Avanzada) -->
   <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl">
-    <div class="bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#1d4ed8] border-b-4 border-[#ffd100] px-8 py-4 flex items-center gap-3 text-white shadow-md">
-      <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0">
-        <span class="material-symbols-outlined text-[22px]">tune</span>
+    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-8 py-5 flex items-center gap-4 text-slate-900 dark:text-white">
+      <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/80 text-[#00234c] dark:text-blue-300 flex items-center justify-center font-black shadow-sm shrink-0 border border-blue-200/80 dark:border-blue-800">
+        <span class="material-symbols-outlined text-[26px]">tune</span>
       </div>
       <div>
-        <h3 class="text-lg font-black text-white leading-tight">Buscador y Filtros de Inteligencia</h3>
-        <p class="text-xs text-blue-200">Filtra por identificador de expediente, rango de fechas o categoría de hallazgo</p>
+        <h3 class="text-xl font-black text-slate-900 dark:text-white leading-tight">Buscador y Filtros de Inteligencia</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Filtra por identificador de expediente, rango de fechas o categoría de hallazgo</p>
       </div>
     </div>
 
@@ -148,20 +146,20 @@
   <!-- Contenedor Principal Tabla de Documentos Procesados -->
   <form method="POST" action="{{ url_for('exportar_masivo') }}" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col flex-1 transition-all duration-300 hover:shadow-2xl">
     
-    <div class="bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#1d4ed8] border-b-4 border-[#ffd100] px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white shadow-md">
+    <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-slate-900 dark:text-white">
       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 flex items-center justify-center font-black shadow-sm shrink-0 border border-amber-200/80 dark:border-amber-800">
           <span class="material-symbols-outlined text-[26px]">article</span>
         </div>
         <div>
-          <h2 class="text-xl font-black text-white leading-tight">Documentos Procesados</h2>
-          <p class="text-xs text-blue-200 mt-0.5">Listado maestro de expedientes e informes periciales indexados</p>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white leading-tight">Documentos Procesados</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Listado maestro de expedientes e informes periciales indexados</p>
         </div>
       </div>
 
       <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-        <span class="text-blue-200 text-xs hidden lg:inline-block font-medium italic">Selecciona las casillas para exportar en lote</span>
-        <button type="submit" class="w-full sm:w-auto bg-[#ffd100] hover:bg-amber-400 text-[#00234c] text-xs font-black uppercase tracking-wider px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 border-b-2 border-amber-600" onclick="
+        <span class="text-slate-500 dark:text-slate-400 text-xs hidden lg:inline-block font-semibold italic">Selecciona las casillas para exportar en lote</span>
+        <button type="submit" class="w-full sm:w-auto bg-[#00234c] hover:bg-[#003366] text-white text-xs font-black uppercase tracking-wider px-6 py-3 rounded-2xl shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 border-b-4 border-[#ffd100]" onclick="
           var checkboxes = document.querySelectorAll('.doc-checkbox:checked');
           if(checkboxes.length === 0) {
             alert('Debes seleccionar al menos un documento usando las casillas de la izquierda.');
@@ -169,10 +167,9 @@
           }
           return confirm('¿Descargar paquete ZIP con los ' + checkboxes.length + ' documentos seleccionados?');
         ">
-          <span class="material-symbols-outlined text-[20px]">folder_zip</span>
+          <span class="material-symbols-outlined text-[20px] text-[#ffd100]">folder_zip</span>
           <span>EXPORTAR MASIVO</span>
         </button>
-      </div>
     </div>
 
     <div class="overflow-x-auto">
