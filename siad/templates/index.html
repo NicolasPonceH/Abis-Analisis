@@ -642,12 +642,14 @@
       <div
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
         <div
-          class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-4 py-3 border-b border-blue-900/50 flex items-center justify-between">
-          <div class="flex items-center gap-2 text-white">
-            <span class="material-symbols-outlined text-[18px]">document_scanner</span>
-            <span class="text-[11px] font-bold uppercase tracking-widest">Documento Original (PDF)</span>
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center justify-between text-white shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
+              <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+            </div>
+            <span class="text-xs font-black uppercase tracking-wider text-white">Documento Original (PDF)</span>
           </div>
-          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-blue-200 transition-colors flex items-center justify-center p-1 rounded hover:bg-white/10" title="Abrir en pestaña nueva">
+          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10" title="Abrir en pestaña nueva">
             <span class="material-symbols-outlined text-[18px]">open_in_new</span>
           </a>
         </div>
@@ -666,27 +668,27 @@
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex flex-col gap-4">
         <!-- Encabezado OCR -->
         <div
-          class="flex items-start sm:items-center justify-between gap-2 border-b border-blue-900/50 pb-3 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 -mx-5 -mt-5 rounded-t-xl">
-          <div class="flex items-center gap-2 text-white">
-            <div class="w-8 h-8 rounded flex items-center justify-center">
+          class="flex items-start sm:items-center justify-between gap-2 border-b-4 border-[#ffd100] bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] px-5 py-4 -mx-5 -mt-5 rounded-t-xl text-white shadow-sm">
+          <div class="flex items-center gap-3 text-white">
+            <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
               <span class="material-symbols-outlined text-[20px]">manage_search</span>
             </div>
-            <h3 class="font-bold text-[14px]">Texto Extraído (OCR)</h3>
+            <h3 class="font-black text-xs uppercase tracking-wider text-white">Texto Extraído (OCR)</h3>
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
             <form action="{{ url_for('extract', filename=viewing) }}" method="post"
               class="js-processing-form m-0 hidden sm:block">
               <button type="submit" title="{{ 'Reextraer' if extracted_text else 'Extraer' }}"
-                class="flex items-center justify-center p-1.5 rounded hover:bg-slate-100 transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600 border border-transparent hover:border-slate-200">
+                class="flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10 transition-colors text-white hover:text-[#ffd100]">
                 <span class="material-symbols-outlined text-[18px]">refresh</span>
               </button>
             </form>
             <button type="button"
               onclick="const text=document.getElementById('ocr-raw-content').innerText; navigator.clipboard.writeText(text); alert('OCR Copiado al portapapeles');"
-              class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 transition-colors rounded px-3 py-1 text-slate-700 dark:text-slate-200 shadow-sm">
+              class="flex items-center gap-1.5 bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] font-black text-xs uppercase tracking-wider transition-colors rounded-lg px-3 py-1.5 shadow-sm border-b-2 border-amber-600">
               <span class="material-symbols-outlined text-[16px]">file_copy</span>
-              <span class="text-[11px] font-bold uppercase tracking-wide">Copiar</span>
+              <span>Copiar</span>
             </button>
           </div>
         </div>
@@ -767,19 +769,22 @@
 
       <!-- Módulo de Resúmenes Inteligentes -->
       <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 xl:col-span-3">
-        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 flex items-center justify-between border-b border-blue-900/50">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center justify-between text-white shadow-sm">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-blue-100">
-              <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+              <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
             </div>
-            <h3 class="text-[17px] font-semibold text-white tracking-wide">Resumen Asistido por IA</h3>
+            <div>
+              <h3 class="text-lg font-black text-white leading-tight">Resumen Asistido por IA</h3>
+              <p class="text-xs text-blue-100 font-bold mt-0.5">Síntesis inteligente estructurada para informe pericial</p>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-3">
             {% if summary_options %}
             <button type="submit" form="summary_form"
-              class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm border border-blue-600">
-              <span class="material-symbols-outlined text-[16px]">save</span>
+              class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg border-b-2 border-amber-600">
+              <span class="material-symbols-outlined text-[18px]">save</span>
               <span>Guardar Selección</span>
             </button>
             {% endif %}
@@ -787,8 +792,8 @@
             {% if extracted_text %}
             <form action="{{ url_for('summarize', filename=viewing) }}" method="post" class="js-processing-form m-0">
               <button type="submit"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-blue-700 hover:bg-blue-50 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
-                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
                 <span class="js-btn-label">{{ 'Generar' if not summary_options else 'Regenerar' }}</span>
               </button>
             </form>
@@ -1006,26 +1011,23 @@
       <!-- Módulo de Extracción y Clasificación de Entidades -->
       <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden xl:col-span-2"
         id="entidades">
-        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex items-center justify-between border-b border-blue-900/50">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center justify-between text-white shadow-sm">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-emerald-900/40 flex items-center justify-center text-emerald-400">
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
               <span class="material-symbols-outlined text-[24px]">hub</span>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-white">Entidades Detectadas</h3>
-              <p class="text-[11px] text-blue-200 mt-0.5 tracking-wide">Extracción estructurada de metadatos clave
-              </p>
+              <h3 class="text-lg font-black text-white leading-tight">Entidades Detectadas</h3>
+              <p class="text-xs text-blue-100 font-bold mt-0.5 tracking-wide">Extracción estructurada de metadatos clave</p>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-
-
             {% if extracted_text %}
             <form action="{{ url_for('entities_view', filename=viewing) }}" method="post" class="js-processing-form m-0">
               <button type="submit"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
-                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
                 <span class="js-btn-label">{{ 'Identificar' if not entities_data else 'Reidentificar' }}</span>
               </button>
             </form>
