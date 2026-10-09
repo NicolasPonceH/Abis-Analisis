@@ -520,7 +520,7 @@ def update_user_password_by_id(user_id, password_hash):
         conn.commit()
 
 
-def create_user(username, password_hash, rol='operador', nombre_completo=None):
+def create_user(username, password_hash, rol='admin', nombre_completo=None):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
