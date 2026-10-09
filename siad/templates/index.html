@@ -100,7 +100,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     <!-- COLUMNA IZQUIERDA: Ingesta Documental + Lista de Archivos Cargados (lg:col-span-8) -->
-    <div class="lg:col-span-8 flex flex-col gap-6">
+    <div class="lg:col-span-8 flex flex-col gap-6 order-last lg:order-last">
 
       <!-- Tarjeta Ingesta / Cargar Archivos -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
@@ -248,10 +248,10 @@
     </div>
 
     <!-- COLUMNA DERECHA: Panel de Inteligencia Operativa y Guía (lg:col-span-4) -->
-    <div class="lg:col-span-4 flex flex-col gap-6">
+    <div class="lg:col-span-4 flex flex-col gap-6 order-first lg:order-first">
 
       <!-- Tarjeta 1: Estado del Sistema OCR -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+      <div class="order-last bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center gap-3 text-white shadow-sm">
           <div class="w-9 h-9 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
             <span class="material-symbols-outlined text-[20px]">dataset</span>
@@ -300,7 +300,7 @@
       </div>
 
       <!-- Tarjeta 2: Guía de Ingesta Rápida -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+      <div class="order-first bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center gap-3 text-white shadow-sm">
           <div class="w-9 h-9 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
             <span class="material-symbols-outlined text-[20px]">help_outline</span>
