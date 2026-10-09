@@ -796,7 +796,7 @@ def build_summary_options(raw_text, entities_data=None, username=None):
                         return sum(user_weights.get(w, 0) for w in words)
                     tr_sents_b = sorted(tr_sents_b, key=sent_score, reverse=True)
                 
-                selected_b = tr_sents_b[:6]
+                selected_b = tr_sents_b[:5]
                 ordered_b = sorted(selected_b, key=lambda s: full_narrative.find(s))
                 hechos_completos = " ".join(ordered_b)
             else:
@@ -810,9 +810,9 @@ def build_summary_options(raw_text, entities_data=None, username=None):
             if len(hechos_sinteticos) > 400:
                 hechos_sinteticos = hechos_sinteticos[:397].rsplit(' ', 1)[0] + "..."
             
-            hechos_completos = " ".join(all_sents[:6])
-            if len(hechos_completos) > 1200:
-                hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
+            hechos_completos = " ".join(all_sents[:5])
+            if len(hechos_completos) > 1000:
+                hechos_completos = hechos_completos[:997].rsplit(' ', 1)[0] + "..."
     
     return {"a": hechos_sinteticos, "b": hechos_completos}
 
