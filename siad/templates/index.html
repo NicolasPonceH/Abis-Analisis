@@ -96,11 +96,11 @@
 
   {% if not viewing %}
 
-  <!-- 2. Contenedor Principal Centrado -->
-  <div class="flex flex-col gap-6 max-w-5xl mx-auto w-full">
+  <!-- 2. Contenedor Principal con Guía Lateral -->
+  <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr] gap-6 lg:gap-8 w-full items-start">
 
     <!-- Tarjetas de Ingesta y Espacio de Trabajo -->
-    <div class="flex flex-col gap-6 order-last">
+    <div class="flex flex-col gap-6 order-last max-w-5xl mx-auto w-full">
 
       <!-- Tarjeta Ingesta / Cargar Archivos -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
