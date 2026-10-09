@@ -537,7 +537,7 @@
   <!-- 2. Cabecera Operativa Forense -->
   <div
     class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-3 border-b border-slate-200 dark:border-slate-700 bg-transparent">
-    <div class="ml-2 sm:ml-6">
+    <div class="ml-0">
       <div class="flex items-center gap-3">
         <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Procesamiento</h1>
         <span
@@ -653,7 +653,7 @@
             <span class="material-symbols-outlined text-[18px]">open_in_new</span>
           </a>
         </div>
-        <iframe src="{{ url_for('serve_upload', filename=viewing) }}" class="w-full h-[60vh] border-0"></iframe>
+        <iframe src="{{ url_for('serve_upload', filename=viewing) }}#toolbar=0&navpanes=0&view=FitH" class="w-full h-[60vh] border-0"></iframe>
         <div
           class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
           <span class="truncate max-w-[300px]">{{ viewing }}</span>
