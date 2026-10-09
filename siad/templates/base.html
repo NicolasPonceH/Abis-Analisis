@@ -48,6 +48,12 @@
       transition: opacity 0.16s cubic-bezier(0.4, 0, 0.2, 1), transform 0.16s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
+    body, html, button, input, select, textarea {
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      text-rendering: optimizeLegibility !important;
+    }
+
     /* Color azul personalizado #00234c para insignias, botones y acentos de tarjetas */
     .bg-brand-blue { background-color: #00234c !important; }
     .hover\:bg-brand-blue-hover:hover { background-color: #003366 !important; }
