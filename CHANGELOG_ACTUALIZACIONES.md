@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS resumenes_feedback (
 );
 ```
 
-### 1.2 Actualización de Roles Predeterminados y Funciones de DB (`siad/db.py`)
-- **Rol Predeterminado `admin` (Administrador Policial):** Dado que en la plataforma todos los usuarios deben tener acceso total compartido a los documentos subidos por cualquier operador, la columna `rol` en la base de datos y la creación de nuevos usuarios (`create_user`) quedan configuradas con **`admin`** (*Administrador Policial*) como rol por defecto.
+### 1.2 Actualización de Roles y Funciones de DB (`siad/db.py`)
+- **Rol `admin`:** La cuenta `admin` queda registrada y tipificada como `Administrador Policial` (rol `admin`).
 - **Nuevas Funciones:**
   - `save_summary_feedback()`: Registra resúmenes editados por usuario.
   - `get_summary_feedback_by_user()`: Consulta el historial de preferencias del usuario.

@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     nombre_completo TEXT,
-    rol TEXT NOT NULL DEFAULT 'admin',
+    rol TEXT NOT NULL DEFAULT 'operador',
     creado_en TIMESTAMPTZ DEFAULT now(),
     ultimo_ingreso TIMESTAMPTZ
 );
