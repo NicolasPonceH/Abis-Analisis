@@ -608,7 +608,7 @@
   if (agrupacionActual === "mes" || agrupacionActual === "semana") {
       chartType = "line";
       isLine = true;
-      if (agrupacionActual === "mes") isArea = true;
+      isArea = true; // Habilitar relleno degradado tanto para Semana como para Mes
   }
 
   new Chart(ctxTendencias, {
@@ -621,13 +621,14 @@
           data: dataVehiculos,
           backgroundColor: isArea ? gradientVehiculos : (isLine ? "#0047AB" : barGradientVehiculos),
           borderColor: isLine ? "#0047AB" : "transparent",
-          borderWidth: isLine ? 2.5 : 0,
+          borderWidth: isLine ? 3.5 : 0,
           borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.4,
-          pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 7,
-          pointBorderWidth: 2,
+          tension: 0.35,
+          pointRadius: isLine ? 5 : 0,
+          pointHoverRadius: 9,
+          pointBorderWidth: isLine ? 3 : 0,
+          pointHoverBorderWidth: 4,
           pointBorderColor: "#ffffff",
           pointBackgroundColor: "#0047AB"
         },
@@ -636,13 +637,14 @@
           data: dataSustancias,
           backgroundColor: isArea ? gradientSustancias : (isLine ? "#eab308" : barGradientSustancias),
           borderColor: isLine ? "#eab308" : "transparent",
-          borderWidth: isLine ? 2.5 : 0,
+          borderWidth: isLine ? 3.5 : 0,
           borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.4,
-          pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 7,
-          pointBorderWidth: 2,
+          tension: 0.35,
+          pointRadius: isLine ? 5 : 0,
+          pointHoverRadius: 9,
+          pointBorderWidth: isLine ? 3 : 0,
+          pointHoverBorderWidth: 4,
           pointBorderColor: "#ffffff",
           pointBackgroundColor: "#eab308"
         },
@@ -651,13 +653,14 @@
           data: dataArmamento,
           backgroundColor: isArea ? gradientArmamento : (isLine ? "#ef4444" : barGradientArmamento),
           borderColor: isLine ? "#ef4444" : "transparent",
-          borderWidth: isLine ? 2.5 : 0,
+          borderWidth: isLine ? 3.5 : 0,
           borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.4,
-          pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 7,
-          pointBorderWidth: 2,
+          tension: 0.35,
+          pointRadius: isLine ? 5 : 0,
+          pointHoverRadius: 9,
+          pointBorderWidth: isLine ? 3 : 0,
+          pointHoverBorderWidth: 4,
           pointBorderColor: "#ffffff",
           pointBackgroundColor: "#ef4444"
         },
@@ -666,13 +669,14 @@
           data: dataPersonas,
           backgroundColor: isArea ? gradientPersonas : (isLine ? "#a855f7" : barGradientPersonas),
           borderColor: isLine ? "#a855f7" : "transparent",
-          borderWidth: isLine ? 2.5 : 0,
+          borderWidth: isLine ? 3.5 : 0,
           borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
           fill: isArea,
-          tension: 0.4,
-          pointRadius: isLine ? 4 : 0,
-          pointHoverRadius: 7,
-          pointBorderWidth: 2,
+          tension: 0.35,
+          pointRadius: isLine ? 5 : 0,
+          pointHoverRadius: 9,
+          pointBorderWidth: isLine ? 3 : 0,
+          pointHoverBorderWidth: 4,
           pointBorderColor: "#ffffff",
           pointBackgroundColor: "#a855f7"
         }
@@ -707,7 +711,8 @@
           intersect: false,
           callbacks: {
             title: function(items) {
-              return '📅 FECHA: ' + items[0].label;
+              let totalPeriod = items.reduce((sum, item) => sum + (item.raw || 0), 0);
+              return `📅 PERÍODO: ${items[0].label}  •  TOTAL: ${totalPeriod}`;
             },
             label: function(context) {
               let val = context.raw || 0;
