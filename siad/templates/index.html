@@ -805,19 +805,19 @@
         {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
         
         {% if summary_options|length > 1 %}
-        <div class="flex flex-wrap gap-3 mb-6">
+        <div class="flex flex-wrap items-center justify-center gap-3.5 mb-6 p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-inner w-full">
           {% set tab_colors = [
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'}
+            {'active': 'bg-[#00234c] text-white shadow-lg ring-2 ring-[#ffd100] transform scale-105 border-b-4 border-[#ffd100]', 'inactive': 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-[#00234c] border border-slate-200 dark:border-slate-700'},
+            {'active': 'bg-[#00234c] text-white shadow-lg ring-2 ring-[#ffd100] transform scale-105 border-b-4 border-[#ffd100]', 'inactive': 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-[#00234c] border border-slate-200 dark:border-slate-700'},
+            {'active': 'bg-[#00234c] text-white shadow-lg ring-2 ring-[#ffd100] transform scale-105 border-b-4 border-[#ffd100]', 'inactive': 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-[#00234c] border border-slate-200 dark:border-slate-700'},
+            {'active': 'bg-[#00234c] text-white shadow-lg ring-2 ring-[#ffd100] transform scale-105 border-b-4 border-[#ffd100]', 'inactive': 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-[#00234c] border border-slate-200 dark:border-slate-700'},
+            {'active': 'bg-[#00234c] text-white shadow-lg ring-2 ring-[#ffd100] transform scale-105 border-b-4 border-[#ffd100]', 'inactive': 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-[#00234c] border border-slate-200 dark:border-slate-700'}
           ] %}
           {% for opt in summary_options %}
           {% set c = tab_colors[loop.index0 % tab_colors|length] %}
           <button type="button" 
                   onclick="switchTab('resumen', parseInt(this.dataset.index))" 
-                  class="resumen-tab-btn px-5 py-2.5 rounded-full font-extrabold text-[12px] uppercase tracking-wider whitespace-nowrap transition-all duration-300 {{ c.active if loop.first else c.inactive }}" 
+                  class="resumen-tab-btn px-7 py-3 rounded-xl font-black text-sm uppercase tracking-wider whitespace-nowrap transition-all duration-300 shadow-md {{ c.active if loop.first else c.inactive }}" 
                   data-index="{{ loop.index0 }}"
                   data-active-class="{{ c.active }}"
                   data-inactive-class="{{ c.inactive }}">
@@ -825,6 +825,7 @@
           </button>
           {% endfor %}
         </div>
+        {% endif %}
         
         <div class="mb-5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-3.5 flex items-start gap-3 rounded-xl shadow-sm">
           <div class="bg-amber-100 dark:bg-amber-900/50 p-1.5 rounded-full text-amber-600 dark:text-amber-400 flex-shrink-0">
@@ -1661,17 +1662,18 @@
       if (selectedPane) selectedPane.classList.remove('hidden');
 
       document.querySelectorAll(`.${group}-tab-btn`).forEach(btn => {
+          const baseClasses = `${group}-tab-btn px-7 py-3 rounded-xl font-black text-sm uppercase tracking-wider whitespace-nowrap transition-all duration-300 shadow-md`;
           if (parseInt(btn.dataset.index) === index) {
               if (btn.dataset.activeClass) {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors ${btn.dataset.activeClass}`;
+                  btn.className = `${baseClasses} ${btn.dataset.activeClass}`;
               } else {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 border-blue-500 text-blue-700 dark:text-blue-400 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+                  btn.className = `${baseClasses} bg-[#00234c] text-white shadow-lg border-b-4 border-[#ffd100]`;
               }
           } else {
               if (btn.dataset.inactiveClass) {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors ${btn.dataset.inactiveClass}`;
+                  btn.className = `${baseClasses} ${btn.dataset.inactiveClass}`;
               } else {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+                  btn.className = `${baseClasses} bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700`;
               }
           }
       });
