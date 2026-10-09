@@ -249,8 +249,10 @@
 
         <!-- Tarjeta 1: Añadir usuarios -->
         <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
-          <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 p-5 px-8 text-slate-900 dark:text-white flex items-center gap-3 font-extrabold text-lg">
-            <span class="material-symbols-outlined text-amber-300 text-[26px]">person_add</span>
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] p-5 px-8 text-white flex items-center gap-3 font-black text-lg shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+              <span class="material-symbols-outlined text-[24px]">person_add</span>
+            </div>
             <span>Añadir usuarios</span>
           </div>
 
@@ -303,12 +305,14 @@
 
         <!-- Tarjeta 2: Registro Activo de Usuarios -->
         <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
-          <div class="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 p-5 px-8 text-slate-900 dark:text-white flex items-center justify-between font-extrabold text-lg">
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] p-5 px-8 text-white flex items-center justify-between font-black text-lg shadow-sm">
             <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-amber-300 text-[26px]">group</span>
+              <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+                <span class="material-symbols-outlined text-[24px]">group</span>
+              </div>
               <span>Registro Activo</span>
             </div>
-            <span class="bg-white/20 text-white font-black text-xs lg:text-sm px-4 py-1.5 rounded-full border border-white/30">
+            <span class="bg-[#ffd100] text-[#00234c] font-black text-xs lg:text-sm px-4 py-1.5 rounded-full shadow-sm">
               {{ db_users|length if db_users else 0 }} Registros
             </span>
           </div>
