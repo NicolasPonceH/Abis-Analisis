@@ -783,8 +783,8 @@ def build_summary_options(raw_text, entities_data=None, username=None):
             else:
                 hechos_sinteticos = full_narrative
                 
-            if len(hechos_sinteticos) > 400:
-                hechos_sinteticos = hechos_sinteticos[:397].rsplit(' ', 1)[0] + "..."
+            if len(hechos_sinteticos) > 350:
+                hechos_sinteticos = hechos_sinteticos[:347].rsplit(' ', 1)[0] + "..."
 
 
             # Opción B: Resumen fluido (Más largo, max 6 oraciones)
@@ -802,17 +802,17 @@ def build_summary_options(raw_text, entities_data=None, username=None):
             else:
                 hechos_completos = full_narrative
                 
-            if len(hechos_completos) > 1200:
-                hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
+            if len(hechos_completos) > 700:
+                hechos_completos = hechos_completos[:697].rsplit(' ', 1)[0] + "..."
                 
         except Exception:
             hechos_sinteticos = " ".join(all_sents[:3])
-            if len(hechos_sinteticos) > 400:
-                hechos_sinteticos = hechos_sinteticos[:397].rsplit(' ', 1)[0] + "..."
+            if len(hechos_sinteticos) > 350:
+                hechos_sinteticos = hechos_sinteticos[:347].rsplit(' ', 1)[0] + "..."
             
-            hechos_completos = " ".join(all_sents[:5])
-            if len(hechos_completos) > 1000:
-                hechos_completos = hechos_completos[:997].rsplit(' ', 1)[0] + "..."
+            hechos_completos = " ".join(all_sents[:6])
+            if len(hechos_completos) > 700:
+                hechos_completos = hechos_completos[:697].rsplit(' ', 1)[0] + "..."
     
     return {"a": hechos_sinteticos, "b": hechos_completos}
 
