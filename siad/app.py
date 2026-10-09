@@ -768,8 +768,8 @@ def build_summary_options(raw_text, entities_data=None, username=None):
         try:
             doc = _nlp(full_narrative)
             
-            # Opción A: Acta Estructurada (Metadata + 2 oraciones)
-            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=15, limit_sentences=2)]
+            # Opción A: Resumen Corto (Max ~6 líneas / 3 oraciones)
+            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=20, limit_sentences=5)]
             if tr_sents_a:
                 if user_weights:
                     def sent_score(s):
@@ -777,33 +777,18 @@ def build_summary_options(raw_text, entities_data=None, username=None):
                         return sum(user_weights.get(w, 0) for w in words)
                     tr_sents_a = sorted(tr_sents_a, key=sent_score, reverse=True)
                 
-                selected_a = tr_sents_a[:2]
+                selected_a = tr_sents_a[:3]
                 ordered_a = sorted(selected_a, key=lambda s: full_narrative.find(s))
-                hechos_sinteticos_text = " ".join(ordered_a)
+                hechos_sinteticos = " ".join(ordered_a)
             else:
-                hechos_sinteticos_text = full_narrative
+                hechos_sinteticos = full_narrative
                 
-            if len(hechos_sinteticos_text) > 400:
-                hechos_sinteticos_text = hechos_sinteticos_text[:397].rsplit(' ', 1)[0] + "..."
-
-            if not entities_data:
-                entities_data = extract_entities(raw_text)
-                
-            detenidos_list = []
-            if entities_data and "personas" in entities_data and "detenidos" in entities_data["personas"]:
-                detenidos_list = entities_data["personas"]["detenidos"]
-                
-            detenidos_str = "<ul>" + "".join([f"<li>{d}</li>" for d in detenidos_list]) + "</ul>" if detenidos_list else "No se registran detenidos."
-
-            unidad = meta.get("unidad", "No identificada") or "No identificada"
-            fecha = meta.get("fecha", "No identificada") or "No identificada"
-            delito = meta.get("delito", "No identificado") or "No identificado"
-            
-            hechos_sinteticos = f"<p><strong>UNIDAD:</strong> {unidad}</p><p><strong>FECHA:</strong> {fecha}</p><p><strong>MOTIVO:</strong> {delito}</p><p><strong>DETENIDOS:</strong><br>{detenidos_str}</p><p><strong>SÍNTESIS DE LOS HECHOS:</strong><br>{hechos_sinteticos_text}</p>"
+            if len(hechos_sinteticos) > 400:
+                hechos_sinteticos = hechos_sinteticos[:397].rsplit(' ', 1)[0] + "..."
 
 
-            # Opción B: Resumen fluido (max 3 oraciones)
-            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=25, limit_sentences=7)]
+            # Opción B: Resumen fluido (Más largo, max 6 oraciones)
+            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=35, limit_sentences=10)]
             if tr_sents_b:
                 if user_weights:
                     def sent_score(s):
@@ -811,7 +796,7 @@ def build_summary_options(raw_text, entities_data=None, username=None):
                         return sum(user_weights.get(w, 0) for w in words)
                     tr_sents_b = sorted(tr_sents_b, key=sent_score, reverse=True)
                 
-                selected_b = tr_sents_b[:3]
+                selected_b = tr_sents_b[:6]
                 ordered_b = sorted(selected_b, key=lambda s: full_narrative.find(s))
                 hechos_completos = " ".join(ordered_b)
             else:
@@ -821,26 +806,13 @@ def build_summary_options(raw_text, entities_data=None, username=None):
                 hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
                 
         except Exception:
-            hechos_sinteticos_text = " ".join(all_sents[:2])
-            if len(hechos_sinteticos_text) > 400:
-                hechos_sinteticos_text = hechos_sinteticos_text[:397].rsplit(' ', 1)[0] + "..."
-                
-            if not entities_data:
-                entities_data = extract_entities(raw_text)
-                
-            detenidos_list = []
-            if entities_data and "personas" in entities_data and "detenidos" in entities_data["personas"]:
-                detenidos_list = entities_data["personas"]["detenidos"]
-                
-            detenidos_str = "<ul>" + "".join([f"<li>{d}</li>" for d in detenidos_list]) + "</ul>" if detenidos_list else "No se registran detenidos."
-
-            unidad = meta.get("unidad", "No identificada") or "No identificada"
-            fecha = meta.get("fecha", "No identificada") or "No identificada"
-            delito = meta.get("delito", "No identificado") or "No identificado"
+            hechos_sinteticos = " ".join(all_sents[:3])
+            if len(hechos_sinteticos) > 400:
+                hechos_sinteticos = hechos_sinteticos[:397].rsplit(' ', 1)[0] + "..."
             
-            hechos_sinteticos = f"<p><strong>UNIDAD:</strong> {unidad}</p><p><strong>FECHA:</strong> {fecha}</p><p><strong>MOTIVO:</strong> {delito}</p><p><strong>DETENIDOS:</strong><br>{detenidos_str}</p><p><strong>SÍNTESIS DE LOS HECHOS:</strong><br>{hechos_sinteticos_text}</p>"
-            
-            hechos_completos = " ".join(all_sents[:4])
+            hechos_completos = " ".join(all_sents[:6])
+            if len(hechos_completos) > 1200:
+                hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
     
     return {"a": hechos_sinteticos, "b": hechos_completos}
 
