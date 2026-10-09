@@ -21,6 +21,11 @@ export function promptAuthModal(file, actionType = "ingesta") {
   const confirmBtn = document.getElementById("btn-modal-auth-confirm");
 
   if (!modal) return;
+  
+  if (claveInput) {
+    claveInput.value = "";
+    claveInput.placeholder = "Ingresa tu contraseña de inicio de sesión...";
+  }
 
   if (actionType === "programacion") {
     if (summaryIconEl) {

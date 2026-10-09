@@ -11,28 +11,23 @@ import os
 # pyrefly: ignore [missing-import]
 import psycopg
 
-DB_HOST = os.environ.get("DB_HOST", "127.0.0.1")
-DB_PORT = os.environ.get("DB_PORT", "5433")
-DB_NAME = os.environ.get("DB_NAME", "Abis_OCR")
-DB_USER = os.environ.get("DB_USER", "postgres")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "abis_dev_pw")
-CONNECT_TIMEOUT = 5  # segundos -- sin esto, si Postgres no responde (apagado, firewall) una
-                      # peticion HTTP puede quedar colgada varios minutos en vez de fallar rapido
-
+DATABASE_URL = os.environ.get("DATABASE_URL")
+CONNECT_TIMEOUT = 5
 
 def get_connection():
+    if not DATABASE_URL:
+        raise RuntimeError("Falta configurar DATABASE_URL en el entorno")
     return psycopg.connect(
-        host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD,
+        conninfo=DATABASE_URL,
         connect_timeout=CONNECT_TIMEOUT,
     )
 
-
 def is_connected():
-    """Chequeo liviano para el indicador de estado en la interfaz (timeout corto -- se llama
-    en cada carga de pagina, no debe demorar la respuesta si Postgres esta caido)."""
     try:
+        if not DATABASE_URL:
+            return False
         with psycopg.connect(
-            host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD,
+            conninfo=DATABASE_URL,
             connect_timeout=1,
         ):
             return True

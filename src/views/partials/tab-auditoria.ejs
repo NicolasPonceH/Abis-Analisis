@@ -1,6 +1,6 @@
 <section id="tab-auditoria" class="tab-content" style="display: none;">
       <div class="table-card" style="margin-bottom: 24px;">
-        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+        <div class="table-header-bar audit-header-bar">
           <div class="chart-title">
             <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -11,7 +11,7 @@
             </svg>
             <span>Bitácora de Eventos y Trazabilidad (Inmutable)</span>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <div class="audit-filter-controls">
             <select id="audit-filter-tipo" class="form-control" style="width: auto;">
               <option value="">-- Todos los Eventos --</option>
               <option value="INGESTA_EXCEL_AUTORIZADA">Carga de Datos (Ingesta)</option>

@@ -17,11 +17,7 @@ function iniciarSIAD(envVars = {}) {
   
   const env = {
     ...process.env,
-    DB_HOST: '127.0.0.1',
-    DB_PORT: '5433',
-    DB_NAME: 'Abis_OCR',
-    DB_USER: 'postgres',
-    DB_PASSWORD: 'abis_dev_pw',
+    DATABASE_URL: process.env.DATABASE_URL,
 
     FLASK_RUN_PORT: envVars.SIAD_PORT || process.env.SIAD_PORT || '5001',
     APPLICATION_ROOT: '/analisis'
