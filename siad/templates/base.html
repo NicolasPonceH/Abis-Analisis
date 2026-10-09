@@ -367,54 +367,54 @@ body.splash-disabled #pdi-splash-overlay,
 
 <!-- 1. Header de Navegación Institucional PDI -->
 <header id="page-header" class="header-institutional fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100] h-[67.33px] flex items-center">
-<div class="h-full w-full px-2 lg:px-4 flex items-center justify-between">
-<div class="flex items-center gap-xs -ml-1">
-<a href="{{ url_for('index') }}" class="flex items-center gap-xs group hover:opacity-90 transition-opacity">
-  <img alt="PDI" class="h-9 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
-  <span class="text-[23px] font-black text-white ml-2 hidden sm:inline-block drop-shadow-md tracking-tight">Análisis Documental</span>
+<div class="h-full w-full px-3 lg:px-6 flex items-center justify-between">
+<div class="flex items-center gap-2 -ml-1">
+<a href="{{ url_for('index') }}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
+  <img alt="PDI" class="h-10 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
+  <span class="text-[25px] font-black text-white ml-2 hidden sm:inline-block drop-shadow-md tracking-tight">Análisis Documental</span>
 </a>
 </div>
-<nav class="hidden md:flex items-center gap-3 h-full py-2">
+<nav class="hidden md:flex items-center gap-3 h-full py-1.5">
 
-<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-md border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-blue-100 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2 rounded-xl text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('index') }}">
-  <span class="material-symbols-outlined text-[20px]">document_scanner</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('index') }}">
+  <span class="material-symbols-outlined text-[24px]">document_scanner</span>
   Procesamiento OCR
 </a>
-<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-md border-b-2 border-amber-600' if active_page == 'historial' else 'text-blue-100 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2 rounded-xl text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('historial') }}">
-  <span class="material-symbols-outlined text-[20px]">history</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'historial' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('historial') }}">
+  <span class="material-symbols-outlined text-[24px]">history</span>
   Historial
 </a>
-<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-md border-b-2 border-amber-600' if active_page == 'estadisticas' else 'text-blue-100 hover:bg-white/10 hover:text-white font-bold' }} px-5 py-2 rounded-xl text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('estadisticas') }}">
-  <span class="material-symbols-outlined text-[20px]">bar_chart</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'estadisticas' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('estadisticas') }}">
+  <span class="material-symbols-outlined text-[24px]">bar_chart</span>
   Estadísticas
 </a>
-<div id="live-clock" class="hidden lg:flex items-center gap-2 text-amber-300 bg-slate-900/60 border border-amber-400/40 px-4 py-1.5 rounded-xl shadow-inner ml-3 shrink-0" title="Hora del Sistema">
-  <span class="material-symbols-outlined text-[18px] text-[#ffd100]">schedule</span>
-  <span class="text-[16px] font-mono font-black tracking-widest drop-shadow-md" id="clock-time">--:--:--</span>
+<div id="live-clock" class="hidden lg:flex items-center gap-2.5 text-amber-300 bg-slate-900/70 border border-amber-400/50 px-4 py-2 rounded-xl shadow-inner ml-2 shrink-0" title="Hora del Sistema">
+  <span class="material-symbols-outlined text-[22px] text-[#ffd100]">schedule</span>
+  <span class="text-[17px] font-mono font-black tracking-widest drop-shadow-md" id="clock-time">--:--:--</span>
 </div>
 </nav>
 <div class="flex items-center gap-3">
   <a class="hidden md:flex mr-2 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-black px-5 py-2.5 rounded-xl text-base tracking-wide uppercase items-center gap-2.5 transition-all duration-200 shadow-lg transform hover:-translate-y-0.5 border-2 border-[#e6bc00]" href="/">
-    <span class="material-symbols-outlined text-[22px]">fingerprint</span>
+    <span class="material-symbols-outlined text-[24px]">fingerprint</span>
     Sistema ABIS
   </a>
   {% if current_user %}
   <div class="flex items-center ml-1 mr-1">
-    <span class="text-white font-bold tracking-wide text-sm uppercase drop-shadow-sm">{{ current_user }}</span>
+    <span class="text-white font-black tracking-wide text-base uppercase drop-shadow-sm">{{ current_user }}</span>
   </div>
   <div class="flex items-center gap-2.5">
-    <a href="{{ url_for('configuracion') }}" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-amber-400/25 text-white hover:text-amber-300 border border-white/20 hover:border-amber-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ajustes del Sistema">
-      <span class="material-symbols-outlined text-[22px]">settings</span>
+    <a href="{{ url_for('configuracion') }}" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-amber-400/25 text-white hover:text-amber-300 border border-white/20 hover:border-amber-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ajustes del Sistema">
+      <span class="material-symbols-outlined text-[24px]">settings</span>
     </a>
-    <a href="{{ url_for('perfil') }}" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-sky-400/25 text-white hover:text-sky-300 border border-white/20 hover:border-sky-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ver Perfil">
-      <span class="material-symbols-outlined text-[22px]">person</span>
+    <a href="{{ url_for('perfil') }}" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-sky-400/25 text-white hover:text-sky-300 border border-white/20 hover:border-sky-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ver Perfil">
+      <span class="material-symbols-outlined text-[24px]">person</span>
     </a>
-    <a href="{{ url_for('logout') }}" class="w-10 h-10 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white border border-red-400/40 hover:border-red-500 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Cerrar sesión">
-      <span class="material-symbols-outlined text-[22px]">logout</span>
+    <a href="{{ url_for('logout') }}" class="w-11 h-11 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white border border-red-400/40 hover:border-red-500 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Cerrar sesión">
+      <span class="material-symbols-outlined text-[24px]">logout</span>
     </a>
   </div>
   {% else %}
-  <a href="{{ url_for('login') }}" class="text-body-md font-medium text-white hover:text-blue-200 transition-colors">Iniciar Sesión</a>
+  <a href="{{ url_for('login') }}" class="text-body-md font-bold text-white hover:text-blue-200 transition-colors">Iniciar Sesión</a>
   {% endif %}
 </div>
 </div>
