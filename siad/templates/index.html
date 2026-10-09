@@ -92,71 +92,294 @@
   }
 </style>
 
-<div class="px-2 lg:px-4 py-3 w-full flex flex-col gap-4">
+<div class="px-4 lg:px-8 py-6 max-w-[1720px] mx-auto w-full flex flex-col gap-6">
 
   {% if not viewing %}
 
-  <div
-    class="max-w-4xl mx-auto w-full rounded-2xl shadow-md border border-slate-200 backdrop-blur-md p-8 flex flex-col items-center" style="background: radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%), radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%), radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%), linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%);">
-    <div class="flex flex-col items-center mb-6 text-center">
-
-      <h2 class="text-xl font-extrabold text-[#00234c] tracking-tight">Cargar documentos para análisis</h2>
+  <!-- 1. Hero Banner Institucional PDI con Gradiente Azul #4d82bc -->
+  <div class="bg-gradient-to-r from-[#4d82bc] via-[#3b6899] to-[#2d5684] text-white rounded-3xl shadow-xl border-b-4 border-[#376293] p-6 lg:p-8 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 relative overflow-hidden">
+    <!-- Patrón de Fondo sutil -->
+    <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMSIvPjwvc3ZnPg==')] bg-repeat" style="background-size: 16px 16px;"></div>
+    
+    <div class="flex items-center gap-5 relative z-10">
+      <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-white/20 text-white flex items-center justify-center shadow-md border border-white/30 shrink-0">
+        <span class="material-symbols-outlined text-[32px] lg:text-[38px]">document_scanner</span>
+      </div>
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ffd100] text-[#00234c] font-black text-[10px] uppercase tracking-widest mb-1.5 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#00234c] animate-pulse"></span> MÓDULO DE INGESTA DOCUMENTAL
+        </div>
+        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-white leading-tight">
+          Sistema Inteligente de Análisis Documental y OCR
+        </h1>
+        <p class="text-xs lg:text-sm text-blue-100 font-medium mt-1">
+          Carga partes policiales, imágenes o expedientes para extracción automatizada de entidades (RUTs, Patentes, Armas, Drogas y Personas).
+        </p>
+      </div>
     </div>
 
-    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data"
-      class="w-full max-w-3xl flex flex-col gap-4">
+    <!-- Indicadores Rápidos en la Franja Hero -->
+    <div class="flex flex-wrap items-center gap-3 relative z-10 w-full xl:w-auto justify-start xl:justify-end">
+      <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-md text-xs font-bold shadow-sm">
+        <span class="material-symbols-outlined text-[18px] text-[#ffd100]">bolt</span>
+        <span>OCR Multi-Motor Activo</span>
+      </div>
+      <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-md text-xs font-bold shadow-sm">
+        <span class="material-symbols-outlined text-[18px] text-emerald-300">verified</span>
+        <span>Reconocimiento NER IA</span>
+      </div>
+      <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-md text-xs font-bold shadow-sm">
+        <span class="material-symbols-outlined text-[18px] text-sky-200">shield</span>
+        <span>Trazabilidad Forense PDI</span>
+      </div>
+    </div>
+  </div>
 
-      <label id="drop-zone"
-        class="cursor-pointer group relative flex flex-col items-center justify-center w-full h-48 border-[2.5px] border-dashed border-blue-400 rounded-2xl bg-blue-50 hover:bg-blue-100 hover:border-blue-500 hover:shadow-[0_0_20px_rgba(96,165,250,0.4)] transition-all duration-300 ease-out overflow-hidden">
-        <!-- Decoración sutil de fondo -->
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-blue-200/30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+  <!-- 2. Grid Principal (2 Columnas en Pantallas Medias/Grandes) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Círculo del ícono animado -->
-        <div id="drop-zone-icon"
-          class="relative z-10 w-16 h-16 mb-4 bg-blue-600 border border-blue-400/30 shadow-[0_4px_15px_rgba(0,0,0,0.2)] rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-700 transition-all duration-300 ease-out">
-          <span class="material-symbols-outlined text-[32px] text-white">upload_file</span>
-        </div>
+    <!-- COLUMNA IZQUIERDA: Ingesta Documental + Lista de Archivos Cargados (lg:col-span-8) -->
+    <div class="lg:col-span-8 flex flex-col gap-6">
 
-        <span
-          class="text-[16px] font-bold text-blue-900 group-hover:text-blue-800 transition-colors relative z-10">Haz
-          clic para examinar o arrastra tus archivos aquí</span>
-        <span class="text-[11px] text-blue-700 mt-2 relative z-10 font-bold tracking-wide uppercase">PDF, Documentos
-          Ofimáticos, TXT, Imágenes</span>
+      <!-- Tarjeta Ingesta / Cargar Archivos -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <!-- Header de Tarjeta Azul #4d82bc -->
+        <div class="bg-gradient-to-r from-[#4d82bc] to-[#3b6899] border-b-2 border-[#376293] px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-black shadow-inner shrink-0 border border-white/30">
+              <span class="material-symbols-outlined text-[22px]">cloud_upload</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-white leading-tight">Carga de Documentos para Análisis</h2>
+              <p class="text-xs text-blue-100 font-medium">Examina tu equipo o arrastra archivos para ingresar al flujo forense</p>
+            </div>
+          </div>
 
-        <input type="file" id="pdf-file-input" name="pdf_file"
-          accept=".pdf, image/*, .txt, .csv, .log, .doc, .docx, .xls, .xlsx, .ppt, .pptx" multiple required
-          class="hidden">
-      </label>
-
-      <div class="flex items-center justify-between min-h-[40px]">
-        <span id="file-count-label" class="text-sm text-slate-500 dark:text-slate-400 italic">No se ha seleccionado
-          ningún archivo</span>
-        <div class="flex items-center gap-3">
           <button type="button" onclick="document.getElementById('pasteModal').showModal()"
-            class="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">content_paste</span> Pegar Texto Directo
+            class="bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 border-b-2 border-amber-600 active:scale-95 shrink-0">
+            <span class="material-symbols-outlined text-[18px]">content_paste</span>
+            <span>Pegar Texto Directo</span>
           </button>
-          <button type="submit" id="submit-action"
-            class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-2.5 rounded shadow-sm transition-all uppercase tracking-wide items-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0">
-            <span class="material-symbols-outlined text-[18px]">upload</span> Subir Doc
-          </button>
+        </div>
+
+        <div class="p-6 flex flex-col gap-5">
+          <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="flex flex-col gap-4">
+
+            <!-- Zona Drag and Drop Mejorada -->
+            <label id="drop-zone"
+              class="cursor-pointer group relative flex flex-col items-center justify-center w-full py-10 px-6 border-[2.5px] border-dashed border-[#4d82bc]/50 rounded-2xl bg-blue-50/40 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-[#4d82bc] hover:shadow-[0_0_25px_rgba(77,130,188,0.25)] transition-all duration-300 ease-out overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#4d82bc]/10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+              <!-- Círculo Ícono -->
+              <div id="drop-zone-icon"
+                class="relative z-10 w-16 h-16 mb-3 bg-[#4d82bc] text-white shadow-lg rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-[#3b6899] transition-all duration-300 border border-blue-300/40">
+                <span class="material-symbols-outlined text-[34px]">upload_file</span>
+              </div>
+
+              <span class="text-base font-black text-slate-800 dark:text-slate-100 group-hover:text-[#4d82bc] transition-colors relative z-10 text-center">
+                Haz clic para examinar o arrastra tus archivos aquí
+              </span>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 relative z-10 font-semibold text-center">
+                Soporta expedientes periciales, partes de denuncia, imágenes y texto
+              </p>
+
+              <!-- Insignias de Formatos Soportados -->
+              <div class="flex flex-wrap items-center justify-center gap-2 mt-4 relative z-10">
+                <span class="px-2.5 py-1 rounded-lg bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 text-[10px] font-black border border-red-200 dark:border-red-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span> PDF
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 text-[10px] font-black border border-blue-200 dark:border-blue-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[14px]">description</span> DOCX / DOC
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 text-[10px] font-black border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[14px]">image</span> PNG / JPG
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 text-[10px] font-black border border-purple-200 dark:border-purple-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[14px]">article</span> TXT / CSV
+                </span>
+              </div>
+
+              <input type="file" id="pdf-file-input" name="pdf_file"
+                accept=".pdf, image/*, .txt, .csv, .log, .doc, .docx, .xls, .xlsx, .ppt, .pptx" multiple required
+                class="hidden">
+            </label>
+
+            <!-- Fila de Estado de Selección -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+              <span id="file-count-label" class="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">
+                No se ha seleccionado ningún archivo
+              </span>
+              <button type="submit" id="submit-action"
+                class="hidden bg-[#4d82bc] hover:bg-[#3b6899] text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-md transition-all uppercase tracking-wider items-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 border-b-2 border-[#ffd100]">
+                <span class="material-symbols-outlined text-[18px] text-[#ffd100]">rocket_launch</span>
+                <span>INICIAR PROCESAMIENTO OCR</span>
+              </button>
+            </div>
+
+            <!-- Fila de Archivos en Cola -->
+            <div id="pdf-file-chips-row"
+              class="hidden flex-col gap-3 mt-2 bg-gradient-to-r from-[#4d82bc] to-[#3b6899] p-5 rounded-2xl border-2 border-blue-300/40 shadow-lg text-white">
+              <div class="flex items-center justify-between border-b border-white/20 pb-2.5">
+                <span class="text-[11px] font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[18px] text-[#ffd100]">queue</span> Archivos listos para procesamiento
+                </span>
+                <button type="button" id="pdf-file-clear"
+                  class="text-white bg-red-600 hover:bg-red-700 shadow-sm transition-all px-3 py-1 rounded-lg text-[10px] flex items-center gap-1 font-extrabold uppercase tracking-wider">
+                  <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar todo
+                </button>
+              </div>
+              <div id="pdf-file-chips" class="flex flex-wrap gap-2 w-full"></div>
+            </div>
+          </form>
         </div>
       </div>
 
-      <div id="pdf-file-chips-row"
-        class="hidden flex-col gap-3 mt-4 bg-[#0047AB] p-6 rounded-2xl border-4 border-blue-300/30 shadow-[0_10px_40px_rgba(0,71,171,0.3)]">
-        <div class="flex items-center justify-between border-b border-white/20 pb-3 mb-2">
-          <span class="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-            <span class="material-symbols-outlined text-[18px] text-blue-200">queue</span> En cola para procesar
-          </span>
-          <button type="button" id="pdf-file-clear"
-            class="text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-wider hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0">
-            <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar todo
-          </button>
+      <!-- Tarjeta Documentos Cargados en Espacio de Trabajo -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#4d82bc] to-[#3b6899] border-b-2 border-[#376293] px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-black shadow-inner shrink-0 border border-white/30">
+              <span class="material-symbols-outlined text-[22px]">folder_open</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-white leading-tight">Documentos en Espacio de Trabajo</h2>
+              <p class="text-xs text-blue-100 font-medium">Expedientes ingresados listos para visualización rápida</p>
+            </div>
+          </div>
+          {% if files %}
+          <form action="{{ url_for('delete_all_documents') }}" method="post"
+            onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos del espacio de trabajo? Esta acción no afecta al historial forense.');">
+            <button type="submit"
+              class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 transition-colors px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
+              <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar Espacio
+            </button>
+          </form>
+          {% endif %}
         </div>
-        <div id="pdf-file-chips" class="flex flex-wrap gap-2 w-full"></div>
+
+        <div class="p-6">
+          <div class="grid grid-cols-1 gap-2.5">
+            {% for f in files %}
+            <div class="flex items-center gap-3 group bg-slate-50 dark:bg-slate-800/70 hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-all p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm hover:border-[#4d82bc]">
+              <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3 truncate no-underline">
+                <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950/80 text-red-600 flex items-center justify-center font-black shrink-0 shadow-sm">
+                  <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                </div>
+                <span class="text-sm font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-[#4d82bc] transition-colors truncate">{{ f }}</span>
+              </a>
+              <form action="{{ url_for('delete_document', filename=f) }}" method="post"
+                onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
+                <button type="submit" title="Eliminar documento"
+                  class="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors p-1.5 rounded-xl opacity-60 group-hover:opacity-100">close</button>
+              </form>
+            </div>
+            {% else %}
+            <div class="py-10 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-800/40 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center">
+              <span class="material-symbols-outlined text-[36px] text-slate-300 dark:text-slate-600 mb-2">inventory_2</span>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">El espacio de trabajo está libre</p>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Sube expedientes en el cuadro de ingesta superior para comenzar</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
-    </form>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: Panel de Inteligencia Operativa y Guía (lg:col-span-4) -->
+    <div class="lg:col-span-4 flex flex-col gap-6">
+
+      <!-- Tarjeta 1: Estado del Sistema OCR -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#4d82bc] to-[#3b6899] border-b-2 border-[#376293] px-6 py-4 flex items-center gap-3 text-white shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center font-black shadow-inner shrink-0 border border-white/30">
+            <span class="material-symbols-outlined text-[20px]">dataset</span>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white leading-tight">Estado Operativo SIAD</h3>
+            <p class="text-[11px] text-blue-100 font-medium">Motor de Inteligencia Policial</p>
+          </div>
+        </div>
+
+        <div class="p-6 flex flex-col gap-4">
+          <!-- Indicador Estado Motor -->
+          <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800">
+            <div class="flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+              <span class="text-xs font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wide">Motor OCR IA Activo</span>
+            </div>
+            <span class="text-[10px] font-extrabold bg-emerald-200/70 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2.5 py-1 rounded-lg">Online</span>
+          </div>
+
+          <!-- Entidades Indexables -->
+          <div class="flex flex-col gap-2.5">
+            <span class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-[#4d82bc]">saved_search</span> Entidades Indexables
+            </span>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-blue-600">directions_car</span>
+                <span class="text-xs font-extrabold text-slate-800 dark:text-slate-200">Vehículos</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-red-600">crisis_alert</span>
+                <span class="text-xs font-extrabold text-slate-800 dark:text-slate-200">Armamento</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-amber-600">medication</span>
+                <span class="text-xs font-extrabold text-slate-800 dark:text-slate-200">Sustancias</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-purple-600">group</span>
+                <span class="text-xs font-extrabold text-slate-800 dark:text-slate-200">Personas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta 2: Guía de Ingesta Rápida -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#4d82bc] to-[#3b6899] border-b-2 border-[#376293] px-6 py-4 flex items-center gap-3 text-white shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center font-black shadow-inner shrink-0 border border-white/30">
+            <span class="material-symbols-outlined text-[20px]">help_outline</span>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white leading-tight">Guía Operativa</h3>
+            <p class="text-[11px] text-blue-100 font-medium">Pasos del proceso forense</p>
+          </div>
+        </div>
+
+        <div class="p-6 flex flex-col gap-4">
+          <div class="flex items-start gap-3">
+            <span class="w-7 h-7 rounded-xl bg-[#4d82bc] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5">1</span>
+            <div>
+              <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+            <span class="w-7 h-7 rounded-xl bg-[#4d82bc] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5">2</span>
+            <div>
+              <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+            <span class="w-7 h-7 rounded-xl bg-[#4d82bc] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5">3</span>
+            <div>
+              <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 
     <script>
       (function () {
@@ -274,7 +497,7 @@
             dropZone.classList.remove('border-blue-400', 'bg-blue-50', 'hover:bg-blue-100');
             var icon = document.getElementById('drop-zone-icon');
             if (icon) {
-              icon.classList.remove('bg-blue-600', 'group-hover:bg-blue-700');
+              icon.classList.remove('bg-[#4d82bc]', 'group-hover:bg-[#3b6899]');
               icon.classList.add('bg-[#C5A059]', 'border-[#C5A059]', 'scale-125');
             }
           }, false);
@@ -287,7 +510,7 @@
             var icon = document.getElementById('drop-zone-icon');
             if (icon) {
               icon.classList.remove('bg-[#C5A059]', 'border-[#C5A059]', 'scale-125');
-              icon.classList.add('bg-blue-600');
+              icon.classList.add('bg-[#4d82bc]');
             }
           }, false);
         });
@@ -308,54 +531,6 @@
         });
       })();
     </script>
-  </div>
-
-  <div
-    class="max-w-4xl mx-auto w-full bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 mt-6">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-blue-900/50 pb-4 gap-4 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 -mx-6 -mt-6 rounded-t-2xl">
-      <div class="flex items-center gap-2 text-white">
-        <div class="w-8 h-8 rounded flex items-center justify-center">
-          <span class="material-symbols-outlined text-[20px]">folder_open</span>
-        </div>
-        <h2 class="text-lg font-bold tracking-tight">Documentos Cargados</h2>
-      </div>
-      {% if files %}
-      <form action="{{ url_for('delete_all_documents') }}" method="post"
-        onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos cargados del espacio de trabajo? Esta acción no afecta al historial forense.');">
-        <button type="submit"
-          class="bg-red-50 text-red-700 hover:bg-red-100 transition-colors px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 border border-red-200">
-          <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar Espacio
-        </button>
-      </form>
-      {% endif %}
-    </div>
-
-    <div class="grid grid-cols-1 gap-2">
-      {% for f in files %}
-      <div
-        class="flex items-center gap-3 group bg-white dark:bg-slate-900 hover:bg-blue-50 transition-colors p-3 rounded-lg border border-slate-100 dark:border-slate-800 shadow-sm hover:border-blue-200 hover:shadow">
-        <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3">
-          <span class="material-symbols-outlined text-red-500 text-[24px]">picture_as_pdf</span>
-          <span
-            class="text-sm font-semibold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 transition-colors">{{
-            f }}</span>
-        </a>
-        <form action="{{ url_for('delete_document', filename=f) }}" method="post"
-          onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
-          <button type="submit" title="Eliminar documento"
-            class="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors p-1.5 rounded opacity-50 group-hover:opacity-100">close</button>
-        </form>
-      </div>
-      {% else %}
-      <div
-        class="py-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
-        <span class="material-symbols-outlined text-[32px] text-slate-300 dark:text-slate-500 mb-2">inventory_2</span>
-        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">El espacio de trabajo está vacío.</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
 
   {% else %}
 
