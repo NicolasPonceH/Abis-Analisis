@@ -5,8 +5,8 @@
 <div class="px-6 lg:px-12 py-10 max-w-[1700px] mx-auto w-full flex flex-col gap-8">
   
   <!-- Cabecera de Ajustes Institucionales -->
-  <div class="bg-gradient-to-br from-[#00234c] via-[#001c3e] to-[#001229] text-white rounded-3xl shadow-2xl border border-blue-900/50 p-8 lg:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
-    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="bg-[#00234c] text-white rounded-3xl shadow-2xl border-b-4 border-[#ffd100] p-8 lg:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
     
     <div class="flex items-center gap-6 relative z-10">
       <div class="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-gradient-to-tr from-[#ffd100] to-[#ffe566] text-[#00234c] flex items-center justify-center shadow-xl shadow-yellow-500/20 shrink-0 font-extrabold">
@@ -44,19 +44,19 @@
         
         <div class="px-4 py-3 text-xs lg:text-sm font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">Ajustes Generales</div>
         
-        <a href="{{ url_for('configuracion', section='general') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if not section or section == 'general' %}bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+        <a href="{{ url_for('configuracion', section='general') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if not section or section == 'general' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
           <span class="material-symbols-outlined text-[26px]">tune</span>
           <span>General</span>
         </a>
 
-        <a href="{{ url_for('configuracion', section='cuenta') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'cuenta' %}bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+        <a href="{{ url_for('configuracion', section='cuenta') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'cuenta' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
           <span class="material-symbols-outlined text-[26px]">manage_accounts</span>
           <span>Cuenta</span>
         </a>
 
         <div class="px-4 pt-5 pb-2 text-xs lg:text-sm font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider border-t-2 border-slate-100 dark:border-slate-800 mt-3">Administración</div>
 
-        <a href="{{ url_for('configuracion', section='administracion') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'administracion' %}bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+        <a href="{{ url_for('configuracion', section='administracion') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'administracion' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
           <span class="material-symbols-outlined text-[26px]">admin_panel_settings</span>
           <span>Administración</span>
         </a>
@@ -251,7 +251,7 @@
 
         <!-- Tarjeta 1: Añadir usuarios -->
         <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
-          <div class="bg-gradient-to-r from-[#003069] to-[#0050a0] border-b-4 border-amber-400 p-5 px-8 text-white flex items-center gap-3 font-extrabold text-lg">
+          <div class="bg-[#00234c] border-b-4 border-[#ffd100] p-5 px-8 text-white flex items-center gap-3 font-extrabold text-lg">
             <span class="material-symbols-outlined text-amber-300 text-[26px]">person_add</span>
             <span>Añadir usuarios</span>
           </div>
@@ -266,8 +266,8 @@
               <div>
                 <label for="siad-nuevo-rol" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nivel de Acceso</label>
                 <select id="siad-nuevo-rol" required class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer">
-                  <option value="admin" selected>Administrador Policial (Total)</option>
                   <option value="operador">Operador (Estándar)</option>
+                  <option value="admin">Administrador (Total)</option>
                 </select>
               </div>
             </div>
@@ -297,7 +297,7 @@
 
         <!-- Tarjeta 2: Registro Activo de Usuarios -->
         <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
-          <div class="bg-gradient-to-r from-[#003069] to-[#0050a0] border-b-4 border-amber-400 p-5 px-8 text-white flex items-center justify-between font-extrabold text-lg">
+          <div class="bg-[#00234c] border-b-4 border-[#ffd100] p-5 px-8 text-white flex items-center justify-between font-extrabold text-lg">
             <div class="flex items-center gap-3">
               <span class="material-symbols-outlined text-amber-300 text-[26px]">group</span>
               <span>Registro Activo</span>
