@@ -270,9 +270,6 @@
       {% if stats and (stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) > 0 %}
       <canvas id="chartDistribucion"></canvas>
       <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900 flex items-center justify-center mb-0.5 shadow-inner">
-          <span class="material-symbols-outlined text-[16px] text-blue-600 dark:text-blue-400">donut_large</span>
-        </div>
         <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">TOTAL ENTIDADES</span>
         <span class="text-3xl font-black text-slate-900 dark:text-white tracking-tight my-0.5">{{ '{:,}'.format((stats.por_categoria.vehiculo + stats.por_categoria.arma + stats.por_categoria.droga + stats.por_categoria.persona) if stats else 0) }}</span>
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-[9px] font-extrabold border border-emerald-200/50 dark:border-emerald-800/50 shadow-sm">
