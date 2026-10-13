@@ -481,7 +481,7 @@ def get_user_by_username(username):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, username, password_hash, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios WHERE username = %s",
+                "SELECT id, username, password_hash, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios WHERE LOWER(username) = LOWER(%s)",
                 (username,)
             )
             row = cur.fetchone()
@@ -514,7 +514,7 @@ def update_password(username, password_hash):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE usuarios SET password_hash = %s WHERE username = %s",
+                "UPDATE usuarios SET password_hash = %s WHERE LOWER(username) = LOWER(%s)",
                 (password_hash, username)
             )
         conn.commit()
@@ -524,7 +524,7 @@ def update_last_login(username):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE usuarios SET ultimo_ingreso = now() WHERE username = %s",
+                "UPDATE usuarios SET ultimo_ingreso = now() WHERE LOWER(username) = LOWER(%s)",
                 (username,)
             )
         conn.commit()

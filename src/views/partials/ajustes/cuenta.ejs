@@ -40,7 +40,7 @@
             Mantén tu cuenta protegida actualizando tu contraseña periódicamente. Se recomienda usar al menos 6 caracteres.
           </p>
         </div>
-        <button type="button" class="account-password-btn account-primary-btn" onclick="document.getElementById('modal-mi-contrasena').hidden = false" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15); width: 100%;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)';">
+        <button type="button" class="account-password-btn account-primary-btn" onclick="if(window.openMiContrasenaModal) window.openMiContrasenaModal(); else document.getElementById('modal-mi-contrasena').hidden = false;" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15); width: 100%;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)';">
           <i class="fa-solid fa-key"></i> Modificar Contraseña
         </button>
       </div>
@@ -66,42 +66,25 @@
 
 <script>
   (() => {
-    const passwordButton = document.querySelector('.account-password-btn');
-    if (!passwordButton) return;
-    const applyPasswordButtonStyle = (background, shadow) => {
-      passwordButton.style.setProperty('background', background, 'important');
-      passwordButton.style.setProperty('color', '#001f44', 'important');
-      passwordButton.style.setProperty('border', '1px solid #e5b900', 'important');
-      passwordButton.style.setProperty('box-shadow', shadow, 'important');
-    };
-    applyPasswordButtonStyle('#ffd100', '0 4px 10px rgba(212, 175, 55, .28)');
-    passwordButton.addEventListener('mouseenter', () => applyPasswordButtonStyle('#f3c400', '0 7px 14px rgba(212, 175, 55, .36)'));
-    passwordButton.addEventListener('mouseleave', () => applyPasswordButtonStyle('#ffd100', '0 4px 10px rgba(212, 175, 55, .28)'));
-  })();
-</script>
+    const getModal = () => document.getElementById('modal-mi-contrasena');
+    const getForm = () => document.getElementById('form-mi-contrasena');
+    const getFeedback = () => document.getElementById('mi-contrasena-feedback');
 
-<script>
-  (() => {
-    const form = document.getElementById('form-mi-contrasena');
-    if (!form) return;
-
-    const modal = document.getElementById('modal-mi-contrasena');
-    const feedback = document.getElementById('mi-contrasena-feedback');
-    
     const setFeedback = (message, type) => {
+      const feedback = getFeedback();
       if (!feedback) return;
       feedback.textContent = message;
       if (type === 'error') {
         feedback.style.color = '#dc2626';
         feedback.style.background = '#fef2f2';
-        feedback.style.padding = '8px 12px';
-        feedback.style.borderRadius = '6px';
+        feedback.style.padding = '10px 14px';
+        feedback.style.borderRadius = '8px';
         feedback.style.border = '1px solid #fecaca';
       } else if (type === 'success') {
         feedback.style.color = '#059669';
         feedback.style.background = '#ecfdf5';
-        feedback.style.padding = '8px 12px';
-        feedback.style.borderRadius = '6px';
+        feedback.style.padding = '10px 14px';
+        feedback.style.borderRadius = '8px';
         feedback.style.border = '1px solid #a7f3d0';
       } else {
         feedback.style.padding = '0';
@@ -109,57 +92,95 @@
         feedback.style.background = 'transparent';
       }
     };
-    // Función para cerrar modal desde botón Cancelar o la X
+
     window.closeMiContrasenaModal = () => {
-      form.reset();
+      const modal = getModal();
+      const form = getForm();
+      if (form) form.reset();
       setFeedback('', '');
-      if (modal) modal.hidden = true;
+      if (modal) {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+      }
     };
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const password = document.getElementById('mi-nueva-contrasena').value;
-      const confirmation = document.getElementById('mi-confirmar-contrasena').value;
-      const submit = form.querySelector('button[type="submit"]');
-
-      if (password.length < 6) return setFeedback('La contraseña debe tener al menos 6 caracteres.', 'error');
-      if (password !== confirmation) return setFeedback('Las contraseñas no coinciden.', 'error');
-
-      submit.disabled = true;
-      submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    window.openMiContrasenaModal = () => {
+      const modal = getModal();
+      const form = getForm();
+      if (form) form.reset();
       setFeedback('', '');
-      
-      try {
-        const response = await fetch('/api/user/change-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password })
-        });
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error(data.error || 'No se pudo actualizar la contraseña.');
-        form.reset();
-        setFeedback('Contraseña actualizada correctamente.', 'success');
-        setTimeout(() => {
-          if (window.closeMiContrasenaModal) window.closeMiContrasenaModal();
-        }, 3000);
-      } catch (error) {
-        setFeedback(error.message || 'No se pudo actualizar la contraseña.', 'error');
-      } finally {
-        submit.disabled = false;
-        submit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+      if (modal) {
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
       }
-    });
+      setTimeout(() => document.getElementById('mi-nueva-contrasena')?.focus(), 60);
+    };
+
+    const attachEvents = () => {
+      const form = getForm();
+      const modal = getModal();
+      if (!form || form.dataset.initialized) return;
+      form.dataset.initialized = 'true';
+
+      modal?.addEventListener('click', (event) => {
+        if (event.target === modal) window.closeMiContrasenaModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal && !modal.hidden) window.closeMiContrasenaModal();
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = document.getElementById('mi-nueva-contrasena').value;
+        const confirmation = document.getElementById('mi-confirmar-contrasena').value;
+        const submit = form.querySelector('button[type="submit"]');
+
+        if (!password || password.length < 6) return setFeedback('La contraseña debe tener al menos 6 caracteres.', 'error');
+        if (password !== confirmation) return setFeedback('Las contraseñas no coinciden.', 'error');
+
+        submit.disabled = true;
+        submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+        setFeedback('', '');
+
+        try {
+          const response = await fetch('/api/user/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+          const data = await response.json();
+          if (!response.ok || !data.ok) throw new Error(data.error || 'No se pudo actualizar la contraseña.');
+          form.reset();
+          setFeedback('Contraseña actualizada correctamente.', 'success');
+          setTimeout(() => {
+            window.closeMiContrasenaModal();
+          }, 1800);
+        } catch (error) {
+          setFeedback(error.message || 'No se pudo actualizar la contraseña.', 'error');
+        } finally {
+          submit.disabled = false;
+          submit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+        }
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', attachEvents);
+    } else {
+      setTimeout(attachEvents, 0);
+    }
   })();
 </script>
 
 <!-- Modal Mi Contraseña -->
-<div id="modal-mi-contrasena" class="settings-modal" hidden>
-  <div class="settings-modal-card" style="width: min(500px, 100%);">
+<div id="modal-mi-contrasena" class="settings-modal settings-form-modal" hidden aria-hidden="true">
+  <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-mi-contrasena-title" style="width: min(520px, 100%);">
     <div class="settings-modal-header">
-      <h2><i class="fa-solid fa-key" style="color: var(--pdi-gold);"></i> Modificar Contraseña</h2>
-      <button type="button" class="settings-close-btn" onclick="closeMiContrasenaModal()"><i class="fa-solid fa-times"></i></button>
+      <h2 id="modal-mi-contrasena-title"><i class="fa-solid fa-key" style="color: var(--pdi-gold);"></i> Modificar Contraseña</h2>
+      <button type="button" class="settings-close-btn" id="btn-close-mi-contrasena" onclick="closeMiContrasenaModal()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <form id="form-mi-contrasena" novalidate>
+    <form id="form-mi-contrasena" class="settings-form" style="padding: 28px 32px;" novalidate>
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <div>
           <label for="mi-nueva-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva contraseña</label>
@@ -182,7 +203,7 @@
       </div>
       <p id="mi-contrasena-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 0.92rem; font-weight: 600;"></p>
       <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-        <button type="button" onclick="closeMiContrasenaModal()" style="background: transparent; border: 1px solid var(--border-medium); color: var(--text-primary); padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;">Cancelar</button>
+        <button type="button" id="btn-cancel-mi-contrasena" onclick="closeMiContrasenaModal()" style="background: transparent; border: 2px solid var(--border-medium); color: var(--text-primary); padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Cancelar</button>
         <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
           <i class="fa-solid fa-floppy-disk"></i> Guardar
         </button>

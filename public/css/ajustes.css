@@ -725,18 +725,28 @@ body {
   align-items: center;
   gap: 10px;
   padding: 12px 24px;
-  border: 0;
+  border: 1px solid #e5b900;
   border-radius: 10px;
-  background: var(--pdi-navy, #001F44);
-  color: #fff;
+  background: var(--pdi-gold, #ffd100);
+  color: var(--pdi-navy-dark, #001733);
   font-weight: 800;
+  font-size: 0.98rem;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 31, 68, 0.15);
-  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 4px 14px rgba(255, 209, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.admin-add-button i {
+  color: var(--pdi-navy-dark, #001733);
 }
 .admin-add-button:hover {
-  background: #003366;
-  transform: translateY(-1px);
+  background: #ffe04d;
+  color: var(--pdi-navy-dark, #001733);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 209, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.admin-add-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(255, 209, 0, 0.3);
 }
 
 /* Modales de Formularios Admin */

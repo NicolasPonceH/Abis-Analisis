@@ -41,6 +41,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from dotenv import load_dotenv
 load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 import db
 from entities import extract_entities, highlight_entities_html, normalize_entities
@@ -83,7 +84,7 @@ app.config["SESSION_COOKIE_PATH"] = "/"
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register"}
+LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
@@ -126,7 +127,7 @@ def verify_password():
     try:
         with db.get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT password_hash FROM usuarios WHERE username = %s", (data["username"],))
+                cur.execute("SELECT password_hash FROM usuarios WHERE LOWER(username) = LOWER(%s)", (data["username"],))
                 row = cur.fetchone()
                 if row and check_password_hash(row[0], data["password"]):
                     return {"ok": True}
@@ -152,6 +153,26 @@ def api_register():
         return {"ok": True}
     except Exception as e:
         print(f"Error registrando usuario: {e}")
+        return {"ok": False, "error": str(e)}, 500
+
+@app.route("/api/update_password", methods=["POST"])
+def api_update_password():
+    data = request.get_json()
+    if not data or not data.get("username") or not data.get("password"):
+        return {"ok": False, "error": "Faltan datos obligatorios"}, 400
+    
+    username = data["username"]
+    password = data["password"]
+    
+    try:
+        user = db.get_user_by_username(username)
+        if not user:
+            return {"ok": False, "error": "El usuario no existe"}, 404
+            
+        db.update_password(username, generate_password_hash(password))
+        return {"ok": True}
+    except Exception as e:
+        print(f"Error actualizando password: {e}")
         return {"ok": False, "error": str(e)}, 500
 
 

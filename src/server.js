@@ -311,9 +311,15 @@ app.post("/api/user/change-password", requireAuth, express.json(), async (req, r
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: req.user.username, password })
     });
-    const data = await updateRes.json();
-    if (data.ok) return res.json({ ok: true });
-    return res.status(400).json({ error: data.error || "Error al actualizar la contraseña." });
+    let data = null;
+    try {
+      data = await updateRes.json();
+    } catch (_) {
+      console.warn("SIAD update_password no devolvió JSON:", updateRes.status);
+    }
+    if (data && data.ok) return res.json({ ok: true });
+    if (data && data.error) return res.status(400).json({ error: data.error });
+    return res.status(updateRes.ok ? 200 : 400).json({ error: "Error al actualizar la contraseña." });
   } catch (err) {
     console.error("Error in change-password:", err);
     return res.status(500).json({ error: "Error de conexión con el sistema de validación." });
@@ -338,9 +344,15 @@ app.post("/api/admin/reset-password", requireAuth, express.json(), async (req, r
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: userRes.rows[0].username, password })
     });
-    const data = await updateRes.json();
-    if (data.ok) return res.json({ ok: true });
-    return res.status(400).json({ error: data.error || "Error al actualizar la contraseña." });
+    let data = null;
+    try {
+      data = await updateRes.json();
+    } catch (_) {
+      console.warn("SIAD reset-password no devolvió JSON:", updateRes.status);
+    }
+    if (data && data.ok) return res.json({ ok: true });
+    if (data && data.error) return res.status(400).json({ error: data.error });
+    return res.status(updateRes.ok ? 200 : 400).json({ error: "Error al actualizar la contraseña." });
   } catch (err) {
     console.error("Error in reset-password:", err);
     return res.status(500).json({ error: "Error de servidor." });
