@@ -488,23 +488,23 @@ body.splash-disabled #pdi-splash-overlay,
 <div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px]">
   <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-3">
+    <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
           {% for category, message in messages %}
             {% if category == "success" %}
-              <div class="flash-banner bg-[#d7f5df] text-[#0b4a1e] rounded-lg px-4 py-2.5 font-body-md flex items-center gap-3 mb-2">
+              <div class="flash-banner bg-[#d7f5df] text-[#0b4a1e] rounded-lg px-4 py-3 font-body-md flex items-center gap-3 mb-4">
                 <span class="material-symbols-outlined text-[20px]">check_circle</span>{{ message }}
               </div>
             {% else %}
-              <div class="flash-banner bg-[#ffdad6] text-[#93000a] rounded-lg px-4 py-2.5 font-body-md flex items-center gap-3 mb-2">
+              <div class="flash-banner bg-[#ffdad6] text-[#93000a] rounded-lg px-4 py-3 font-body-md flex items-center gap-3 mb-4">
                 <span class="material-symbols-outlined text-[20px]">error</span>{{ message }}
               </div>
             {% endif %}
           {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+        {% endif %}
+      {% endwith %}
+    </div>
 
     {% block content %}{% endblock %}
   </main>
