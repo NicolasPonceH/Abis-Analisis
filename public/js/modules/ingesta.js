@@ -27,6 +27,121 @@ export const SHEET_SCHEMA = [
   { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación", "region 2", "región 2", "REGION2"] },
 ];
 
+function formatoFechaIngesta(valor) {
+  if (!valor) return "-";
+  const fecha = new Date(valor);
+  if (Number.isNaN(fecha.getTime())) return String(valor);
+  return fecha.toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short" });
+}
+
+function claseEstadoIngesta(estado) {
+  return String(estado || "").toLowerCase().replace(/[^a-z]/g, "") || "error";
+}
+
+export async function cargarHistorialIngestas() {
+  const body = document.getElementById("ingesta-history-body");
+  const feedback = document.getElementById("ingesta-history-feedback");
+  if (!body) return;
+
+  try {
+    const res = await fetch("/api/ingest/historial");
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo cargar el historial.");
+
+    if (!data.lotes || data.lotes.length === 0) {
+      body.innerHTML = `<tr><td colspan="7" class="ingesta-history-empty">No hay ingestas registradas.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = data.lotes.map((lote) => {
+      const puedeEliminar = lote.estado !== "ELIMINADO" && lote.estado !== "PROCESANDO";
+      const archivo = lote.nombre_archivo || lote.tipo_ingesta || "Sin nombre";
+      return `
+        <tr>
+          <td><strong>#${escapeHtml(String(lote.id_lote))}</strong></td>
+          <td>${escapeHtml(formatoFechaIngesta(lote.iniciado_en))}</td>
+          <td>
+            <span class="ingesta-lote-file" title="${escapeHtml(archivo)}">${escapeHtml(archivo)}</span>
+            <span class="ingesta-lote-meta">${escapeHtml(lote.tipo_ingesta || "-")}</span>
+          </td>
+          <td>${escapeHtml(lote.usuario || "-")}</td>
+          <td>${Number(lote.filas_insertadas || 0).toLocaleString("es-CL")}</td>
+          <td><span class="ingesta-lote-status ${claseEstadoIngesta(lote.estado)}">${escapeHtml(lote.estado || "-")}</span></td>
+          <td>
+            ${puedeEliminar
+              ? `<button type="button" class="btn-ingesta-eliminar" data-ingesta-delete="${escapeHtml(String(lote.id_lote))}" data-ingesta-file="${escapeHtml(archivo)}" data-ingesta-count="${Number(lote.filas_insertadas || 0)}">Eliminar</button>`
+              : `<span class="ingesta-lote-meta">${lote.estado === "ELIMINADO" ? "Ya eliminado" : "En proceso"}</span>`}
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    body.querySelectorAll("[data-ingesta-delete]").forEach((button) => {
+      button.addEventListener("click", () => {
+        promptAuthModal({
+          idLote: Number(button.dataset.ingestaDelete),
+          archivo: button.dataset.ingestaFile,
+          cantidad: Number(button.dataset.ingestaCount || 0),
+        }, "ingesta_eliminar");
+      });
+    });
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="7" class="ingesta-history-empty">No se pudo cargar el historial.</td></tr>`;
+    if (feedback) {
+      feedback.className = "ingesta-history-feedback error";
+      feedback.textContent = err.message;
+      feedback.style.display = "block";
+    }
+  }
+}
+
+export async function executeDeleteIngestAuthorized(payload, clave) {
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const feedback = document.getElementById("ingesta-history-feedback");
+
+  try {
+    const res = await fetch(`/api/ingest/lotes/${encodeURIComponent(payload.idLote)}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({ clave }),
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo eliminar el lote.");
+
+    closeAuthModal();
+    if (feedback) {
+      feedback.className = "ingesta-history-feedback success";
+      feedback.textContent = `Lote #${payload.idLote} eliminado. Registros eliminados: ${Number(data.eliminados || 0).toLocaleString("es-CL")}.`;
+      feedback.style.display = "block";
+    }
+    await cargarHistorialIngestas();
+    await loadAvailableDates();
+    await loadMetrics();
+    await loadTrendData();
+    await checkSystemHealth();
+  } catch (err) {
+    if (modalDialog) {
+      modalDialog.classList.remove("modal-shake");
+      void modalDialog.offsetWidth;
+      modalDialog.classList.add("modal-shake");
+    }
+    if (errorMsg) {
+      errorMsg.textContent = err.message;
+      errorMsg.style.display = "flex";
+    }
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = "<span>Autorizar y Eliminar Registros</span>";
+    }
+  }
+}
+
 export function setupDragAndDrop() {
   const dropzone = document.getElementById("upload-dropzone");
   const fileInput = document.getElementById("file-input");
@@ -64,6 +179,9 @@ export function setupDragAndDrop() {
 
   // Eventos del Modal de Autorización Policial
   setupAuthModalEvents();
+  const refreshHistory = document.getElementById("btn-refresh-ingesta-history");
+  if (refreshHistory) refreshHistory.addEventListener("click", cargarHistorialIngestas);
+  cargarHistorialIngestas();
 }
 
 export async function handleFileUpload(file, clave) {
@@ -158,6 +276,7 @@ export async function handleFileUpload(file, clave) {
       await loadMetrics();
       await loadTrendData();
       await checkSystemHealth();
+      await cargarHistorialIngestas();
     } else {
       if (statusDiv) {
         statusDiv.innerHTML = `
@@ -695,6 +814,7 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
       await loadMetrics();
       await loadTrendData();
       await checkSystemHealth();
+      await cargarHistorialIngestas();
       if (typeof cargarBitacoraAuditoria === "function") {
         cargarBitacoraAuditoria();
       }

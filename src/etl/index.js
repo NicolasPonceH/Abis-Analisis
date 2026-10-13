@@ -6,26 +6,26 @@ const { bulkInsertRegistros } = require("./bulkInsert");
 // Las filas que no se pudieron mapear (result.errors) NO bloquean al resto del lote: se
 // insertan todas las filas validas en una sola transaccion y se reportan las demas aparte,
 // para que un puñado de filas con errores no tumbe la carga diaria completa.
-async function runEtl(filePath, pool) {
+async function runEtl(filePath, pool, options = {}) {
   const result = await processExcelFile(filePath, pool);
 
   if (!result.headerValidation.ok) {
     return { ...result, insertResult: null };
   }
 
-  const insertResult = await bulkInsertRegistros(pool, result.rows);
+  const insertResult = await bulkInsertRegistros(pool, result.rows, options);
   return { ...result, insertResult };
 }
 
 // Orquesta la ingesta directa de filas pegadas desde la hoja de cálculo / portapapeles
-async function runSheetEtl(headers, rows, pool) {
+async function runSheetEtl(headers, rows, pool, options = {}) {
   const result = await processSheetRows(headers, rows, pool);
 
   if (!result.headerValidation.ok || result.rows.length === 0) {
     return { ...result, insertResult: { inserted: 0, batches: 0 } };
   }
 
-  const insertResult = await bulkInsertRegistros(pool, result.rows);
+  const insertResult = await bulkInsertRegistros(pool, result.rows, options);
   return { ...result, insertResult };
 }
 

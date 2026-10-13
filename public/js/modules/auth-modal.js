@@ -1,4 +1,4 @@
-import { handleFileUpload, executeSheetIngestAuthorized } from './ingesta.js';
+import { handleFileUpload, executeSheetIngestAuthorized, executeDeleteIngestAuthorized } from './ingesta.js';
 import { executeAgregarDestinatarioAuthorized, executeToggleDestinatarioAuthorized, executeEliminarDestinatarioAuthorized, executeSaveScheduleAuthorized } from './ajustes.js';
 
 export let pendingAuthFile = null;
@@ -116,6 +116,21 @@ export function promptAuthModal(file, actionType = "ingesta") {
     }
     if (fileNameEl) fileNameEl.textContent = `${file.nombre} (Chat ID: ${file.chatId})`;
     if (fileDetailsEl) fileDetailsEl.textContent = `Acción: Eliminación de PostgreSQL`;
+  } else if (actionType === "ingesta_eliminar") {
+    if (summaryIconEl) {
+      summaryIconEl.innerHTML = `
+        <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" style="stroke: #dc2626;">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      `;
+    }
+    if (titleEl) titleEl.textContent = "Autorización para Eliminar Ingesta";
+    if (subtitleEl) subtitleEl.textContent = "Eliminación controlada de registros en PostgreSQL";
+    if (warningEl) warningEl.textContent = "Esta acción eliminará todos los registros del lote seleccionado. Debe verificar su contraseña de inicio de sesión.";
+    if (confirmBtn) confirmBtn.innerHTML = `<span>Autorizar y Eliminar Registros</span>`;
+    if (fileNameEl) fileNameEl.textContent = `Lote #${file.idLote}: ${file.archivo}`;
+    if (fileDetailsEl) fileDetailsEl.textContent = `${Number(file.cantidad || 0).toLocaleString()} registros serán eliminados de PostgreSQL.`;
   } else if (actionType === "sheet_ingest") {
     if (summaryIconEl) {
       summaryIconEl.innerHTML = `
@@ -284,8 +299,9 @@ export async function confirmAuthorizedUpload() {
     await executeEliminarDestinatarioAuthorized(pendingAuthFile, clave);
   } else if (pendingAuthAction === "sheet_ingest") {
     await executeSheetIngestAuthorized(pendingAuthFile, clave);
+  } else if (pendingAuthAction === "ingesta_eliminar") {
+    await executeDeleteIngestAuthorized(pendingAuthFile, clave);
   } else {
     await handleFileUpload(pendingAuthFile, clave);
   }
 }
-
