@@ -96,15 +96,56 @@
 
   {% if not viewing %}
 
-  <!-- 2. Contenedor Principal con Guía Lateral -->
-  <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr_300px] xl:grid-cols-[340px_1fr_340px] gap-6 lg:gap-10 w-full items-start">
+  <!-- 2. Contenedor Principal con Guía Lateral y Tarjetas Principales -->
+  <div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] xl:grid-cols-[380px_1fr] gap-8 w-full max-w-7xl mx-auto items-start">
 
-    <!-- Tarjetas de Ingesta y Espacio de Trabajo -->
-    <div class="flex flex-col gap-6 order-last max-w-5xl mx-auto w-full">
+    <!-- Tarjeta de Guía Operativa (Izquierda) -->
+    <div class="flex flex-col gap-6 w-full">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center gap-3 text-white shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+            <span class="material-symbols-outlined text-[22px]">help_outline</span>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white leading-tight">Guía Operativa</h3>
+            <p class="text-xs text-blue-100 font-bold">Pasos del proceso forense</p>
+          </div>
+        </div>
+
+        <div class="p-6 flex flex-col gap-4">
+          <div class="flex items-start gap-3">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">1</span>
+            <div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 pt-3.5">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">2</span>
+            <div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 pt-3.5">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">3</span>
+            <div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas de Ingesta y Espacio de Trabajo (Derecha / Principal) -->
+    <div class="flex flex-col gap-6 w-full">
 
       <!-- Tarjeta Ingesta / Cargar Archivos -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
-        <!-- Header de Tarjeta Azul #4d82bc -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <!-- Header de Tarjeta Azul Institucional -->
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
@@ -117,7 +158,7 @@
           </div>
 
           <button type="button" onclick="document.getElementById('pasteModal').showModal()"
-            class="bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 border-b-2 border-amber-600 active:scale-95 shrink-0">
+            class="bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 border-b-2 border-amber-600 active:scale-95 shrink-0 cursor-pointer">
             <span class="material-symbols-outlined text-[18px]">content_paste</span>
             <span>Pegar Texto Directo</span>
           </button>
@@ -126,37 +167,37 @@
         <div class="p-6 flex flex-col gap-5">
           <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="flex flex-col gap-4">
 
-            <!-- Zona Drag and Drop Mejorada -->
+            <!-- Zona Drag and Drop Nítida y con Contraste Sólido -->
             <label id="drop-zone"
-              class="cursor-pointer group relative flex flex-col items-center justify-center w-full py-10 px-6 border-[2.5px] border-dashed border-[#4d82bc]/50 rounded-2xl bg-blue-50/40 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-[#4d82bc] hover:shadow-[0_0_25px_rgba(77,130,188,0.25)] transition-all duration-300 ease-out overflow-hidden">
-              <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#4d82bc]/10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              class="cursor-pointer group relative flex flex-col items-center justify-center w-full py-10 px-6 border-2 border-dashed border-[#2563eb] rounded-2xl bg-blue-50/50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-[#1d4ed8] hover:shadow-lg transition-all duration-200 ease-out overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#2563eb]/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               <!-- Círculo Ícono -->
               <div id="drop-zone-icon"
-                class="relative z-10 w-16 h-16 mb-3 bg-[#4d82bc] text-white shadow-lg rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-[#3b6899] transition-all duration-300 border border-blue-300/40">
+                class="relative z-10 w-16 h-16 mb-3 bg-[#00234c] text-[#ffd100] shadow-md rounded-2xl flex items-center justify-center group-hover:scale-105 transition-all duration-200 border-2 border-amber-400/40">
                 <span class="material-symbols-outlined text-[34px]">upload_file</span>
               </div>
 
-              <span class="text-base font-black text-slate-800 dark:text-slate-100 group-hover:text-[#4d82bc] transition-colors relative z-10 text-center">
+              <span class="text-base sm:text-lg font-black text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors relative z-10 text-center">
                 Haz clic para examinar o arrastra tus archivos aquí
               </span>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 relative z-10 font-semibold text-center">
+              <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1 relative z-10 font-bold text-center">
                 Soporta expedientes periciales, partes de denuncia, imágenes y texto
               </p>
 
-              <!-- Insignias de Formatos Soportados -->
+              <!-- Insignias de Formatos Soportados con Contraste Fuerte -->
               <div class="flex flex-wrap items-center justify-center gap-2 mt-4 relative z-10">
-                <span class="px-2.5 py-1 rounded-lg bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 text-[10px] font-black border border-red-200 dark:border-red-800 flex items-center gap-1 shadow-sm">
-                  <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span> PDF
+                <span class="px-3 py-1 rounded-lg bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-300 text-xs font-black border border-red-300 dark:border-red-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span> PDF
                 </span>
-                <span class="px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 text-[10px] font-black border border-blue-200 dark:border-blue-800 flex items-center gap-1 shadow-sm">
-                  <span class="material-symbols-outlined text-[14px]">description</span> DOCX / DOC
+                <span class="px-3 py-1 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 text-xs font-black border border-blue-300 dark:border-blue-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[15px]">description</span> DOCX / DOC
                 </span>
-                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 text-[10px] font-black border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shadow-sm">
-                  <span class="material-symbols-outlined text-[14px]">image</span> PNG / JPG
+                <span class="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 text-xs font-black border border-emerald-300 dark:border-emerald-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[15px]">image</span> PNG / JPG
                 </span>
-                <span class="px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 text-[10px] font-black border border-purple-200 dark:border-purple-800 flex items-center gap-1 shadow-sm">
-                  <span class="material-symbols-outlined text-[14px]">article</span> TXT / CSV
+                <span class="px-3 py-1 rounded-lg bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 text-xs font-black border border-purple-300 dark:border-purple-800 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[15px]">article</span> TXT / CSV
                 </span>
               </div>
 
@@ -167,11 +208,11 @@
 
             <!-- Fila de Estado de Selección -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
-              <span id="file-count-label" class="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">
+              <span id="file-count-label" class="text-xs font-bold text-slate-600 dark:text-slate-300 italic">
                 No se ha seleccionado ningún archivo
               </span>
               <button type="submit" id="submit-action"
-                class="hidden bg-gradient-to-r from-[#ffd100] via-[#ffe052] to-[#ffd100] hover:from-[#ffe875] hover:to-[#ffd100] text-[#00234c] font-black text-xs sm:text-sm px-7 py-3 rounded-2xl shadow-lg hover:shadow-xl border-b-4 border-amber-600 transition-all uppercase tracking-widest items-center gap-3 transform hover:-translate-y-1 active:translate-y-0 ring-4 ring-amber-400/40">
+                class="hidden bg-gradient-to-r from-[#ffd100] via-[#ffe052] to-[#ffd100] hover:from-[#ffe875] hover:to-[#ffd100] text-[#00234c] font-black text-xs sm:text-sm px-7 py-3 rounded-2xl shadow-lg hover:shadow-xl border-b-4 border-amber-600 transition-all uppercase tracking-widest items-center gap-3 transform hover:-translate-y-1 active:translate-y-0 ring-4 ring-amber-400/40 cursor-pointer">
                 <span class="material-symbols-outlined text-[22px] text-[#00234c] font-black animate-bounce">rocket_launch</span>
                 <span class="drop-shadow-sm font-black">INICIAR PROCESAMIENTO OCR</span>
               </button>
@@ -179,13 +220,13 @@
 
             <!-- Fila de Archivos en Cola -->
             <div id="pdf-file-chips-row"
-              class="hidden flex-col gap-3 mt-2 bg-gradient-to-r from-[#4d82bc] to-[#3b6899] p-5 rounded-2xl border-2 border-blue-300/40 shadow-lg text-white">
+              class="hidden flex-col gap-3 mt-2 bg-gradient-to-r from-[#00234c] to-[#003875] p-5 rounded-2xl border-2 border-blue-400/40 shadow-lg text-white">
               <div class="flex items-center justify-between border-b border-white/20 pb-2.5">
-                <span class="text-[11px] font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
                   <span class="material-symbols-outlined text-[18px] text-[#ffd100]">queue</span> Archivos listos para procesamiento
                 </span>
                 <button type="button" id="pdf-file-clear"
-                  class="text-white bg-red-600 hover:bg-red-700 shadow-sm transition-all px-3 py-1 rounded-lg text-[10px] flex items-center gap-1 font-extrabold uppercase tracking-wider">
+                  class="text-white bg-red-600 hover:bg-red-700 shadow-sm transition-all px-3 py-1 rounded-lg text-xs flex items-center gap-1 font-black uppercase tracking-wider cursor-pointer">
                   <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar todo
                 </button>
               </div>
@@ -196,7 +237,7 @@
       </div>
 
       <!-- Tarjeta Documentos Cargados en Espacio de Trabajo -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
@@ -211,7 +252,7 @@
           <form action="{{ url_for('delete_all_documents') }}" method="post"
             onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos del espacio de trabajo? Esta acción no afecta al historial forense.');">
             <button type="submit"
-              class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 transition-colors px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
+              class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 transition-colors px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1 shadow-sm cursor-pointer">
               <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar Espacio
             </button>
           </form>
@@ -219,26 +260,26 @@
         </div>
 
         <div class="p-6">
-          <div class="grid grid-cols-1 gap-2.5">
+          <div class="grid grid-cols-1 gap-3">
             {% for f in files %}
-            <div class="flex items-center gap-3 group bg-slate-50 dark:bg-slate-800/70 hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-all p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm hover:border-[#4d82bc]">
+            <div class="flex items-center gap-3 group bg-white dark:bg-slate-800 hover:bg-blue-50/60 dark:hover:bg-slate-700/60 transition-all p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-sm hover:border-[#2563eb]">
               <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3 truncate no-underline">
-                <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950/80 text-red-600 flex items-center justify-center font-black shrink-0 shadow-sm">
-                  <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950 text-red-700 flex items-center justify-center font-black shrink-0 border border-red-200 shadow-sm">
+                  <span class="material-symbols-outlined text-[22px]">picture_as_pdf</span>
                 </div>
-                <span class="text-sm font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-[#4d82bc] transition-colors truncate">{{ f }}</span>
+                <span class="text-sm font-black text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors truncate">{{ f }}</span>
               </a>
               <form action="{{ url_for('delete_document', filename=f) }}" method="post"
                 onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
                 <button type="submit" title="Eliminar documento"
-                  class="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors p-1.5 rounded-xl opacity-60 group-hover:opacity-100">close</button>
+                  class="material-symbols-outlined text-[20px] text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors p-1.5 rounded-xl cursor-pointer">close</button>
               </form>
             </div>
             {% else %}
-            <div class="py-10 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-800/40 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center">
-              <span class="material-symbols-outlined text-[36px] text-slate-300 dark:text-slate-600 mb-2">inventory_2</span>
-              <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">El espacio de trabajo está libre</p>
-              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Sube expedientes en el cuadro de ingesta superior para comenzar</p>
+            <div class="py-10 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-800/40 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-center">
+              <span class="material-symbols-outlined text-[36px] text-slate-400 dark:text-slate-500 mb-2">inventory_2</span>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider">El espacio de trabajo está libre</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-semibold">Sube expedientes en el cuadro de ingesta superior para comenzar</p>
             </div>
             {% endfor %}
           </div>
@@ -246,54 +287,6 @@
       </div>
 
     </div>
-
-    <!-- Tarjeta de Guía Operativa -->
-    <div class="flex flex-col gap-6 order-first">
-
-
-      <!-- Tarjeta 2: Guía de Ingesta Rápida -->
-      <div class="order-first bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
-        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center gap-3 text-white shadow-sm">
-          <div class="w-9 h-9 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
-            <span class="material-symbols-outlined text-[20px]">help_outline</span>
-          </div>
-          <div>
-            <h3 class="text-base font-black text-white leading-tight">Guía Operativa</h3>
-            <p class="text-[11px] text-blue-100 font-bold">Pasos del proceso forense</p>
-          </div>
-        </div>
-
-        <div class="p-6 flex flex-col gap-4">
-          <div class="flex items-start gap-3">
-            <span class="w-8 h-8 rounded-xl bg-[#4d82bc] text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5">1</span>
-            <div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
-              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
-            <span class="w-8 h-8 rounded-xl bg-[#4d82bc] text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5">2</span>
-            <div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
-              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
-            <span class="w-8 h-8 rounded-xl bg-[#4d82bc] text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5">3</span>
-            <div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
-              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Div invisible para contrapeso y centrado perfecto -->
-    <div class="hidden lg:block order-last"></div>
 
   </div>
 

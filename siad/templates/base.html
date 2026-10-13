@@ -19,8 +19,7 @@
     ::-webkit-scrollbar-thumb { background: #c5c8d0; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #9da3af; }
     
-    #page-content,#page-header{transition:all .25s cubic-bezier(0.23, 1, 0.32, 1);}
-    html{transition:zoom .2s ease-out;}
+    #page-content,#page-header{transition:opacity .2s ease-out;}
 
     @view-transition {
       navigation: auto;
@@ -29,28 +28,24 @@
     @keyframes pageFadeSlideIn {
       0% {
         opacity: 0;
-        transform: translateY(8px);
       }
       100% {
         opacity: 1;
-        transform: translateY(0);
       }
     }
 
     .animate-page-enter {
-      animation: pageFadeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      will-change: opacity, transform;
+      animation: pageFadeSlideIn 0.2s ease-out forwards;
     }
 
     .page-leaving {
       opacity: 0 !important;
-      transform: translateY(-6px) !important;
-      transition: opacity 0.16s cubic-bezier(0.4, 0, 0.2, 1), transform 0.16s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transition: opacity 0.15s ease-out !important;
     }
 
     body, html, button, input, select, textarea {
-      -webkit-font-smoothing: antialiased !important;
-      -moz-osx-font-smoothing: grayscale !important;
+      -webkit-font-smoothing: auto !important;
+      -moz-osx-font-smoothing: auto !important;
       text-rendering: optimizeLegibility !important;
     }
 
@@ -271,7 +266,11 @@ body.splash-disabled #pdi-splash-overlay,
   if (sessionStorage.getItem('pdi_splash_completed') === '1') {
     root.classList.add('splash-disabled');
     var fontSize = localStorage.getItem('fontSize');
-    if (fontSize) root.style.zoom = fontSize + '%';
+    if (fontSize && fontSize !== '100') {
+      root.style.zoom = fontSize + '%';
+    } else {
+      root.style.removeProperty('zoom');
+    }
   }
 })();</script>
 
@@ -506,7 +505,11 @@ body.splash-disabled #pdi-splash-overlay,
     setTimeout(function () {
       root.classList.add('splash-disabled');
       var fontSize = localStorage.getItem('fontSize');
-      if (fontSize) root.style.zoom = fontSize + '%';
+      if (fontSize && fontSize !== '100') {
+        root.style.zoom = fontSize + '%';
+      } else {
+        root.style.removeProperty('zoom');
+      }
     }, 2450);
   }
 
