@@ -11,28 +11,23 @@ import os
 # pyrefly: ignore [missing-import]
 import psycopg
 
-DB_HOST = os.environ.get("DB_HOST", "127.0.0.1")
-DB_PORT = os.environ.get("DB_PORT", "5433")
-DB_NAME = os.environ.get("DB_NAME", "Abis_OCR")
-DB_USER = os.environ.get("DB_USER", "postgres")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "abis_dev_pw")
-CONNECT_TIMEOUT = 5  # segundos -- sin esto, si Postgres no responde (apagado, firewall) una
-                      # peticion HTTP puede quedar colgada varios minutos en vez de fallar rapido
-
+DATABASE_URL = os.environ.get("DATABASE_URL")
+CONNECT_TIMEOUT = 5
 
 def get_connection():
+    if not DATABASE_URL:
+        raise RuntimeError("Falta configurar DATABASE_URL en el entorno")
     return psycopg.connect(
-        host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD,
+        conninfo=DATABASE_URL,
         connect_timeout=CONNECT_TIMEOUT,
     )
 
-
 def is_connected():
-    """Chequeo liviano para el indicador de estado en la interfaz (timeout corto -- se llama
-    en cada carga de pagina, no debe demorar la respuesta si Postgres esta caido)."""
     try:
+        if not DATABASE_URL:
+            return False
         with psycopg.connect(
-            host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD,
+            conninfo=DATABASE_URL,
             connect_timeout=1,
         ):
             return True
@@ -486,7 +481,7 @@ def get_user_by_username(username):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, username, password_hash, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios WHERE username = %s",
+                "SELECT id, username, password_hash, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios WHERE LOWER(username) = LOWER(%s)",
                 (username,)
             )
             row = cur.fetchone()
@@ -543,7 +538,7 @@ def update_password(username, password_hash):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE usuarios SET password_hash = %s WHERE username = %s",
+                "UPDATE usuarios SET password_hash = %s WHERE LOWER(username) = LOWER(%s)",
                 (password_hash, username)
             )
         conn.commit()
@@ -553,7 +548,7 @@ def update_last_login(username):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE usuarios SET ultimo_ingreso = now() WHERE username = %s",
+                "UPDATE usuarios SET ultimo_ingreso = now() WHERE LOWER(username) = LOWER(%s)",
                 (username,)
             )
         conn.commit()

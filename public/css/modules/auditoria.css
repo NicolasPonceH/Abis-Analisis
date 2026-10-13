@@ -25,6 +25,8 @@
 }
 
 .audit-badge-seguridad {
+}
+
 .btn-link-action:hover {
   color: #0369a1;
 }
@@ -94,6 +96,96 @@
   background: #ffd100;
   color: #475569;
   border: 1px solid var(--border-subtle);
+}
+
+/* Encabezado de la bitácora: título y filtros alineados en una sola fila. */
+#tab-auditoria .table-card {
+  overflow: visible;
+}
+
+#tab-auditoria .audit-header-bar {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 96px;
+  margin: -24px -24px 18px;
+  padding: 18px 28px;
+  border: 1px solid rgba(255, 209, 0, 0.9);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: linear-gradient(135deg, #285889 0%, #4789c5 100%);
+  box-shadow: 0 6px 18px rgba(0, 31, 68, 0.18);
+}
+
+#tab-auditoria .audit-header-bar .chart-title {
+  min-width: 0;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+#tab-auditoria .audit-header-bar .chart-title .svg-icon {
+  flex: 0 0 auto;
+  stroke: var(--pdi-gold) !important;
+}
+
+#tab-auditoria .audit-filter-controls {
+  display: grid;
+  grid-template-columns: minmax(300px, 352px) 154px 154px auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+#tab-auditoria .audit-filter-controls .custom-select,
+#tab-auditoria .audit-filter-controls > select {
+  width: 100% !important;
+  min-width: 0;
+}
+
+#tab-auditoria .audit-filter-controls .form-control,
+#tab-auditoria .audit-filter-controls .custom-select-toggle {
+  height: 46px;
+  min-height: 46px;
+  background: #ffffff;
+  border-color: rgba(255, 209, 0, 0.85);
+  color: var(--pdi-navy);
+}
+
+#tab-auditoria .audit-filter-controls .btn {
+  height: 46px;
+  padding-inline: 18px;
+}
+
+@media (max-width: 1180px) {
+  #tab-auditoria .audit-header-bar {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  #tab-auditoria .audit-filter-controls {
+    grid-template-columns: minmax(260px, 1fr) 150px 150px auto;
+  }
+}
+
+@media (max-width: 760px) {
+  #tab-auditoria .audit-header-bar {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+
+  #tab-auditoria .audit-header-bar .chart-title {
+    white-space: normal;
+  }
+
+  #tab-auditoria .audit-filter-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #tab-auditoria .audit-filter-controls .custom-select,
+  #tab-auditoria .audit-filter-controls > select,
+  #tab-auditoria .audit-filter-controls .btn {
+    grid-column: span 2;
+  }
 }
 
 

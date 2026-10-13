@@ -41,6 +41,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from dotenv import load_dotenv
 load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 import db
 from entities import extract_entities, highlight_entities_html, normalize_entities
@@ -75,15 +76,15 @@ app = Flask(__name__)
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-# Default de desarrollo documentado, no un secreto real -- sobreescribir con SECRET_KEY en
-# cualquier instalacion que no sea localhost (Sprint 9: revision de seguridad).
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-v2")
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    raise RuntimeError("SECRET_KEY environment variable is missing. It is required for sessions.")
 app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register"}
+LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
@@ -102,11 +103,6 @@ _nlp.max_length = 2_000_000  # actas largas pueden superar el limite por defecto
 
 try:
     db.init_schema()
-    with db.get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
-            if not cur.fetchone():
-                db.create_user("admin", generate_password_hash("admin123"), "admin")
 except Exception as exc:  # PostgreSQL puede no estar disponible; el resto de la app sigue andando
     print(f"Aviso: no se pudo inicializar el esquema de PostgreSQL ({exc}).")
 
@@ -131,7 +127,7 @@ def verify_password():
     try:
         with db.get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT password_hash FROM usuarios WHERE username = %s", (data["username"],))
+                cur.execute("SELECT password_hash FROM usuarios WHERE LOWER(username) = LOWER(%s)", (data["username"],))
                 row = cur.fetchone()
                 if row and check_password_hash(row[0], data["password"]):
                     return {"ok": True}
@@ -157,6 +153,26 @@ def api_register():
         return {"ok": True}
     except Exception as e:
         print(f"Error registrando usuario: {e}")
+        return {"ok": False, "error": str(e)}, 500
+
+@app.route("/api/update_password", methods=["POST"])
+def api_update_password():
+    data = request.get_json()
+    if not data or not data.get("username") or not data.get("password"):
+        return {"ok": False, "error": "Faltan datos obligatorios"}, 400
+    
+    username = data["username"]
+    password = data["password"]
+    
+    try:
+        user = db.get_user_by_username(username)
+        if not user:
+            return {"ok": False, "error": "El usuario no existe"}, 404
+            
+        db.update_password(username, generate_password_hash(password))
+        return {"ok": True}
+    except Exception as e:
+        print(f"Error actualizando password: {e}")
         return {"ok": False, "error": str(e)}, 500
 
 
@@ -823,7 +839,6 @@ def summarize_text(raw_text, limit_sentences=3):
 
 @app.before_request
 def require_login():
-    print("COOKIES RECIBIDAS:", request.cookies, flush=True)
     if request.endpoint is None or request.endpoint in LOGIN_EXEMPT_ENDPOINTS:
         return None
     if not session.get("user_id"):

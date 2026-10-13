@@ -1,6 +1,6 @@
-import { state } from '../core/state.js';
-import { escaparHtml } from '../core/utils.js';
-import { promptAuthModal, closeAuthModal } from './auth-modal.js';
+import { state } from '../core/state.js?v=3';
+import { escapeHtml } from '../core/utils.js?v=3';
+import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js?v=4';
 
 export var liveClockInterval = null;
 
@@ -310,6 +310,8 @@ export function renderScheduleHistory(history) {
 }
 
 export function setupScheduleEvents() {
+  setupAuthModalEvents();
+  
   // Toggle Switch Habilitado
   const toggle = document.getElementById("schedule-enabled-toggle");
   if (toggle) {
@@ -496,6 +498,7 @@ export async function cargarDestinatariosTelegram() {
 
     if (data.botInfo && data.botInfo.link) {
       state.telegramBotLink = data.botInfo.link;
+      state.telegramBotUsername = data.botInfo.username || "AbisSystemBot";
       const linkDirecto = document.getElementById("link-directo-bot");
       const labelLink = document.getElementById("label-link-bot");
       if (linkDirecto) {
@@ -549,7 +552,7 @@ export function renderTablaDestinatarios(destinatarios) {
       : `<svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
 
     const testButtonHtml = d.activo
-      ? `<button type="button" class="btn-dest-action btn-dest-test" onclick="probarDestinatarioIndividual(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', this)" title="Enviar mensaje de prueba individual a este destinatario">
+      ? `<button type="button" class="btn-dest-action btn-dest-test" data-action="probar" data-id="${d.id}" data-nombre="${escapeHtml(d.nombre)}" title="Enviar mensaje de prueba individual a este destinatario">
            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
            <span>Probar</span>
          </button>`
@@ -561,24 +564,24 @@ export function renderTablaDestinatarios(destinatarios) {
     return `
       <tr>
         <td style="font-weight:600; color:var(--pdi-navy);">
-          ${escaparHtml(d.nombre)}
+          ${escapeHtml(d.nombre)}
         </td>
         <td>
-          <code>${escaparHtml(d.chat_id)}</code>
+          <code>${escapeHtml(d.chatId || '')}</code>
         </td>
         <td>
-          <span class="badge badge-info">${escaparHtml(d.rol_unidad || "General")}</span>
+          <span class="badge badge-info">${escapeHtml(d.rol_unidad || "General")}</span>
         </td>
         <td>${estadoBadge}</td>
         <td><small style="color:var(--text-muted);">${d.fecha_registro || '-'}</small></td>
         <td style="text-align:center;">
           <div class="dest-actions-group">
             ${testButtonHtml}
-            <button type="button" class="btn-dest-action btn-dest-toggle" onclick="solicitarToggleDestinatario(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', '${d.chat_id}', ${d.activo})" title="${toggleText} envíos para este oficial">
+            <button type="button" class="btn-dest-action btn-dest-toggle" data-action="toggle" data-id="${d.id}" data-nombre="${escapeHtml(d.nombre)}" data-chatid="${escapeHtml(d.chatId || '')}" data-activo="${d.activo}" title="${toggleText} envíos para este oficial">
               ${toggleIcon}
               <span>${toggleText}</span>
             </button>
-            <button type="button" class="btn-dest-action btn-dest-delete" onclick="solicitarEliminarDestinatario(${d.id}, '${escaparHtml(d.nombre).replace(/'/g, "\\'")}', '${d.chat_id}')" title="Eliminar este oficial del sistema">
+            <button type="button" class="btn-dest-action btn-dest-delete" data-action="eliminar" data-id="${d.id}" data-nombre="${escapeHtml(d.nombre)}" data-chatid="${escapeHtml(d.chatId || '')}" title="Eliminar este oficial del sistema">
               <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               <span>Eliminar</span>
             </button>
@@ -615,6 +618,7 @@ export function setupDestinatariosTelegramEvents() {
   }
 
   // Botón Copiar Enlace Directo
+
   const btnCopiar = document.getElementById("btn-copiar-link-bot");
   if (btnCopiar) {
     btnCopiar.addEventListener("click", () => {
@@ -637,6 +641,29 @@ export function setupDestinatariosTelegramEvents() {
   if (btnRefresh) {
     btnRefresh.addEventListener("click", () => {
       cargarDestinatariosTelegram();
+    });
+  }
+
+  // Delegación de eventos para la tabla (XSS Mitigation)
+  const tbody = document.getElementById("destinatarios-table-body");
+  if (tbody) {
+    tbody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button.btn-dest-action");
+      if (!btn) return;
+      
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      const nombre = btn.dataset.nombre;
+      const chatId = btn.dataset.chatid;
+      const activo = btn.dataset.activo === "true";
+      
+      if (action === "probar") {
+        window.probarDestinatarioIndividual(id, nombre, btn);
+      } else if (action === "toggle") {
+        window.solicitarToggleDestinatario(id, nombre, chatId, activo);
+      } else if (action === "eliminar") {
+        window.solicitarEliminarDestinatario(id, nombre, chatId);
+      }
     });
   }
 }

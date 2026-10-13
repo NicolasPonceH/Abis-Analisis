@@ -12,6 +12,9 @@
         <div style="display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-user-plus" style="color: var(--pdi-gold);"></i> Añadir usuarios
         </div>
+        <button type="button" id="open-new-user-modal" class="admin-add-button">
+          <i class="fa-solid fa-plus"></i> Añadir
+        </button>
       </div>
 
       <form id="form-nuevo-usuario" style="padding: 24px;" novalidate>
@@ -31,16 +34,26 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
           <div>
             <label for="nuevo-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña Inicial</label>
-            <input type="password" id="nuevo-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+            <div class="password-wrapper" style="position:relative; width:100%;">
+  <input type="password" id="nuevo-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s; padding-right: 48px !important;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+  <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('nuevo-password', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+  </button>
+</div>
           </div>
           <div>
             <label for="nuevo-password-confirm" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmar Contraseña</label>
-            <input type="password" id="nuevo-password-confirm" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+            <div class="password-wrapper" style="position:relative; width:100%;">
+  <input type="password" id="nuevo-password-confirm" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s; padding-right: 48px !important;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+  <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('nuevo-password-confirm', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+  </button>
+</div>
           </div>
         </div>
         <p id="nuevo-usuario-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 0.92rem; font-weight: 600;"></p>
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
-          <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
+          <button type="submit" style="background: var(--pdi-gold, #ffd100); color: #001733; border: 1px solid #e5b900; padding: 11px 22px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 209, 0, 0.35); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;" onmouseover="this.style.background='#ffe04d'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 16px rgba(255,209,0,0.45)'" onmouseout="this.style.background='var(--pdi-gold, #ffd100)'; this.style.transform='none'; this.style.boxShadow='0 4px 14px rgba(255,209,0,0.35)'">
             <i class="fa-solid fa-user-plus"></i> Añadir
           </button>
         </div>
@@ -142,11 +155,21 @@
           <form id="form-cambiar-password-admin" hidden novalidate>
             <div style="margin-bottom: 16px;">
               <label for="admin-nueva-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva Contraseña Fuerte</label>
-              <input type="password" id="admin-nueva-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='var(--border-subtle)'">
+              <div class="password-wrapper" style="position:relative; width:100%;">
+  <input type="password" id="admin-nueva-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s; padding-right: 48px !important;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='var(--border-subtle)'">
+  <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('admin-nueva-password', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+  </button>
+</div>
             </div>
             <div style="margin-bottom: 24px;">
               <label for="admin-confirmar-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Repetir Contraseña</label>
-              <input type="password" id="admin-confirmar-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='var(--border-subtle)'">
+              <div class="password-wrapper" style="position:relative; width:100%;">
+  <input type="password" id="admin-confirmar-password" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s; padding-right: 48px !important;" onfocus="this.style.borderColor='#DC2626'" onblur="this.style.borderColor='var(--border-subtle)'">
+  <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('admin-confirmar-password', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+  </button>
+</div>
             </div>
             <p id="admin-password-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
@@ -230,7 +253,57 @@
         openModal();
       };
 
+      // El formulario de alta se muestra únicamente dentro de un popup.
       const formNuevo = document.getElementById('form-nuevo-usuario');
+      const newUserModal = document.createElement('div');
+      newUserModal.id = 'new-user-modal';
+      newUserModal.className = 'settings-modal new-user-modal';
+      newUserModal.hidden = true;
+      newUserModal.setAttribute('aria-hidden', 'true');
+      newUserModal.innerHTML = `
+        <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="new-user-title">
+          <div class="settings-modal-header">
+            <h2 id="new-user-title"><i class="fa-solid fa-user-plus" style="color: var(--pdi-gold);"></i> Añadir usuario</h2>
+            <button type="button" class="settings-close-btn" id="close-new-user-modal" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>`;
+      document.body.appendChild(newUserModal);
+      const newUserCard = newUserModal.querySelector('.settings-modal-card');
+      const newUserHeader = newUserModal.querySelector('.settings-modal-header');
+      const newUserActions = formNuevo.querySelector('button[type="submit"]')?.parentElement;
+      const cancelNewUser = document.createElement('button');
+      cancelNewUser.type = 'button';
+      cancelNewUser.className = 'new-user-cancel';
+      cancelNewUser.textContent = 'Cancelar';
+      newUserActions?.insertBefore(cancelNewUser, newUserActions.querySelector('button[type="submit"]'));
+      formNuevo.style.padding = '32px';
+      formNuevo.parentElement?.removeChild(formNuevo);
+      newUserCard.appendChild(formNuevo);
+
+      const closeNewUserModal = () => {
+        formNuevo.reset();
+        setFeedback('nuevo-usuario-feedback', '', '');
+        newUserModal.hidden = true;
+        newUserModal.setAttribute('aria-hidden', 'true');
+      };
+      const openNewUserModal = () => {
+        formNuevo.reset();
+        setFeedback('nuevo-usuario-feedback', '', '');
+        newUserModal.hidden = false;
+        newUserModal.setAttribute('aria-hidden', 'false');
+        document.getElementById('nuevo-usuario')?.focus();
+      };
+      window.openNewUserModal = openNewUserModal;
+      window.closeNewUserModal = closeNewUserModal;
+      document.getElementById('open-new-user-modal')?.addEventListener('click', openNewUserModal);
+      document.getElementById('close-new-user-modal')?.addEventListener('click', closeNewUserModal);
+      cancelNewUser.addEventListener('click', closeNewUserModal);
+      newUserModal.addEventListener('click', (event) => {
+        if (event.target === newUserModal) closeNewUserModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !newUserModal.hidden) closeNewUserModal();
+      });
 
       // Handlers
       formNuevo?.addEventListener('submit', async (e) => {

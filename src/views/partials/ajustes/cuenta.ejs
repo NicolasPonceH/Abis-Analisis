@@ -1,64 +1,62 @@
-<div style="width: 100%; padding-bottom: 40px;">
+<div class="account-page" style="width: 100%; padding-bottom: 40px;">
   <div style="margin-bottom: 32px;">
     <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; letter-spacing: -0.02em;">Mi Cuenta</h1>
     <p style="color: var(--text-muted); font-size: 1.07rem; margin: 0;">Administra tus datos personales y el acceso seguro a tu perfil institucional.</p>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px;">
+  <div class="account-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px;">
     
     <!-- Perfil Actual -->
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.07rem;">
+    <div class="account-card profile-card" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div class="account-card-header" style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.07rem;">
         <i class="fa-solid fa-id-card" style="color: var(--pdi-gold);"></i> Perfil Actual
       </div>
-      <div style="padding: 32px 24px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 24px;">
-        <div style="width: 88px; height: 88px; flex-shrink: 0; background: linear-gradient(135deg, var(--text-primary) 0%, #003366 100%); border-radius: 50%; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; box-shadow: 0 0 0 4px #eff6ff, 0 4px 10px rgba(0,31,68,0.2);">
-          <%= typeof user !== 'undefined' ? user.username.charAt(0).toUpperCase() : 'U' %>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text-primary); text-transform: capitalize; letter-spacing: -0.01em;">
-            <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
-          </h2>
-          <div style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 12px; margin-top: 4px;">
-            <span style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
-              <%= typeof user !== 'undefined' ? ((user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin')) ? 'Administrador' : 'Operador') : 'Operador' %>
-            </span>
-            <span style="box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 6px; color: #059669; font-weight: 700; font-size: 0.92rem; background: #ecfdf5; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0;">
-              <span style="width: 6px; height: 6px; background: #10B981; border-radius: 50%; display: inline-block; box-shadow: 0 0 4px #10B981;"></span> Activo
-            </span>
+      <div class="account-card-body account-profile-body">
+        <div class="account-profile-layout">
+          <div class="account-avatar">
+            <%= typeof user !== 'undefined' ? user.username.charAt(0).toUpperCase() : 'U' %>
+          </div>
+          <div class="account-profile-identity">
+            <span class="account-profile-eyebrow">Perfil institucional</span>
+            <h2><%= typeof user !== 'undefined' ? user.username : 'Usuario' %></h2>
+            <p><i class="fa-solid fa-user-shield" aria-hidden="true"></i> <%= typeof user !== 'undefined' ? ((user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin')) ? 'Administrador' : 'Operador') : 'Operador' %></p>
+          </div>
+          <div class="account-profile-state">
+            <span>Estado de cuenta</span>
+            <strong><i aria-hidden="true"></i> Activo</strong>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Cambiar Contraseña -->
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-      <div style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.07rem;">
+    <div class="account-card" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+      <div class="account-card-header" style="background: linear-gradient(135deg, rgba(0, 48, 105, 0.95) 0%, rgba(0, 80, 160, 0.85) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; border-bottom: 3.5px solid rgba(255, 209, 0, 0.95); color: #ffffff; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.07rem;">
         <i class="fa-solid fa-shield-halved" style="color: var(--pdi-gold);"></i> Seguridad de Acceso
       </div>
-      <div style="padding: 32px 24px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-        <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+      <div class="account-card-body" style="padding: 32px 24px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div class="account-security-copy" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
           <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin: 0;">
             Mantén tu cuenta protegida actualizando tu contraseña periódicamente. Se recomienda usar al menos 6 caracteres.
           </p>
         </div>
-        <button type="button" onclick="document.getElementById('modal-mi-contrasena').hidden = false" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15); width: 100%;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
+        <button type="button" class="account-password-btn account-primary-btn" onclick="if(window.openMiContrasenaModal) window.openMiContrasenaModal(); else document.getElementById('modal-mi-contrasena').hidden = false;" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15); width: 100%;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)';">
           <i class="fa-solid fa-key"></i> Modificar Contraseña
         </button>
       </div>
     </div>
 
     <!-- Sesión (Grid Full Width) -->
-    <div style="grid-column: 1 / -1; background: var(--bg-surface); border: 1px solid #fecaca; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.05);">
-      <div style="background: #fef2f2; border-bottom: 1px solid #fecaca; padding: 16px 24px; color: #991b1b; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.07rem; text-transform: uppercase; letter-spacing: 0.05em;">
+    <div class="account-card account-session" style="grid-column: 1 / -1; background: var(--bg-surface); border: 1px solid #fecaca; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.05);">
+      <div class="account-card-header" style="background: #dc2626; border-bottom: 3px solid #b91c1c; padding: 16px 24px; color: #ffffff; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2); display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.07rem; text-transform: uppercase; letter-spacing: 0.05em;">
         <i class="fa-solid fa-power-off"></i> Control de Sesión
       </div>
-      <div style="padding: 24px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+      <div class="account-session-body" style="padding: 24px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
         <div>
           <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 700;">Cerrar sesión activa</h3>
           <p style="color: var(--text-muted); font-size: 1rem; margin: 0; line-height: 1.5;">Si estás utilizando un dispositivo compartido o público, asegúrate de cerrar sesión al terminar para evitar accesos no autorizados.</p>
         </div>
-        <a href="/logout" style="background: #DC2626; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); flex-shrink: 0;" onmouseover="this.style.background='#b91c1c'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(220, 38, 38, 0.3)'" onmouseout="this.style.background='#DC2626'; this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(220, 38, 38, 0.2)'">
+        <a href="/logout" class="account-danger-btn">
           <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
         </a>
       </div>
@@ -68,26 +66,25 @@
 
 <script>
   (() => {
-    const form = document.getElementById('form-mi-contrasena');
-    if (!form) return;
+    const getModal = () => document.getElementById('modal-mi-contrasena');
+    const getForm = () => document.getElementById('form-mi-contrasena');
+    const getFeedback = () => document.getElementById('mi-contrasena-feedback');
 
-    const modal = document.getElementById('modal-mi-contrasena');
-    const feedback = document.getElementById('mi-contrasena-feedback');
-    
     const setFeedback = (message, type) => {
+      const feedback = getFeedback();
       if (!feedback) return;
       feedback.textContent = message;
       if (type === 'error') {
         feedback.style.color = '#dc2626';
         feedback.style.background = '#fef2f2';
-        feedback.style.padding = '8px 12px';
-        feedback.style.borderRadius = '6px';
+        feedback.style.padding = '10px 14px';
+        feedback.style.borderRadius = '8px';
         feedback.style.border = '1px solid #fecaca';
       } else if (type === 'success') {
         feedback.style.color = '#059669';
         feedback.style.background = '#ecfdf5';
-        feedback.style.padding = '8px 12px';
-        feedback.style.borderRadius = '6px';
+        feedback.style.padding = '10px 14px';
+        feedback.style.borderRadius = '8px';
         feedback.style.border = '1px solid #a7f3d0';
       } else {
         feedback.style.padding = '0';
@@ -95,70 +92,118 @@
         feedback.style.background = 'transparent';
       }
     };
-    // Función para cerrar modal desde botón Cancelar o la X
+
     window.closeMiContrasenaModal = () => {
-      form.reset();
+      const modal = getModal();
+      const form = getForm();
+      if (form) form.reset();
       setFeedback('', '');
-      if (modal) modal.hidden = true;
+      if (modal) {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+      }
     };
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const password = document.getElementById('mi-nueva-contrasena').value;
-      const confirmation = document.getElementById('mi-confirmar-contrasena').value;
-      const submit = form.querySelector('button[type="submit"]');
-
-      if (password.length < 6) return setFeedback('La contraseña debe tener al menos 6 caracteres.', 'error');
-      if (password !== confirmation) return setFeedback('Las contraseñas no coinciden.', 'error');
-
-      submit.disabled = true;
-      submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    window.openMiContrasenaModal = () => {
+      const modal = getModal();
+      const form = getForm();
+      if (form) form.reset();
       setFeedback('', '');
-      
-      try {
-        const response = await fetch('/api/user/change-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password })
-        });
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error(data.error || 'No se pudo actualizar la contraseña.');
-        form.reset();
-        setFeedback('Contraseña actualizada correctamente.', 'success');
-        setTimeout(() => {
-          if (window.closeMiContrasenaModal) window.closeMiContrasenaModal();
-        }, 3000);
-      } catch (error) {
-        setFeedback(error.message || 'No se pudo actualizar la contraseña.', 'error');
-      } finally {
-        submit.disabled = false;
-        submit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+      if (modal) {
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
       }
-    });
+      setTimeout(() => document.getElementById('mi-nueva-contrasena')?.focus(), 60);
+    };
+
+    const attachEvents = () => {
+      const form = getForm();
+      const modal = getModal();
+      if (!form || form.dataset.initialized) return;
+      form.dataset.initialized = 'true';
+
+      modal?.addEventListener('click', (event) => {
+        if (event.target === modal) window.closeMiContrasenaModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal && !modal.hidden) window.closeMiContrasenaModal();
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = document.getElementById('mi-nueva-contrasena').value;
+        const confirmation = document.getElementById('mi-confirmar-contrasena').value;
+        const submit = form.querySelector('button[type="submit"]');
+
+        if (!password || password.length < 6) return setFeedback('La contraseña debe tener al menos 6 caracteres.', 'error');
+        if (password !== confirmation) return setFeedback('Las contraseñas no coinciden.', 'error');
+
+        submit.disabled = true;
+        submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+        setFeedback('', '');
+
+        try {
+          const response = await fetch('/api/user/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+          const data = await response.json();
+          if (!response.ok || !data.ok) throw new Error(data.error || 'No se pudo actualizar la contraseña.');
+          form.reset();
+          setFeedback('Contraseña actualizada correctamente.', 'success');
+          setTimeout(() => {
+            window.closeMiContrasenaModal();
+          }, 1800);
+        } catch (error) {
+          setFeedback(error.message || 'No se pudo actualizar la contraseña.', 'error');
+        } finally {
+          submit.disabled = false;
+          submit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+        }
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', attachEvents);
+    } else {
+      setTimeout(attachEvents, 0);
+    }
   })();
 </script>
 
 <!-- Modal Mi Contraseña -->
-<div id="modal-mi-contrasena" class="settings-modal" hidden>
-  <div class="settings-modal-card" style="width: min(500px, 100%);">
+<div id="modal-mi-contrasena" class="settings-modal settings-form-modal" hidden aria-hidden="true">
+  <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-mi-contrasena-title" style="width: min(520px, 100%);">
     <div class="settings-modal-header">
-      <h2><i class="fa-solid fa-key" style="color: var(--pdi-gold);"></i> Modificar Contraseña</h2>
-      <button type="button" class="settings-close-btn" onclick="closeMiContrasenaModal()"><i class="fa-solid fa-times"></i></button>
+      <h2 id="modal-mi-contrasena-title"><i class="fa-solid fa-key" style="color: var(--pdi-gold);"></i> Modificar Contraseña</h2>
+      <button type="button" class="settings-close-btn" id="btn-close-mi-contrasena" onclick="closeMiContrasenaModal()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <form id="form-mi-contrasena" novalidate>
+    <form id="form-mi-contrasena" class="settings-form" style="padding: 28px 32px;" novalidate>
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <div>
           <label for="mi-nueva-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva contraseña</label>
-          <input type="password" id="mi-nueva-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+          <div class="password-wrapper" style="position:relative; width:100%;">
+  <input type="password" id="mi-nueva-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box; padding-right: 48px !important;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+  <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('mi-nueva-contrasena', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+  </button>
+</div>
         </div>
         <div>
           <label for="mi-confirmar-contrasena" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmar contraseña</label>
-          <input type="password" id="mi-confirmar-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+          <div class="password-wrapper" style="position:relative; width:100%;">
+  <input type="password" id="mi-confirmar-contrasena" minlength="6" autocomplete="new-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box; padding-right: 48px !important;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
+  <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('mi-confirmar-contrasena', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+  </button>
+</div>
         </div>
       </div>
       <p id="mi-contrasena-feedback" aria-live="polite" style="margin: 12px 0 0 0; font-size: 0.92rem; font-weight: 600;"></p>
       <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-        <button type="button" onclick="closeMiContrasenaModal()" style="background: transparent; border: 1px solid var(--border-medium); color: var(--text-primary); padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s;">Cancelar</button>
+        <button type="button" id="btn-cancel-mi-contrasena" onclick="closeMiContrasenaModal()" style="background: transparent; border: 2px solid var(--border-medium); color: var(--text-primary); padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Cancelar</button>
         <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0, 31, 68, 0.15);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">
           <i class="fa-solid fa-floppy-disk"></i> Guardar
         </button>

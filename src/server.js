@@ -177,7 +177,10 @@ const rateLimit = (ms = 15000, maxAttempts = 20) => {
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-const JWT_SECRET = process.env.SECRET_KEY || "dev-only-secret";
+const JWT_SECRET = process.env.SECRET_KEY;
+if (!JWT_SECRET) {
+  throw new Error("SECRET_KEY environment variable is missing. It is required for JWT sessions.");
+}
 
 function requireAuth(req, res, next) {
   const token = req.cookies.abis_auth;
@@ -193,6 +196,24 @@ function requireAuth(req, res, next) {
     res.redirect("/login");
   }
 }
+
+function apiRequireAuth(req, res, next) {
+  // Ignorar login
+  if (req.path.startsWith("/login")) return next();
+  
+  const token = req.cookies.abis_auth;
+  if (!token) return res.status(401).json({ ok: false, error: "No autorizado" });
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch (err) {
+    return res.status(401).json({ ok: false, error: "Token inválido" });
+  }
+}
+
+// Proteger toda la API con autenticación JWT
+app.use("/api", apiRequireAuth);
 
 app.get("/login", (req, res) => {
   res.render("login", { error: null });
@@ -229,7 +250,12 @@ app.post("/login", async (req, res) => {
           userRole = "admin";
         }
         const token = jwt.sign({ username, rol: userRole }, JWT_SECRET, { expiresIn: "8h" });
-        res.cookie("abis_auth", token, { httpOnly: true, maxAge: 8 * 3600 * 1000 });
+        res.cookie("abis_auth", token, { 
+          httpOnly: true, 
+          maxAge: 8 * 3600 * 1000,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax"
+        });
         return res.redirect("/");
       }
     }
@@ -305,9 +331,15 @@ app.post("/api/user/change-password", requireAuth, express.json(), async (req, r
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: req.user.username, password })
     });
-    const data = await updateRes.json();
-    if (data.ok) return res.json({ ok: true });
-    return res.status(400).json({ error: data.error || "Error al actualizar la contraseña." });
+    let data = null;
+    try {
+      data = await updateRes.json();
+    } catch (_) {
+      console.warn("SIAD update_password no devolvió JSON:", updateRes.status);
+    }
+    if (data && data.ok) return res.json({ ok: true });
+    if (data && data.error) return res.status(400).json({ error: data.error });
+    return res.status(updateRes.ok ? 200 : 400).json({ error: "Error al actualizar la contraseña." });
   } catch (err) {
     console.error("Error in change-password:", err);
     return res.status(500).json({ error: "Error de conexión con el sistema de validación." });
@@ -332,9 +364,15 @@ app.post("/api/admin/reset-password", requireAuth, express.json(), async (req, r
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: userRes.rows[0].username, password })
     });
-    const data = await updateRes.json();
-    if (data.ok) return res.json({ ok: true });
-    return res.status(400).json({ error: data.error || "Error al actualizar la contraseña." });
+    let data = null;
+    try {
+      data = await updateRes.json();
+    } catch (_) {
+      console.warn("SIAD reset-password no devolvió JSON:", updateRes.status);
+    }
+    if (data && data.ok) return res.json({ ok: true });
+    if (data && data.error) return res.status(400).json({ error: data.error });
+    return res.status(updateRes.ok ? 200 : 400).json({ error: "Error al actualizar la contraseña." });
   } catch (err) {
     console.error("Error in reset-password:", err);
     return res.status(500).json({ error: "Error de servidor." });
@@ -848,9 +886,10 @@ app.post("/api/oracle/populate", async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       console.warn(`[SEGURIDAD] Intento de poblamiento desde Oracle rechazado: Clave no autorizada.`);
       return res.status(401).json({
         ok: false,
@@ -859,23 +898,26 @@ app.post("/api/oracle/populate", async (req, res) => {
       });
     }
 
-    const { connectionString, user, password, sql } = req.body || {};
+    const connectionString = process.env.ORACLE_CONNECTION_STRING;
+    const user = process.env.ORACLE_USER;
+    const password = process.env.ORACLE_PASSWORD;
+    const sql = "SELECT * FROM ENROLAMIENTOS_VIEW WHERE ESTADO = 'PENDIENTE'";
 
     if (!connectionString || !user || !password) {
-      return res.status(400).json({
+      return res.status(500).json({
         ok: false,
-        error: "Faltan parámetros de conexión Oracle: connectionString, user, password",
+        error: "Servidor mal configurado. Faltan variables de entorno para Oracle.",
       });
     }
 
-    if (!sql || typeof sql !== "string") {
+    if (false) {
       return res.status(400).json({
         ok: false,
         error: "Falta el parámetro 'sql' con la consulta o nombre de tabla a poblar",
       });
     }
 
-    console.log(`[ORACLE] Solicitud de poblamiento autorizada. Ejecutando: ${sql.substring(0, 80)}${sql.length > 80 ? "..." : ""}`);
+    console.log(`[ORACLE] Solicitud de poblamiento ETL autorizada.`);
 
     // 2. Conectar a Oracle
     const oracledb = require("oracledb");
@@ -1019,9 +1061,10 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       console.warn(`[SEGURIDAD] Intento de ingesta rechazado: Clave de autorización no válida o ausente.`);
       return res.status(401).json({
         ok: false,
@@ -1094,9 +1137,10 @@ app.post("/api/ingest/sheet", async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       console.warn(`[SEGURIDAD] Intento de ingesta de hoja de cálculo rechazado: Clave no autorizada.`);
       return res.status(401).json({
         ok: false,
@@ -1256,9 +1300,10 @@ app.post("/api/security/cifrar", upload.single("archivo"), async (req, res) => {
   try {
     // Verificación de clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       console.warn(`[SEGURIDAD] Intento de cifrado rechazado: Clave de autorización no válida o ausente.`);
       return res.status(401).json({
         ok: false,
@@ -1306,9 +1351,10 @@ app.post("/api/security/descifrar", upload.single("archivo"), async (req, res) =
   try {
     // Verificación de clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       console.warn(`[SEGURIDAD] Intento de descifrado rechazado: Clave de autorización no válida o ausente.`);
       return res.status(401).json({
         ok: false,
@@ -1389,9 +1435,10 @@ app.post("/api/settings/schedule", async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       console.warn(`[SEGURIDAD] Intento de modificación de programación rechazado: Clave de autorización no válida o ausente.`);
       return res.status(401).json({
         ok: false,
@@ -1482,7 +1529,7 @@ app.get("/api/telegram/destinatarios", async (req, res) => {
     res.json({
       ok: true,
       destinatarios: destinatarios.map(d => ({
-        ...d,
+        id: d.id, nombre: d.nombre, tipo: d.tipo, activo: d.activo,
         chatId: maskSensitiveId(d.chatId)
       })),
       botInfo,
@@ -1496,8 +1543,10 @@ app.get("/api/telegram/destinatarios", async (req, res) => {
 app.post("/api/telegram/destinatarios", async (req, res) => {
   try {
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       return res.status(401).json({
         ok: false,
         error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
@@ -1527,8 +1576,10 @@ app.post("/api/telegram/destinatarios", async (req, res) => {
 app.patch("/api/telegram/destinatarios/:id/toggle", async (req, res) => {
   try {
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       return res.status(401).json({
         ok: false,
         error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
@@ -1554,8 +1605,10 @@ app.patch("/api/telegram/destinatarios/:id/toggle", async (req, res) => {
 app.delete("/api/telegram/destinatarios/:id", async (req, res) => {
   try {
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
-    const claveEsperada = process.env.INGESTA_PASSWORD;
-    if (!claveEnviada || claveEnviada.trim() !== claveEsperada.trim()) {
+    if (!claveEnviada) return res.status(401).json({ ok: false, error: "Contraseña requerida", codigo: "AUTH_REQUIRED" });
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: req.user.username, password: claveEnviada }) });
+    const authData = await authRes.json();
+    if (!authData.ok) {
       return res.status(401).json({
         ok: false,
         error: "Clave de autorización no válida o ausente. Se requiere credencial policial autorizada.",
@@ -1662,8 +1715,8 @@ function maskSensitiveId(id) {
 const { iniciarBot, detenerBot } = require("./telegram/botService");
 
 // Validación de arranque: Asegurar que las variables críticas existan
-if (!process.env.INGESTA_PASSWORD) {
-  console.error("❌ FALTA INGESTA_PASSWORD - Deteniendo servidor por seguridad");
+if (!process.env.SECRET_KEY) {
+  console.error("❌ FALTA SECRET_KEY - Deteniendo servidor por seguridad");
   process.exit(1);
 }
 

@@ -15,9 +15,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
-  <link rel="stylesheet" href="/css/styles.css?v=45">
+  <link rel="stylesheet" href="/css/styles.css?v=65">
   <link rel="stylesheet" href="/css/layout.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/ajustes.css?v=67">
   
 <script>
   (function() {
@@ -42,65 +43,7 @@
   })();
 </script>
   
-  <style>
-    body { background-color: var(--bg-app); font-family: 'Open Sans', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
-    
-    .ajustes-container { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
-    
-    .ajustes-sidebar { width: 260px; background: var(--bg-surface); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; padding: 32px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.02); flex-shrink: 0; overflow-y: auto; }
-    .ajustes-sidebar-header { padding: 0 24px; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; color: var(--text-primary); }
-    .ajustes-sidebar-header svg { width: 24px; height: 24px; stroke-width: 2.5; }
-    .ajustes-sidebar-header h2 { font-size: 18px; font-weight: 800; letter-spacing: 0.05em; margin: 0; }
-    
-    .ajustes-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
-    .ajustes-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; text-decoration: none; font-size: 14.5px; font-weight: 600; color: #475569; transition: all 0.2s ease; }
-    .ajustes-nav-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
-    .ajustes-nav-item.active { background: var(--bg-surface-hover); color: #0B5ED7; font-weight: 700; box-shadow: inset 3px 0 0 #0B5ED7; }
-    .ajustes-nav-item i { font-size: 1.14rem; width: 20px; text-align: center; }
-    
-    .ajustes-section-title { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 28px; margin: 24px 0 12px 0; }
-    
-    .ajustes-content { flex: 1; padding: 40px; overflow-y: auto; background-color: var(--bg-app); }
-    .ajustes-page-title { color: var(--text-primary); font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.02em; }
-    .ajustes-page-subtitle { color: var(--text-muted); font-size: 1.07rem; margin: 0 0 32px 0; }
-    
-    .ajustes-card { background: var(--bg-surface); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border-subtle); padding: 24px; margin-bottom: 24px; }
-    .ajustes-card-header { font-size: 1.14rem; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--bg-surface-hover); padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-
-    .account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
-    .account-grid > .ajustes-card { height: 100%; box-sizing: border-box; }
-    .settings-form { display: flex; flex-direction: column; gap: 14px; }
-    .settings-form[hidden] { display: none; }
-    .settings-form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .settings-form label { display: block; color: #475569; font-size: 0.92rem; font-weight: 700; margin-bottom: 6px; }
-    .settings-form .form-control { width: 100%; box-sizing: border-box; }
-    .form-feedback { min-height: 20px; margin: 0; font-size: 0.92rem; font-weight: 700; }
-    .form-feedback.success { color: #047857; }
-    .form-feedback.error { color: #b91c1c; }
-    .admin-form-card { border-top: 4px solid #D4AF37; }
-    .admin-action-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border-medium); background: var(--bg-surface); color: var(--text-secondary); border-radius: 6px; padding: 7px 9px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
-    .admin-action-btn:hover { background: var(--bg-surface-hover); border-color: #93c5fd; color: #0B5ED7; }
-    .admin-action-btn.password:hover { background: #fff7ed; border-color: #fdba74; color: #c2410c; }
-    .admin-actions { display: flex; justify-content: flex-end; gap: 7px; flex-wrap: wrap; }
-    .settings-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 23, 42, 0.48); }
-    .settings-modal[hidden], .admin-form-card[hidden] { display: none; }
-    .settings-modal-card { width: min(440px, 100%); background: var(--bg-surface); border-radius: 14px; box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24); padding: 24px; }
-    .settings-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-    .settings-modal-header h2 { margin: 0; color: var(--text-primary); font-size: 20px; }
-    .settings-close-btn { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 20px; padding: 0 4px; }
-    
-    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg-surface-subtle); }
-    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .info-label { color: var(--text-muted); font-weight: 600; font-size: 1rem; }
-    .info-value { color: var(--text-primary); font-weight: 700; font-size: 1rem; text-align: right; }
-    
-    @media (max-width: 768px) {
-      .ajustes-container { flex-direction: column; overflow: auto; height: auto; }
-      .ajustes-sidebar { width: 100%; height: auto; padding: 16px 0; border-right: none; border-bottom: 1px solid var(--border-subtle); }
-      .ajustes-content { padding: 20px; overflow: visible; }
-      .account-grid, .settings-form-row { grid-template-columns: 1fr; }
-    }
-  </style>
+  
 <script>
   (function() {
     try {
@@ -156,38 +99,45 @@
 
   <% const activeSec = (typeof activeSection !== 'undefined' && activeSection) ? activeSection : 'general'; %>
   <div class="ajustes-container">
-    <aside class="ajustes-sidebar">
+    <aside class="ajustes-sidebar" id="ajustes-sidebar">
       <div class="ajustes-sidebar-header">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
         <h2>AJUSTES</h2>
+        <button type="button" class="ajustes-sidebar-toggle" id="ajustes-sidebar-toggle" aria-expanded="true" aria-controls="ajustes-sidebar" title="Contraer barra lateral">
+          <i class="fa-solid fa-chevron-left ajustes-toggle-icon-left" aria-hidden="true"></i>
+          <i class="fa-solid fa-chevron-right ajustes-toggle-icon-right" aria-hidden="true"></i>
+        </button>
       </div>
 
       <nav class="ajustes-nav">
-        <a href="/ajustes/general" class="ajustes-nav-item <%= activeSec === 'general' ? 'active' : '' %>">
-          <i class="fa-solid fa-sliders"></i> General
+        <a href="/ajustes/general" title="General" class="ajustes-nav-item <%= activeSec === 'general' ? 'active' : '' %>">
+          <i class="fa-solid fa-sliders"></i><span class="ajustes-nav-label">General</span>
         </a>
-        <a href="/ajustes/cuenta" class="ajustes-nav-item <%= activeSec === 'cuenta' ? 'active' : '' %>">
-          <i class="fa-solid fa-user"></i> Cuenta
+        <a href="/ajustes/horarios" title="Horarios" class="ajustes-nav-item <%= activeSec === 'horarios' ? 'active' : '' %>">
+          <i class="fa-solid fa-clock"></i><span class="ajustes-nav-label">Horarios</span>
+        </a>
+        <a href="/ajustes/cuenta" title="Cuenta" class="ajustes-nav-item <%= activeSec === 'cuenta' ? 'active' : '' %>">
+          <i class="fa-solid fa-user"></i><span class="ajustes-nav-label">Cuenta</span>
         </a>
       </nav>
 
       <div class="ajustes-section-title">ADMINISTRACIÓN</div>
       <nav class="ajustes-nav">
-        <a href="/ajustes/administracion" class="ajustes-nav-item <%= activeSec === 'administracion' ? 'active' : '' %>">
-          <i class="fa-solid fa-users-gear"></i> Administración
+        <a href="/ajustes/administracion" title="Administración" class="ajustes-nav-item <%= activeSec === 'administracion' ? 'active' : '' %>">
+          <i class="fa-solid fa-users-gear"></i><span class="ajustes-nav-label">Administración</span>
         </a>
       </nav>
 
-      <div style="margin-top: auto; padding: 32px 12px 0 12px; display: flex; flex-direction: column; gap: 8px;">
+      <div class="ajustes-sidebar-actions">
 
-        <a href="/" class="ajustes-nav-item" style="justify-content: center; padding: 8px 12px; font-size: 13px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #047857; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(16, 185, 129, 0.22)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(16, 185, 129, 0.12)'; this.style.transform='translateY(0)';">
-          <i class="fa-solid fa-arrow-left" style="font-size: 14px;"></i> Volver al Dashboard
+        <a href="/" title="Volver al Dashboard" class="ajustes-nav-item sidebar-dashboard-link">
+          <i class="fa-solid fa-arrow-left"></i><span class="ajustes-nav-label">Volver al Dashboard</span>
         </a>
-        <a href="/logout" class="ajustes-nav-item" style="justify-content: center; padding: 8px 12px; font-size: 13px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; transition: all 0.2s ease;" onmouseover="this.style.background='#fee2e2';" onmouseout="this.style.background='#fef2f2';">
-          <i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 14px;"></i> Cerrar Sesión
+        <a href="/logout" title="Cerrar Sesión" class="ajustes-nav-item sidebar-logout-link">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i><span class="ajustes-nav-label">Cerrar Sesión</span>
         </a>
       </div>
     </aside>
@@ -195,6 +145,8 @@
     <main class="ajustes-content">
       <% if (activeSec === 'general') { %>
         <%- include('partials/ajustes/general') %>
+      <% } else if (activeSec === 'horarios') { %>
+        <%- include('partials/ajustes/horarios') %>
       <% } else if (activeSec === 'cuenta') { %>
         <%- include('partials/ajustes/cuenta') %>
       <% } else if (activeSec === 'administracion') { %>
@@ -204,13 +156,59 @@
   </div>
   <% if (typeof activeSec !== 'undefined' && activeSec === 'horarios') { %>
   <script type="module">
-    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=2';
-    window.addEventListener('DOMContentLoaded', () => {
+    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=6';
+    const init = () => {
       setupScheduleEvents();
       loadScheduleSettings();
-    });
+    };
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
   <% } %>
+  <%- include('partials/auth-modal') %>
+  <script type="module" src="/js/components/custom-selects.js?v=3"></script>
+  <script>
+    (() => {
+      const container = document.querySelector('.ajustes-container');
+      const toggle = document.getElementById('ajustes-sidebar-toggle');
+      if (!container || !toggle) return;
+
+      const storageKey = 'abis-ajustes-sidebar-collapsed';
+      const isDesktop = () => window.matchMedia('(min-width: 1201px)').matches;
+      const updateState = (collapsed) => {
+        container.classList.toggle('ajustes-sidebar-collapsed', collapsed);
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+        toggle.title = collapsed ? 'Expandir barra lateral' : 'Contraer barra lateral';
+        toggle.classList.toggle('is-collapsed', collapsed);
+      };
+
+      updateState(isDesktop() && localStorage.getItem(storageKey) === 'true');
+      toggle.addEventListener('click', () => {
+        if (!isDesktop()) return;
+        const collapsed = !container.classList.contains('ajustes-sidebar-collapsed');
+        updateState(collapsed);
+        localStorage.setItem(storageKey, String(collapsed));
+      });
+      window.addEventListener('resize', () => {
+        updateState(isDesktop() && localStorage.getItem(storageKey) === 'true');
+      });
+    })();
+  </script>
+  <script>
+    window.togglePasswordVisibility = function(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      if (btn.hasAttribute('aria-pressed')) btn.setAttribute('aria-pressed', String(isPassword));
+      if (btn.hasAttribute('aria-label')) btn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      btn.innerHTML = isPassword
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:100%;height:100%;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>`;
+    };
+  </script>
 </body>
 </html>
 

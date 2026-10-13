@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     :root {
       --navy-950: #031323;
@@ -328,31 +329,46 @@
 
     .visual-copy {
       position: absolute;
-      right: 1%;
-      bottom: 3%;
-      max-width: 310px;
+      right: 1.5%;
+      bottom: 0%;
+      max-width: clamp(320px, 34vw, 440px);
       text-align: right;
       text-shadow: 0 3px 20px rgba(0, 15, 31, 0.62);
     }
 
     .visual-copy .eyebrow {
-      margin: 0 0 8px;
+      margin: 0 0 10px;
       color: var(--gold-light);
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 800;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .visual-copy .eyebrow i {
+      color: var(--gold);
+      font-size: 11px;
     }
 
     .visual-copy h2 {
       margin: 0;
-      font-size: clamp(24px, 3vw, 42px);
+      font-size: clamp(26px, 3.2vw, 44px);
       font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1.03;
+      letter-spacing: -0.035em;
+      line-height: 1.08;
+      color: #ffffff;
+      text-shadow: 0 2px 14px rgba(0, 15, 31, 0.7);
     }
 
-    .visual-copy p { margin: 10px 0 0; color: rgba(255,255,255,0.78); font-size: 12px; line-height: 1.5; }
+    .visual-copy p {
+      margin: 12px 0 0;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
 
     .abis-orbit {
       position: relative;
@@ -516,7 +532,7 @@
         <div id="view-login">
           <div class="card-heading">
             <h1>Bienvenido</h1>
-            <p class="subtitle">Ingresa tus credenciales para acceder al sistema de enrolamiento biométrico.</p>
+            <p class="subtitle">Ingresa tus credenciales para acceder a la plataforma de monitoreo y enrolamiento biométrico.</p>
           </div>
 
           <form method="post" action="/login" id="form-login">
@@ -626,9 +642,9 @@
           <div class="abis-core"><span>ABIS</span></div>
         </div>
         <div class="visual-copy">
-          <p class="eyebrow">Plataforma Institucional · PDI</p>
-          <h2>Análisis e Inteligencia.</h2>
-          <p>Plataforma de enrolamiento y verificación biométrica avanzada para la Policía de Investigaciones de Chile.</p>
+          <p class="eyebrow"><i class="fa-solid fa-satellite-dish"></i> Monitoreo & Automatización · PDI Chile</p>
+          <h2>Monitoreo y Automatización.</h2>
+          <p>Supervisión continua en tiempo real de enrolamiento biométrico, auditoría operativa y despacho automatizado de reportes ejecutivos para la Policía de Investigaciones de Chile.</p>
         </div>
       </section>
     </div>
@@ -669,6 +685,9 @@
       input.type = isPassword ? 'text' : 'password';
       btn.setAttribute('aria-pressed', String(isPassword));
       btn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      btn.innerHTML = isPassword
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>`;
     };
 
     window.switchView = function(viewName) {

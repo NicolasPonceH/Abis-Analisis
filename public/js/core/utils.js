@@ -8,15 +8,6 @@ export function escapeHtml(unsafe) {
     .replace(/'/g, "&#039;");
 }
 
-export function escaparHtml(texto) {
-  if (texto === null || texto === undefined) return "";
-  return String(texto)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
 
 export function animateValue(id, endValue) {
   const el = document.getElementById(id);
