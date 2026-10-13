@@ -32,6 +32,12 @@ flowchart LR
 
 ## Capturas de la plataforma
 
+### Inicio de sesión ABIS
+
+El acceso principal de ABIS valida las credenciales institucionales antes de habilitar el dashboard y los módulos operativos.
+
+![Login ABIS](docs/screenshots/2026-10-13/01-abis-login.png)
+
 ### Dashboard ejecutivo ABIS
 
 El panel principal permite consultar una fecha específica, los últimos siete días o el histórico acumulado. Muestra el total de enrolamientos, sincronización con PDI, eficacia biométrica, inconsistencias, rendimiento por cuartel y nacionalidades.
@@ -49,6 +55,14 @@ Desde el panel se pueden actualizar las métricas y generar documentos Word, Exc
 La ingesta acepta archivos `.xlsx` y archivos protegidos `.enc` con AES-256-GCM. El archivo se procesa en memoria, se valida, se normaliza contra los catálogos y se inserta por lotes en PostgreSQL.
 
 ![Ingesta ABIS](docs/screenshots/2026-10-13/03-abis-ingesta.png)
+
+### Ajustes del sistema ABIS
+
+El módulo de Ajustes concentra las preferencias generales, programación de reportes, configuración de cuenta y administración de usuarios.
+
+![Ajustes generales ABIS](docs/screenshots/2026-10-13/06-abis-ajustes-general.png)
+
+![Administración de usuarios ABIS](docs/screenshots/2026-10-13/09-abis-ajustes-administracion.png)
 
 ### Inicio de sesión del módulo SIAD
 
