@@ -128,10 +128,10 @@
   <!-- 2. Contenedor Principal: Tarjetas Centrales Agrandadas y Centradas Matemáticamente -->
   <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[320px_1fr_320px] 2xl:grid-cols-[340px_1fr_340px] gap-6 xl:gap-8 w-full max-w-[1850px] mx-auto items-start">
 
-    <!-- Tarjeta de Guía Operativa (Columna Izquierda) -->
+    <!-- Tarjeta de Guía Operativa (Columna Izquierda - Con el mismo largo que Carga de Documentos) -->
     <div class="flex flex-col gap-6 w-full order-1">
-      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
-        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center gap-3 text-white shadow-sm">
+      <div id="card-guia-operativa" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all lg:min-h-[580px]">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 sm:px-6 py-4 flex items-center gap-3 text-white shadow-sm shrink-0">
           <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
             <span class="material-symbols-outlined text-[22px]">help_outline</span>
           </div>
@@ -141,28 +141,50 @@
           </div>
         </div>
 
-        <div class="p-5 flex flex-col gap-4">
-          <div class="flex items-start gap-3">
+        <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between gap-3.5 overflow-hidden">
+          <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
             <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">1</span>
             <div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
-              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-relaxed">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
             </div>
           </div>
 
-          <div class="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 pt-3.5">
+          <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
             <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">2</span>
             <div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
-              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-relaxed">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
             </div>
           </div>
 
-          <div class="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 pt-3.5">
+          <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
             <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">3</span>
             <div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
-              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-relaxed">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">4</span>
+            <div>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Genera Informes</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-relaxed">Exporta actas en Word oficial (.docx), reportes ejecutivos y métricas forenses.</p>
+            </div>
+          </div>
+
+          <div class="pt-2 mt-auto">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50/60 dark:from-slate-800/90 dark:to-slate-800/50 border border-blue-200/80 dark:border-blue-900/60 rounded-2xl p-3.5 flex items-start gap-3 shadow-xs">
+              <div class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] flex items-center justify-center shrink-0 font-black shadow-xs">
+                <span class="material-symbols-outlined text-[18px]">verified_user</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-xs font-black text-[#00234c] dark:text-[#ffd100] uppercase tracking-wider">Custodia Forense PDI</span>
+                <p class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
+                  Procesamiento local, seguro y aislado para resguardo de la evidencia pericial.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -173,7 +195,7 @@
     <div class="flex flex-col gap-6 w-full order-2">
 
       <!-- Tarjeta Ingesta / Cargar Archivos (AMPLIADA) -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+      <div id="card-carga-documentos" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
         <!-- Header de Tarjeta Azul Institucional Ampliado -->
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white shadow-sm">
           <div class="flex items-center gap-3.5">
@@ -335,7 +357,32 @@
     <!-- Columna Derecha de Contrapeso Invisible (Para Centrado Matemático Perfecto) -->
     <div class="hidden lg:block w-full order-3 pointer-events-none" aria-hidden="true"></div>
 
-  </div>
+    <script>
+      (function syncGuiaOperativaHeight() {
+        function sync() {
+          var carga = document.getElementById('card-carga-documentos');
+          var guia = document.getElementById('card-guia-operativa');
+          if (!carga || !guia) return;
+          if (window.innerWidth >= 1024) {
+            guia.style.height = carga.offsetHeight + 'px';
+          } else {
+            guia.style.removeProperty('height');
+          }
+        }
+
+        if (window.ResizeObserver) {
+          var ro = new ResizeObserver(sync);
+          var cargaEl = document.getElementById('card-carga-documentos');
+          if (cargaEl) ro.observe(cargaEl);
+        }
+
+        window.addEventListener('resize', sync);
+        document.addEventListener('DOMContentLoaded', sync);
+        setTimeout(sync, 50);
+        setTimeout(sync, 200);
+        setTimeout(sync, 600);
+      })();
+    </script>
 
     <script>
       (function () {
