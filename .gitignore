@@ -2,6 +2,8 @@ node_modules/
 .env
 .env.local
 logs/*.log
+*.log
+debug.log
 test-results/
 *.enc
 test-banner-seba.png

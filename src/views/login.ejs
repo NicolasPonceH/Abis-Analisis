@@ -546,24 +546,31 @@
 
     .abis-core {
       position: absolute;
-      inset: 25%;
+      inset: 29% 8% 29%;
       display: grid;
       place-items: center;
-      border: 1px solid rgba(255, 232, 125, 0.72);
-      border-radius: 31% 69% 58% 42% / 42% 37% 63% 58%;
-      background: linear-gradient(145deg, rgba(21, 103, 158, 0.74), rgba(4, 28, 61, 0.94));
-      box-shadow: inset 10px 10px 24px rgba(154, 226, 255, 0.16), inset -14px -15px 28px rgba(0, 0, 0, 0.28), 0 0 30px rgba(56, 170, 221, 0.22), 0 0 75px rgba(45, 171, 242, 0.2);
+      border: 7px solid #263650;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #52647f 0%, #1f2d46 18%, #111b2d 54%, #2b3b58 100%);
+      box-shadow: inset 5px 5px 0 rgba(151, 176, 207, 0.22), inset -8px -8px 0 rgba(0, 0, 0, 0.4), 0 0 30px rgba(56, 170, 221, 0.3), 0 0 75px rgba(45, 171, 242, 0.25), 0 17px 0 #101a2b;
       transform: rotateX(12deg) rotateY(-18deg) translateZ(20px);
       transform-style: preserve-3d;
       animation: coreFloat 5.5s ease-in-out infinite;
     }
 
-    .abis-core::before, .abis-core::after { position: absolute; content: ''; border-radius: 50%; }
-    .abis-core::before { top: 13%; right: 18%; width: 22%; height: 15%; background: rgba(255,255,255,0.34); filter: blur(7px); transform: rotate(-24deg); }
-    .abis-core::after { inset: 12%; border: 1px solid rgba(255,255,255,0.14); transform: translateZ(9px); }
+    .abis-core::before, .abis-core::after { position: absolute; content: ''; pointer-events: none; }
+    .abis-core::before { top: 5%; left: 7%; width: 86%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #667997, #1a263b 25%, #111a2a 70%, #7486a1); box-shadow: 0 65px 0 rgba(15, 24, 39, 0.9), 0 66px 0 rgba(99, 121, 151, 0.3); transform: translateZ(12px); }
+    .abis-core::after { top: 18%; right: -5%; width: 10px; height: 58%; border: 1px solid rgba(143, 169, 199, 0.48); border-radius: 6px; background: repeating-linear-gradient(180deg, #0e1728 0 8px, #74849d 9px 11px, #1d2a42 12px 18px); box-shadow: 3px 0 0 rgba(0,0,0,0.32); transform: translateZ(15px); }
 
-    .abis-core span { position: relative; z-index: 1; color: #fff; font-size: clamp(24px, 4vw, 49px); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 3px 15px rgba(0,0,0,0.38), 0 0 18px rgba(130, 220, 255, 0.35); transform: translateZ(25px); }
-    .abis-core small { position: absolute; z-index: 2; bottom: 20%; color: rgba(202, 240, 255, 0.68); font-size: clamp(5px, 0.55vw, 8px); font-weight: 700; letter-spacing: 0.18em; transform: translateZ(28px); white-space: nowrap; }
+    .tablet-screen { position: relative; z-index: 2; display: grid; width: 90%; height: 82%; place-items: center; border: 3px solid #0b1321; border-radius: 7px; background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98)); box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28); transform: translateZ(22px); }
+    .tablet-screen::before { position: absolute; inset: 9%; content: ''; border: 1px solid rgba(163, 231, 255, 0.17); border-radius: 3px; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(139, 218, 255, 0.07) 8px, transparent 9px); }
+
+    .abis-core span { position: relative; z-index: 2; color: #fff; font-size: clamp(24px, 4vw, 49px); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 3px 15px rgba(0,0,0,0.38), 0 0 18px rgba(130, 220, 255, 0.35); transform: translateZ(25px); }
+    .abis-core small { position: absolute; z-index: 2; bottom: 16%; color: rgba(202, 240, 255, 0.72); font-size: clamp(5px, 0.55vw, 8px); font-weight: 700; letter-spacing: 0.18em; transform: translateZ(28px); white-space: nowrap; }
+    .tablet-enrolled { position: absolute; z-index: 3; bottom: 7%; color: #6dffb6; font-size: clamp(5px, 0.6vw, 8px); font-weight: 900; letter-spacing: 0.14em; line-height: 1; text-shadow: 0 0 8px rgba(75, 255, 169, 0.72); text-transform: uppercase; transform: translateZ(30px); animation: enrolledBlink 1.8s ease-in-out infinite, enrolledGlitch 3.2s steps(1, end) infinite; }
+    .tablet-enrolled::before, .tablet-enrolled::after { position: absolute; inset: 0; content: attr(data-text); pointer-events: none; }
+    .tablet-enrolled::before { color: #ff4da6; clip-path: inset(0 0 58% 0); transform: translate(-1px, 1px); opacity: 0.68; }
+    .tablet-enrolled::after { color: #49dfff; clip-path: inset(58% 0 0 0); transform: translate(1px, -1px); opacity: 0.68; }
 
     /* Overlay de validación: conserva la animación de acceso, ahora con una escena 3D. */
     #scanner-overlay {
@@ -591,9 +598,18 @@
     .scan-particle-one { top: 19%; left: 13%; animation: scanParticleOne 3.8s ease-in-out infinite; }
     .scan-particle-two { right: 10%; bottom: 20%; background: var(--gold); box-shadow: 0 0 12px 4px rgba(255, 215, 0, 0.7); animation: scanParticleTwo 4.4s ease-in-out infinite -1.2s; }
     .scan-particle-three { top: 34%; right: 4%; width: 3px; height: 3px; animation: scanParticleThree 5s ease-in-out infinite -2s; }
-    .scanner-frame { position: relative; display: grid; width: 190px; height: 208px; place-items: center; overflow: hidden; border: 1px solid rgba(255, 209, 0, 0.55); border-radius: 30px; background: linear-gradient(145deg, rgba(21,87,133,0.68), rgba(1,17,36,0.88)); box-shadow: 0 0 35px rgba(255,209,0,0.12), inset 0 0 25px rgba(0,0,0,0.28); transform: translateZ(34px) rotateX(7deg) rotateY(-9deg); }
+    .scanner-frame { position: relative; display: grid; width: 250px; height: 176px; place-items: center; overflow: hidden; border: 7px solid #263650; border-radius: 22px; background: linear-gradient(145deg, #52647f 0%, #1f2d46 18%, #111b2d 54%, #2b3b58 100%); box-shadow: inset 5px 5px 0 rgba(151, 176, 207, 0.22), inset -8px -8px 0 rgba(0, 0, 0, 0.4), 0 0 35px rgba(57, 185, 237, 0.24), 0 14px 0 #101a2b; transform: translateZ(34px) rotateX(7deg) rotateY(-9deg); }
+    .scanner-frame::before { position: absolute; inset: 14px; content: ''; border: 1px solid rgba(144, 229, 255, 0.2); border-radius: 10px; background: repeating-linear-gradient(0deg, transparent 0 10px, rgba(129, 221, 255, 0.08) 11px, transparent 12px); box-shadow: inset 0 0 30px rgba(75, 196, 241, 0.12); pointer-events: none; }
+    .scanner-frame::after { position: absolute; top: 19%; right: -4px; width: 9px; height: 58%; content: ''; border: 1px solid rgba(143, 169, 199, 0.48); border-radius: 5px; background: repeating-linear-gradient(180deg, #0e1728 0 8px, #74849d 9px 11px, #1d2a42 12px 18px); box-shadow: 3px 0 0 rgba(0,0,0,0.32); pointer-events: none; }
+    .loading-device-content { position: relative; z-index: 2; display: flex; width: 88%; height: 82%; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 3px solid #0b1321; border-radius: 7px; background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98)); box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28); transform: translateZ(22px); }
+    .loading-device-content::before { position: absolute; inset: 9%; content: ''; border: 1px solid rgba(163, 231, 255, 0.17); border-radius: 3px; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(139, 218, 255, 0.07) 8px, transparent 9px); pointer-events: none; }
+    .scanner-frame .fingerprint-icon { position: relative; z-index: 2; width: auto; height: auto; font-size: 38px; line-height: 1; transform: none; }
+    .scanner-frame .fingerprint-icon.active { transform: scale(1.12); }
+    .loading-device-wordmark { position: relative; z-index: 2; color: #f5fbff; font-size: 29px; font-weight: 800; letter-spacing: 0.08em; line-height: 0.92; text-shadow: 0 0 18px rgba(211, 245, 255, 0.58); }
+    .loading-device-status { position: relative; z-index: 2; margin-top: 4px; padding: 3px 8px; border: 1px solid rgba(188, 211, 224, 0.35); border-radius: 999px; color: #b8c5cf; font-size: 7px; font-weight: 800; letter-spacing: 0.18em; line-height: 1; text-transform: uppercase; animation: statusBlink 1.2s ease-in-out infinite; }
+    .loading-device-status.registered { border-color: rgba(84, 240, 173, 0.8); color: #9affd3; box-shadow: 0 0 15px rgba(65, 239, 174, 0.32); animation: registeredBlink 850ms ease-in-out infinite; }
     .fingerprint-icon { display: block; width: 158px; height: 178px; color: #a8b3bf; font-family: 'Material Symbols Outlined'; font-size: 158px; font-style: normal; font-weight: 400; line-height: 178px; text-align: center; white-space: nowrap; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48; opacity: 0.88; transition: color 600ms ease-out, opacity 600ms ease-out, filter 600ms ease-out, transform 600ms ease-out; filter: drop-shadow(0 0 8px rgba(168, 179, 191, 0.36)); animation: fingerprintGlow 2.4s ease-in-out infinite; }
-    .fingerprint-icon.active { color: #9affd3; opacity: 1; filter: drop-shadow(0 0 15px rgba(65, 239, 174, 0.95)); transform: scale(1.1); animation: fingerprintVerifiedGlow 700ms ease-out forwards; }
+    .fingerprint-icon.active { color: #9affd3; opacity: 1; filter: drop-shadow(0 0 15px rgba(65, 239, 174, 0.95)); transform: scale(1.18); animation: fingerprintVerifiedGlow 700ms ease-out forwards; }
     .corner { position: absolute; width: 24px; height: 24px; border-color: var(--gold); border-style: solid; border-width: 0; }
     .top-left { top: 12px; left: 12px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 5px; }
     .top-right { top: 12px; right: 12px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 5px; }
@@ -636,6 +652,9 @@
     @keyframes statusBlink { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
     @keyframes fingerprintGlow { 0%, 100% { opacity: 0.68; filter: drop-shadow(0 0 6px rgba(168, 179, 191, 0.24)); } 50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(190, 204, 216, 0.62)); } }
     @keyframes fingerprintVerifiedGlow { from { opacity: 0.85; filter: drop-shadow(0 0 8px rgba(65, 239, 174, 0.55)); } to { opacity: 1; filter: drop-shadow(0 0 20px rgba(65, 239, 174, 1)); } }
+    @keyframes enrolledBlink { 0%, 100% { opacity: 0.68; } 50% { opacity: 1; } }
+    @keyframes enrolledGlitch { 0%, 88%, 100% { transform: translateZ(30px); } 90% { transform: translate3d(-2px, 1px, 30px); } 92% { transform: translate3d(2px, -1px, 30px); } 94% { transform: translate3d(-1px, 0, 30px); } }
+    @keyframes registeredBlink { 0%, 100% { opacity: 0.72; } 50% { opacity: 1; } }
     @keyframes ringSpin { from { transform: rotateX(58deg) rotateZ(0deg); } to { transform: rotateX(58deg) rotateZ(360deg); } }
     @keyframes coreFloat { 0%, 100% { transform: rotateX(12deg) rotateY(-18deg) translate3d(0, 8px, 20px); } 50% { transform: rotateX(-10deg) rotateY(16deg) translate3d(0, -10px, 34px); } }
     @keyframes stageFloat { 0%, 100% { transform: rotateX(0deg) rotateY(-2deg) translateY(5px); } 50% { transform: rotateX(4deg) rotateY(5deg) translateY(-7px); } }
@@ -840,8 +859,11 @@
             </svg>
           </div>
           <div class="abis-core">
-            <span>ABIS</span>
-            <small>BIOMETRIC INTELLIGENCE</small>
+            <div class="tablet-screen">
+              <span>ABIS</span>
+              <small>BIOMETRIC INTELLIGENCE</small>
+              <strong class="tablet-enrolled" data-text="USUARIO ENROLADO">USUARIO ENROLADO</strong>
+            </div>
           </div>
         </div>
         <div class="visual-copy">
@@ -866,7 +888,11 @@
             <span class="corner top-right"></span>
             <span class="corner bottom-left"></span>
             <span class="corner bottom-right"></span>
-            <span class="material-symbols-outlined fingerprint-icon" aria-hidden="true">fingerprint</span>
+            <div class="loading-device-content">
+              <span class="material-symbols-outlined fingerprint-icon" aria-hidden="true">fingerprint</span>
+              <strong class="loading-device-wordmark">ABIS</strong>
+              <span class="loading-device-status">VALIDANDO</span>
+            </div>
             <div class="laser"></div>
           </div>
         </div>
@@ -890,6 +916,7 @@
     const text = document.querySelector('.scanner-text');
     const laser = document.querySelector('.laser');
     const scannerStatus = document.querySelector('.scanner-status');
+    const loadingStatus = document.querySelector('.loading-device-status');
     const progressBar = document.querySelector('.scanner-progress');
     const progressFill = document.querySelector('.scanner-progress-fill');
 
@@ -934,6 +961,10 @@
         fp.classList.add('active');
         overlay.classList.add('is-verified');
         updateScannerProgress(100, 'ACCESO AUTORIZADO');
+        if (loadingStatus) {
+          loadingStatus.textContent = 'USUARIO ENROLADO';
+          loadingStatus.classList.add('registered');
+        }
         text.innerHTML = '<span style="color: #FFD700;">IDENTIDAD VERIFICADA</span><br><span style="font-size: 18px; color: #ffffff; display: block; margin-top: 12px; font-weight: 800; animation: none; letter-spacing: 0.05em;">BIENVENIDO A ABIS</span>';
         laser.style.display = 'none';
 
