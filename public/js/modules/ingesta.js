@@ -2,9 +2,9 @@ import { state } from '../core/state.js';
 import { escapeHtml } from '../core/utils.js';
 import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
 import { loadMetrics } from './panel-ejecutivo.js';
-import { loadTrendData } from './tendencias.js';
+import { loadTrendData } from './tendencias.js?v=20261013-2';
 import { cargarBitacoraAuditoria } from './auditoria.js';
-import { checkSystemHealth, loadAvailableDates } from '../app.js';
+import { checkSystemHealth, loadAvailableDates } from '../app.js?v=23';
 
 export const sheetState = {
   headers: [],
@@ -25,6 +25,18 @@ export const SHEET_SCHEMA = [
   { field: "estadoRegistro", label: "Registración Biométrica", required: true, aliases: ["estado registro", "registración biométrica", "registracion_biometrica", "registracion biometrica"] },
   { field: "estadoGeneral", label: "Estado General", required: true, aliases: ["estado general", "estado_general"] },
   { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación", "region 2", "región 2", "REGION2"] },
+];
+
+// Formato institucional que puede llegar pegado desde Oracle/Excel sin cabeceras.
+// Las columnas adicionales se conservan en la vista previa, pero solo las columnas
+// reconocidas por SHEET_SCHEMA participan en el mapeo e insercion.
+const HEADERLESS_ORACLE_HEADERS_28 = [
+  "Fecha Enrolamiento", "Hora", "Equipo", "Usuario", "Unidad",
+  "Nombre Completo", "Tipo de Documento", "Documento", "Emitido En",
+  "Nacionalidad", "Estado Sincronizacion", "Estado Registro", "Estado General",
+  "Cuartel", "Region", "Fecha Nacimiento", "Edad Exacta", "Mayor de Edad",
+  "ID Origen", "IP", "Cuartel New", "Nombre Funcionario", "Profesion",
+  "Genero", "Tipo Registro", "Latitud", "Longitud", "ID Registro",
 ];
 
 function formatoFechaIngesta(valor) {
@@ -491,7 +503,17 @@ export function parseClipboardData(text) {
   let headers = [];
   let dataRows = [];
 
-  if (hasHeaderKeywords) {
+  // Si la primera fila parece un registro real (fecha + hora + equipo),
+  // nunca debe convertirse en encabezado aunque contenga palabras conocidas.
+  const looksLikeHeaderlessOracleRow = firstRow.length >= HEADERLESS_ORACLE_HEADERS_28.length
+    && /^(\d{1,2}[-/]\d{1,2}[-/]\d{4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})$/.test(String(firstRow[0] || "").trim())
+    && /^\d{1,2}:\d{2}(?::\d{2})?$/.test(String(firstRow[1] || "").trim())
+    && /^(PC DE ESCRITORIO|TABLET)$/i.test(String(firstRow[2] || "").trim());
+
+  if (looksLikeHeaderlessOracleRow) {
+    headers = HEADERLESS_ORACLE_HEADERS_28.slice();
+    dataRows = grid;
+  } else if (hasHeaderKeywords) {
     headers = firstRow.map((h) => String(h || "").trim());
     dataRows = grid.slice(1);
   } else {
@@ -515,7 +537,7 @@ export function parseClipboardData(text) {
   return { headers, rows: dataRows };
 }
 
-export function loadSampleOracleData() {
+function loadLegacySampleOracleData() {
   const hoy = new Date().toISOString().split("T")[0];
   const sampleHeaders = [
     "Acciones", "Fecha", "hora", "EQUIPO", "Usuario", "UNIDAD",
@@ -539,6 +561,26 @@ export function loadSampleOracleData() {
   ].join("\n");
 
   handlePastedClipboardText(tsvText);
+}
+
+// Muestra una muestra anonima con la misma estructura de 28 columnas que
+// normalmente se copia desde Oracle/Excel. Las columnas no modeladas se
+// conservan en la previsualizacion y no se insertan en PostgreSQL.
+export function loadSampleOracleData() {
+  const fecha = new Date().toISOString().split("T")[0];
+  const sampleHeaders = HEADERLESS_ORACLE_HEADERS_28.slice();
+  const sampleRows = [
+    [fecha, "08:15:00", "PC DE ESCRITORIO", "operador_demo", "PREPOLIN ARICA", "GOMEZ PEREZ JUAN", "DNI", "87654321", "VENEZUELA", "VENEZUELA", "SINCRONIZADO", "REGISTRADO", "OK", "CHACALLUTA", "ARICA Y PARINACOTA", "1994-02-10", "32", "MAYOR DE EDAD", "demo-001", "10.20.1.15", "CHACALLUTA", "FUNCIONARIO DEMO", "COMERCIANTE", "HOMBRE", "ENROLADO", "-18.4783", "-70.3126", "20820001"],
+    [fecha, "09:30:22", "TABLET", "operador_demo", "PREPOLIN ARICA", "SILVA MORA LAURA", "PASAPORTE", "PA123456", "COLOMBIA", "COLOMBIA", "SINCRONIZADO", "REGISTRADO", "OK", "CHUNGARA", "ARICA Y PARINACOTA", "1998-07-25", "28", "MAYOR DE EDAD", "demo-002", "10.20.1.18", "CHUNGARA", "FUNCIONARIO DEMO", "PROFESIONAL", "MUJER", "ENROLADO", "-18.9050", "-69.2725", "20820002"],
+    [fecha, "10:45:10", "PC DE ESCRITORIO", "operador_demo", "JENATID", "MAMANI CHOQUE CARLOS", "CEDULA", "65432198", "BOLIVIA", "BOLIVIA", "SINCRONIZADO", "REGISTRADO", "OK", "COLCHANES", "TARAPACA", "2012-11-03", "14", "MENOR DE EDAD", "demo-003", "10.20.2.11", "COLCHANES", "FUNCIONARIO DEMO", "ESTUDIANTE", "HOMBRE", "ENROLADO", "-20.5300", "-69.0500", "20820003"],
+    [fecha, "11:20:05", "TABLET", "operador_demo", "PREPOLIN ARICA", "JEAN BAPTISTE MARIE", "PASAPORTE", "HT998877", "HAITI", "HAITI", "SINCRONIZADO", "REGISTRADO", "OK", "BELEN", "ARICA Y PARINACOTA", "1985-04-12", "41", "MAYOR DE EDAD", "demo-004", "10.20.1.20", "BELEN", "FUNCIONARIO DEMO", "TECNICO", "MUJER", "ENROLADO", "-18.4739", "-70.3000", "20820004"],
+    [fecha, "12:05:40", "PC DE ESCRITORIO", "operador_demo", "PREPOLIN ARICA", "QUISPE MAMANI LUIS", "DNI", "45678912", "PERU", "PERU", "SINCRONIZADO", "REGISTRADO", "OK", "CHACALLUTA", "ARICA Y PARINACOTA", "1987-09-30", "39", "MAYOR DE EDAD", "demo-005", "10.20.1.22", "CHACALLUTA", "FUNCIONARIO DEMO", "VENDEDOR", "HOMBRE", "ENROLADO", "-18.4783", "-70.3126", "20820005"],
+  ];
+
+  handlePastedClipboardText([
+    sampleHeaders.join("\t"),
+    ...sampleRows.map((row) => row.join("\t")),
+  ].join("\n"));
 }
 
 export function renderSpreadsheetGrid() {
@@ -787,6 +829,16 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
     if (feedbackDiv) feedbackDiv.style.display = "block";
 
     if (res.ok && data.ok) {
+      const detalleErrores = Array.isArray(data.erroresDetalle)
+        ? data.erroresDetalle
+          .slice(0, 5)
+          .map((item) => {
+            const detalle = Array.isArray(item.errors) ? item.errors.join("; ") : "Error de mapeo";
+            const fila = item.fila ? `Fila ${item.fila}: ` : "";
+            return `${fila}${detalle}`;
+          })
+          .filter(Boolean)
+        : [];
       if (feedbackDiv) {
         feedbackDiv.innerHTML = `
           <div class="alert alert-success">
@@ -799,6 +851,7 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
                 &bull; <strong>Modo de Carga:</strong> <span class="badge badge-success">Portapapeles Directo Oracle DB / Excel</span><br>
                 &bull; <strong>Filas Procesadas:</strong> <strong>${(data.totalMapeadas || sheetData.rows.length).toLocaleString()}</strong> recibidas &bull; <strong>${(data.totalInsertadas || 0).toLocaleString()}</strong> insertadas en PostgreSQL<br>
                 &bull; <strong>Inconsistencias Registradas:</strong> ${data.erroresFilas || 0}<br>
+                ${detalleErrores.length > 0 ? `&bull; <strong>Detalle:</strong> ${escapeHtml(detalleErrores.join(" | "))}<br>` : ""}
                 &bull; <strong>Tiempo de Inserción:</strong> ${((data.duracionMs || 0) / 1000).toFixed(2)} segundos<br>
                 &bull; <strong>Huella Criptográfica SHA-256:</strong> <code>${data.hashSHA256}</code><br>
                 &bull; <strong>Auditoría:</strong> Evento <code>INGESTA_PORTAPAPELES_AUTORIZADA</code> registrado en la bitácora inmutable.

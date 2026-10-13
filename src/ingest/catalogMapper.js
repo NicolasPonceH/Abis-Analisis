@@ -99,6 +99,10 @@ function parseDateToString(val) {
     const [d, m, y] = s.split("/");
     return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
   }
+  if (/^\d{2}-\d{2}-\d{4}/.test(s)) {
+    const [d, m, y] = s.split("-");
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
   return s;
 }
 
@@ -298,4 +302,3 @@ function mapRow(row, catalogs) {
 }
 
 module.exports = { loadCatalogs, mapRow };
-

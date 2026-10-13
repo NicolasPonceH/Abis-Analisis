@@ -950,6 +950,28 @@ async function generarCapturaDiaria(reporteDiario) {
  * - Foto 2: TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO 2026 (tipoFiltro: 'ENROLADO')
  * - Foto 4: TOTAL DE REGISTROS EN EL SISTEMA ABIS ACOMULADO AL AÑO 2026 (tipoFiltro: 'TODOS')
  */
+async function generarCapturaDistribucionDiaria(reporteDiario) {
+  const fecha = reporteDiario.fecha || "";
+  const [y, m, d] = fecha.split("-");
+  const fechaFmt = y && m && d ? `${d}-${m}-${y}` : fecha;
+  const html = renderTableroExcelHtml({
+    titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS DEL ${fechaFmt}`,
+    tipoFiltro: "ENROLADO",
+    total: reporteDiario.total,
+    nacionalidades: reporteDiario.nacionalidadesPrincipales,
+    unidades: reporteDiario.unidadesActivas,
+    cuarteles: reporteDiario.cuartelesActivos,
+    dispositivos: reporteDiario.dispositivos,
+    edad: reporteDiario.edad,
+    genero: reporteDiario.genero,
+    regiones: reporteDiario.regiones,
+    esRango: true,
+    anioRango: y || String(new Date().getFullYear()),
+  });
+
+  return renderHtmlToPng(html, "#captura-root");
+}
+
 async function generarCapturaAcumulado(dataAcumulada, { titulo, tipoFiltro = "ENROLADO", anio = 2026 } = {}) {
   const html = renderTableroExcelHtml({
     ...dataAcumulada,
@@ -965,8 +987,8 @@ async function generarCapturaAcumulado(dataAcumulada, { titulo, tipoFiltro = "EN
 module.exports = {
   generarCapturaMatrizFinDeSemana,
   generarCapturaDistribucionFinDeSemana,
+  generarCapturaDistribucionDiaria,
   generarCapturaAcumulado,
   generarCapturaDiaria,
   renderHtmlToPng,
 };
-

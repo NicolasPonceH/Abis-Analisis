@@ -1179,6 +1179,9 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
     }
 
     const totalInsertadas = resultadoEtl.insertResult ? resultadoEtl.insertResult.inserted : 0;
+    const detalleErrores = resultadoEtl.errors.length > 0
+      ? JSON.stringify(resultadoEtl.errors.slice(0, 50))
+      : null;
     await actualizarLote(pool, idLote, {
       estado: "COMPLETADO",
       finalizado: true,
@@ -1186,6 +1189,7 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
       filasValidas: resultadoEtl.rows.length,
       filasInsertadas: totalInsertadas,
       filasError: resultadoEtl.errors.length,
+      detalle: detalleErrores,
     });
 
     // Registro formal en bitácora de auditoría inmutable
@@ -1292,6 +1296,9 @@ app.post("/api/ingest/sheet", async (req, res) => {
     }
 
     const totalInsertadas = resultadoEtl.insertResult ? resultadoEtl.insertResult.inserted : 0;
+    const detalleErrores = resultadoEtl.errors.length > 0
+      ? JSON.stringify(resultadoEtl.errors.slice(0, 50))
+      : null;
     await actualizarLote(pool, idLote, {
       estado: "COMPLETADO",
       finalizado: true,
@@ -1299,6 +1306,7 @@ app.post("/api/ingest/sheet", async (req, res) => {
       filasValidas: resultadoEtl.rows.length,
       filasInsertadas: totalInsertadas,
       filasError: resultadoEtl.errors.length,
+      detalle: detalleErrores,
     });
 
     // Registro formal en bitácora de auditoría inmutable
@@ -1486,6 +1494,59 @@ app.post("/api/telegram/enviar", async (req, res) => {
 
     const replyMarkup = crearBotonesDescarga({ fecha: reporte.fecha || fecha, desde, hasta });
     let envio = null;
+
+    // El envio manual diario usa el mismo album de 4 capturas que el programador.
+    if (!desde || !hasta) {
+      try {
+        const {
+          generarCapturaDiaria,
+          generarCapturaDistribucionDiaria,
+          generarCapturaAcumulado,
+        } = require("./reportes/imageReportService");
+        const { obtenerDatosAcumulados } = require("./reportes/reporteFinDeSemana");
+        const anioActual = new Date().getFullYear();
+        const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+          obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+          obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+        ]);
+        const [bufferDiario, bufferDistribucion, bufferAcumEnrolados, bufferAcumRegistros] = await Promise.all([
+          generarCapturaDiaria(reporte),
+          generarCapturaDistribucionDiaria(reporte),
+          generarCapturaAcumulado(dataAcumEnrolados, {
+            titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL ANIO ${anioActual}`,
+            tipoFiltro: "ENROLADO",
+            anio: anioActual,
+          }),
+          generarCapturaAcumulado(dataAcumRegistros, {
+            titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACUMULADO AL ANIO ${anioActual}`,
+            tipoFiltro: "TODOS",
+            anio: anioActual,
+          }),
+        ]);
+
+        envio = await telegramClient.enviarGrupoFotos({
+          token,
+          chatId,
+          fotos: [
+            { buffer: bufferDiario, caption: `FOTO 1/4: ESTADOS DE LA JORNADA ${fecha}` },
+            { buffer: bufferDistribucion, caption: `FOTO 2/4: DISTRIBUCION DE LA JORNADA ${fecha}` },
+            { buffer: bufferAcumEnrolados, caption: `FOTO 3/4: ENROLADOS ACUMULADOS ${anioActual}` },
+            { buffer: bufferAcumRegistros, caption: `FOTO 4/4: REGISTROS ACUMULADOS ${anioActual}` },
+          ],
+        });
+
+        const resTexto = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+        const primerEnvio = Array.isArray(envio) ? envio[0] : envio;
+        return res.json({
+          ok: true,
+          mensaje: `Reporte visual de la jornada ${periodo} enviado exitosamente al canal de Telegram institucional`,
+          messageId: primerEnvio?.message_id || resTexto?.message_id,
+        });
+      } catch (dailyErr) {
+        console.error("[TELEGRAM ENVIAR DIARIO ERROR]", dailyErr);
+        return res.status(500).json({ ok: false, error: dailyErr.message });
+      }
+    }
 
     // Generar captura visual dinámica según la fecha o rango seleccionado en la web
     try {
@@ -1684,13 +1745,14 @@ app.post("/api/settings/schedule", async (req, res) => {
       });
     }
 
-    const { enabled, times, days, reportType, telegramChatId } = req.body || {};
+    const { enabled, times, days, reportType, telegramChatId, sendFourPhotosDaily } = req.body || {};
     const updated = await schedulerService.saveConfig({
       enabled: enabled !== undefined ? Boolean(enabled) : undefined,
       times,
       days,
       reportType,
       telegramChatId,
+      sendFourPhotosDaily: sendFourPhotosDaily !== undefined ? Boolean(sendFourPhotosDaily) : undefined,
     });
     const next = schedulerService.getNextExecution(updated);
 

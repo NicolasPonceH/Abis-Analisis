@@ -82,6 +82,11 @@ export async function loadScheduleSettings() {
       reportTypeSelect.value = data.config.reportType;
     }
 
+    const fourPhotosToggle = document.getElementById("schedule-four-photos-toggle");
+    if (fourPhotosToggle) {
+      fourPhotosToggle.checked = data.config.sendFourPhotosDaily !== false;
+    }
+
     // 6. Canal de Telegram Info
     const chatIdDisplay = document.getElementById("telegram-chat-id-display");
     if (chatIdDisplay) {
@@ -366,6 +371,7 @@ export function setupScheduleEvents() {
       try {
         const enabled = document.getElementById("schedule-enabled-toggle")?.checked ?? true;
         const reportType = document.getElementById("schedule-report-type")?.value || "extenso";
+        const sendFourPhotosDaily = document.getElementById("schedule-four-photos-toggle")?.checked ?? true;
 
         const days = [];
         document.querySelectorAll(".day-check:checked").forEach((cb) => {
@@ -385,6 +391,7 @@ export function setupScheduleEvents() {
           times: [...state.currentScheduleTimes],
           days,
           reportType,
+          sendFourPhotosDaily,
         };
 
         // Solicitar clave institucional mediante el modal de seguridad policial

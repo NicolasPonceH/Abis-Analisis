@@ -62,12 +62,12 @@
             <span>Pegar Portapapeles</span>
           </button>
           <button type="button" id="btn-load-sample-sheet" class="btn btn-secondary"
-            title="Cargar datos de ejemplo para probar el flujo">
+            title="Cargar una muestra anonimizada con 28 columnas de Oracle">
             <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
               <polygon
                 points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span>Cargar Ejemplo PostgreSQL</span>
+            <span>Cargar ejemplo Oracle</span>
           </button>
           <button type="button" id="btn-clear-sheet" class="btn btn-secondary" title="Limpiar datos de la tabla"
             style="display: none;">
@@ -185,13 +185,13 @@
             </svg>
             <span>+ Fila</span>
           </button>
-          <button type="button" id="btn-sheet-submit" class="btn btn-primary" style="height:36px; font-weight:700;">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+          <span class="sheet-preview-action-hint">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <path d="m9 12 2 2 4-4" />
             </svg>
-            <span>Validar e Ingestar en BD</span>
-          </button>
+            La autorización se solicita al final
+          </span>
         </div>
       </div>
 
@@ -214,14 +214,14 @@
             <line x1="12" y1="16" x2="12" y2="12" />
             <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
-          <span>Puedes editar o corregir cualquier celda directamente haciendo doble clic antes de poblar la base de
-            datos PostgreSQL.</span>
+          <span><strong>Revisa antes de continuar.</strong> Puedes editar cualquier celda haciendo doble clic. La
+            contraseña se solicitará una sola vez para validar e insertar el lote en PostgreSQL.</span>
         </div>
-        <button type="button" id="btn-sheet-submit-bottom" class="btn btn-primary" style="font-weight:700;">
+        <button type="button" id="btn-sheet-submit-bottom" class="btn btn-primary sheet-preview-primary-action">
           <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
           </svg>
-          <span>Autorizar e Ingestar Registros en BD</span>
+          <span>Autorizar e ingestar en PostgreSQL</span>
         </button>
       </div>
     </div>

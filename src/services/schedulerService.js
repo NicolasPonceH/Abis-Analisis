@@ -8,6 +8,7 @@ const { obtenerReporteFinDeSemana, obtenerDatosAcumulados } = require("../report
 const {
   generarCapturaMatrizFinDeSemana,
   generarCapturaDistribucionFinDeSemana,
+  generarCapturaDistribucionDiaria,
   generarCapturaAcumulado,
   generarCapturaDiaria,
 } = require("../reportes/imageReportService");
@@ -23,6 +24,7 @@ const DEFAULT_CONFIG = {
   times: ["07:10", "08:30", "08:49", "09:00"], // 07:10 AM permanente y jornadas operativas
   days: [1, 2, 3, 4, 5, 6, 0], // Lunes a Domingo (0 = Domingo, 1 = Lunes, ...)
   reportType: "extenso", // "extenso" | "resumen"
+  sendFourPhotosDaily: true,
   targetChannel: "telegram",
   telegramChatId: "",
   lastSent: null,
@@ -484,8 +486,30 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
       : formatearReporteExtenso(reporteDiario, { fecha: periodo.fecha, origen });
 
     let bufDiario = null;
+    let bufDistribucionDiaria = null;
+    let bufAcumEnrolados = null;
+    let bufAcumRegistros = null;
     try {
-      bufDiario = await generarCapturaDiaria(reporteDiario);
+      const anioActual = new Date().getFullYear();
+      const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+        obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+        obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+      ]);
+
+      [bufDiario, bufDistribucionDiaria, bufAcumEnrolados, bufAcumRegistros] = await Promise.all([
+        generarCapturaDiaria(reporteDiario),
+        generarCapturaDistribucionDiaria(reporteDiario),
+        generarCapturaAcumulado(dataAcumEnrolados, {
+          titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}`,
+          tipoFiltro: "ENROLADO",
+          anio: anioActual,
+        }),
+        generarCapturaAcumulado(dataAcumRegistros, {
+          titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}`,
+          tipoFiltro: "TODOS",
+          anio: anioActual,
+        }),
+      ]);
     } catch (renderErr) {
       console.warn("[SCHEDULER] Error generando captura diaria:", renderErr.message);
     }
@@ -501,7 +525,34 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
 
     for (const cid of chatIds) {
       try {
-        if (bufDiario) {
+        if (config.sendFourPhotosDaily && bufDiario && bufDistribucionDiaria && bufAcumEnrolados && bufAcumRegistros) {
+          const anioActual = new Date().getFullYear();
+          const fotosAlbum = [
+            {
+              buffer: bufDiario,
+              caption: [
+                `📊 <b>FOTO 1/4: ESTADOS DE LA JORNADA ${periodo.fechaFmt}</b>`,
+                `👥 Total enrolados: <b>${totalReportado.toLocaleString("es-CL")}</b>`,
+                `✅ Sincronización PDI: <b>${slaReportado.toFixed(1)}%</b>`,
+                `📌 <i>Jornada cerrada anterior</i>`,
+              ].join("\n"),
+            },
+            {
+              buffer: bufDistribucionDiaria,
+              caption: `📋 <b>FOTO 2/4: DISTRIBUCIÓN DE LA JORNADA ${periodo.fechaFmt}</b>\n<i>Desglose por nacionalidad, unidad, cuartel, equipo, género y edad.</i>`,
+            },
+            {
+              buffer: bufAcumEnrolados,
+              caption: `📈 <b>FOTO 3/4: ENROLADOS ACUMULADOS ${anioActual}</b>\n<i>Distribución histórica de enrolamientos biométricos.</i>`,
+            },
+            {
+              buffer: bufAcumRegistros,
+              caption: `📈 <b>FOTO 4/4: REGISTROS ACUMULADOS ${anioActual}</b>\n<i>Universo consolidado de registros del sistema ABIS.</i>`,
+            },
+          ];
+          const resAlbum = await telegramClient.enviarGrupoFotos({ token, chatId: cid, fotos: fotosAlbum });
+          envio = Array.isArray(resAlbum) ? resAlbum[0] : resAlbum;
+        } else if (bufDiario) {
           envio = await telegramClient.enviarFoto({
             token,
             chatId: cid,
@@ -672,4 +723,3 @@ module.exports = {
   iniciarScheduler,
   detenerScheduler,
 };
-

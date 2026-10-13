@@ -3,6 +3,41 @@ const { validateHeaders } = require("./headerValidator");
 const { loadCatalogs, mapRow } = require("./catalogMapper");
 const { EXPECTED_COLUMNS, findMatchingHeader, normalizeHeaderName } = require("./headerSchema");
 
+const HEADERLESS_ORACLE_HEADERS_28 = [
+  "Fecha Enrolamiento", "Hora", "Equipo", "Usuario", "Unidad",
+  "Nombre Completo", "Tipo de Documento", "Documento", "Emitido En",
+  "Nacionalidad", "Estado Sincronizacion", "Estado Registro", "Estado General",
+  "Cuartel", "Region", "Fecha Nacimiento", "Edad Exacta", "Mayor de Edad",
+  "ID Origen", "IP", "Cuartel New", "Nombre Funcionario", "Profesion",
+  "Genero", "Tipo Registro", "Latitud", "Longitud", "ID Registro",
+];
+
+function pareceFilaOracleSinCabecera(row) {
+  if (!Array.isArray(row) || row.length < HEADERLESS_ORACLE_HEADERS_28.length) return false;
+  const fecha = String(row[0] || "").trim();
+  const hora = String(row[1] || "").trim();
+  const equipo = String(row[2] || "").trim();
+  return /^(\d{1,2}[-/]\d{1,2}[-/]\d{4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})$/.test(fecha)
+    && /^\d{1,2}:\d{2}(?::\d{2})?$/.test(hora)
+    && /^(PC DE ESCRITORIO|TABLET)$/i.test(equipo);
+}
+
+// Recupera exportaciones pegadas sin cabeceras, incluso si una versión antigua
+// del navegador envió la primera fila como encabezado o utilizó 12 cabeceras genéricas.
+function normalizarEntradaHoja(headers, rows) {
+  let normalizedHeaders = Array.isArray(headers) ? headers.slice() : [];
+  let normalizedRows = Array.isArray(rows) ? rows.slice() : [];
+
+  if (pareceFilaOracleSinCabecera(normalizedHeaders)) {
+    normalizedRows = [normalizedHeaders, ...normalizedRows];
+    normalizedHeaders = HEADERLESS_ORACLE_HEADERS_28.slice();
+  } else if (pareceFilaOracleSinCabecera(normalizedRows[0])) {
+    normalizedHeaders = HEADERLESS_ORACLE_HEADERS_28.slice();
+  }
+
+  return { headers: normalizedHeaders, rows: normalizedRows };
+}
+
 function toFieldKeyedRow(rawRow, actualHeaders) {
   const row = {};
   for (const column of EXPECTED_COLUMNS) {
@@ -119,6 +154,7 @@ async function processExcelFile(filePath, pool, options = {}) {
 
 // Procesa filas provenientes directamente del portapapeles o de una cuadrícula de hoja de cálculo
 async function processSheetRows(headers, rows, pool) {
+  ({ headers, rows } = normalizarEntradaHoja(headers, rows));
   const headerValidation = validateHeaders(headers);
   if (!headerValidation.ok) {
     return { headerValidation, rows: [], errors: [] };
@@ -151,4 +187,3 @@ async function processSheetRows(headers, rows, pool) {
 }
 
 module.exports = { processExcelFile, processSheetRows, toFieldKeyedRow };
-
