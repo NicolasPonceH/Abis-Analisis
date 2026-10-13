@@ -11,20 +11,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
-    @layer base {
-      html, body { margin: 0; padding: 0; }
-      body { overscroll-behavior: none; }
-      main > :first-child { margin-top: 0 !important; }
-      main > :last-child { margin-bottom: 0 !important; }
+    html {
+      height: 100%;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f3f5; }
-    ::-webkit-scrollbar-thumb { background: #c5c8d0; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #9da3af; }
-    
+    body {
+      min-height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex !important;
+      flex-direction: column !important;
+      background-color: #001c3d !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overscroll-behavior: none;
+    }
     #page-content {
+      flex: 1 0 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      min-height: calc(100vh - 67.33px) !important;
+      min-height: calc(100dvh - 67.33px) !important;
+      background-color: #f8fafc;
       will-change: opacity, transform;
       transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dark #page-content {
+      background-color: #020617 !important;
+    }
+    main {
+      flex: 1 0 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      background-color: #f8fafc !important;
+    }
+    .dark main {
+      background-color: #020617 !important;
+    }
+    #page-footer {
+      margin-top: auto !important;
+      flex-shrink: 0 !important;
+      width: 100% !important;
+      background-color: #001c3d !important;
+    }
+    @layer base {
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
     }
     .siad-transition-out {
       opacity: 0.15 !important;
@@ -394,7 +427,7 @@ body.splash-disabled #pdi-splash-overlay,
   })();
 </script>
 </head>
-<body class="font-sans bg-background dark:bg-slate-950 font-body-md text-on-background dark:text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="font-sans bg-[#001c3d] dark:bg-slate-950 font-body-md text-on-background dark:text-slate-100 min-h-screen flex flex-col antialiased">
 
 <div id="siad-progress-bar"></div>
 
