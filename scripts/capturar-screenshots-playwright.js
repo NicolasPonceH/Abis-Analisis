@@ -29,8 +29,53 @@ async function waitForPage(page) {
   });
 }
 
-async function capture(page, filename) {
+async function anonymizePage(page) {
+  await page.evaluate(() => {
+    const textNodes = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) textNodes.push(node);
+
+    for (const textNode of textNodes) {
+      const original = textNode.nodeValue || "";
+      const trimmed = original.trim();
+      if (!trimmed) continue;
+
+      if (/\.pdf\b/i.test(original)) {
+        textNode.nodeValue = "DOCUMENTO_DEMO.pdf";
+        continue;
+      }
+
+      if (/\b(?:Tabatha|Ana\s+María|Ana\s+Maria|Renato|Sergio)\b/i.test(original)) {
+        textNode.nodeValue = "PERSONA DEMO";
+        continue;
+      }
+
+      if (/\b\d{1,2}\.\d{3}\.\d{3}-[\dkK]\b/.test(original)) {
+        textNode.nodeValue = original.replace(/\b\d{1,2}\.\d{3}\.\d{3}-[\dkK]\b/g, "XX.XXX.XXX-X");
+        continue;
+      }
+
+      if (/\b(?:DOC|SYS_ID)[-_:\s]*\d+[A-Z-]*\b/i.test(original)) {
+        textNode.nodeValue = original.replace(/\bDOC[-_]\d+[A-Z-]*\b/gi, "DOC-DEMO").replace(/SYS_ID:\s*\d+/gi, "SYS_ID: DEMO");
+        continue;
+      }
+
+      if (/^(?:abis_user|admin|nicolas|nicolastest|ejemplo|martin)$/i.test(trimmed)) {
+        textNode.nodeValue = "USUARIO DEMO";
+      }
+    }
+
+    for (const input of document.querySelectorAll("input, textarea")) {
+      if (/\.pdf\b/i.test(input.value || "")) input.value = "DOCUMENTO_DEMO.pdf";
+      if (/\.pdf\b/i.test(input.placeholder || "")) input.placeholder = "DOCUMENTO_DEMO.pdf";
+    }
+  });
+}
+
+async function capture(page, filename, { anonymize = false } = {}) {
   await waitForPage(page);
+  if (anonymize) await anonymizePage(page);
   const target = path.join(OUTPUT_DIR, filename);
   await page.screenshot({ path: target, fullPage: true });
   console.log(`CAPTURED ${target}`);
@@ -71,7 +116,7 @@ async function captureAbis(browser) {
 
   await loginAbis(page);
   await page.goto(ABIS_URL, { waitUntil: "domcontentloaded" });
-  await capture(page, "02-abis-dashboard.png");
+  await capture(page, "02-abis-dashboard.png", { anonymize: true });
 
   for (const [tab, filename] of [
     ["ingesta", "03-abis-ingesta.png"],
@@ -79,7 +124,7 @@ async function captureAbis(browser) {
     ["auditoria", "05-abis-auditoria.png"],
   ]) {
     await page.locator(`button[data-tab='${tab}']`).click();
-    await capture(page, filename);
+    await capture(page, filename, { anonymize: true });
   }
 
   for (const [section, filename] of [
@@ -89,7 +134,7 @@ async function captureAbis(browser) {
     ["administracion", "09-abis-ajustes-administracion.png"],
   ]) {
     await page.goto(`${ABIS_URL}/ajustes/${section}`, { waitUntil: "domcontentloaded" });
-    await capture(page, filename);
+    await capture(page, filename, { anonymize: true });
   }
 
   await context.close();
@@ -115,7 +160,7 @@ async function captureSiad(browser) {
     ["/configuracion?section=administracion", "15-siad-administracion.png"],
   ]) {
     await page.goto(`${SIAD_URL}${route}`, { waitUntil: "domcontentloaded" });
-    await capture(page, filename);
+    await capture(page, filename, { anonymize: true });
   }
 
   await context.close();
