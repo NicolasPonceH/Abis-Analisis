@@ -81,6 +81,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-v2")
 app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
@@ -864,6 +865,7 @@ def login():
         try:
             user = db.get_user_by_username(username)
             if user and check_password_hash(user["password_hash"], password):
+                session.permanent = True
                 session["user_id"] = user["id"]
                 session["username"] = user["username"]
                 session["rol"] = user["rol"]
