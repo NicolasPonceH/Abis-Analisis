@@ -10,7 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
     @layer base {
       html, body { margin: 0; padding: 0; }
@@ -606,8 +607,31 @@ body.splash-disabled #pdi-splash-overlay,
   function runScripts(container) {
     var scripts = Array.from(container.querySelectorAll('script'));
     scripts.forEach(function (oldScript) {
+      if (oldScript.type && oldScript.type.toLowerCase() !== 'text/javascript' && oldScript.type.toLowerCase() !== 'application/javascript') {
+        return;
+      }
       var newScript = cloneAndRunScript(oldScript);
       oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  }
+
+  function syncHeadScripts(newDoc) {
+    var headScripts = Array.from(newDoc.head.querySelectorAll('script'));
+    headScripts.forEach(function (s) {
+      if (s.src) {
+        var exists = Array.from(document.head.querySelectorAll('script')).some(function(existing) {
+          return existing.src === s.src;
+        });
+        if (!exists) {
+          var el = document.createElement('script');
+          el.src = s.src;
+          document.head.appendChild(el);
+        }
+      } else if (s.textContent.trim()) {
+        var el = document.createElement('script');
+        el.textContent = s.textContent;
+        document.head.appendChild(el);
+      }
     });
   }
 
@@ -651,6 +675,9 @@ body.splash-disabled #pdi-splash-overlay,
         window.location.href = url;
         return;
       }
+
+      // Sincronizar scripts del head (por ejemplo librerías y utilidades)
+      syncHeadScripts(newDoc);
 
       // 1. Actualizar título de la pestaña
       if (newDoc.title) document.title = newDoc.title;
