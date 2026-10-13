@@ -10,8 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
     @layer base {
       html, body { margin: 0; padding: 0; }
@@ -521,223 +519,30 @@ body.splash-disabled #pdi-splash-overlay,
   root.classList.add('splash-disabled');
 
   var progressBar = document.getElementById('siad-progress-bar');
-  var pageContent = document.getElementById('page-content');
-  var pageCache = new Map();
-  var isNavigating = false;
-
-  function setProgress(pct, fadeOut) {
-    if (!progressBar) return;
-    if (pct === 0) {
-      progressBar.style.transition = 'none';
-      progressBar.style.width = '0%';
+  if (progressBar) {
+    progressBar.style.transition = 'width 0.2s ease, opacity 0.15s ease';
+    progressBar.style.width = '100%';
+    setTimeout(function() {
       progressBar.style.opacity = '0';
-      return;
-    }
-    progressBar.style.transition = 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease';
-    progressBar.style.opacity = '1';
-    progressBar.style.width = pct + '%';
-    if (fadeOut) {
-      setTimeout(function () {
-        progressBar.style.opacity = '0';
-        setTimeout(function () {
-          progressBar.style.transition = 'none';
-          progressBar.style.width = '0%';
-        }, 180);
-      }, 100);
-    }
+      setTimeout(function() {
+        progressBar.style.width = '0%';
+      }, 150);
+    }, 80);
   }
 
-  function isEligibleLink(anchor, href) {
-    if (!href || href.startsWith('#') || href.startsWith('javascript:') || anchor.target === '_blank' || anchor.hasAttribute('download')) return false;
-    try {
-      var target = new URL(anchor.href, window.location.origin);
-      if (target.origin !== window.location.origin) return false;
-      // Exclude logout, downloads, or external systems
-      var path = target.pathname;
-      if (path.includes('/logout') || path.includes('/export/') || path.includes('/excel') || path.endsWith('.docx') || path.endsWith('.xlsx')) return false;
-      // Exclude returning to Express dashboard if on /
-      if (anchor.innerText && anchor.innerText.includes('Sistema ABIS')) return false;
-      // Do not navigate if current URL is identical
-      if (window.location.pathname === target.pathname && window.location.search === target.search) return false;
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function prefetchUrl(url) {
-    if (pageCache.has(url)) return;
-    fetch(url, { headers: { 'X-Requested-With': 'SIAD-Nav' } })
-      .then(function (res) {
-        if (!res.ok) throw new Error('Bad status');
-        var ct = res.headers.get('content-type') || '';
-        if (!ct.includes('text/html')) throw new Error('Not HTML');
-        return res.text();
-      })
-      .then(function (html) {
-        pageCache.set(url, { html: html, time: Date.now() });
-      })
-      .catch(function () {});
-  }
-
-  // Precargar en memoria al pasar el mouse por encima (tiempo de cambio = 0ms)
-  document.addEventListener('mouseover', function (e) {
-    var a = e.target.closest('a[href]');
-    if (a && isEligibleLink(a, a.getAttribute('href'))) {
-      prefetchUrl(a.href);
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchstart', function (e) {
-    var a = e.target.closest('a[href]');
-    if (a && isEligibleLink(a, a.getAttribute('href'))) {
-      prefetchUrl(a.href);
-    }
-  }, { passive: true });
-
-  function cloneAndRunScript(oldScript) {
-    var newScript = document.createElement('script');
-    Array.from(oldScript.attributes).forEach(function (attr) {
-      newScript.setAttribute(attr.name, attr.value);
-    });
-    newScript.textContent = oldScript.textContent;
-    return newScript;
-  }
-
-  function runScripts(container) {
-    var scripts = Array.from(container.querySelectorAll('script'));
-    scripts.forEach(function (oldScript) {
-      if (oldScript.type && oldScript.type.toLowerCase() !== 'text/javascript' && oldScript.type.toLowerCase() !== 'application/javascript') {
-        return;
-      }
-      var newScript = cloneAndRunScript(oldScript);
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-  }
-
-  function syncHeadScripts(newDoc) {
-    var headScripts = Array.from(newDoc.head.querySelectorAll('script'));
-    headScripts.forEach(function (s) {
-      if (s.src) {
-        var exists = Array.from(document.head.querySelectorAll('script')).some(function(existing) {
-          return existing.src === s.src;
-        });
-        if (!exists) {
-          var el = document.createElement('script');
-          el.src = s.src;
-          document.head.appendChild(el);
-        }
-      } else if (s.textContent.trim()) {
-        var el = document.createElement('script');
-        el.textContent = s.textContent;
-        document.head.appendChild(el);
-      }
-    });
-  }
-
-  function updateNavActive(newDoc) {
-    var currentNav = document.getElementById('siad-main-nav');
-    var newNav = newDoc.getElementById('siad-main-nav');
-    if (currentNav && newNav) {
-      currentNav.innerHTML = newNav.innerHTML;
-    }
-  }
-
-  async function navigateTo(url, pushState) {
-    if (isNavigating) return;
-    isNavigating = true;
-    setProgress(35, false);
-
-    if (pageContent) {
-      pageContent.classList.remove('siad-transition-in');
-      pageContent.classList.add('siad-transition-out');
-    }
-
-    try {
-      var html = '';
-      var cached = pageCache.get(url);
-      if (cached && (Date.now() - cached.time < 60000)) {
-        html = cached.html;
-        setProgress(85, false);
-      } else {
-        setProgress(65, false);
-        var response = await fetch(url, { headers: { 'X-Requested-With': 'SIAD-Nav' } });
-        if (!response.ok) throw new Error('Status ' + response.status);
-        html = await response.text();
-        pageCache.set(url, { html: html, time: Date.now() });
-      }
-
-      var parser = new DOMParser();
-      var newDoc = parser.parseFromString(html, 'text/html');
-      var newPageContent = newDoc.getElementById('page-content');
-
-      if (!newPageContent) {
-        window.location.href = url;
-        return;
-      }
-
-      // Sincronizar scripts del head (por ejemplo librerías y utilidades)
-      syncHeadScripts(newDoc);
-
-      // 1. Actualizar título de la pestaña
-      if (newDoc.title) document.title = newDoc.title;
-
-      // 2. Actualizar barra de navegación y pestaña activa
-      updateNavActive(newDoc);
-
-      // 3. Reemplazar contenido de forma atómica
-      pageContent.innerHTML = newPageContent.innerHTML;
-
-      // 4. Actualizar historial de navegación
-      if (pushState) {
-        window.history.pushState({ siadUrl: url }, '', url);
-      }
-
-      // 5. Scroll arriba suave
-      window.scrollTo({ top: 0, behavior: 'instant' });
-
-      // 6. Ejecutar scripts propios de la nueva vista
-      runScripts(pageContent);
-
-      setProgress(100, true);
-
-      // 7. Animación de entrada fluida
-      requestAnimationFrame(function () {
-        pageContent.classList.remove('siad-transition-out');
-        pageContent.classList.add('siad-transition-in');
-      });
-
-      // 8. Disparar eventos estándar para inicializar componentes
-      document.dispatchEvent(new Event('DOMContentLoaded'));
-      window.dispatchEvent(new Event('pageshow'));
-      window.dispatchEvent(new CustomEvent('siad:view-changed', { detail: { url: url } }));
-    } catch (err) {
-      window.location.href = url;
-    } finally {
-      isNavigating = false;
-    }
-  }
-
-  // Interceptar clics en enlaces institucionales
+  // Barra de progreso dorada inmediata al hacer clic en cualquier navegación
   document.addEventListener('click', function (e) {
     var link = e.target.closest('a[href]');
     if (!link) return;
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
     var href = link.getAttribute('href');
-    if (!isEligibleLink(link, href)) return;
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || link.target === '_blank' || link.hasAttribute('download')) return;
 
-    e.preventDefault();
-    navigateTo(link.href, true);
-  });
-
-  // Limpiar caché al enviar formularios para garantizar datos frescos
-  document.addEventListener('submit', function () {
-    pageCache.clear();
-  });
-
-  // Soporte perfecto para botones Atrás / Adelante del navegador
-  window.addEventListener('popstate', function () {
-    navigateTo(window.location.href, false);
+    if (progressBar) {
+      progressBar.style.transition = 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s ease';
+      progressBar.style.opacity = '1';
+      progressBar.style.width = '70%';
+    }
   });
 
   // Reproducción bajo demanda para pruebas
