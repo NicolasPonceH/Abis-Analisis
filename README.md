@@ -36,37 +36,66 @@ flowchart LR
 
 El panel principal permite consultar una fecha específica, los últimos siete días o el histórico acumulado. Muestra el total de enrolamientos, sincronización con PDI, eficacia biométrica, inconsistencias, rendimiento por cuartel y nacionalidades.
 
-![Dashboard ejecutivo ABIS](docs/abis_main.png)
+![Dashboard ejecutivo ABIS](docs/screenshots/2026-10-13/02-abis-dashboard.png)
 
 ### Panel de métricas y exportaciones
 
 Desde el panel se pueden actualizar las métricas y generar documentos Word, Excel, CSV, JSON e impresión. Los reportes pueden consultar una jornada, un rango de fechas o el acumulado.
 
-![Métricas ABIS](public/assets/screenshots/desktop-metricas.png)
+![Métricas ABIS](docs/screenshots/2026-10-13/04-abis-tendencias.png)
 
 ### Módulo de ingesta ABIS
 
 La ingesta acepta archivos `.xlsx` y archivos protegidos `.enc` con AES-256-GCM. El archivo se procesa en memoria, se valida, se normaliza contra los catálogos y se inserta por lotes en PostgreSQL.
 
-![Ingesta ABIS](public/assets/screenshots/desktop-ingesta.png)
+![Ingesta ABIS](docs/screenshots/2026-10-13/03-abis-ingesta.png)
 
 ### Inicio de sesión del módulo SIAD
 
 SIAD utiliza autenticación de usuarios y roles para controlar el acceso al análisis documental.
 
-![Inicio de sesión SIAD](docs/siad_module.png)
+![Inicio de sesión SIAD](docs/screenshots/2026-10-13/10-siad-login.png)
 
 ### Historial documental SIAD
 
 El módulo documental permite consultar los documentos procesados, sus resúmenes y las entidades detectadas.
 
-![Historial documental SIAD](siad/docs/img/historial.png)
+![Historial documental SIAD](docs/screenshots/2026-10-13/12-siad-historial.png)
 
 ### Estadísticas SIAD
 
 El panel presenta tendencias y distribución de la información extraída desde los documentos.
 
-![Estadísticas SIAD](siad/docs/img/estadisticas.png)
+![Estadísticas SIAD](docs/screenshots/2026-10-13/13-siad-estadisticas.png)
+
+### Galería completa de capturas Playwright
+
+Las siguientes imágenes fueron generadas desde la aplicación ejecutándose localmente con Playwright el `2026-10-13`.
+
+#### ABIS
+
+| Módulo | Captura |
+|---|---|
+| Login ABIS | [01-abis-login.png](docs/screenshots/2026-10-13/01-abis-login.png) |
+| Dashboard | [02-abis-dashboard.png](docs/screenshots/2026-10-13/02-abis-dashboard.png) |
+| Ingesta e historial de lotes | [03-abis-ingesta.png](docs/screenshots/2026-10-13/03-abis-ingesta.png) |
+| Evolución y tendencias | [04-abis-tendencias.png](docs/screenshots/2026-10-13/04-abis-tendencias.png) |
+| Bitácora y auditoría | [05-abis-auditoria.png](docs/screenshots/2026-10-13/05-abis-auditoria.png) |
+| Ajustes generales | [06-abis-ajustes-general.png](docs/screenshots/2026-10-13/06-abis-ajustes-general.png) |
+| Ajustes de horarios | [07-abis-ajustes-horarios.png](docs/screenshots/2026-10-13/07-abis-ajustes-horarios.png) |
+| Cuenta | [08-abis-ajustes-cuenta.png](docs/screenshots/2026-10-13/08-abis-ajustes-cuenta.png) |
+| Administración de usuarios | [09-abis-ajustes-administracion.png](docs/screenshots/2026-10-13/09-abis-ajustes-administracion.png) |
+
+#### SIAD
+
+| Módulo | Captura |
+|---|---|
+| Login SIAD | [10-siad-login.png](docs/screenshots/2026-10-13/10-siad-login.png) |
+| Procesamiento OCR | [11-siad-procesamiento.png](docs/screenshots/2026-10-13/11-siad-procesamiento.png) |
+| Historial documental | [12-siad-historial.png](docs/screenshots/2026-10-13/12-siad-historial.png) |
+| Estadísticas operativas | [13-siad-estadisticas.png](docs/screenshots/2026-10-13/13-siad-estadisticas.png) |
+| Configuración general | [14-siad-configuracion-general.png](docs/screenshots/2026-10-13/14-siad-configuracion-general.png) |
+| Administración SIAD | [15-siad-administracion.png](docs/screenshots/2026-10-13/15-siad-administracion.png) |
 
 ## Módulos del sistema
 
@@ -347,6 +376,7 @@ El servidor ABIS inicia el módulo SIAD cuando la configuración local lo permit
 | `npm run security:cifrar` | Cifra un archivo de ingesta. |
 | `npm run security:descifrar` | Descifra y valida un archivo protegido. |
 | `npm run telegram:enviar` | Envía un reporte autorizado. |
+| `node scripts/capturar-screenshots-playwright.js` | Regenera la galería visual de ABIS y SIAD con Playwright. |
 
 ## Documentación adicional
 
