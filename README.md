@@ -36,7 +36,7 @@ flowchart LR
 
 El acceso principal de ABIS valida las credenciales institucionales antes de habilitar el dashboard y los módulos operativos.
 
-![Login ABIS](docs/screenshots/2026-10-13/01-abis-login.png)
+![Login ABIS](docs/screenshots/2026-10-13/01-abis-login-fondo.png)
 
 ### Dashboard ejecutivo ABIS
 
@@ -90,7 +90,7 @@ Las siguientes imágenes fueron generadas desde la aplicación ejecutándose loc
 
 | Módulo | Captura |
 |---|---|
-| Login ABIS | [01-abis-login.png](docs/screenshots/2026-10-13/01-abis-login.png) |
+| Login ABIS | [01-abis-login-fondo.png](docs/screenshots/2026-10-13/01-abis-login-fondo.png) |
 | Dashboard | [02-abis-dashboard.png](docs/screenshots/2026-10-13/02-abis-dashboard.png) |
 | Ingesta e historial de lotes | [03-abis-ingesta.png](docs/screenshots/2026-10-13/03-abis-ingesta.png) |
 | Evolución y tendencias | [04-abis-tendencias.png](docs/screenshots/2026-10-13/04-abis-tendencias.png) |

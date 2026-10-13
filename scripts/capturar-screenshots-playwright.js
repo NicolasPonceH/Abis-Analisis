@@ -131,7 +131,7 @@ async function captureAbis(browser) {
   const page = await context.newPage();
 
   await page.goto(`${ABIS_URL}/login`, { waitUntil: "domcontentloaded" });
-  await capture(page, "01-abis-login.png");
+  await capture(page, "01-abis-login-fondo.png");
 
   await loginAbis(page);
   await page.goto(ABIS_URL, { waitUntil: "domcontentloaded" });
