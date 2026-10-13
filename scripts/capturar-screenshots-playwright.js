@@ -16,6 +16,25 @@ fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
 async function waitForPage(page) {
   await page.waitForLoadState("domcontentloaded");
+  await page.evaluate(async () => {
+    const backgroundNodes = [
+      document.querySelector(".login-shell"),
+      document.querySelector("body"),
+    ].filter(Boolean);
+
+    const urls = [...new Set(backgroundNodes.flatMap((node) => {
+      const background = getComputedStyle(node).backgroundImage || "";
+      return [...background.matchAll(/url\(["']?(.*?)["']?\)/g)].map((match) => match[1]);
+    }))];
+
+    await Promise.all(urls.map((url) => new Promise((resolve) => {
+      const image = new Image();
+      image.onload = resolve;
+      image.onerror = resolve;
+      image.src = url;
+      if (image.complete) resolve();
+    })));
+  });
   await page.waitForTimeout(900);
   await page.addStyleTag({
     content: `
