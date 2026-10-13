@@ -124,12 +124,11 @@
 <div class="px-4 lg:px-8 xl:px-12 py-8 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
 
   {% if not viewing %}
-
-  <!-- 2. Contenedor Principal: Tarjetas Centrales Agrandadas y Centradas Matemáticamente -->
-  <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[320px_1fr_320px] 2xl:grid-cols-[340px_1fr_340px] gap-6 xl:gap-8 w-full max-w-[1850px] mx-auto items-start">
+  <!-- 2. Contenedor Principal: Tarjetas de Ingesta y Espacio de Trabajo -->
+  <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[340px_1fr] gap-6 xl:gap-8 w-full max-w-[1850px] mx-auto items-start">
 
     <!-- Tarjeta de Guía Operativa (Columna Izquierda - Con el mismo largo que Carga de Documentos) -->
-    <div class="flex flex-col gap-6 w-full order-1">
+    <div class="w-full order-1">
       <div id="card-guia-operativa" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all lg:min-h-[580px]">
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 sm:px-6 py-4 flex items-center gap-3 text-white shadow-sm shrink-0">
           <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
@@ -191,10 +190,8 @@
       </div>
     </div>
 
-    <!-- Tarjetas Principales Agrandadas: Carga y Espacio de Trabajo (Columna Central) -->
-    <div class="flex flex-col gap-6 w-full order-2">
-
-      <!-- Tarjeta Ingesta / Cargar Archivos (AMPLIADA) -->
+    <!-- Tarjeta Ingesta / Cargar Archivos (Columna Derecha Ampliada) -->
+    <div class="w-full order-2">
       <div id="card-carga-documentos" class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
         <!-- Header de Tarjeta Azul Institucional Ampliado -->
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white shadow-sm">
@@ -283,10 +280,12 @@
           </form>
         </div>
       </div>
+    </div>
 
-      <!-- Tarjeta Documentos Cargados en Espacio de Trabajo (Agrandada, más larga y con scroll interno) -->
-      <div class="w-full bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
-        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
+    <!-- Tarjeta Documentos Cargados en Espacio de Trabajo (Ancho Completo Expandido - lg:col-span-2) -->
+    <div class="w-full order-3 lg:col-span-2">
+      <div id="card-documentos-cargados" class="w-full bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-4.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
               <span class="material-symbols-outlined text-[22px]">folder_open</span>
@@ -296,7 +295,7 @@
                 <h2 class="text-base sm:text-lg font-black text-white leading-tight">Documentos Cargados</h2>
                 {% if files %}
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-[#ffd100] text-[#00234c] shadow-xs">
-                  {{ files | length }}
+                  {{ files | length }} expedientes
                 </span>
                 {% endif %}
               </div>
@@ -307,7 +306,7 @@
           <form action="{{ url_for('delete_all_documents') }}" method="post"
             onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos del espacio de trabajo? Esta acción no afecta al historial forense.');">
             <button type="submit"
-              class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 transition-colors px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1 shadow-sm cursor-pointer">
+              class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 transition-colors px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1 shadow-sm cursor-pointer">
               <span class="material-symbols-outlined text-[15px]">delete_sweep</span> Limpiar Espacio
             </button>
           </form>
@@ -315,24 +314,24 @@
         </div>
 
         <div class="p-6 sm:p-7">
-          <div class="max-h-[320px] sm:max-h-[380px] overflow-y-auto pr-2 sm:pr-3 space-y-3 custom-doc-scroll">
+          <div class="max-h-[340px] sm:max-h-[400px] overflow-y-auto pr-2 sm:pr-3 space-y-3 custom-doc-scroll">
             {% for f in files %}
-            <div class="flex items-center gap-3.5 group bg-white dark:bg-slate-800/90 hover:bg-blue-50/70 dark:hover:bg-slate-700/60 transition-all p-3.5 px-4.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-[#2563eb] hover:shadow-md">
-              <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3.5 min-w-0 no-underline" title="Ver archivo: {{ f }}">
-                <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950 text-red-700 flex items-center justify-center font-black shrink-0 border border-red-200 shadow-xs group-hover:scale-105 transition-transform">
-                  <span class="material-symbols-outlined text-[22px]">picture_as_pdf</span>
+            <div class="flex items-center gap-4 group bg-white dark:bg-slate-800/90 hover:bg-blue-50/70 dark:hover:bg-slate-700/60 transition-all p-3.5 px-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-[#2563eb] hover:shadow-md">
+              <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-4 min-w-0 no-underline" title="Ver archivo: {{ f }}">
+                <div class="w-11 h-11 rounded-xl bg-red-100 dark:bg-red-950 text-red-700 flex items-center justify-center font-black shrink-0 border border-red-200 shadow-xs group-hover:scale-105 transition-transform">
+                  <span class="material-symbols-outlined text-[24px]">picture_as_pdf</span>
                 </div>
                 <div class="flex flex-col min-w-0 flex-1">
                   <span class="text-sm sm:text-base font-black text-slate-800 dark:text-white group-hover:text-[#2563eb] transition-colors truncate">{{ f }}</span>
-                  <span class="text-[11px] font-bold text-slate-400 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Listo para visualización rápida y OCR
+                  <span class="text-xs font-bold text-slate-400 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Listo para visualización rápida y OCR
                   </span>
                 </div>
               </a>
-              <div class="flex items-center gap-2 shrink-0">
+              <div class="flex items-center gap-2.5 shrink-0">
                 <a href="{{ url_for('view_pdf', filename=f) }}" title="Visualizar documento"
-                  class="hidden sm:flex items-center gap-1 text-xs font-black text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60 px-3 py-1.5 rounded-xl transition-colors border border-blue-200 dark:border-blue-800/60">
-                  <span class="material-symbols-outlined text-[16px]">visibility</span> Ver
+                  class="hidden sm:flex items-center gap-1.5 text-xs font-black text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60 px-3.5 py-2 rounded-xl transition-colors border border-blue-200 dark:border-blue-800/60">
+                  <span class="material-symbols-outlined text-[17px]">visibility</span> Ver
                 </a>
                 <form action="{{ url_for('delete_document', filename=f) }}" method="post"
                   onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
@@ -351,11 +350,8 @@
           </div>
         </div>
       </div>
-
     </div>
-
-    <!-- Columna Derecha de Contrapeso Invisible (Para Centrado Matemático Perfecto) -->
-    <div class="hidden lg:block w-full order-3 pointer-events-none" aria-hidden="true"></div>
+  </div>
 
     <script>
       (function syncGuiaOperativaHeight() {
