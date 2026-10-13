@@ -7,29 +7,31 @@ volumen de uso de esta app (subir/procesar documentos uno por uno desde la UI) n
 """
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 # pyrefly: ignore [missing-import]
 import psycopg
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
 CONNECT_TIMEOUT = 5
 
 def get_connection():
-    if not DATABASE_URL:
-        raise RuntimeError("Falta configurar DATABASE_URL en el entorno")
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        return psycopg.connect(conninfo=url, connect_timeout=CONNECT_TIMEOUT)
     return psycopg.connect(
-        conninfo=DATABASE_URL,
+        host=os.environ.get("DB_HOST", "127.0.0.1"),
+        port=os.environ.get("DB_PORT", "5433"),
+        dbname=os.environ.get("DB_NAME", "Abis_OCR"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD", "abis_dev_pw"),
         connect_timeout=CONNECT_TIMEOUT,
     )
 
 def is_connected():
     try:
-        if not DATABASE_URL:
-            return False
-        with psycopg.connect(
-            conninfo=DATABASE_URL,
-            connect_timeout=1,
-        ):
+        with get_connection() as conn:
             return True
     except Exception:
         return False
