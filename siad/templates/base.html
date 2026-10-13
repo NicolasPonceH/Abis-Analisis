@@ -6,7 +6,7 @@
 <meta name="description" content="Sistema Inteligente de Análisis Documental y Forense (SIAD) para el procesamiento de archivos, OCR y correlación de inteligencia criminal."/>
 <title>{% block title %}SIAD - PDI{% endblock %}</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
     @layer base {
       html, body { margin: 0; padding: 0; }
@@ -19,13 +19,68 @@
     ::-webkit-scrollbar-thumb { background: #c5c8d0; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #9da3af; }
     
-    #page-content,#page-header{transition:all .25s cubic-bezier(0.23, 1, 0.32, 1);}
-    html{transition:zoom .2s ease-out;}
+    #page-content,#page-header{transition:opacity .2s ease-out;}
+
+    @view-transition {
+      navigation: auto;
+    }
+
+    @keyframes pageFadeSlideIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .animate-page-enter {
+      animation: pageFadeSlideIn 0.2s ease-out forwards;
+    }
+
+    .page-leaving {
+      opacity: 0 !important;
+      transition: opacity 0.15s ease-out !important;
+    }
+
+    body, html, button, input, select, textarea {
+      -webkit-font-smoothing: auto !important;
+      -moz-osx-font-smoothing: auto !important;
+      text-rendering: optimizeLegibility !important;
+    }
+
+    /* Color azul personalizado #00234c para insignias, botones y acentos de tarjetas */
+    .bg-brand-blue { background-color: #00234c !important; }
+    .hover\:bg-brand-blue-hover:hover { background-color: #003366 !important; }
+    .text-brand-blue { color: #00234c !important; }
+    .text-brand-blue-dark { color: #001835 !important; }
+    .border-brand-blue { border-color: #00234c !important; }
+    .badge-brand-blue {
+      background-color: rgba(0, 35, 76, 0.1) !important;
+      color: #00234c !important;
+      border: 1px solid rgba(0, 35, 76, 0.25) !important;
+    }
+    .dark .badge-brand-blue {
+      background-color: rgba(0, 35, 76, 0.4) !important;
+      color: #ffd100 !important;
+      border: 1px solid rgba(255, 209, 0, 0.4) !important;
+    }
 
     .flash-banner{animation:flashIn .18s ease-out;}
     @keyframes flashIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
     @media (prefers-reduced-motion:reduce){.flash-banner{animation:flashFadeOnly .18s ease-out;}}
     @keyframes flashFadeOnly{from{opacity:0;}to{opacity:1;}}
+
+    select option {
+      background-color: #00234c !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      padding: 12px 16px !important;
+    }
+    .dark select option {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+    }
 </style>
 
 <style id="pdi-splash-isolated-css">
@@ -211,7 +266,11 @@ body.splash-disabled #pdi-splash-overlay,
   if (sessionStorage.getItem('pdi_splash_completed') === '1') {
     root.classList.add('splash-disabled');
     var fontSize = localStorage.getItem('fontSize');
-    if (fontSize) root.style.zoom = fontSize + '%';
+    if (fontSize && fontSize !== '100') {
+      root.style.zoom = fontSize + '%';
+    } else {
+      root.style.removeProperty('zoom');
+    }
   }
 })();</script>
 
@@ -317,7 +376,7 @@ body.splash-disabled #pdi-splash-overlay,
     }
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 {% block extra_head %}{% endblock %}
 <script>
   (function() {
@@ -355,62 +414,61 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 
 <!-- 1. Header de Navegación Institucional PDI -->
-<header id="page-header" class="fixed top-0 w-full z-50 bg-[#00234c] text-white shadow-md border-b-[3px] border-[#ffd100]">
-<div class="h-16 w-full px-6 lg:px-margin-desktop flex items-center justify-between">
-<div class="flex items-center gap-xs">
-<a href="{{ url_for('index') }}" class="flex items-center gap-xs group hover:opacity-90 transition-opacity">
-  <img alt="PDI" class="h-9 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
-  <span class="text-[25px] font-bold text-white ml-2 hidden sm:inline-block drop-shadow-md" style="font-family: 'Playfair Display', serif; letter-spacing: 0.5px; padding-top: 2px;">Análisis Documental</span>
+<header id="page-header" class="header-institutional fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100] h-[67.33px] flex items-center">
+<div class="h-full w-full px-3 lg:px-6 flex items-center justify-between">
+<div class="flex items-center gap-2 -ml-1">
+<a href="{{ url_for('index') }}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
+  <img alt="PDI" class="h-10 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
+  <span class="text-[25px] font-black text-white ml-2 hidden sm:inline-block drop-shadow-md tracking-tight">Análisis Documental</span>
 </a>
 </div>
-<nav class="hidden md:flex items-center gap-2 h-full py-2">
+<nav class="hidden md:flex items-center gap-3 h-full py-1.5">
 
-<a class="{{ 'bg-white/15 text-white font-bold shadow-inner' if active_page == 'procesar' or not active_page else 'text-slate-300 hover:bg-white/10 hover:text-white' }} px-4 py-2 rounded-lg text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('index') }}">
-  <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('index') }}">
+  <span class="material-symbols-outlined text-[24px]">document_scanner</span>
   Procesamiento OCR
 </a>
-<a class="{{ 'bg-white/15 text-white font-bold shadow-inner' if active_page == 'historial' else 'text-slate-300 hover:bg-white/10 hover:text-white' }} px-4 py-2 rounded-lg text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('historial') }}">
-  <span class="material-symbols-outlined text-[18px]">history</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'historial' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('historial') }}">
+  <span class="material-symbols-outlined text-[24px]">history</span>
   Historial
 </a>
-<a class="{{ 'bg-white/15 text-white font-bold shadow-inner' if active_page == 'estadisticas' else 'text-slate-300 hover:bg-white/10 hover:text-white' }} px-4 py-2 rounded-lg text-sm tracking-wide uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('estadisticas') }}">
-  <span class="material-symbols-outlined text-[18px]">bar_chart</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'estadisticas' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('estadisticas') }}">
+  <span class="material-symbols-outlined text-[24px]">bar_chart</span>
   Estadísticas
 </a>
-<div id="live-clock" class="hidden lg:flex items-center gap-2 text-white bg-black/30 border border-blue-400/40 px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.3)] ml-2" title="Hora del Sistema">
-  <span class="material-symbols-outlined text-[20px] text-[#ffd100]">schedule</span>
-  <span class="text-[16px] font-mono font-black tracking-widest drop-shadow-md" id="clock-time">--:--:--</span>
+<div id="live-clock" class="hidden lg:flex items-center gap-2.5 bg-white text-[#00234c] border-2 border-[#ffd100] px-4 py-1.5 rounded-xl shadow-md ml-4 lg:ml-8 shrink-0 select-none" title="Hora del Sistema">
+  <span class="material-symbols-outlined text-[22px] text-[#00234c] font-black">schedule</span>
+  <span class="text-xl lg:text-2xl font-mono text-[#00234c] tracking-[0.08em] leading-none" style="font-weight: 900;" id="clock-time">-- : -- : --</span>
 </div>
 </nav>
-<div class="flex items-center gap-4">
-  <a class="hidden md:flex mr-2 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-bold px-5 py-2 rounded-lg text-sm tracking-wide uppercase items-center gap-2 transition-all duration-200 shadow-md transform hover:-translate-y-0.5 border border-[#e6bc00]" href="/">
-    <span class="material-symbols-outlined text-[18px]">fingerprint</span>
+<div class="flex items-center gap-3">
+  <a class="hidden md:flex mr-2 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-black px-5 py-2.5 rounded-xl text-base tracking-wide uppercase items-center gap-2.5 transition-all duration-200 shadow-lg transform hover:-translate-y-0.5 border-2 border-[#e6bc00]" href="/">
+    <span class="material-symbols-outlined text-[24px]">fingerprint</span>
     Sistema ABIS
   </a>
   {% if current_user %}
-  <div class="flex flex-col items-end mr-1">
-  <span class="text-white font-bold tracking-wide text-sm uppercase drop-shadow-sm">{{ current_user }}</span>
-  <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1 drop-shadow-sm">
-  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse shadow-[0_0_6px_rgba(52,211,153,1)]"></span>
-              Sesión Segura
-            </span>
+  <div class="flex items-center ml-1 mr-1">
+    <span class="text-white font-black tracking-wide text-base uppercase drop-shadow-sm">{{ current_user }}</span>
   </div>
-  <div class="flex items-center gap-2">
-    <a href="{{ url_for('perfil') }}" class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-sm hover:bg-white/20 hover:scale-105 transition-all duration-200" title="Ver Perfil">
-      <span class="material-symbols-outlined text-[20px]">person</span>
+  <div class="flex items-center gap-2.5">
+    <a href="{{ url_for('configuracion') }}" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-amber-400/25 text-white hover:text-amber-300 border border-white/20 hover:border-amber-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ajustes del Sistema">
+      <span class="material-symbols-outlined text-[24px]">settings</span>
     </a>
-    <a href="{{ url_for('logout') }}" class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-sm hover:bg-[#93000a] hover:border-[#93000a] hover:scale-105 transition-all duration-200" title="Cerrar sesión">
-      <span class="material-symbols-outlined text-[20px]">logout</span>
+    <a href="{{ url_for('perfil') }}" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-sky-400/25 text-white hover:text-sky-300 border border-white/20 hover:border-sky-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ver Perfil">
+      <span class="material-symbols-outlined text-[24px]">person</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="w-11 h-11 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white border border-red-400/40 hover:border-red-500 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Cerrar sesión">
+      <span class="material-symbols-outlined text-[24px]">logout</span>
     </a>
   </div>
   {% else %}
-  <a href="{{ url_for('login') }}" class="text-body-md font-medium text-white hover:text-blue-200 transition-colors">Iniciar Sesión</a>
+  <a href="{{ url_for('login') }}" class="text-body-md font-bold text-white hover:text-blue-200 transition-colors">Iniciar Sesión</a>
   {% endif %}
 </div>
 </div>
 </header>
 
-<div id="page-content" class="w-full flex-grow flex flex-col pt-16">
+<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px] animate-page-enter">
   <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
     <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
@@ -447,9 +505,45 @@ body.splash-disabled #pdi-splash-overlay,
     setTimeout(function () {
       root.classList.add('splash-disabled');
       var fontSize = localStorage.getItem('fontSize');
-      if (fontSize) root.style.zoom = fontSize + '%';
+      if (fontSize && fontSize !== '100') {
+        root.style.zoom = fontSize + '%';
+      } else {
+        root.style.removeProperty('zoom');
+      }
     }, 2450);
   }
+
+  // Transición suave e instantánea al hacer clic en pestañas y enlaces de navegación
+  document.addEventListener('DOMContentLoaded', function () {
+    var pageContent = document.getElementById('page-content');
+    if (!pageContent) return;
+
+    document.querySelectorAll('header a[href], nav a[href]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var href = this.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:') || this.target === '_blank') return;
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        
+        try {
+          var targetUrl = new URL(this.href, window.location.origin);
+          if (window.location.pathname === targetUrl.pathname && window.location.search === targetUrl.search) return;
+        } catch (err) {}
+
+        e.preventDefault();
+        pageContent.classList.add('page-leaving');
+        setTimeout(function () {
+          window.location.href = href;
+        }, 130);
+      });
+    });
+  });
+
+  window.addEventListener('pageshow', function () {
+    var pageContent = document.getElementById('page-content');
+    if (pageContent) {
+      pageContent.classList.remove('page-leaving');
+    }
+  });
 
   // Controlador para reproducir bajo demanda (ej: botón en Configuración)
   window.triggerPdiSplash = function () {
@@ -688,8 +782,8 @@ body.splash-disabled #pdi-splash-overlay,
     const clockEl = document.getElementById('clock-time');
     if (!clockEl) return;
     const now = new Date();
-    // Formato 24h ej: 14:35:09
-    clockEl.textContent = now.toLocaleTimeString('es-CL', { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' });
+    const str = now.toLocaleTimeString('es-CL', { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' });
+    clockEl.textContent = str.replace(/:/g, ' : ');
   }
   updateClock();
   setInterval(updateClock, 1000);

@@ -92,71 +92,203 @@
   }
 </style>
 
-<div class="px-2 lg:px-4 py-3 w-full flex flex-col gap-4">
+<div class="px-4 lg:px-8 xl:px-12 py-8 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
 
   {% if not viewing %}
 
-  <div
-    class="max-w-4xl mx-auto w-full rounded-2xl shadow-md border border-slate-200 backdrop-blur-md p-8 flex flex-col items-center" style="background: radial-gradient(circle at 15% 50%, rgba(0, 35, 76, 0.12), transparent 30%), radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.15), transparent 30%), radial-gradient(circle at 50% 90%, rgba(255, 209, 0, 0.1), transparent 35%), linear-gradient(135deg, #eaf0f7 0%, #f8fafc 100%);">
-    <div class="flex flex-col items-center mb-6 text-center">
+  <!-- 2. Contenedor Principal: Tarjetas Centrales Agrandadas y Centradas Matemáticamente -->
+  <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[320px_1fr_320px] 2xl:grid-cols-[340px_1fr_340px] gap-6 xl:gap-8 w-full max-w-[1850px] mx-auto items-start">
 
-      <h2 class="text-xl font-extrabold text-[#00234c] tracking-tight">Cargar documentos para análisis</h2>
+    <!-- Tarjeta de Guía Operativa (Columna Izquierda) -->
+    <div class="flex flex-col gap-6 w-full order-1">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center gap-3 text-white shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+            <span class="material-symbols-outlined text-[22px]">help_outline</span>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white leading-tight">Guía Operativa</h3>
+            <p class="text-xs text-blue-100 font-bold">Pasos del proceso forense</p>
+          </div>
+        </div>
+
+        <div class="p-5 flex flex-col gap-4">
+          <div class="flex items-start gap-3">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">1</span>
+            <div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 pt-3.5">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">2</span>
+            <div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 pt-3.5">
+            <span class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">3</span>
+            <div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-1 leading-relaxed">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data"
-      class="w-full max-w-3xl flex flex-col gap-4">
+    <!-- Tarjetas Principales Agrandadas: Carga y Espacio de Trabajo (Columna Central) -->
+    <div class="flex flex-col gap-6 w-full order-2">
 
-      <label id="drop-zone"
-        class="cursor-pointer group relative flex flex-col items-center justify-center w-full h-48 border-[2.5px] border-dashed border-blue-400 rounded-2xl bg-blue-50 hover:bg-blue-100 hover:border-blue-500 hover:shadow-[0_0_20px_rgba(96,165,250,0.4)] transition-all duration-300 ease-out overflow-hidden">
-        <!-- Decoración sutil de fondo -->
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-blue-200/30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <!-- Tarjeta Ingesta / Cargar Archivos (AMPLIADA) -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <!-- Header de Tarjeta Azul Institucional Ampliado -->
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white shadow-sm">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+              <span class="material-symbols-outlined text-[26px]">cloud_upload</span>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-white leading-tight">Carga de Documentos para Análisis</h2>
+              <p class="text-xs sm:text-sm text-blue-100 font-bold">Examina tu equipo o arrastra archivos para ingresar al flujo forense</p>
+            </div>
+          </div>
 
-        <!-- Círculo del ícono animado -->
-        <div id="drop-zone-icon"
-          class="relative z-10 w-16 h-16 mb-4 bg-blue-600 border border-blue-400/30 shadow-[0_4px_15px_rgba(0,0,0,0.2)] rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-700 transition-all duration-300 ease-out">
-          <span class="material-symbols-outlined text-[32px] text-white">upload_file</span>
-        </div>
-
-        <span
-          class="text-[16px] font-bold text-blue-900 group-hover:text-blue-800 transition-colors relative z-10">Haz
-          clic para examinar o arrastra tus archivos aquí</span>
-        <span class="text-[11px] text-blue-700 mt-2 relative z-10 font-bold tracking-wide uppercase">PDF, Documentos
-          Ofimáticos, TXT, Imágenes</span>
-
-        <input type="file" id="pdf-file-input" name="pdf_file"
-          accept=".pdf, image/*, .txt, .csv, .log, .doc, .docx, .xls, .xlsx, .ppt, .pptx" multiple required
-          class="hidden">
-      </label>
-
-      <div class="flex items-center justify-between min-h-[40px]">
-        <span id="file-count-label" class="text-sm text-slate-500 dark:text-slate-400 italic">No se ha seleccionado
-          ningún archivo</span>
-        <div class="flex items-center gap-3">
           <button type="button" onclick="document.getElementById('pasteModal').showModal()"
-            class="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">content_paste</span> Pegar Texto Directo
+            class="bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] text-xs sm:text-sm font-black uppercase tracking-wider px-5 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 border-b-2 border-amber-600 active:scale-95 shrink-0 cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">content_paste</span>
+            <span>Pegar Texto Directo</span>
           </button>
-          <button type="submit" id="submit-action"
-            class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-2.5 rounded shadow-sm transition-all uppercase tracking-wide items-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0">
-            <span class="material-symbols-outlined text-[18px]">upload</span> Subir Doc
-          </button>
+        </div>
+
+        <div class="p-6 sm:p-8 flex flex-col gap-6">
+          <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="flex flex-col gap-5">
+
+            <!-- Zona Drag and Drop Grande, Espaciosa y Nítida -->
+            <label id="drop-zone"
+              class="cursor-pointer group relative flex flex-col items-center justify-center w-full py-16 sm:py-20 px-8 border-3 border-dashed border-[#2563eb] rounded-3xl bg-blue-50/50 dark:bg-slate-800/60 hover:bg-blue-50/80 dark:hover:bg-slate-800 hover:border-[#1d4ed8] hover:shadow-2xl transition-all duration-300 ease-out overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#2563eb]/5 to-[#2563eb]/10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              <!-- Círculo Ícono Grande -->
+              <div id="drop-zone-icon"
+                class="relative z-10 w-22 h-22 mb-4 bg-[#00234c] text-[#ffd100] shadow-xl rounded-3xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 border-2 border-amber-400/40">
+                <span class="material-symbols-outlined text-[46px]">upload_file</span>
+              </div>
+
+              <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-[#2563eb] transition-colors relative z-10 text-center tracking-tight">
+                Haz clic para examinar o arrastra tus archivos aquí
+              </span>
+              <p class="text-sm sm:text-base text-slate-700 dark:text-slate-300 mt-2 relative z-10 font-bold text-center max-w-xl">
+                Soporta expedientes periciales, partes de denuncia, documentos y texto plano
+              </p>
+
+              <!-- Insignias de Formatos Soportados con Contraste Fuerte y Mayor Tamaño -->
+              <div class="flex flex-wrap items-center justify-center gap-3 mt-6 relative z-10">
+                <span class="px-4 py-1.5 rounded-xl bg-red-100 text-red-900 dark:bg-red-950/80 dark:text-red-200 text-xs sm:text-sm font-black border border-red-300 dark:border-red-800 flex items-center gap-1.5 shadow-sm">
+                  <span class="material-symbols-outlined text-[17px]">picture_as_pdf</span> PDF
+                </span>
+                <span class="px-4 py-1.5 rounded-xl bg-blue-100 text-blue-900 dark:bg-blue-950/80 dark:text-blue-200 text-xs sm:text-sm font-black border border-blue-300 dark:border-blue-800 flex items-center gap-1.5 shadow-sm">
+                  <span class="material-symbols-outlined text-[17px]">description</span> DOCX / DOC
+                </span>
+                <span class="px-4 py-1.5 rounded-xl bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-200 text-xs sm:text-sm font-black border border-purple-300 dark:border-purple-800 flex items-center gap-1.5 shadow-sm">
+                  <span class="material-symbols-outlined text-[17px]">article</span> TXT / CSV
+                </span>
+              </div>
+
+              <input type="file" id="pdf-file-input" name="pdf_file"
+                accept=".pdf, image/*, .txt, .csv, .log, .doc, .docx, .xls, .xlsx, .ppt, .pptx" multiple required
+                class="hidden">
+            </label>
+
+            <!-- Fila de Estado de Selección -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
+              <span id="file-count-label" class="text-sm font-bold text-slate-600 dark:text-slate-300 italic">
+                No se ha seleccionado ningún archivo
+              </span>
+              <button type="submit" id="submit-action"
+                class="hidden bg-gradient-to-r from-[#ffd100] via-[#ffe052] to-[#ffd100] hover:from-[#ffe875] hover:to-[#ffd100] text-[#00234c] font-black text-sm px-8 py-3.5 rounded-2xl shadow-lg hover:shadow-xl border-b-4 border-amber-600 transition-all uppercase tracking-widest items-center gap-3 transform hover:-translate-y-1 active:translate-y-0 ring-4 ring-amber-400/40 cursor-pointer">
+                <span class="material-symbols-outlined text-[24px] text-[#00234c] font-black animate-bounce">rocket_launch</span>
+                <span class="drop-shadow-sm font-black">INICIAR PROCESAMIENTO OCR</span>
+              </button>
+            </div>
+
+            <!-- Fila de Archivos en Cola -->
+            <div id="pdf-file-chips-row"
+              class="hidden flex-col gap-3 mt-2 bg-gradient-to-r from-[#00234c] to-[#003875] p-6 rounded-2xl border-2 border-blue-400/40 shadow-xl text-white">
+              <div class="flex items-center justify-between border-b border-white/20 pb-3">
+                <span class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px] text-[#ffd100]">queue</span> Archivos listos para procesamiento
+                </span>
+                <button type="button" id="pdf-file-clear"
+                  class="text-white bg-red-600 hover:bg-red-700 shadow-sm transition-all px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1 font-black uppercase tracking-wider cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">delete_sweep</span> Limpiar todo
+                </button>
+              </div>
+              <div id="pdf-file-chips" class="flex flex-wrap gap-2.5 w-full"></div>
+            </div>
+          </form>
         </div>
       </div>
 
-      <div id="pdf-file-chips-row"
-        class="hidden flex-col gap-3 mt-4 bg-[#0047AB] p-6 rounded-2xl border-4 border-blue-300/30 shadow-[0_10px_40px_rgba(0,71,171,0.3)]">
-        <div class="flex items-center justify-between border-b border-white/20 pb-3 mb-2">
-          <span class="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-            <span class="material-symbols-outlined text-[18px] text-blue-200">queue</span> En cola para procesar
-          </span>
-          <button type="button" id="pdf-file-clear"
-            class="text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-wider hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0">
-            <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar todo
-          </button>
+      <!-- Tarjeta Documentos Cargados en Espacio de Trabajo (Alineada al ancho de carga con proporciones ideales) -->
+      <div class="w-full bg-white dark:bg-slate-900 rounded-3xl shadow-xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transition-all">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-white shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+              <span class="material-symbols-outlined text-[22px]">folder_open</span>
+            </div>
+            <div>
+              <h2 class="text-base sm:text-lg font-black text-white leading-tight">Documentos Cargados</h2>
+              <p class="text-xs text-blue-100 font-bold">Expedientes ingresados listos para visualización rápida</p>
+            </div>
+          </div>
+          {% if files %}
+          <form action="{{ url_for('delete_all_documents') }}" method="post"
+            onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos del espacio de trabajo? Esta acción no afecta al historial forense.');">
+            <button type="submit"
+              class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 transition-colors px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1 shadow-sm cursor-pointer">
+              <span class="material-symbols-outlined text-[15px]">delete_sweep</span> Limpiar Espacio
+            </button>
+          </form>
+          {% endif %}
         </div>
-        <div id="pdf-file-chips" class="flex flex-wrap gap-2 w-full"></div>
+
+        <div class="p-6 sm:p-7">
+          <div class="grid grid-cols-1 gap-2.5">
+            {% for f in files %}
+            <div class="flex items-center gap-3.5 group bg-white dark:bg-slate-800/90 hover:bg-blue-50/70 dark:hover:bg-slate-700/60 transition-all p-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-[#2563eb]">
+              <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3 truncate no-underline">
+                <div class="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-950 text-red-700 flex items-center justify-center font-black shrink-0 border border-red-200 shadow-xs">
+                  <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                </div>
+                <span class="text-sm font-black text-slate-800 dark:text-white group-hover:text-[#2563eb] transition-colors truncate">{{ f }}</span>
+              </a>
+              <form action="{{ url_for('delete_document', filename=f) }}" method="post"
+                onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
+                <button type="submit" title="Eliminar documento"
+                  class="material-symbols-outlined text-[19px] text-slate-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors p-1.5 rounded-lg cursor-pointer">close</button>
+              </form>
+            </div>
+            {% else %}
+            <div class="py-8 flex flex-col items-center justify-center bg-slate-50/60 dark:bg-slate-800/40 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-center">
+              <span class="material-symbols-outlined text-[34px] text-slate-400 dark:text-slate-500 mb-2">inventory_2</span>
+              <p class="text-sm text-slate-800 dark:text-slate-200 font-bold uppercase tracking-wider">El espacio de trabajo está libre</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Sube expedientes en el cuadro de ingesta superior para comenzar</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
-    </form>
+
+    </div>
+
+    <!-- Columna Derecha de Contrapeso Invisible (Para Centrado Matemático Perfecto) -->
+    <div class="hidden lg:block w-full order-3 pointer-events-none" aria-hidden="true"></div>
+
+  </div>
 
     <script>
       (function () {
@@ -274,7 +406,7 @@
             dropZone.classList.remove('border-blue-400', 'bg-blue-50', 'hover:bg-blue-100');
             var icon = document.getElementById('drop-zone-icon');
             if (icon) {
-              icon.classList.remove('bg-blue-600', 'group-hover:bg-blue-700');
+              icon.classList.remove('bg-[#4d82bc]', 'group-hover:bg-[#3b6899]');
               icon.classList.add('bg-[#C5A059]', 'border-[#C5A059]', 'scale-125');
             }
           }, false);
@@ -287,7 +419,7 @@
             var icon = document.getElementById('drop-zone-icon');
             if (icon) {
               icon.classList.remove('bg-[#C5A059]', 'border-[#C5A059]', 'scale-125');
-              icon.classList.add('bg-blue-600');
+              icon.classList.add('bg-[#4d82bc]');
             }
           }, false);
         });
@@ -308,61 +440,13 @@
         });
       })();
     </script>
-  </div>
-
-  <div
-    class="max-w-4xl mx-auto w-full bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 mt-6">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-blue-900/50 pb-4 gap-4 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 -mx-6 -mt-6 rounded-t-2xl">
-      <div class="flex items-center gap-2 text-white">
-        <div class="w-8 h-8 rounded flex items-center justify-center">
-          <span class="material-symbols-outlined text-[20px]">folder_open</span>
-        </div>
-        <h2 class="text-lg font-bold tracking-tight">Documentos Cargados</h2>
-      </div>
-      {% if files %}
-      <form action="{{ url_for('delete_all_documents') }}" method="post"
-        onsubmit="return confirm('¿Eliminar los {{ files | length }} documentos cargados del espacio de trabajo? Esta acción no afecta al historial forense.');">
-        <button type="submit"
-          class="bg-red-50 text-red-700 hover:bg-red-100 transition-colors px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 border border-red-200">
-          <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar Espacio
-        </button>
-      </form>
-      {% endif %}
-    </div>
-
-    <div class="grid grid-cols-1 gap-2">
-      {% for f in files %}
-      <div
-        class="flex items-center gap-3 group bg-white dark:bg-slate-900 hover:bg-blue-50 transition-colors p-3 rounded-lg border border-slate-100 dark:border-slate-800 shadow-sm hover:border-blue-200 hover:shadow">
-        <a href="{{ url_for('view_pdf', filename=f) }}" class="flex-1 flex items-center gap-3">
-          <span class="material-symbols-outlined text-red-500 text-[24px]">picture_as_pdf</span>
-          <span
-            class="text-sm font-semibold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 transition-colors">{{
-            f }}</span>
-        </a>
-        <form action="{{ url_for('delete_document', filename=f) }}" method="post"
-          onsubmit="return confirm('¿Eliminar {{ f }} del espacio de trabajo?');">
-          <button type="submit" title="Eliminar documento"
-            class="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors p-1.5 rounded opacity-50 group-hover:opacity-100">close</button>
-        </form>
-      </div>
-      {% else %}
-      <div
-        class="py-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
-        <span class="material-symbols-outlined text-[32px] text-slate-300 dark:text-slate-500 mb-2">inventory_2</span>
-        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">El espacio de trabajo está vacío.</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
 
   {% else %}
 
   <!-- 2. Cabecera Operativa Forense -->
   <div
     class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-3 border-b border-slate-200 dark:border-slate-700 bg-transparent">
-    <div class="ml-2 sm:ml-6">
+    <div class="ml-0">
       <div class="flex items-center gap-3">
         <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Procesamiento</h1>
         <span
@@ -461,22 +545,26 @@
   <div class="flex flex-col lg:flex-row gap-5 items-stretch mt-2" id="split-container">
 
     <!-- 3. Panel Izquierdo (Documento Original y OCR) -->
-    <div class="flex flex-col gap-6 w-full lg:w-[20%] flex-shrink-0" id="split-left">
+    <div class="flex flex-col gap-6 w-full lg:w-[18%] flex-shrink-0" id="split-left">
 
       <!-- Visor Documento Original -->
       <div
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
         <div
-          class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-4 py-3 border-b border-blue-900/50 flex items-center justify-between">
-          <div class="flex items-center gap-2 text-white">
-            <span class="material-symbols-outlined text-[18px]">document_scanner</span>
-            <span class="text-[11px] font-bold uppercase tracking-widest">Documento Original (PDF)</span>
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center justify-between text-white shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
+              <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+            </div>
+            <span class="text-xs font-black uppercase tracking-wider text-white">Documento Original (PDF)</span>
           </div>
-          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-blue-200 transition-colors flex items-center justify-center p-1 rounded hover:bg-white/10" title="Abrir en pestaña nueva">
+          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10" title="Abrir en pestaña nueva">
             <span class="material-symbols-outlined text-[18px]">open_in_new</span>
           </a>
         </div>
-        <iframe src="{{ url_for('serve_upload', filename=viewing) }}" class="w-full h-[60vh] border-0"></iframe>
+        <div class="overflow-auto custom-scrollbar relative w-full bg-slate-800" style="height: 65vh;">
+          <iframe id="pdf-viewer-iframe" src="{{ url_for('serve_upload', filename=viewing) }}#toolbar=0&navpanes=0&view=FitH" class="w-full h-full border-0 transition-transform duration-200"></iframe>
+        </div>
         <div
           class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
           <span class="truncate max-w-[300px]">{{ viewing }}</span>
@@ -491,27 +579,27 @@
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex flex-col gap-4">
         <!-- Encabezado OCR -->
         <div
-          class="flex items-start sm:items-center justify-between gap-2 border-b border-blue-900/50 pb-3 bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 -mx-5 -mt-5 rounded-t-xl">
-          <div class="flex items-center gap-2 text-white">
-            <div class="w-8 h-8 rounded flex items-center justify-center">
+          class="flex items-start sm:items-center justify-between gap-2 border-b-4 border-[#ffd100] bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] px-5 py-4 -mx-5 -mt-5 rounded-t-xl text-white shadow-sm">
+          <div class="flex items-center gap-3 text-white">
+            <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
               <span class="material-symbols-outlined text-[20px]">manage_search</span>
             </div>
-            <h3 class="font-bold text-[14px]">Texto Extraído (OCR)</h3>
+            <h3 class="font-black text-xs uppercase tracking-wider text-white">Texto Extraído (OCR)</h3>
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
             <form action="{{ url_for('extract', filename=viewing) }}" method="post"
               class="js-processing-form m-0 hidden sm:block">
               <button type="submit" title="{{ 'Reextraer' if extracted_text else 'Extraer' }}"
-                class="flex items-center justify-center p-1.5 rounded hover:bg-slate-100 transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600 border border-transparent hover:border-slate-200">
+                class="flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10 transition-colors text-white hover:text-[#ffd100]">
                 <span class="material-symbols-outlined text-[18px]">refresh</span>
               </button>
             </form>
             <button type="button"
               onclick="const text=document.getElementById('ocr-raw-content').innerText; navigator.clipboard.writeText(text); alert('OCR Copiado al portapapeles');"
-              class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 transition-colors rounded px-3 py-1 text-slate-700 dark:text-slate-200 shadow-sm">
+              class="flex items-center gap-1.5 bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] font-black text-xs uppercase tracking-wider transition-colors rounded-lg px-3 py-1.5 shadow-sm border-b-2 border-amber-600">
               <span class="material-symbols-outlined text-[16px]">file_copy</span>
-              <span class="text-[11px] font-bold uppercase tracking-wide">Copiar</span>
+              <span>Copiar</span>
             </button>
           </div>
         </div>
@@ -588,32 +676,29 @@
       {% endif %}
 
       <!-- Contenedor Flex para Resumen y Entidades -->
-      <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 w-full items-start">
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 w-full items-start">
 
       <!-- Módulo de Resúmenes Inteligentes -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 xl:col-span-3">
-        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-5 py-4 flex items-center justify-between border-b border-blue-900/50">
+      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 xl:col-span-7 2xl:col-span-7">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center justify-between text-white shadow-sm flex-wrap gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-blue-100">
-              <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+              <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
             </div>
-            <h3 class="text-[17px] font-semibold text-white tracking-wide">Resumen Asistido por IA</h3>
+            <div>
+              <h3 class="text-lg font-black text-white leading-tight">Resumen Asistido por IA</h3>
+              <p class="text-xs text-blue-100 font-bold mt-0.5">Síntesis inteligente estructurada para informe pericial</p>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            {% if summary_options %}
-            <button type="submit" form="summary_form"
-              class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm border border-blue-600">
-              <span class="material-symbols-outlined text-[16px]">save</span>
-              <span>Guardar Selección</span>
-            </button>
-            {% endif %}
+          <div class="flex items-center gap-3">
+            <!-- Botón Guardar Selección movido sobre las opciones -->
 
             {% if extracted_text %}
             <form action="{{ url_for('summarize', filename=viewing) }}" method="post" class="js-processing-form m-0">
               <button type="submit"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-blue-700 hover:bg-blue-50 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
-                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
                 <span class="js-btn-label">{{ 'Generar' if not summary_options else 'Regenerar' }}</span>
               </button>
             </form>
@@ -630,19 +715,19 @@
         {% set docs_to_render = entities_data.subdocuments if entities_data and entities_data.subdocuments else [entities_data] %}
         
         {% if summary_options|length > 1 %}
-        <div class="flex flex-wrap gap-3 mb-6">
+        <div class="flex flex-wrap items-center justify-center gap-3.5 mb-6 p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-inner w-full">
           {% set tab_colors = [
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'},
-            {'active': 'bg-blue-800 text-white shadow-md ring-2 ring-blue-400 transform scale-105', 'inactive': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 hover:text-blue-800'}
+            {'active': 'bg-[#00234c] text-white shadow-md ring-2 ring-[#ffd100] border-b-4 border-[#ffd100] font-black', 'inactive': 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-100 hover:text-[#00234c] border-2 border-slate-300 dark:border-slate-700 font-extrabold'},
+            {'active': 'bg-[#00234c] text-white shadow-md ring-2 ring-[#ffd100] border-b-4 border-[#ffd100] font-black', 'inactive': 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-100 hover:text-[#00234c] border-2 border-slate-300 dark:border-slate-700 font-extrabold'},
+            {'active': 'bg-[#00234c] text-white shadow-md ring-2 ring-[#ffd100] border-b-4 border-[#ffd100] font-black', 'inactive': 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-100 hover:text-[#00234c] border-2 border-slate-300 dark:border-slate-700 font-extrabold'},
+            {'active': 'bg-[#00234c] text-white shadow-md ring-2 ring-[#ffd100] border-b-4 border-[#ffd100] font-black', 'inactive': 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-100 hover:text-[#00234c] border-2 border-slate-300 dark:border-slate-700 font-extrabold'},
+            {'active': 'bg-[#00234c] text-white shadow-md ring-2 ring-[#ffd100] border-b-4 border-[#ffd100] font-black', 'inactive': 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-100 hover:text-[#00234c] border-2 border-slate-300 dark:border-slate-700 font-extrabold'}
           ] %}
           {% for opt in summary_options %}
           {% set c = tab_colors[loop.index0 % tab_colors|length] %}
           <button type="button" 
                   onclick="switchTab('resumen', parseInt(this.dataset.index))" 
-                  class="resumen-tab-btn px-5 py-2.5 rounded-full font-extrabold text-[12px] uppercase tracking-wider whitespace-nowrap transition-all duration-300 {{ c.active if loop.first else c.inactive }}" 
+                  class="resumen-tab-btn px-7 py-3 rounded-xl font-black text-sm uppercase tracking-wider whitespace-nowrap transition-all duration-300 shadow-md {{ c.active if loop.first else c.inactive }}" 
                   data-index="{{ loop.index0 }}"
                   data-active-class="{{ c.active }}"
                   data-inactive-class="{{ c.inactive }}">
@@ -729,6 +814,17 @@
               {% endif %}
               <!-- Caja Resumen (Sin envoltorio) -->
               {% if opt %}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <h4 class="text-[13px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500 text-[20px]">assignment_turned_in</span>
+                    Selecciona tu versión preferida
+                  </h4>
+                  <button type="submit"
+                    class="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-b from-[#ffd100] to-[#f5b800] hover:from-[#ffe566] hover:to-[#ffd100] text-[#00234c] font-black text-[13px] uppercase tracking-widest transition-all shadow-md hover:shadow-lg border-b-4 border-amber-600 active:scale-95 transform hover:-translate-y-0.5 w-full sm:w-auto">
+                    <span class="material-symbols-outlined text-[20px] font-black">save</span>
+                    <span class="drop-shadow-sm">Guardar Selección</span>
+                  </button>
+                </div>
                 <div class="mb-2">
                   <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
                 <!-- Opción A -->
@@ -746,8 +842,8 @@
                         <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">A</span>
                       </div>
                       <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Técnica</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Acta Estructurada</span>
+                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Resumen Corto</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Sintético (Max 6 Líneas)</span>
                       </div>
                     </div>
                     
@@ -755,7 +851,7 @@
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
                     <div class="editor-wrapper mt-auto">
-                      <div id="editor_{{ loop.index0 }}_a" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
+                      <div id="editor_{{ loop.index0 }}_a" class="custom-scrollbar" style="height: 280px; font-size: 15px; line-height: 1.5;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
                     </div>
                   </div>
                 </label>
@@ -775,8 +871,8 @@
                         <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">B</span>
                       </div>
                       <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Opción Narrativa</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Resumen Fluido</span>
+                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Resumen Extendido</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Relato Fluido (Max 12 Líneas)</span>
                       </div>
                     </div>
                     
@@ -784,7 +880,7 @@
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
                     <div class="editor-wrapper mt-auto">
-                      <div id="editor_{{ loop.index0 }}_b" class="custom-scrollbar" style="height: 240px; font-size: 15px;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
+                      <div id="editor_{{ loop.index0 }}_b" class="custom-scrollbar" style="height: 280px; font-size: 15px; line-height: 1.5;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
                     </div>
                   </div>
                 </label>
@@ -828,28 +924,25 @@
       </div>
 
       <!-- Módulo de Extracción y Clasificación de Entidades -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden xl:col-span-2"
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden xl:col-span-5 2xl:col-span-5"
         id="entidades">
-        <div class="bg-gradient-to-r from-[#002855] to-[#0047AB] dark:bg-slate-800 px-6 py-4 flex items-center justify-between border-b border-blue-900/50">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center justify-between text-white shadow-sm">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-emerald-900/40 flex items-center justify-center text-emerald-400">
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
               <span class="material-symbols-outlined text-[24px]">hub</span>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-white">Entidades Detectadas</h3>
-              <p class="text-[11px] text-blue-200 mt-0.5 tracking-wide">Extracción estructurada de metadatos clave
-              </p>
+              <h3 class="text-lg font-black text-white leading-tight">Entidades Detectadas</h3>
+              <p class="text-xs text-blue-100 font-bold mt-0.5 tracking-wide">Extracción estructurada de metadatos clave</p>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-
-
             {% if extracted_text %}
             <form action="{{ url_for('entities_view', filename=viewing) }}" method="post" class="js-processing-form m-0">
               <button type="submit"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-bold text-[11px] tracking-widest uppercase shadow-sm">
-                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
                 <span class="js-btn-label">{{ 'Identificar' if not entities_data else 'Reidentificar' }}</span>
               </button>
             </form>
@@ -992,82 +1085,136 @@
 
 <!-- Modal Pegar Texto -->
 <dialog id="pasteModal"
-  class="p-0 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm w-full max-w-2xl">
+  class="p-0 rounded-3xl shadow-2xl border-4 border-[#00234c] bg-white dark:bg-slate-900 backdrop:bg-slate-900/60 backdrop:backdrop-blur-md w-full max-w-2xl overflow-hidden m-auto">
   <form action="{{ url_for('upload_pasted_text') }}" method="post" class="flex flex-col h-full m-0 js-processing-form">
-    <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-      <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <span class="material-symbols-outlined text-emerald-600">content_paste</span>
-        Pegar Texto (Ej. Reporte WhatsApp)
-      </h3>
-      <button type="button" onclick="document.getElementById('pasteModal').close()"
-        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div class="p-4 flex flex-col gap-4">
-      <div class="flex flex-col gap-1.5 border-b border-slate-200 dark:border-slate-700 pb-4">
-        <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Título General del Archivo (Opcional)</label>
-        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-1">Nombre con el que se guardará el conjunto de mensajes en el sistema.</p>
-        <input type="text" name="titulo_general" maxlength="60"
-          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-          placeholder="Ej: Reportes Operativos WhatsApp - 11 Septiembre">
-      </div>
-      
-      <div id="textAreasContainer" class="flex flex-col gap-4 max-h-[50vh] overflow-y-auto pr-2">
-        <!-- Primer Mensaje -->
-        <div class="flex flex-col gap-1.5 report-block relative">
-          <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Mensaje 1</label>
-          <input type="text" name="pasted_title" maxlength="60"
-            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            placeholder="Sub-Título (Ej: BICRIM Arica)">
-          <textarea name="pasted_text" rows="6"
-            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-y"
-            placeholder="Pega el texto del mensaje aquí..."></textarea>
+    
+    <!-- Cabecera Institucional PDI (Azul Marino + Franja Amarilla + Texto Blanco) -->
+    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-5 flex justify-between items-center text-white shadow-md">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border-2 border-amber-400">
+          <span class="material-symbols-outlined text-[26px]">content_paste</span>
+        </div>
+        <div>
+          <h3 class="font-black text-xl text-white leading-tight flex items-center gap-2">
+            Ingreso de Texto Directo
+          </h3>
+          <p class="text-xs text-blue-100 font-bold mt-0.5">Pegado de reportes WhatsApp, minutas policiales o extractos de chat</p>
         </div>
       </div>
-      
-      <button type="button" onclick="addTextArea()" class="text-xs text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1 hover:text-blue-700 w-fit px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded">
-        <span class="material-symbols-outlined text-[16px]">add_circle</span> Agregar otro mensaje
+      <button type="button" onclick="document.getElementById('pasteModal').close()"
+        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex items-center justify-center font-black border border-white/20 hover:scale-105">
+        <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </div>
-    <div
-      class="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-slate-800/50">
-      <button type="button" onclick="document.getElementById('pasteModal').close()"
-        class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancelar</button>
-      <button type="submit"
-        class="px-4 py-2 text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-        <span class="material-symbols-outlined text-[16px]">check_circle</span>
-        <span class="js-btn-label">Procesar Texto</span>
+
+    <!-- Cuerpo del Modal -->
+    <div class="p-6 flex flex-col gap-5 max-h-[75vh] overflow-y-auto bg-slate-50/50 dark:bg-slate-950">
+      
+      <!-- Bloque Título General -->
+      <div class="bg-gradient-to-r from-blue-50/90 to-amber-50/50 dark:from-slate-800 dark:to-slate-800/80 p-5 rounded-2xl border-2 border-blue-200 dark:border-slate-700 flex flex-col gap-2.5 shadow-md">
+        <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-[#00234c] text-[#ffd100] flex items-center justify-center font-black shadow-sm shrink-0">
+            <span class="material-symbols-outlined text-[15px]">topic</span>
+          </span>
+          Título General del Expediente (Opcional)
+        </label>
+        <p class="text-[11px] text-slate-600 dark:text-slate-400 font-bold">Nombre identificador con el que se agruparán los mensajes ingresados.</p>
+        <input type="text" name="titulo_general" maxlength="60"
+          class="w-full bg-white dark:bg-slate-900 border-2 border-blue-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400 placeholder:font-normal"
+          placeholder="Ej: Reportes Operativos WhatsApp - BICRIM Arica">
+      </div>
+
+      <!-- Contenedor de Mensajes -->
+      <div id="textAreasContainer" class="flex flex-col gap-5">
+        <!-- Primer Mensaje -->
+        <div class="report-block bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4">
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 py-3 -mx-5 -mt-5 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
+            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] text-xs font-black flex items-center justify-center shadow-inner">1</span>
+              Mensaje Principal #1
+            </span>
+            <span class="text-[10px] font-black uppercase tracking-wider bg-[#ffd100] text-[#00234c] px-3 py-1 rounded-lg border border-amber-400 shadow-sm">Texto Base</span>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
+            </label>
+            <input type="text" name="pasted_title" maxlength="60"
+              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400"
+              placeholder="Sub-Título (Ej: Minuta BICRIM Arica)">
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-blue-600">edit_note</span> Contenido del Mensaje
+            </label>
+            <textarea name="pasted_text" rows="5"
+              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-semibold"
+              placeholder="Pega el texto del mensaje o acta policial aquí..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Agregar Otro Mensaje -->
+      <button type="button" onclick="addTextArea()"
+        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white border-2 border-[#ffd100] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+        <span class="material-symbols-outlined text-[20px] text-[#ffd100]">add_circle</span>
+        <span>Agregar Otro Mensaje al Lote</span>
       </button>
+
+    </div>
+
+    <!-- Footer del Modal -->
+    <div class="p-4 px-6 border-t-2 border-blue-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-slate-100 via-blue-50/60 to-slate-100 dark:from-slate-900 dark:to-slate-800 shadow-inner">
+      <span class="text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[18px] text-amber-600">info</span> Se aplicará OCR y extracción NER a todos los bloques ingresados
+      </span>
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <button type="button" onclick="document.getElementById('pasteModal').close()"
+          class="px-4 py-2.5 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-300 dark:border-slate-700">
+          Cancelar
+        </button>
+        <button type="submit"
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white text-xs font-black uppercase tracking-wider px-7 py-3 rounded-xl border-b-4 border-[#ffd100] shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+          <span class="material-symbols-outlined text-[18px] text-[#ffd100]">bolt</span>
+          <span class="js-btn-label">Procesar Texto Directo</span>
+        </button>
+      </div>
     </div>
   </form>
 </dialog>
 
 <!-- Modal Procesamiento por Lotes -->
-<dialog id="batchModal" class="p-0 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm w-full max-w-xl">
+<dialog id="batchModal" class="p-0 rounded-3xl shadow-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/60 backdrop:backdrop-blur-md w-full max-w-xl overflow-hidden m-auto">
   <div class="flex flex-col h-full m-0">
-    <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-      <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <span class="material-symbols-outlined text-blue-600">upload_file</span>
-        Procesando Lote
-      </h3>
-      <button type="button" id="batchCancelBtn" onclick="window.cancelBatch = true;" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-3 py-1.5 rounded-lg transition-colors border border-red-200 dark:border-red-800">
+    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex justify-between items-center text-white shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+          <span class="material-symbols-outlined text-[22px]">upload_file</span>
+        </div>
+        <div>
+          <h3 class="font-black text-lg text-white leading-tight">Procesando Lote Documental</h3>
+          <p class="text-xs text-blue-100 font-bold">Iniciando OCR y análisis NER paralelo</p>
+        </div>
+      </div>
+      <button type="button" id="batchCancelBtn" onclick="window.cancelBatch = true;" class="text-xs font-black uppercase tracking-wider text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/60 hover:bg-red-200 dark:hover:bg-red-900/80 px-3.5 py-1.5 rounded-xl transition-all border border-red-300 dark:border-red-800 shadow-sm">
         Cancelar Restantes
       </button>
     </div>
     
     <!-- Barra de Progreso Visible -->
-    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5">
-      <div id="batchProgressBar" class="bg-blue-600 h-1.5 transition-all duration-300" style="width: 0%"></div>
+    <div class="w-full bg-slate-200 dark:bg-slate-800 h-2">
+      <div id="batchProgressBar" class="bg-[#ffd100] h-2 transition-all duration-300 shadow-sm" style="width: 0%"></div>
     </div>
 
-    <div class="p-4 flex flex-col gap-3 max-h-[50vh] overflow-y-auto" id="batchFileList">
+    <div class="p-5 flex flex-col gap-3 max-h-[50vh] overflow-y-auto" id="batchFileList">
       <!-- Los archivos se inyectarán aquí -->
     </div>
-    <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-      <span class="text-sm font-bold text-slate-600 dark:text-slate-400" id="batchStatusText">Iniciando...</span>
-      <button type="button" id="batchCloseBtn" onclick="window.location.href='/historial';" class="hidden px-4 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-        <span class="material-symbols-outlined text-[16px]">check_circle</span> Ir al Historial
+    <div class="p-4 px-6 border-t-2 border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/80 dark:bg-slate-900/80">
+      <span class="text-xs font-black text-slate-700 dark:text-slate-300" id="batchStatusText">Iniciando...</span>
+      <button type="button" id="batchCloseBtn" onclick="window.location.href='/historial';" class="hidden px-5 py-2.5 text-xs font-black uppercase tracking-wider bg-[#00234c] text-white hover:bg-[#003366] rounded-xl border-b-2 border-[#ffd100] transition-all flex items-center gap-2 shadow-md">
+        <span class="material-symbols-outlined text-[18px] text-[#ffd100]">check_circle</span> Ir al Historial
       </button>
     </div>
   </div>
@@ -1078,14 +1225,29 @@
     const container = document.getElementById('textAreasContainer');
     const count = container.querySelectorAll('.report-block').length + 1;
     const div = document.createElement('div');
-    div.className = 'flex flex-col gap-1.5 report-block mt-2 pt-4 border-t border-slate-100 dark:border-slate-800 relative';
+    div.className = 'report-block bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4 anim-in mt-2';
     div.innerHTML = `
-        <button type="button" onclick="this.parentElement.remove()" class="absolute top-3 right-0 text-slate-400 hover:text-red-500 transition-colors">
-            <span class="material-symbols-outlined text-[20px]">delete</span>
-        </button>
-        <label class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Mensaje ${count}</label>
-        <input type="text" name="pasted_title" maxlength="60" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" placeholder="Sub-Título (Ej: BRIDEC Arica)">
-        <textarea name="pasted_text" rows="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-y" placeholder="Pega el texto del mensaje aquí..."></textarea>
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 py-3 -mx-5 -mt-5 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
+          <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] text-xs font-black flex items-center justify-center shadow-inner">${count}</span>
+            Mensaje Adicional #${count}
+          </span>
+          <button type="button" onclick="this.closest('.report-block').remove()" class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 text-[10px] font-black uppercase px-2.5 py-1 rounded-md shadow-sm transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">delete</span> Eliminar
+          </button>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
+          </label>
+          <input type="text" name="pasted_title" maxlength="60" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400" placeholder="Sub-Título (Ej: Minuta BRIDEC Arica)">
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">edit_note</span> Contenido del Mensaje
+          </label>
+          <textarea name="pasted_text" rows="5" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-semibold" placeholder="Pega el texto del mensaje aquí..."></textarea>
+        </div>
     `;
     container.appendChild(div);
     div.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -1428,22 +1590,41 @@
       if (selectedPane) selectedPane.classList.remove('hidden');
 
       document.querySelectorAll(`.${group}-tab-btn`).forEach(btn => {
+          const baseClasses = `${group}-tab-btn px-7 py-3 rounded-xl font-black text-sm uppercase tracking-wider whitespace-nowrap transition-all duration-300 shadow-md`;
           if (parseInt(btn.dataset.index) === index) {
               if (btn.dataset.activeClass) {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors ${btn.dataset.activeClass}`;
+                  btn.className = `${baseClasses} ${btn.dataset.activeClass}`;
               } else {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 border-blue-500 text-blue-700 dark:text-blue-400 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+                  btn.className = `${baseClasses} bg-[#00234c] text-white shadow-lg border-b-4 border-[#ffd100]`;
               }
           } else {
               if (btn.dataset.inactiveClass) {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors ${btn.dataset.inactiveClass}`;
+                  btn.className = `${baseClasses} ${btn.dataset.inactiveClass}`;
               } else {
-                  btn.className = `${group}-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-[12px] uppercase tracking-wide whitespace-nowrap transition-colors`;
+                  btn.className = `${baseClasses} bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700`;
               }
           }
       });
   }
 
+  let currentOcrFontSize = 12;
+  function cambiarTamanoTextoOcr(delta) {
+      currentOcrFontSize = Math.min(24, Math.max(10, currentOcrFontSize + delta));
+      const container = document.getElementById('ocr-raw-content');
+      if (container) {
+          container.style.fontSize = `${currentOcrFontSize}px`;
+      }
+  }
+
+  let currentResumenFontSize = 16;
+  function cambiarTamanoTextoResumen(delta) {
+      currentResumenFontSize = Math.min(28, Math.max(12, currentResumenFontSize + delta));
+      document.querySelectorAll('.ql-editor').forEach(el => {
+          el.style.fontSize = `${currentResumenFontSize}px`;
+      });
+      const lbl = document.getElementById('resumen-font-size-label');
+      if (lbl) lbl.innerText = `${currentResumenFontSize}px`;
+  }
 
 </script>
 

@@ -1,152 +1,388 @@
 {% extends "base.html" %}
-{% block title %}Configuración - SIAD{% endblock %}
+{% block title %}Configuración y Ajustes - SIAD PDI{% endblock %}
 {% block content %}
 
-<div class="px-6 lg:px-margin-desktop py-8 max-w-[1400px] mx-auto w-full flex flex-col gap-6">
+<div class="px-6 lg:px-12 py-10 max-w-[1700px] mx-auto w-full flex flex-col gap-8">
   
-  <!-- Cabecera -->
-  <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <div class="flex items-start gap-4">
-      <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 shrink-0">
-        <span class="material-symbols-outlined text-[24px]">settings</span>
+  <!-- Cabecera de Ajustes Institucionales -->
+  <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] text-white rounded-3xl shadow-xl border-b-4 border-[#ffd100] p-8 lg:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+    <div class="flex items-center gap-6 relative z-10">
+      <div class="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center shadow-md border border-amber-400 shrink-0 font-extrabold">
+        <span class="material-symbols-outlined text-[36px] lg:text-[42px]">settings</span>
       </div>
-      <div class="flex flex-col">
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Configuración del Sistema</h1>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 font-medium mt-1">Preferencias de visualización guardadas localmente en este navegador.</p>
+      <div class="flex flex-col gap-1">
+        <h1 class="text-3xl lg:text-4xl font-black tracking-tight text-white flex flex-wrap items-center gap-3">
+          Ajustes del Sistema SIAD
+          <span class="text-xs lg:text-sm font-black uppercase tracking-widest bg-[#ffd100] text-[#00234c] px-4 py-1.5 rounded-full shadow-sm">Plataforma PDI</span>
+        </h1>
+        <p class="text-sm lg:text-base text-blue-100 font-bold">Configuración general de preferencias, parámetros operativos, cuenta y administración policial.</p>
       </div>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flex flex-col gap-3">
+      {% for category, message in messages %}
+        <div class="p-5 rounded-2xl font-black text-sm lg:text-base flex items-center gap-3 shadow-md {% if category == 'error' %}bg-red-100 text-red-800 border-2 border-red-300{% else %}bg-emerald-100 text-emerald-800 border-2 border-emerald-300{% endif %}">
+          <span class="material-symbols-outlined text-[28px]">{% if category == 'error' %}error{% else %}check_circle{% endif %}</span>
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Layout Principal con Navegación Lateral -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
     
-    <!-- Apariencia -->
-    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
-      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-        <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-          <span class="material-symbols-outlined text-[24px]">palette</span>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Apariencia</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tema visual de la interfaz</p>
-        </div>
-      </div>
+    <!-- Sidebar de Navegación de Ajustes -->
+    <div class="lg:col-span-1 flex flex-col gap-3">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-md p-4 flex flex-col gap-2">
+        
+        <div class="px-4 py-3 text-xs lg:text-sm font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">Ajustes Generales</div>
+        
+        <a href="{{ url_for('configuracion', section='general') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if not section or section == 'general' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+          <span class="material-symbols-outlined text-[26px]">tune</span>
+          <span>General</span>
+        </a>
 
-      <div class="flex items-center justify-between gap-4 py-2">
-        <div class="flex flex-col gap-1">
-          <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Modo Oscuro</p>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[250px]">Invierte los colores de la pantalla para reducir la fatiga visual en entornos de poca luz.</p>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer shrink-0">
-          <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
-          <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner group-hover:shadow transition-all"></div>
-        </label>
-      </div>
-    </div>
+        <a href="{{ url_for('configuracion', section='cuenta') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'cuenta' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+          <span class="material-symbols-outlined text-[26px]">manage_accounts</span>
+          <span>Cuenta</span>
+        </a>
 
-    <!-- Accesibilidad -->
-    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
-      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-        <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-          <span class="material-symbols-outlined text-[24px]">accessibility_new</span>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Accesibilidad</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ajustes de lectura y tamaño</p>
-        </div>
-      </div>
+        <div class="px-4 pt-5 pb-2 text-xs lg:text-sm font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider border-t-2 border-slate-100 dark:border-slate-800 mt-3">Administración</div>
 
-      <div class="flex flex-col gap-4 py-2">
-        <div class="flex items-center justify-between">
-          <div class="flex flex-col gap-1">
-            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Tamaño de la Fuente</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">Ajusta el zoom global de la interfaz.</p>
-          </div>
-          <span id="font-size-value" class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 font-bold px-3 py-1 rounded-lg text-sm border border-blue-100 dark:border-blue-900/50">100%</span>
-        </div>
-        <div class="flex items-center gap-4 mt-2">
-          <span class="font-bold text-slate-400 dark:text-slate-500" style="font-size:14px">A</span>
-          <input type="range" id="font-size-slider" min="80" max="150" step="5" value="100" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
-          <span class="font-bold text-slate-600 dark:text-slate-300" style="font-size:20px">A</span>
-        </div>
+        <a href="{{ url_for('configuracion', section='administracion') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'administracion' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+          <span class="material-symbols-outlined text-[26px]">admin_panel_settings</span>
+          <span>Administración</span>
+        </a>
+
       </div>
     </div>
 
-    <!-- IA y Procesamiento -->
-    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
-      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-        <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
-          <span class="material-symbols-outlined text-[24px]">psychology</span>
+    <!-- Contenido Central de la Sección Seleccionada -->
+    <div class="lg:col-span-3 flex flex-col gap-8">
+
+      {% if not section or section == 'general' %}
+      <!-- ==================== SECCIÓN 1: GENERAL ==================== -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Apariencia -->
+        <div class="bg-gradient-to-br from-white via-indigo-50/40 to-indigo-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-indigo-600 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-indigo-500/20">
+                <span class="material-symbols-outlined text-[30px]">dark_mode</span>
+              </div>
+              <div>
+                <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Modo Oscuro</h3>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Invierte colores para entornos con poca luz</p>
+              </div>
+            </div>
+            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">Reduce la fatiga visual en turnos nocturnos o de monitoreo continuo de análisis policial.</p>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Activar Tema Oscuro</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+              <div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+            </label>
+          </div>
         </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Inteligencia Artificial</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Preferencias del motor de IA</p>
+
+        <!-- Accesibilidad y Zoom -->
+        <div class="bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-emerald-500 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-emerald-500/20">
+                <span class="material-symbols-outlined text-[30px]">text_fields</span>
+              </div>
+              <div>
+                <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Tamaño de la Fuente</h3>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Ajuste de lectura global</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Nivel de Zoom</span>
+              <span id="font-size-value" class="bg-emerald-600 text-white font-black px-4 py-1.5 rounded-xl text-sm shadow-md">100%</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="font-black text-slate-400 text-xs uppercase">80%</span>
+            <input type="range" id="font-size-slider" min="80" max="140" step="5" value="100" class="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-xl appearance-none cursor-pointer accent-emerald-600">
+            <span class="font-black text-slate-800 dark:text-slate-200 text-sm">140%</span>
+          </div>
         </div>
+
+        <!-- Motor IA y OCR -->
+        <div class="bg-gradient-to-br from-white via-purple-50/40 to-purple-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-purple-600 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-purple-500/20">
+                <span class="material-symbols-outlined text-[30px]">psychology</span>
+              </div>
+              <div>
+                <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Inteligencia Documental</h3>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Extracción spaCy & TextRank</p>
+              </div>
+            </div>
+            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">El motor analiza automáticamente RUTs, nombres, fechas y ubicaciones en documentos escaneados.</p>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Resumen Automático</span>
+            <span class="bg-purple-600 text-white font-black px-4 py-2 rounded-xl text-xs lg:text-sm shadow-md flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+              Aprendizaje Adaptativo: {{ learned_count if learned_count else 0 }} Ediciones Aprendidas
+            </span>
+          </div>
+        </div>
+
+        <!-- Exportación de Actas -->
+        <div class="bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-amber-500 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <div class="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-lg shadow-amber-500/20">
+                <span class="material-symbols-outlined text-[30px]">description</span>
+              </div>
+              <div>
+                <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Actas Oficiales RF-07</h3>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Formato predeterminado de Word</p>
+              </div>
+            </div>
+            <p class="text-sm lg:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">Genera documentos institucionales formateados según los estándares institucionales de la PDI.</p>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <span class="text-sm lg:text-base font-black text-slate-800 dark:text-slate-200">Plantilla</span>
+            <span class="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs lg:text-sm shadow-md">RF-07 Oficial</span>
+          </div>
+        </div>
+
       </div>
 
-      <div class="flex flex-col gap-5 py-2">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Resumen por Defecto</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[220px]">Define qué tipo de resumen se generará automáticamente.</p>
+      {% elif section == 'cuenta' %}
+      <!-- ==================== SECCIÓN 3: CUENTA ==================== -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Información de Usuario -->
+        <div class="bg-gradient-to-br from-white via-blue-50/40 to-blue-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-[#0047AB] border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-[#0047AB] text-white flex items-center justify-center font-black shrink-0 shadow-lg shadow-blue-500/20">
+                <span class="material-symbols-outlined text-[30px]">badge</span>
+              </div>
+              <div>
+                <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Credencial de Usuario</h3>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Datos institucionales registrados</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-4 py-2">
+              <div class="flex justify-between items-center text-sm lg:text-base">
+                <span class="text-slate-500 dark:text-slate-400 font-bold">Nombre de Usuario:</span>
+                <span class="font-black text-slate-900 dark:text-slate-100 text-base lg:text-lg font-mono">{{ (user and user.username) or current_user or session.get('username') or 'admin' }}</span>
+              </div>
+              <div class="flex justify-between items-center text-sm lg:text-base">
+                <span class="text-slate-500 dark:text-slate-400 font-bold">Rol Asignado:</span>
+                <span class="bg-[#00234c] text-white font-black px-4 py-1.5 rounded-xl text-xs lg:text-sm uppercase tracking-wider border-b-2 border-[#ffd100] shadow-sm">
+                  {% set current_uname = (user and user.username) or current_user or session.get('username') or '' %}
+                  {% set current_urol = (user and user.rol) or session.get('rol') or '' %}
+                  {% if current_urol == 'admin' or current_uname == 'admin' %}Administrador Policial{% else %}Operador Autorizado{% endif %}
+                </span>
+              </div>
+              <div class="flex justify-between items-center text-sm lg:text-base">
+                <span class="text-slate-500 dark:text-slate-400 font-bold">Estado de la Cuenta:</span>
+                <span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-extrabold px-3 py-1 rounded-xl text-xs lg:text-sm border border-emerald-200/60 dark:border-emerald-900/60 flex items-center gap-2 shadow-sm">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Activo
+                </span>
+              </div>
+            </div>
           </div>
-          <select class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
-            <option value="tecnico">Técnico (Viñetas)</option>
-            <option value="narrativo">Narrativo (Párrafos)</option>
-          </select>
+
+          <div class="pt-6 border-t border-slate-200/60 dark:border-slate-800 mt-6">
+            <a href="{{ url_for('perfil_reporte') }}" class="w-full bg-[#00234c] hover:bg-[#003366] text-white font-black text-sm lg:text-base py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all border-b-4 border-[#ffd100] shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <span class="material-symbols-outlined text-[24px] text-[#ffd100]">download</span>
+              <span>Descargar Mi Historial (Excel)</span>
+            </a>
+          </div>
         </div>
 
-        <div class="flex flex-col gap-2 mt-2">
-          <div class="flex items-center justify-between">
-            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Nivel de Extracción</p>
-            <span class="bg-purple-50 dark:bg-purple-900/30 text-purple-700 font-bold px-3 py-1 rounded-lg text-[11px] border border-purple-100 dark:border-purple-900/50">Estricto</span>
-          </div>
-          <div class="flex items-center gap-4 mt-1">
-            <span class="text-[10px] font-bold text-slate-400">Exacto</span>
-            <input type="range" min="1" max="3" step="1" value="1" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600">
-            <span class="text-[10px] font-bold text-slate-400">Deductivo</span>
+        <!-- Cambio de Contraseña -->
+        <div class="bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-3xl border-l-4 border-l-amber-500 border-y border-r border-slate-200/80 dark:border-slate-800 shadow-md hover:shadow-xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-800">
+              <div class="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-lg shadow-amber-500/20">
+                <span class="material-symbols-outlined text-[30px]">lock_reset</span>
+              </div>
+              <div>
+                <h3 class="font-black text-slate-900 dark:text-slate-100 text-xl lg:text-2xl">Seguridad de la Cuenta</h3>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Actualización de clave de acceso</p>
+              </div>
+            </div>
+
+            <form action="{{ url_for('cambiar_password') }}" method="post" class="flex flex-col gap-6">
+              <div>
+                <label for="new_password" class="block text-sm lg:text-base font-black text-slate-800 dark:text-slate-200 mb-2">Nueva Contraseña</label>
+                <input type="password" id="new_password" name="new_password" required placeholder="••••••••" class="w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-amber-500/20 font-semibold shadow-sm">
+              </div>
+
+              <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm lg:text-base py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3 mt-2 active:scale-95">
+                <span class="material-symbols-outlined text-[24px]">key</span>
+                Actualizar Contraseña
+              </button>
+            </form>
           </div>
         </div>
+
       </div>
-    </div>
 
-    <!-- Exportación y Privacidad -->
-    <div class="bg-gradient-to-br from-[#f8fafc] dark:from-slate-900 to-[#eff6ff] dark:to-slate-950 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
-      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-        <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
-          <span class="material-symbols-outlined text-[24px]">shield_lock</span>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Privacidad y Exportación</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control de datos y actas</p>
-        </div>
-      </div>
+      {% elif section == 'administracion' %}
+      <!-- ==================== SECCIÓN 3: ADMINISTRACIÓN ==================== -->
+      <div class="flex flex-col gap-8">
 
-      <div class="flex flex-col gap-5 py-2">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Anonimizar Datos Personales</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[250px]">Oculta RUTs y nombres en la previsualización por seguridad.</p>
+        <!-- Banner Titulo de Administracion -->
+        <div class="mb-2">
+          <h2 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Panel de Administración</h2>
+          <p class="text-sm lg:text-base text-slate-500 dark:text-slate-400 mt-1">Gestiona usuarios, roles y credenciales del Sistema ABIS / SIAD de forma segura.</p>
+        </div>
+
+        <!-- Tarjeta 1: Añadir usuarios -->
+        <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] p-5 px-8 text-white flex items-center gap-3 font-black text-lg shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+              <span class="material-symbols-outlined text-[24px]">person_add</span>
+            </div>
+            <span>Añadir usuarios</span>
           </div>
-          <label class="relative inline-flex items-center cursor-pointer shrink-0">
-            <input type="checkbox" checked class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500 shadow-inner group-hover:shadow transition-all"></div>
-          </label>
+
+          <form id="form-nuevo-usuario-siad" class="p-8 flex flex-col gap-6" onsubmit="crearUsuarioAdminSIAD(event)">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="siad-nuevo-usuario" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nombre de Usuario</label>
+                <input type="text" id="siad-nuevo-usuario" required placeholder="ej: jgonzalez" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+
+              <div>
+                <label class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nivel de Acceso</label>
+                <input type="hidden" id="siad-nuevo-rol" value="operador">
+                
+                <div class="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-inner">
+                  <button type="button" id="btn-rol-operador" onclick="seleccionarRolUI('operador')" class="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all bg-[#00234c] text-white shadow-md border-b-2 border-[#ffd100]">
+                    <span class="material-symbols-outlined text-[20px] text-[#ffd100]">person</span>
+                    <span>Operador (Estándar)</span>
+                  </button>
+                  <button type="button" id="btn-rol-admin" onclick="seleccionarRolUI('admin')" class="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70">
+                    <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                    <span>Administrador (Total)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="siad-nuevo-password" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Contraseña Inicial</label>
+                <input type="password" id="siad-nuevo-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+
+              <div>
+                <label for="siad-nuevo-password-confirm" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Confirmar Contraseña</label>
+                <input type="password" id="siad-nuevo-password-confirm" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+            </div>
+
+            <div id="siad-feedback-usuario" class="hidden text-sm font-bold p-4 rounded-xl"></div>
+
+            <div class="flex justify-end pt-4 border-t-2 border-slate-100 dark:border-slate-800">
+              <button type="submit" class="bg-[#00234c] hover:bg-[#003366] text-white font-black text-sm lg:text-base py-3.5 px-8 rounded-2xl border-b-4 border-[#ffd100] shadow-lg hover:shadow-xl transition-all flex items-center gap-3 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[22px]">person_add</span>
+                Añadir
+              </button>
+            </div>
+          </form>
         </div>
 
-        <div class="flex items-center justify-between gap-4 mt-2">
-          <div class="flex flex-col gap-1">
-            <p class="font-bold text-slate-700 dark:text-slate-200 text-sm">Formato de Acta</p>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-[250px]">Estilo predeterminado para documentos Word.</p>
+        <!-- Tarjeta 2: Registro Activo de Usuarios -->
+        <div class="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg">
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] p-5 px-8 text-white flex items-center justify-between font-black text-lg shadow-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
+                <span class="material-symbols-outlined text-[24px]">group</span>
+              </div>
+              <span>Registro Activo</span>
+            </div>
+            <span class="bg-[#ffd100] text-[#00234c] font-black text-xs lg:text-sm px-4 py-1.5 rounded-full shadow-sm">
+              {{ db_users|length if db_users else 0 }} Registros
+            </span>
           </div>
-          <select class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
-            <option value="estandar">RF-07 Estándar</option>
-            <option value="resumido">Solo Resumen</option>
-          </select>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black uppercase tracking-wider">
+                  <th class="py-4 px-6">Usuario</th>
+                  <th class="py-4 px-6">Rol</th>
+                  <th class="py-4 px-6">Estado</th>
+                  <th class="py-4 px-6">Último Acceso</th>
+                  <th class="py-4 px-6 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm lg:text-base">
+                {% if db_users and db_users|length > 0 %}
+                  {% for u in db_users %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td class="py-4 px-6 font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[24px] {% if u.rol == 'admin' %}text-sky-500{% else %}text-slate-400{% endif %}">
+                          {% if u.rol == 'admin' %}admin_panel_settings{% else %}person{% endif %}
+                        </span>
+                        {{ u.username }}
+                      </td>
+                      <td class="py-4 px-6">
+                        <span class="{% if u.rol == 'admin' %}bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300 border-sky-300{% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300{% endif %} font-black px-3.5 py-1 rounded-xl text-xs uppercase tracking-wider border">
+                          {{ 'Admin' if u.rol == 'admin' else 'Operador' }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-6">
+                        <span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700 font-extrabold px-3 py-1 rounded-xl text-xs inline-flex items-center gap-1.5">
+                          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Activo
+                        </span>
+                      </td>
+                      <td class="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium text-xs lg:text-sm">
+                        {{ u.last_login or 'Nunca' }}
+                      </td>
+                      <td class="py-4 px-6 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                          <button onclick="cambiarRolSIAD({{ u.id }}, '{{ u.rol }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px]">edit</span> Rol
+                          </button>
+                          <button onclick="cambiarPasswordSIAD({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-red-200 dark:border-red-800 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px]">key</span> Clave
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="py-12 text-center text-slate-400 font-bold">
+                      <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">folder_open</span>
+                      No hay usuarios registrados
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
+      {% endif %}
+
     </div>
 
   </div>
+
 </div>
 
 <script>
@@ -154,23 +390,121 @@
     var root = document.documentElement;
 
     var darkToggle = document.getElementById('dark-mode-toggle');
-    darkToggle.checked = root.classList.contains('dark');
-    darkToggle.addEventListener('change', function () {
-      root.classList.toggle('dark', darkToggle.checked);
-      localStorage.setItem('darkMode', darkToggle.checked ? '1' : '0');
-    });
+    if (darkToggle) {
+      darkToggle.checked = root.classList.contains('dark');
+      darkToggle.addEventListener('change', function () {
+        root.classList.toggle('dark', darkToggle.checked);
+        localStorage.setItem('darkMode', darkToggle.checked ? '1' : '0');
+      });
+    }
 
     var slider = document.getElementById('font-size-slider');
     var valorEtiqueta = document.getElementById('font-size-value');
-    var tamanoActual = parseInt(localStorage.getItem('fontSize'), 10) || 100;
-    slider.value = tamanoActual;
-    valorEtiqueta.textContent = tamanoActual + '%';
+    if (slider && valorEtiqueta) {
+      var tamanoActual = parseInt(localStorage.getItem('fontSize'), 10) || 100;
+      slider.value = tamanoActual;
+      valorEtiqueta.textContent = tamanoActual + '%';
 
-    slider.addEventListener('input', function () {
-      root.style.zoom = slider.value + '%';
-      valorEtiqueta.textContent = slider.value + '%';
-      localStorage.setItem('fontSize', slider.value);
-    });
+      slider.addEventListener('input', function () {
+        root.style.zoom = slider.value + '%';
+        valorEtiqueta.textContent = slider.value + '%';
+        localStorage.setItem('fontSize', slider.value);
+      });
+    }
   })();
+
+  function seleccionarRolUI(rol) {
+    document.getElementById('siad-nuevo-rol').value = rol;
+    var btnOp = document.getElementById('btn-rol-operador');
+    var btnAd = document.getElementById('btn-rol-admin');
+    
+    if (rol === 'operador') {
+      btnOp.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all bg-[#00234c] text-white shadow-md border-b-2 border-[#ffd100]";
+      btnAd.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70";
+    } else {
+      btnAd.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all bg-[#00234c] text-white shadow-md border-b-2 border-[#ffd100]";
+      btnOp.className = "flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-black text-xs lg:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70";
+    }
+  }
+
+  async function crearUsuarioAdminSIAD(e) {
+    e.preventDefault();
+    var u = document.getElementById('siad-nuevo-usuario').value;
+    var r = document.getElementById('siad-nuevo-rol').value;
+    var p1 = document.getElementById('siad-nuevo-password').value;
+    var p2 = document.getElementById('siad-nuevo-password-confirm').value;
+    var fb = document.getElementById('siad-feedback-usuario');
+
+    if (p1 !== p2) {
+      fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
+      fb.textContent = 'Las contraseñas no coinciden.';
+      fb.classList.remove('hidden');
+      return;
+    }
+
+    try {
+      var res = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p1, rol: r })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        fb.className = 'text-sm font-bold p-4 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300';
+        fb.textContent = 'Usuario registrado exitosamente en el sistema.';
+        fb.classList.remove('hidden');
+        setTimeout(function() { location.reload(); }, 1000);
+      } else {
+        fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
+        fb.textContent = data.error || 'No se pudo registrar el usuario.';
+        fb.classList.remove('hidden');
+      }
+    } catch (err) {
+      fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
+      fb.textContent = 'Error de conexión con el servidor.';
+      fb.classList.remove('hidden');
+    }
+  }
+
+  async function cambiarRolSIAD(id, currentRol) {
+    var nuevoRol = currentRol === 'admin' ? 'operador' : 'admin';
+    if (!confirm('¿Desea cambiar el rol de este usuario a ' + nuevoRol.toUpperCase() + '?')) return;
+    try {
+      var res = await fetch('/api/admin/update-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, rol: nuevoRol })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        location.reload();
+      } else {
+        alert(data.error || 'Error al modificar rol');
+      }
+    } catch (err) {
+      alert('Error de conexión');
+    }
+  }
+
+  async function cambiarPasswordSIAD(id, username) {
+    var p = prompt('Ingrese la nueva contraseña para el usuario "' + username + '" (mínimo 6 caracteres):');
+    if (!p || p.length < 6) return;
+    try {
+      var res = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, password: p })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        alert('Contraseña actualizada correctamente.');
+      } else {
+        alert(data.error || 'Error al actualizar contraseña.');
+      }
+    } catch (err) {
+      alert('Error de conexión');
+    }
+  }
 </script>
+
 {% endblock %}

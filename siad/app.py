@@ -76,9 +76,9 @@ app = Flask(__name__)
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.secret_key = os.environ.get("SECRET_KEY")
-if not app.secret_key:
-    raise RuntimeError("SECRET_KEY environment variable is missing. It is required for sessions.")
+# Default de desarrollo documentado, no un secreto real -- sobreescribir con SECRET_KEY en
+# cualquier instalacion que no sea localhost (Sprint 9: revision de seguridad).
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-v2")
 app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
@@ -103,6 +103,11 @@ _nlp.max_length = 2_000_000  # actas largas pueden superar el limite por defecto
 
 try:
     db.init_schema()
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
+            if not cur.fetchone():
+                db.create_user("admin", generate_password_hash("admin123"), "admin")
 except Exception as exc:  # PostgreSQL puede no estar disponible; el resto de la app sigue andando
     print(f"Aviso: no se pudo inicializar el esquema de PostgreSQL ({exc}).")
 
@@ -742,9 +747,29 @@ def parse_police_report(raw_text):
     data["narrativas"] = narratives
     return data
 
-def build_summary_options(raw_text, entities=None):
+
+def get_user_learned_weights(username):
+    if not username:
+        return {}
+    try:
+        feedback = db.get_summary_feedback_by_user(username, limit=20)
+        if not feedback:
+            return {}
+        term_freq = {}
+        for item in feedback:
+            edited_text = (item.get("resumen_editado") or "").lower()
+            words = set(re.findall(r'\b[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]{3,}\b', edited_text))
+            for w in words:
+                term_freq[w] = term_freq.get(w, 0) + 1
+        return term_freq
+    except Exception:
+        return {}
+
+
+def build_summary_options(raw_text, entities_data=None, username=None):
     """Genera dos opciones de resumen limpias y fluidas para el parte policial,
-       exclusivas para el campo 'Resumen Diligencia' del Word."""
+       exclusivas para el campo 'Resumen Diligencia' del Word. Incorpora aprendizaje continuo
+       basado en las preferencias aprendidas del usuario."""
     meta = parse_police_report(raw_text)
     narratives = meta.get("narrativas", [])
     
@@ -753,45 +778,63 @@ def build_summary_options(raw_text, entities=None):
     for nar in narratives:
         all_sents.extend(split_sentences_safely(nar))
         
-    # 1. SÍNTESIS INTELIGENTE (Opción A - Info más importante, ultra corta)
     full_narrative = " ".join(all_sents)
     hechos_sinteticos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     hechos_completos = "Procedimiento policial ejecutado conforme a las diligencias informadas."
     
+    # Ponderación por aprendizaje de usuario
+    user_weights = get_user_learned_weights(username or session.get("username"))
+
     if full_narrative:
         try:
             doc = _nlp(full_narrative)
             
-            # Opción A: Ultra corta (max 1 oracion, max ~6 líneas = ~320 chars)
-            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=10, limit_sentences=1)]
+            # Opción A: Resumen Corto (Max ~6 líneas / 3 oraciones)
+            tr_sents_a = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=20, limit_sentences=5)]
             if tr_sents_a:
-                ordered_a = sorted(tr_sents_a, key=lambda s: full_narrative.find(s))
+                if user_weights:
+                    def sent_score(s):
+                        words = set(re.findall(r'\b[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]{3,}\b', s.lower()))
+                        return sum(user_weights.get(w, 0) for w in words)
+                    tr_sents_a = sorted(tr_sents_a, key=sent_score, reverse=True)
+                
+                selected_a = tr_sents_a[:3]
+                ordered_a = sorted(selected_a, key=lambda s: full_narrative.find(s))
                 hechos_sinteticos = " ".join(ordered_a)
             else:
                 hechos_sinteticos = full_narrative
                 
-            # Truncado estricto si sigue siendo muy largo (para forzar <= 6 líneas visuales)
-            if len(hechos_sinteticos) > 320:
-                hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
+            if len(hechos_sinteticos) > 350:
+                hechos_sinteticos = hechos_sinteticos[:347].rsplit(' ', 1)[0] + "..."
 
-            # Opción B: Resumen fluido (max 3 oraciones, resume pero no deja original)
-            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=20, limit_sentences=3)]
+
+            # Opción B: Resumen fluido (Más largo, max 6 oraciones)
+            tr_sents_b = [str(sent).strip() for sent in doc._.textrank.summary(limit_phrases=35, limit_sentences=10)]
             if tr_sents_b:
-                ordered_b = sorted(tr_sents_b, key=lambda s: full_narrative.find(s))
+                if user_weights:
+                    def sent_score(s):
+                        words = set(re.findall(r'\b[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]{3,}\b', s.lower()))
+                        return sum(user_weights.get(w, 0) for w in words)
+                    tr_sents_b = sorted(tr_sents_b, key=sent_score, reverse=True)
+                
+                selected_b = tr_sents_b[:5]
+                ordered_b = sorted(selected_b, key=lambda s: full_narrative.find(s))
                 hechos_completos = " ".join(ordered_b)
             else:
                 hechos_completos = full_narrative
                 
-            if len(hechos_completos) > 1200:
-                hechos_completos = hechos_completos[:1197].rsplit(' ', 1)[0] + "..."
+            if len(hechos_completos) > 700:
+                hechos_completos = hechos_completos[:697].rsplit(' ', 1)[0] + "..."
                 
         except Exception:
-            hechos_sinteticos = " ".join(all_sents[:1])
-            if len(hechos_sinteticos) > 320:
-                hechos_sinteticos = hechos_sinteticos[:317].rsplit(' ', 1)[0] + "..."
-            hechos_completos = " ".join(all_sents[:3])
+            hechos_sinteticos = " ".join(all_sents[:3])
+            if len(hechos_sinteticos) > 350:
+                hechos_sinteticos = hechos_sinteticos[:347].rsplit(' ', 1)[0] + "..."
+            
+            hechos_completos = " ".join(all_sents[:6])
+            if len(hechos_completos) > 700:
+                hechos_completos = hechos_completos[:697].rsplit(' ', 1)[0] + "..."
     
-    # Devolvemos puramente el relato para no duplicar datos en la tabla del Word
     return {"a": hechos_sinteticos, "b": hechos_completos}
 
 def summarize_text(raw_text, limit_sentences=3):
@@ -801,6 +844,7 @@ def summarize_text(raw_text, limit_sentences=3):
 
 @app.before_request
 def require_login():
+    print("COOKIES RECIBIDAS:", request.cookies, flush=True)
     if request.endpoint is None or request.endpoint in LOGIN_EXEMPT_ENDPOINTS:
         return None
     if not session.get("user_id"):
@@ -1503,10 +1547,19 @@ def select_summary(filename):
             
         texto_editado = request.form.get(f"texto_{i}_{opcion_elegida}") or request.form.get(f"texto_{opcion_elegida}")
         if texto_editado:
+            original_text = opt.get(opcion_elegida, "")
             opt["selected"] = opcion_elegida
             cleaned_text = re.sub(r'</p>|<br\s*/?>', '\n', texto_editado)
             cleaned_text = re.sub(r'<[^>]+>', '', cleaned_text).strip()
             opt[opcion_elegida] = cleaned_text
+            
+            # Aprendizaje adaptativo continuo: registrar feedback de edición
+            username = session.get("username", "")
+            if username and cleaned_text:
+                try:
+                    db.save_summary_feedback(username, None, original_text, cleaned_text)
+                except Exception as e:
+                    print(f"Error guardando feedback de resumen: {e}")
             
     with open(options_path, "w", encoding="utf-8") as f:
         json.dump(summary_options, f, ensure_ascii=False, indent=2)
@@ -1724,6 +1777,77 @@ def estadisticas():
 
 
 
+@app.route("/configuracion")
+def configuracion():
+    username = session.get("username", "")
+    if not username:
+        return redirect(url_for("login"))
+    user = db.get_user_by_username(username)
+    section = request.args.get("section", "general")
+    if section not in ["general", "cuenta", "administracion"]:
+        section = "general"
+    db_users = []
+    if section == "administracion":
+        try:
+            db_users = db.get_all_users()
+        except Exception:
+            db_users = []
+    learned_count = 0
+    try:
+        learned_count = db.get_summary_feedback_count(username)
+    except Exception:
+        learned_count = 0
+    return render_template("configuracion.html", user=user, active_page="configuracion", section=section, db_users=db_users, learned_count=learned_count)
+
+
+@app.route("/api/admin/create-user", methods=["POST"])
+def api_admin_create_user():
+    data = request.get_json() or {}
+    username = (data.get("username") or "").strip()
+    password = data.get("password") or ""
+    rol = data.get("rol") or "operador"
+    
+    if len(username) < 3 or len(password) < 6 or rol not in ["admin", "operador"]:
+        return {"ok": False, "error": "Datos inválidos (mínimo 3 caracteres usuario y 6 en contraseña)"}, 400
+        
+    existing = db.get_user_by_username(username)
+    if existing:
+        return {"ok": False, "error": "El usuario ya existe en el registro policial"}, 400
+        
+    try:
+        user_id = db.create_user(username, generate_password_hash(password), rol=rol, nombre_completo=username)
+        return {"ok": True, "user_id": user_id}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
+
+@app.route("/api/admin/update-role", methods=["POST"])
+def api_admin_update_role():
+    data = request.get_json() or {}
+    user_id = data.get("id")
+    rol = data.get("rol")
+    if not user_id or rol not in ["admin", "operador"]:
+        return {"ok": False, "error": "Datos inválidos"}, 400
+    try:
+        db.update_user_role(user_id, rol)
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
+
+@app.route("/api/admin/reset-password", methods=["POST"])
+def api_admin_reset_password():
+    data = request.get_json() or {}
+    user_id = data.get("id")
+    password = data.get("password")
+    if not user_id or not password or len(password) < 6:
+        return {"ok": False, "error": "Contraseña inválida (mínimo 6 caracteres)"}, 400
+    try:
+        db.update_user_password_by_id(user_id, generate_password_hash(password))
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
 @app.route("/perfil")
 def perfil():
     username = session.get("username", "")
@@ -1750,7 +1874,8 @@ def cambiar_password():
     else:
         flash("Debe proporcionar una nueva contraseña.", "error")
     
-    return redirect(url_for("perfil"))
+    redirect_url = request.referrer or url_for("configuracion", section="cuenta")
+    return redirect(redirect_url)
 
 @app.route("/perfil/reporte.xlsx")
 def perfil_reporte():
@@ -1759,24 +1884,136 @@ def perfil_reporte():
         return redirect(url_for("login"))
     
     try:
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
         docs = db.get_all_docs_by_user(username)
         wb = Workbook()
         ws = wb.active
-        ws.title = "Mis Documentos"
+        ws.title = "Historial de Análisis"
+        ws.views.sheetView[0].showGridLines = True
+
+        # Styles
+        title_font = Font(name="Arial", size=13, bold=True, color="FFFFFF")
+        sub_font = Font(name="Arial", size=10, italic=True, color="1E293B")
+        meta_font = Font(name="Arial", size=10, bold=True, color="1E293B")
+        header_font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
+        data_font = Font(name="Arial", size=10, color="0F172A")
         
-        ws.append(["ID", "Nombre de Archivo", "Fecha Procesamiento", "Resumen"])
+        navy_fill = PatternFill(start_color="00234C", end_color="00234C", fill_type="solid")
+        header_fill = PatternFill(start_color="00234C", end_color="00234C", fill_type="solid")
+        meta_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+        zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+        white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+        
+        thin_border = Border(
+            left=Side(style="thin", color="CBD5E1"),
+            right=Side(style="thin", color="CBD5E1"),
+            top=Side(style="thin", color="CBD5E1"),
+            bottom=Side(style="thin", color="CBD5E1")
+        )
+        gold_bottom_border = Border(
+            left=Side(style="thin", color="CBD5E1"),
+            right=Side(style="thin", color="CBD5E1"),
+            top=Side(style="thin", color="CBD5E1"),
+            bottom=Side(style="medium", color="FFD100")
+        )
+
+        # 1. Main Banner Header
+        ws.merge_cells("A1:E1")
+        ws["A1"] = "POLICÍA DE INVESTIGACIONES DE CHILE — SIAD"
+        ws["A1"].font = title_font
+        ws["A1"].fill = navy_fill
+        ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 32
+
+        # 2. Metadata Rows
+        ws.merge_cells("A2:E2")
+        ws["A2"] = f"REPORTE OFICIAL DE ACTIVIDAD Y ANÁLISIS DOCUMENTAL — OPERADOR: {username.upper()}"
+        ws["A2"].font = sub_font
+        ws["A2"].fill = meta_fill
+        ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[2].height = 22
+
+        now_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        ws["A3"] = "Fecha de Emisión:"
+        ws["A3"].font = meta_font
+        ws["B3"] = now_str
+        ws["B3"].font = data_font
+        ws["C3"] = "Total Documentos Registrados:"
+        ws["C3"].font = meta_font
+        ws["D3"] = len(docs)
+        ws["D3"].font = data_font
+
+        ws.row_dimensions[4].height = 10
+
+        # 3. Table Column Headers (Row 5)
+        headers = ["N° ID", "Nombre del Archivo Documental", "Fecha de Procesamiento", "Resumen de Inteligencia Documental", "Entidades Detectadas"]
+        ws.row_dimensions[5].height = 28
+        for col_num, h_text in enumerate(headers, 1):
+            cell = ws.cell(row=5, column=col_num, value=h_text)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border = gold_bottom_border
+
+        # 4. Data Rows (Row 6 onwards)
+        row_idx = 6
         for d in docs:
-            dt = d["fecha_procesamiento"]
-            if dt and dt.tzinfo:
-                dt = dt.replace(tzinfo=None)
-            ws.append([d["id"], d["nombre_archivo"], dt, d["resumen"]])
-            
-        if len(docs) > 0:
-            tab = Table(displayName="MisDocumentos", ref=f"A1:D{len(docs)+1}")
-            style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=True)
-            tab.tableStyleInfo = style
-            ws.add_table(tab)
-            
+            dt = d.get("fecha_procesamiento")
+            fecha_str = ""
+            if dt:
+                if hasattr(dt, "strftime"):
+                    fecha_str = dt.strftime("%d/%m/%Y %H:%M:%S")
+                else:
+                    fecha_str = str(dt)
+
+            resumen_txt = d.get("resumen") or "Sin resumen"
+            doc_id = d.get("id")
+
+            # Count entities for this doc
+            ent_summary = "—"
+            try:
+                ents = db.get_document_entities(doc_id)
+                if ents:
+                    cats = {}
+                    for e in ents:
+                        cat = e.get("categoria", "Entidad").capitalize()
+                        cats[cat] = cats.get(cat, 0) + 1
+                    ent_summary = ", ".join([f"{k}: {v}" for k, v in cats.items()])
+            except Exception:
+                pass
+
+            row_data = [doc_id, d.get("nombre_archivo", ""), fecha_str, resumen_txt, ent_summary]
+            current_fill = zebra_fill if row_idx % 2 == 0 else white_fill
+
+            for col_num, val in enumerate(row_data, 1):
+                cell = ws.cell(row=row_idx, column=col_num, value=val)
+                cell.font = data_font
+                cell.fill = current_fill
+                cell.border = thin_border
+                
+                # Alignment & wrapping rules
+                if col_num == 1:
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                elif col_num == 2:
+                    cell.alignment = Alignment(horizontal="left", vertical="center")
+                    cell.font = Font(name="Arial", size=10, bold=True, color="0F172A")
+                elif col_num == 3:
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                elif col_num == 4:
+                    cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+                elif col_num == 5:
+                    cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+            row_idx += 1
+
+        # Fixed Column Widths for Optimal Readability
+        ws.column_dimensions["A"].width = 12
+        ws.column_dimensions["B"].width = 38
+        ws.column_dimensions["C"].width = 25
+        ws.column_dimensions["D"].width = 75
+        ws.column_dimensions["E"].width = 35
+
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
@@ -1784,12 +2021,12 @@ def perfil_reporte():
         return send_file(
             output,
             as_attachment=True,
-            download_name=f"reporte_actividad_{username}.xlsx",
+            download_name=f"reporte_actividad_{username}_{datetime.now().strftime('%Y%m%d')}.xlsx",
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     except Exception as e:
-        flash(f"Error al generar reporte: {e}", "error")
-        return redirect(url_for("perfil"))
+        flash(f"Error al generar reporte Excel: {e}", "error")
+        return redirect(url_for("configuracion", section="cuenta"))
 
 
 @app.route("/estadisticas/exportar.xlsx")

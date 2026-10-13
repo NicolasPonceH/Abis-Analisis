@@ -7,29 +7,31 @@ volumen de uso de esta app (subir/procesar documentos uno por uno desde la UI) n
 """
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 # pyrefly: ignore [missing-import]
 import psycopg
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
 CONNECT_TIMEOUT = 5
 
 def get_connection():
-    if not DATABASE_URL:
-        raise RuntimeError("Falta configurar DATABASE_URL en el entorno")
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        return psycopg.connect(conninfo=url, connect_timeout=CONNECT_TIMEOUT)
     return psycopg.connect(
-        conninfo=DATABASE_URL,
+        host=os.environ.get("DB_HOST", "127.0.0.1"),
+        port=os.environ.get("DB_PORT", "5433"),
+        dbname=os.environ.get("DB_NAME", "Abis_OCR"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD", "abis_dev_pw"),
         connect_timeout=CONNECT_TIMEOUT,
     )
 
 def is_connected():
     try:
-        if not DATABASE_URL:
-            return False
-        with psycopg.connect(
-            conninfo=DATABASE_URL,
-            connect_timeout=1,
-        ):
+        with get_connection() as conn:
             return True
     except Exception:
         return False
@@ -491,6 +493,30 @@ def get_user_by_username(username):
             return dict(zip(columns, row))
 
 
+def get_all_users():
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, username, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios ORDER BY id ASC"
+            )
+            columns = [desc.name for desc in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def update_user_role(user_id, rol):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE usuarios SET rol = %s WHERE id = %s", (rol, user_id))
+        conn.commit()
+
+
+def update_user_password_by_id(user_id, password_hash):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE usuarios SET password_hash = %s WHERE id = %s", (password_hash, user_id))
+        conn.commit()
+
+
 def create_user(username, password_hash, rol='operador', nombre_completo=None):
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -557,3 +583,37 @@ def get_all_docs_by_user(username):
             )
             columns = [desc.name for desc in cur.description]
             return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def save_summary_feedback(username, documento_id, resumen_original, resumen_editado):
+    if not username or not resumen_editado:
+        return None
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO resumenes_feedback (usuario_username, documento_id, resumen_original, resumen_editado) "
+                "VALUES (%s, %s, %s, %s) RETURNING id",
+                (username, documento_id, resumen_original, resumen_editado)
+            )
+            feedback_id = cur.fetchone()[0]
+        conn.commit()
+    return feedback_id
+
+
+def get_summary_feedback_by_user(username, limit=10):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, resumen_original, resumen_editado, creado_en FROM resumenes_feedback "
+                "WHERE usuario_username = %s ORDER BY creado_en DESC LIMIT %s",
+                (username, limit)
+            )
+            columns = [desc.name for desc in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def get_summary_feedback_count(username):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM resumenes_feedback WHERE usuario_username = %s", (username,))
+            return cur.fetchone()[0]
