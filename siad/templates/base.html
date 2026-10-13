@@ -485,8 +485,8 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 </header>
 
-<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px]">
-  <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
+<div id="page-content" class="w-full flex-1 flex flex-col min-h-screen pt-[67.33px]">
+  <main class="w-full flex-1 bg-slate-50 dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
     <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -509,23 +509,23 @@ body.splash-disabled #pdi-splash-overlay,
     {% block content %}{% endblock %}
   </main>
 
-  <!-- 3. Footer Institucional PDI / SIAD - Diseño Sencillo y Limpio -->
-  <footer id="page-footer" class="w-full bg-[#001c3d] text-white border-t-2 border-[#ffd100] shadow-md select-none shrink-0">
-    <div class="w-full max-w-[1720px] mx-auto px-6 sm:px-10 py-6">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+  <!-- 3. Footer Institucional PDI / SIAD - Diseño Limpio, Sencillo y Proporcionado -->
+  <footer id="page-footer" class="w-full mt-auto bg-[#001c3d] text-white border-t-2 border-[#ffd100] shadow-md select-none shrink-0">
+    <div class="w-full max-w-[1720px] mx-auto px-6 sm:px-10 py-7">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-center">
 
-        <!-- Identidad Institucional -->
+        <!-- Columna 1: Identidad Institucional -->
         <div class="flex items-center gap-3.5">
           <img src="{{ url_for('static', filename='img/pdi-logo.jpg') }}" alt="PDI"
-            class="h-10 w-auto object-contain rounded-lg border border-amber-400/30">
+            class="h-11 w-auto object-contain rounded-lg border border-amber-400/40 shadow-xs shrink-0">
           <div>
             <h3 class="text-sm font-black text-white leading-tight tracking-wide">Policía de Investigaciones de Chile</h3>
-            <p class="text-xs text-[#ffd100] font-semibold">SIAD · Sistema de Análisis Documental y OCR</p>
+            <p class="text-xs text-[#ffd100] font-bold mt-0.5">SIAD · Sistema de Análisis Documental y OCR</p>
           </div>
         </div>
 
-        <!-- Enlaces Rápidos -->
-        <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-slate-200">
+        <!-- Columna 2: Enlaces Rápidos Centrados -->
+        <nav class="flex flex-wrap items-center justify-center md:justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-200">
           <a href="{{ url_for('index') }}" class="hover:text-[#ffd100] transition-colors flex items-center gap-1.5 py-1">
             <span class="material-symbols-outlined text-[17px]">document_scanner</span>
             <span>Procesamiento OCR</span>
@@ -544,14 +544,14 @@ body.splash-disabled #pdi-splash-overlay,
           </a>
         </nav>
 
-        <!-- Estado y Botón Subir -->
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2 text-xs text-slate-300 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+        <!-- Columna 3: Estado y Botón Subir Alineados a la Derecha -->
+        <div class="flex items-center justify-start md:justify-end gap-3.5">
+          <div class="flex items-center gap-2 text-xs text-slate-200 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-medium">Sistema Operativo</span>
+            <span class="font-bold">Sistema Operativo</span>
           </div>
           <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
-            class="bg-white/10 hover:bg-[#ffd100] text-slate-200 hover:text-[#00234c] border border-white/20 hover:border-amber-400 font-bold text-xs py-1.5 px-3.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+            class="bg-white/10 hover:bg-[#ffd100] text-slate-200 hover:text-[#00234c] border border-white/20 hover:border-amber-400 font-bold text-xs py-1.5 px-3.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
             title="Volver al inicio de la página">
             <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
             <span>Volver arriba</span>
@@ -561,7 +561,7 @@ body.splash-disabled #pdi-splash-overlay,
       </div>
 
       <!-- Línea sutil de Copyright -->
-      <div class="border-t border-white/10 mt-5 pt-4 text-center text-[11px] text-slate-400">
+      <div class="border-t border-white/10 mt-6 pt-4 text-center text-[11px] text-slate-400">
         © 2026 Policía de Investigaciones de Chile • Todos los derechos reservados.
       </div>
     </div>
