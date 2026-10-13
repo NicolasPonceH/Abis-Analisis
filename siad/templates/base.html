@@ -6,7 +6,11 @@
 <meta name="description" content="Sistema Inteligente de Análisis Documental y Forense (SIAD) para el procesamiento de archivos, OCR y correlación de inteligencia criminal."/>
 <title>{% block title %}SIAD - PDI{% endblock %}</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4" defer></script>
 <style>
     @layer base {
       html, body { margin: 0; padding: 0; }
@@ -19,28 +23,31 @@
     ::-webkit-scrollbar-thumb { background: #c5c8d0; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #9da3af; }
     
-    #page-content,#page-header{transition:opacity .2s ease-out;}
-
-    @view-transition {
-      navigation: auto;
+    #page-content {
+      will-change: opacity, transform;
+      transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    @keyframes pageFadeSlideIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
+    .siad-transition-out {
+      opacity: 0.15 !important;
+      transform: translateY(3px) scale(0.999);
+      pointer-events: none;
     }
-
-    .animate-page-enter {
-      animation: pageFadeSlideIn 0.2s ease-out forwards;
+    .siad-transition-in {
+      opacity: 1 !important;
+      transform: translateY(0) scale(1);
     }
-
-    .page-leaving {
-      opacity: 0 !important;
-      transition: opacity 0.15s ease-out !important;
+    #siad-progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3.5px;
+      background: linear-gradient(90deg, #ffd100 0%, #fff275 50%, #ffd100 100%);
+      box-shadow: 0 0 12px rgba(255, 209, 0, 0.9), 0 0 4px rgba(255, 209, 0, 0.6);
+      z-index: 2147483646;
+      pointer-events: none;
+      transition: width 0.18s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+      opacity: 0;
     }
 
     body, html, button, input, select, textarea {
@@ -375,8 +382,6 @@ body.splash-disabled #pdi-splash-overlay,
       }
     }
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 {% block extra_head %}{% endblock %}
 <script>
   (function() {
@@ -392,8 +397,10 @@ body.splash-disabled #pdi-splash-overlay,
 </head>
 <body class="font-sans bg-background dark:bg-slate-950 font-body-md text-on-background dark:text-slate-100 min-h-screen flex flex-col antialiased">
 
-<!-- Splash Screen / Intro Institucional PDI -->
-<div id="pdi-splash-overlay" style="position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; min-width: 100%; min-height: 100%; z-index: 2147483647; background: #001430; background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; overflow: hidden;">
+<div id="siad-progress-bar"></div>
+
+<!-- Splash Screen / Intro Institucional PDI (oculto por defecto para evitar parpadeos entre vistas) -->
+<div id="pdi-splash-overlay" style="display: none !important; position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; min-width: 100%; min-height: 100%; z-index: 2147483647; background: #001430; background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%); flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; overflow: hidden;">
   <div class="pdi-splash-box">
     <!-- Emblema con halo dorado pulsante -->
     <div class="pdi-badge-frame">
@@ -422,7 +429,7 @@ body.splash-disabled #pdi-splash-overlay,
   <span class="text-[25px] font-black text-white ml-2 hidden sm:inline-block drop-shadow-md tracking-tight">Análisis Documental</span>
 </a>
 </div>
-<nav class="hidden md:flex items-center gap-3 h-full py-1.5">
+<nav class="hidden md:flex items-center gap-3 h-full py-1.5" id="siad-main-nav">
 
 <a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('index') }}">
   <span class="material-symbols-outlined text-[24px]">document_scanner</span>
@@ -439,6 +446,17 @@ body.splash-disabled #pdi-splash-overlay,
 <div id="live-clock" class="hidden lg:flex items-center gap-2.5 bg-white text-[#00234c] border-2 border-[#ffd100] px-4 py-1.5 rounded-xl shadow-md ml-4 lg:ml-8 shrink-0 select-none" title="Hora del Sistema">
   <span class="material-symbols-outlined text-[22px] text-[#00234c] font-black">schedule</span>
   <span class="text-xl lg:text-2xl font-mono text-[#00234c] tracking-[0.08em] leading-none" style="font-weight: 900;" id="clock-time">-- : -- : --</span>
+  <script>
+    (function() {
+      try {
+        var el = document.getElementById('clock-time');
+        if (el) {
+          var d = new Date();
+          el.textContent = d.toLocaleTimeString('es-CL', { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' }).replace(/:/g, ' : ');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </div>
 </nav>
 <div class="flex items-center gap-3">
@@ -468,7 +486,7 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 </header>
 
-<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px] animate-page-enter">
+<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px]">
   <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
     <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
@@ -498,63 +516,210 @@ body.splash-disabled #pdi-splash-overlay,
 <script>
 (function () {
   var root = document.documentElement;
+  sessionStorage.setItem('pdi_splash_completed', '1');
+  root.classList.add('splash-disabled');
 
-  // Marcar splash como visto inmediatamente para que NUNCA vuelva a salir entre menús
-  if (!root.classList.contains('splash-disabled')) {
-    sessionStorage.setItem('pdi_splash_completed', '1');
-    setTimeout(function () {
-      root.classList.add('splash-disabled');
-      var fontSize = localStorage.getItem('fontSize');
-      if (fontSize && fontSize !== '100') {
-        root.style.zoom = fontSize + '%';
-      } else {
-        root.style.removeProperty('zoom');
-      }
-    }, 2450);
+  var progressBar = document.getElementById('siad-progress-bar');
+  var pageContent = document.getElementById('page-content');
+  var pageCache = new Map();
+  var isNavigating = false;
+
+  function setProgress(pct, fadeOut) {
+    if (!progressBar) return;
+    if (pct === 0) {
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+      progressBar.style.opacity = '0';
+      return;
+    }
+    progressBar.style.transition = 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease';
+    progressBar.style.opacity = '1';
+    progressBar.style.width = pct + '%';
+    if (fadeOut) {
+      setTimeout(function () {
+        progressBar.style.opacity = '0';
+        setTimeout(function () {
+          progressBar.style.transition = 'none';
+          progressBar.style.width = '0%';
+        }, 180);
+      }, 100);
+    }
   }
 
-  // Transición suave e instantánea al hacer clic en pestañas y enlaces de navegación
-  document.addEventListener('DOMContentLoaded', function () {
-    var pageContent = document.getElementById('page-content');
-    if (!pageContent) return;
-
-    document.querySelectorAll('header a[href], nav a[href]').forEach(function (link) {
-      link.addEventListener('click', function (e) {
-        var href = this.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript:') || this.target === '_blank') return;
-        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        
-        try {
-          var targetUrl = new URL(this.href, window.location.origin);
-          if (window.location.pathname === targetUrl.pathname && window.location.search === targetUrl.search) return;
-        } catch (err) {}
-
-        e.preventDefault();
-        pageContent.classList.add('page-leaving');
-        setTimeout(function () {
-          window.location.href = href;
-        }, 130);
-      });
-    });
-  });
-
-  window.addEventListener('pageshow', function () {
-    var pageContent = document.getElementById('page-content');
-    if (pageContent) {
-      pageContent.classList.remove('page-leaving');
+  function isEligibleLink(anchor, href) {
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || anchor.target === '_blank' || anchor.hasAttribute('download')) return false;
+    try {
+      var target = new URL(anchor.href, window.location.origin);
+      if (target.origin !== window.location.origin) return false;
+      // Exclude logout, downloads, or external systems
+      var path = target.pathname;
+      if (path.includes('/logout') || path.includes('/export/') || path.includes('/excel') || path.endsWith('.docx') || path.endsWith('.xlsx')) return false;
+      // Exclude returning to Express dashboard if on /
+      if (anchor.innerText && anchor.innerText.includes('Sistema ABIS')) return false;
+      // Do not navigate if current URL is identical
+      if (window.location.pathname === target.pathname && window.location.search === target.search) return false;
+      return true;
+    } catch (e) {
+      return false;
     }
+  }
+
+  function prefetchUrl(url) {
+    if (pageCache.has(url)) return;
+    fetch(url, { headers: { 'X-Requested-With': 'SIAD-Nav' } })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Bad status');
+        var ct = res.headers.get('content-type') || '';
+        if (!ct.includes('text/html')) throw new Error('Not HTML');
+        return res.text();
+      })
+      .then(function (html) {
+        pageCache.set(url, { html: html, time: Date.now() });
+      })
+      .catch(function () {});
+  }
+
+  // Precargar en memoria al pasar el mouse por encima (tiempo de cambio = 0ms)
+  document.addEventListener('mouseover', function (e) {
+    var a = e.target.closest('a[href]');
+    if (a && isEligibleLink(a, a.getAttribute('href'))) {
+      prefetchUrl(a.href);
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchstart', function (e) {
+    var a = e.target.closest('a[href]');
+    if (a && isEligibleLink(a, a.getAttribute('href'))) {
+      prefetchUrl(a.href);
+    }
+  }, { passive: true });
+
+  function cloneAndRunScript(oldScript) {
+    var newScript = document.createElement('script');
+    Array.from(oldScript.attributes).forEach(function (attr) {
+      newScript.setAttribute(attr.name, attr.value);
+    });
+    newScript.textContent = oldScript.textContent;
+    return newScript;
+  }
+
+  function runScripts(container) {
+    var scripts = Array.from(container.querySelectorAll('script'));
+    scripts.forEach(function (oldScript) {
+      var newScript = cloneAndRunScript(oldScript);
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  }
+
+  function updateNavActive(newDoc) {
+    var currentNav = document.getElementById('siad-main-nav');
+    var newNav = newDoc.getElementById('siad-main-nav');
+    if (currentNav && newNav) {
+      currentNav.innerHTML = newNav.innerHTML;
+    }
+  }
+
+  async function navigateTo(url, pushState) {
+    if (isNavigating) return;
+    isNavigating = true;
+    setProgress(35, false);
+
+    if (pageContent) {
+      pageContent.classList.remove('siad-transition-in');
+      pageContent.classList.add('siad-transition-out');
+    }
+
+    try {
+      var html = '';
+      var cached = pageCache.get(url);
+      if (cached && (Date.now() - cached.time < 60000)) {
+        html = cached.html;
+        setProgress(85, false);
+      } else {
+        setProgress(65, false);
+        var response = await fetch(url, { headers: { 'X-Requested-With': 'SIAD-Nav' } });
+        if (!response.ok) throw new Error('Status ' + response.status);
+        html = await response.text();
+        pageCache.set(url, { html: html, time: Date.now() });
+      }
+
+      var parser = new DOMParser();
+      var newDoc = parser.parseFromString(html, 'text/html');
+      var newPageContent = newDoc.getElementById('page-content');
+
+      if (!newPageContent) {
+        window.location.href = url;
+        return;
+      }
+
+      // 1. Actualizar título de la pestaña
+      if (newDoc.title) document.title = newDoc.title;
+
+      // 2. Actualizar barra de navegación y pestaña activa
+      updateNavActive(newDoc);
+
+      // 3. Reemplazar contenido de forma atómica
+      pageContent.innerHTML = newPageContent.innerHTML;
+
+      // 4. Actualizar historial de navegación
+      if (pushState) {
+        window.history.pushState({ siadUrl: url }, '', url);
+      }
+
+      // 5. Scroll arriba suave
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // 6. Ejecutar scripts propios de la nueva vista
+      runScripts(pageContent);
+
+      setProgress(100, true);
+
+      // 7. Animación de entrada fluida
+      requestAnimationFrame(function () {
+        pageContent.classList.remove('siad-transition-out');
+        pageContent.classList.add('siad-transition-in');
+      });
+
+      // 8. Disparar eventos estándar para inicializar componentes
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+      window.dispatchEvent(new Event('pageshow'));
+      window.dispatchEvent(new CustomEvent('siad:view-changed', { detail: { url: url } }));
+    } catch (err) {
+      window.location.href = url;
+    } finally {
+      isNavigating = false;
+    }
+  }
+
+  // Interceptar clics en enlaces institucionales
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href]');
+    if (!link) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    var href = link.getAttribute('href');
+    if (!isEligibleLink(link, href)) return;
+
+    e.preventDefault();
+    navigateTo(link.href, true);
   });
 
-  // Controlador para reproducir bajo demanda (ej: botón en Configuración)
+  // Limpiar caché al enviar formularios para garantizar datos frescos
+  document.addEventListener('submit', function () {
+    pageCache.clear();
+  });
+
+  // Soporte perfecto para botones Atrás / Adelante del navegador
+  window.addEventListener('popstate', function () {
+    navigateTo(window.location.href, false);
+  });
+
+  // Reproducción bajo demanda para pruebas
   window.triggerPdiSplash = function () {
     var overlay = document.getElementById('pdi-splash-overlay');
     var bar = document.getElementById('pdi-splash-bar');
     if (!overlay) return;
 
-    var fontSize = localStorage.getItem('fontSize');
-    if (fontSize) root.style.zoom = '100%';
-
-    root.classList.remove('splash-disabled');
+    overlay.style.removeProperty('display');
     overlay.style.display = 'flex';
     overlay.style.animation = 'none';
     if (bar) bar.style.animation = 'none';
@@ -564,15 +729,14 @@ body.splash-disabled #pdi-splash-overlay,
       box.offsetHeight;
       box.style.animation = 'pdiBoxScaleOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
     }
-    overlay.offsetHeight; /* trigger reflow */
+    overlay.offsetHeight;
     if (bar) bar.offsetHeight;
 
     overlay.style.animation = 'pdiOverlayFadeOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
     if (bar) bar.style.animation = 'pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
 
     setTimeout(function () {
-      root.classList.add('splash-disabled');
-      if (fontSize) root.style.zoom = fontSize + '%';
+      overlay.style.display = 'none';
     }, 2450);
   };
 })();
