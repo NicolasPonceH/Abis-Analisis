@@ -1,5 +1,6 @@
 require("dotenv").config();
 const path = require("path");
+const crypto = require("crypto");
 const express = require("express");
 const multer = require("multer");
 const cookieParser = require("cookie-parser");
@@ -13,6 +14,8 @@ const {
   obtenerComparacionPeriodos,
 } = require("./reportes/reporteRango");
 const { runEtl, runSheetEtl } = require("./etl");
+const { bulkInsertRegistros } = require("./etl/bulkInsert");
+const { loadCatalogs, mapRow } = require("./ingest/catalogMapper");
 const {
   ensureIngestHistory,
   crearLote,
@@ -143,7 +146,9 @@ const upload = multer({
   fileFilter
 });
 
-app.use(express.json());
+// Oracle envia lotes JSON; 10 MB permite cargas operativas sin dejar el parser
+// abierto a cuerpos arbitrariamente grandes.
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -203,9 +208,62 @@ function requireAuth(req, res, next) {
   }
 }
 
+function getOracleIntegrationToken(req) {
+  const customToken = req.headers["x-abis-integration-token"];
+  if (customToken) return customToken.trim();
+
+  const authorization = req.headers.authorization || "";
+  if (authorization.startsWith("Bearer ")) {
+    return authorization.slice("Bearer ".length).trim();
+  }
+
+  return "";
+}
+
+function isValidOracleIntegrationToken(providedToken) {
+  const configuredToken = process.env.ORACLE_INGEST_TOKEN;
+  if (!configuredToken || !providedToken) return false;
+
+  const configuredBuffer = Buffer.from(configuredToken, "utf8");
+  const providedBuffer = Buffer.from(providedToken, "utf8");
+  return (
+    configuredBuffer.length === providedBuffer.length &&
+    crypto.timingSafeEqual(configuredBuffer, providedBuffer)
+  );
+}
+
 function apiRequireAuth(req, res, next) {
   // Ignorar login
   if (req.path.startsWith("/login")) return next();
+
+  // Integracion servidor-a-servidor Oracle -> ABIS. Solo se habilita cuando
+  // existe un token dedicado en el entorno; nunca se usa un valor por defecto.
+  if (req.path === "/oracle/populate") {
+    const integrationToken = getOracleIntegrationToken(req);
+    if (integrationToken) {
+      if (!process.env.ORACLE_INGEST_TOKEN || process.env.ORACLE_INGEST_TOKEN.length < 32) {
+        return res.status(503).json({
+          ok: false,
+          error: "La integracion Oracle no esta configurada con un token seguro en ABIS.",
+          codigo: "INTEGRATION_NOT_CONFIGURED",
+        });
+      }
+      if (!isValidOracleIntegrationToken(integrationToken)) {
+        return res.status(401).json({
+          ok: false,
+          error: "Token de integracion Oracle invalido.",
+          codigo: "INTEGRATION_UNAUTHORIZED",
+        });
+      }
+
+      req.user = {
+        username: process.env.ORACLE_INGEST_USER || "oracle-integration",
+        rol: "integracion",
+      };
+      req.integrationAuth = true;
+      return next();
+    }
+  }
   
   const token = req.cookies.abis_auth;
   if (!token) return res.status(401).json({ ok: false, error: "No autorizado" });
@@ -954,7 +1012,7 @@ app.get("/api/export/csv", async (req, res) => {
 // siguiendo el esquema normalizado del sistema ABIS.
 // Requiere clave de autorización en header 'x-ingesta-auth'.
 
-app.post("/api/oracle/populate", async (req, res) => {
+app.post("/api/oracle/populate-legacy", async (req, res) => {
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
@@ -1128,6 +1186,188 @@ function transformOracleToPostgre(rows, cols) {
 }
 
 module.exports = { transformOracleToPostgre };
+
+// ===========================================================================
+// ORACLE -> POSTGRESQL POPULATION API (JSON PUSH)
+// ===========================================================================
+// Oracle entrega un lote JSON; ABIS valida, normaliza y persiste el lote en
+// una sola transaccion. Se mantiene /oracle/populate como contrato estable.
+
+const ORACLE_JSON_MAX_ROWS = 50000;
+
+function pickPayloadField(row, ...keys) {
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(row, key)) return row[key];
+  }
+  return undefined;
+}
+
+function normalizeOracleRecord(row) {
+  if (!row || typeof row !== "object" || Array.isArray(row)) return null;
+
+  return {
+    fechaEnrolamiento: pickPayloadField(row, "fechaEnrolamiento", "fecha_enrolamiento", "FECHA_ENROLAMIENTO"),
+    nacionalidad: pickPayloadField(row, "nacionalidad", "NACIONALIDAD"),
+    unidad: pickPayloadField(row, "unidad", "UNIDAD"),
+    cuartel: pickPayloadField(row, "cuartel", "CUARTEL"),
+    equipo: pickPayloadField(row, "equipo", "EQUIPO"),
+    genero: pickPayloadField(row, "genero", "género", "GENERO", "GÉNERO"),
+    mayorEdad: pickPayloadField(row, "mayorEdad", "mayor_edad", "esMayorEdad", "es_mayor_edad", "ES_MAYOR_EDAD"),
+    edadExacta: pickPayloadField(row, "edadExacta", "edad_exacta", "EDAD_EXACTA"),
+    profesion: pickPayloadField(row, "profesion", "profesión", "PROFESION", "PROFESIÓN"),
+    estadoSincronizacion: pickPayloadField(row, "estadoSincronizacion", "estado_sincronizacion", "ESTADO_SINCRONIZACION"),
+    estadoRegistro: pickPayloadField(row, "estadoRegistro", "estado_registro", "ESTADO_REGISTRO"),
+    estadoGeneral: pickPayloadField(row, "estadoGeneral", "estado_general", "ESTADO_GENERAL"),
+  };
+}
+
+async function validarCredencialIngesta(req) {
+  if (req.integrationAuth === true) return true;
+
+  const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+  if (!claveEnviada) return false;
+
+  const authRes = await fetch(
+    `${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: req.user.username, password: claveEnviada }),
+    }
+  );
+  if (!authRes.ok) return false;
+  const authData = await authRes.json();
+  return authData.ok === true;
+}
+
+app.post("/api/oracle/populate", async (req, res) => {
+  let idLote = null;
+  try {
+    if (!(await validarCredencialIngesta(req))) {
+      console.warn("[SEGURIDAD] Intento de poblamiento JSON desde Oracle rechazado.");
+      return res.status(401).json({
+        ok: false,
+        error: "Clave de autorizacion no valida o ausente.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
+    const { registros, periodo = null } = req.body || {};
+    if (!Array.isArray(registros) || registros.length === 0) {
+      return res.status(400).json({
+        ok: false,
+        error: "El cuerpo debe incluir un arreglo 'registros' con al menos una fila.",
+        codigo: "REGISTROS_REQUIRED",
+      });
+    }
+    if (registros.length > ORACLE_JSON_MAX_ROWS) {
+      return res.status(413).json({
+        ok: false,
+        error: `El lote supera el maximo permitido de ${ORACLE_JSON_MAX_ROWS} registros.`,
+        codigo: "PAYLOAD_TOO_LARGE",
+      });
+    }
+
+    const catalogs = await loadCatalogs(pool);
+    const mappedRows = [];
+    const errores = [];
+    const correcciones = [];
+
+    registros.forEach((rawRow, index) => {
+      const normalizedRow = normalizeOracleRecord(rawRow);
+      if (!normalizedRow) {
+        errores.push({ fila: index + 1, errores: ["La fila debe ser un objeto JSON."] });
+        return;
+      }
+
+      const result = mapRow(normalizedRow, catalogs);
+      if (result.errors.length > 0) {
+        errores.push({ fila: index + 1, errores: result.errors });
+        return;
+      }
+
+      const { correcciones: rowCorrections = [], ...mapped } = result.mapped;
+      mappedRows.push(mapped);
+      if (rowCorrections.length > 0) {
+        correcciones.push({ fila: index + 1, correcciones: rowCorrections });
+      }
+    });
+
+    // No se inserta parcialmente: Oracle puede corregir y reenviar el lote.
+    if (errores.length > 0) {
+      return res.status(422).json({
+        ok: false,
+        error: "El JSON contiene registros invalidos; no se inserto ningun registro.",
+        codigo: "VALIDATION_ERROR",
+        filasRecibidas: registros.length,
+        filasValidas: mappedRows.length,
+        filasRechazadas: errores.length,
+        totalErrores: errores.length,
+        detalles: errores.slice(0, 100),
+      });
+    }
+
+    const hashSHA256 = generarHashSHA256(JSON.stringify(registros));
+    await ensureIngestHistory(pool);
+    idLote = await crearLote(pool, {
+      tipoIngesta: "ORACLE_JSON",
+      nombreArchivo: "oracle-push.json",
+      hashSha256: hashSHA256,
+      usuario: req.user.username,
+      filasRecibidas: registros.length,
+    });
+
+    const insertResult = await bulkInsertRegistros(pool, mappedRows, {
+      idLote,
+      onBatchInserted: ({ batches, inserted, total }) => {
+        console.log(`[ORACLE JSON] Lote ${batches}: ${inserted}/${total} registros insertados.`);
+      },
+    });
+
+    await actualizarLote(pool, idLote, {
+      estado: "COMPLETADO",
+      finalizado: true,
+      filasRecibidas: registros.length,
+      filasValidas: mappedRows.length,
+      filasInsertadas: insertResult.inserted,
+      filasError: 0,
+      detalle: JSON.stringify({ periodo, correcciones: correcciones.length }),
+    });
+
+    console.log(`[ORACLE JSON] ${insertResult.inserted} registros insertados. Lote ${idLote}.`);
+    return res.json({
+      ok: true,
+      mensaje: "JSON de Oracle procesado e insertado exitosamente en PostgreSQL.",
+      idLote,
+      hashSHA256,
+      filasRecibidas: registros.length,
+      filasValidadas: mappedRows.length,
+      filasInsertadas: insertResult.inserted,
+      lotes: insertResult.batches,
+      correcciones: correcciones.slice(0, 100),
+    });
+  } catch (err) {
+    if (idLote) {
+      try {
+        await actualizarLote(pool, idLote, {
+          estado: "ERROR",
+          finalizado: true,
+          filasError: 1,
+          detalle: err.message,
+        });
+      } catch (historyErr) {
+        console.error("[ORACLE JSON HISTORIAL ERROR]", historyErr.message);
+      }
+    }
+    console.error("[ORACLE JSON ERROR]", err);
+    return res.status(500).json({
+      ok: false,
+      error: "No fue posible procesar el JSON de Oracle.",
+      detalle: err.message,
+      idLote,
+    });
+  }
+});
 
 app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
   let idLote = null;

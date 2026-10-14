@@ -1240,3 +1240,130 @@ body {
     display: none;
   }
 }
+
+/* Tema oscuro para el módulo de ajustes. */
+:root.dark-theme .ajustes-container,
+:root.dark-theme .ajustes-content {
+  background: var(--bg-app);
+}
+
+:root.dark-theme .ajustes-sidebar {
+  background: #111827;
+  border-color: var(--border-subtle);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.24);
+}
+
+:root.dark-theme .ajustes-sidebar-header,
+:root.dark-theme .ajustes-nav-item,
+:root.dark-theme .ajustes-nav-item:hover,
+:root.dark-theme .ajustes-nav-item.active {
+  color: var(--text-primary);
+}
+
+:root.dark-theme .ajustes-nav-item:hover {
+  background: var(--bg-surface-hover);
+}
+
+:root.dark-theme .ajustes-section-title,
+:root.dark-theme .ajustes-nav-item i {
+  color: var(--text-muted);
+}
+
+:root.dark-theme .ajustes-nav-item.active i,
+:root.dark-theme .ajustes-nav-item:hover i {
+  color: var(--pdi-gold);
+}
+
+:root.dark-theme .general-settings-title {
+  color: var(--text-primary) !important;
+}
+
+:root.dark-theme .general-settings-intro > p {
+  color: var(--text-muted) !important;
+}
+
+:root.dark-theme .general-settings-card {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24) !important;
+}
+
+:root.dark-theme .general-settings-row,
+:root.dark-theme .theme-preference-row {
+  border-color: var(--border-subtle) !important;
+}
+
+.theme-preference-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-preference-label i {
+  color: #4f46e5;
+  font-size: 13px;
+}
+
+.theme-preference-row .toggle-switch input:checked + .toggle-slider {
+  background-color: #4f46e5;
+}
+
+:root.dark-theme .theme-preference-label i {
+  color: #818cf8;
+}
+
+:root.dark-theme .general-settings-card [style*="border-bottom: 1px solid #e2e8f0"] {
+  border-color: var(--border-subtle) !important;
+}
+
+:root.dark-theme .general-settings-card [style*="color: #0f172a"],
+:root.dark-theme .general-settings-card [style*="color: #334155"] {
+  color: var(--text-primary) !important;
+}
+
+:root.dark-theme .general-settings-card [style*="color: #64748b"] {
+  color: var(--text-muted) !important;
+}
+
+:root.dark-theme .general-settings-card [style*="background: #f1f5f9"] {
+  background: #0f172a !important;
+  border-color: var(--border-medium) !important;
+}
+
+:root.dark-theme .accent-picker-toggle,
+:root.dark-theme .accent-picker-menu {
+  background: #0f172a;
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+:root.dark-theme .accent-picker-toggle:hover,
+:root.dark-theme .accent-picker-toggle[aria-expanded="true"] {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+}
+
+:root.dark-theme .accent-picker-toggle i {
+  color: var(--text-muted);
+}
+
+:root.dark-theme .accent-picker-option {
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .accent-picker-option:hover,
+:root.dark-theme .accent-picker-option.selected {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+@media (max-width: 760px) {
+  .general-settings-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .general-settings-row,
+  .theme-preference-row {
+    gap: 16px;
+  }
+}

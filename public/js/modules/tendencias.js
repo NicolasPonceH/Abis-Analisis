@@ -316,7 +316,57 @@ export function configureTrendCalendar() {
   cal.max = fechas[fechas.length - 1];
 }
 
+function syncTrendLayout() {
+  const chartBody = document.getElementById("trend-chart-body");
+  const matrixCard = document.getElementById("trend-detail-matrix");
+  const expandButton = document.getElementById("btn-toggle-expand-trend");
+  const expandText = document.getElementById("trend-expand-text");
+  const collapseButton = document.getElementById("btn-collapse-trend");
+
+  if (chartBody) {
+    chartBody.classList.toggle("is-expanded", state.trendExpanded);
+    chartBody.style.minHeight = state.trendExpanded ? "560px" : "420px";
+    chartBody.setAttribute("aria-expanded", String(state.trendExpanded));
+  }
+
+  if (matrixCard) {
+    matrixCard.hidden = !state.trendMatrixVisible;
+    matrixCard.style.display = state.trendMatrixVisible ? "" : "none";
+    matrixCard.setAttribute("aria-hidden", String(!state.trendMatrixVisible));
+  }
+
+  if (expandButton) {
+    expandButton.setAttribute("aria-pressed", String(state.trendExpanded));
+    expandButton.title = state.trendExpanded
+      ? "Contraer gráfico"
+      : "Expandir gráfico para ver detalladamente";
+  }
+  if (expandText) {
+    expandText.textContent = state.trendExpanded
+      ? "Contraer Vista"
+      : "Expandir Vista Detallada";
+  }
+
+  if (collapseButton) {
+    collapseButton.setAttribute("aria-expanded", String(state.trendMatrixVisible));
+    collapseButton.title = state.trendMatrixVisible
+      ? "Ocultar tabla detallada"
+      : "Mostrar tabla detallada";
+    const label = collapseButton.querySelector("span");
+    if (label) {
+      label.textContent = state.trendMatrixVisible ? "Ocultar Tabla" : "Mostrar Tabla";
+    }
+  }
+}
+
 export function setupTrendControls() {
+  const initialMatrixCard = document.getElementById("trend-detail-matrix");
+  if (initialMatrixCard) {
+    state.trendMatrixVisible =
+      !initialMatrixCard.hidden &&
+      window.getComputedStyle(initialMatrixCard).display !== "none";
+  }
+  syncTrendLayout();
   // Presets de rango temporal de tendencia
   document.querySelectorAll("#trend-period-presets .preset-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -344,42 +394,16 @@ export function setupTrendControls() {
 
   // Botón Expandir / Contraer Gráfico y Detalle
   const btnExpandTrend = document.getElementById("btn-toggle-expand-trend");
-  if (btnExpandTrend) {
-    btnExpandTrend.addEventListener("click", () => {
-      const chartBody = document.getElementById("trend-chart-body");
-      const matrixCard = document.getElementById("trend-detail-matrix");
-      const expandText = document.getElementById("trend-expand-text");
-      const matrixIsHidden = matrixCard
-        ? window.getComputedStyle(matrixCard).display === "none"
-        : false;
-      const shouldExpand = matrixIsHidden || !state.trendExpanded;
-
-      state.trendExpanded = shouldExpand;
-
-      if (chartBody) {
-        chartBody.classList.toggle("is-expanded", state.trendExpanded);
-      }
-      if (matrixCard) {
-        if (state.trendExpanded) {
-          state.trendMatrixVisible = true;
-          matrixCard.style.display = "block";
-          const matrixToggle = document.getElementById("btn-collapse-trend");
-          matrixToggle?.setAttribute("aria-expanded", "true");
-          const matrixToggleLabel = matrixToggle?.querySelector("span");
-          if (matrixToggleLabel) matrixToggleLabel.textContent = "Ocultar Tabla";
-          matrixCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        } else {
-          state.trendMatrixVisible = false;
-          matrixCard.style.display = "none";
-          const matrixToggle = document.getElementById("btn-collapse-trend");
-          matrixToggle?.setAttribute("aria-expanded", "false");
-          const matrixToggleLabel = matrixToggle?.querySelector("span");
-          if (matrixToggleLabel) matrixToggleLabel.textContent = "Mostrar Tabla";
-        }
-      }
-      if (expandText) {
-        expandText.textContent = state.trendExpanded ? "Contraer Vista" : "Expandir Vista Detallada";
-      }
+  if (btnExpandTrend && btnExpandTrend.dataset.trendBound !== "true") {
+    btnExpandTrend.dataset.trendBound = "true";
+    btnExpandTrend.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      state.trendExpanded = !state.trendExpanded;
+      // "Vista detallada" incluye el gráfico ampliado y la matriz histórica.
+      // El botón de la matriz sigue permitiendo ocultarla de forma independiente.
+      state.trendMatrixVisible = state.trendExpanded;
+      syncTrendLayout();
 
       // Redibujar gráfico para ajustarse a nueva altura
       setTimeout(() => {
@@ -390,21 +414,16 @@ export function setupTrendControls() {
 
   // Botón contraer dentro de la tabla
   const btnCollapseTrend = document.getElementById("btn-collapse-trend");
-  const initialMatrixCard = document.getElementById("trend-detail-matrix");
-  if (initialMatrixCard) {
-    state.trendMatrixVisible = window.getComputedStyle(initialMatrixCard).display !== "none";
-  }
-  if (btnCollapseTrend) {
-    btnCollapseTrend.addEventListener("click", () => {
+  if (btnCollapseTrend && btnCollapseTrend.dataset.trendBound !== "true") {
+    btnCollapseTrend.dataset.trendBound = "true";
+    btnCollapseTrend.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       const matrixCard = document.getElementById("trend-detail-matrix");
       if (!matrixCard) return;
 
-      const matrixIsVisible = window.getComputedStyle(matrixCard).display !== "none";
-      state.trendMatrixVisible = !matrixIsVisible;
-      matrixCard.style.display = state.trendMatrixVisible ? "block" : "none";
-      btnCollapseTrend.setAttribute("aria-expanded", String(state.trendMatrixVisible));
-      const label = btnCollapseTrend.querySelector("span");
-      if (label) label.textContent = state.trendMatrixVisible ? "Ocultar Tabla" : "Mostrar Tabla";
+      state.trendMatrixVisible = !state.trendMatrixVisible;
+      syncTrendLayout();
     });
   }
 

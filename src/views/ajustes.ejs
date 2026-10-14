@@ -50,7 +50,11 @@
       const fs = localStorage.getItem('pref-fontsize') || '14px';
       document.documentElement.style.fontSize = fs;
       if (localStorage.getItem('pref-contrast') === 'true') document.documentElement.classList.add('high-contrast');
-      if (localStorage.getItem('pref-theme') === 'dark') document.documentElement.classList.add('dark-theme');
+      const sharedTheme = localStorage.getItem('darkMode');
+      const isDarkTheme = sharedTheme !== null
+        ? sharedTheme === '1'
+        : localStorage.getItem('pref-theme') === 'dark';
+      if (isDarkTheme) document.documentElement.classList.add('dark-theme');
       if (localStorage.getItem('pref-animations') === 'true') document.documentElement.classList.add('reduce-animations');
     } catch(e) {}
   })();

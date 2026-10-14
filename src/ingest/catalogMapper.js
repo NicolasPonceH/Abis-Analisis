@@ -1,7 +1,7 @@
 const { resolve } = require("../etl/catalogResolver");
 
 const norm = (value) =>
-  String(value || "")
+  String(value ?? "")
     .trim()
     .toUpperCase();
 
