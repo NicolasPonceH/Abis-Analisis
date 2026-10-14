@@ -3,9 +3,9 @@ import { escapeHtml } from './core/utils.js';
 import { bklitDataLabelsPlugin } from './components/charts.js';
 import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportExcel, exportCurrentReportCsv, sendReportToTelegram } from './components/export.js';
 import { promptAuthModal } from './modules/auth-modal.js';
-import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js?v=22';
+import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js?v=24';
 import { setupDragAndDrop, initSpreadsheetIngest } from './modules/ingesta.js';
-import { loadTrendData, setupTrendControls } from './modules/tendencias.js?v=20261013-2';
+import { loadTrendData, setupTrendControls } from './modules/tendencias.js?v=20261014-2';
 import { auditState, cargarBitacoraAuditoria } from './modules/auditoria.js';
 import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js';
 

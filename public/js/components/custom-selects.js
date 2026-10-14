@@ -34,6 +34,12 @@ function createCustomSelect(select) {
 
   let isOpen = false;
 
+  const handleScroll = (event) => {
+    // El menú tiene su propio scroll; no debe cerrarse al desplazar sus opciones.
+    if (event.target === menu || menu.contains(event.target)) return;
+    close();
+  };
+
   const positionMenu = () => {
     if (!isOpen || menu.parentNode !== document.body) return;
 
@@ -61,7 +67,7 @@ function createCustomSelect(select) {
     toggle.setAttribute('aria-expanded', 'true');
     positionMenu();
     window.addEventListener('resize', positionMenu);
-    window.addEventListener('scroll', close, true);
+    window.addEventListener('scroll', handleScroll, true);
   };
 
   const close = () => {
@@ -72,7 +78,7 @@ function createCustomSelect(select) {
     }
     isOpen = false;
     window.removeEventListener('resize', positionMenu);
-    window.removeEventListener('scroll', close, true);
+    window.removeEventListener('scroll', handleScroll, true);
     menu.classList.remove('custom-select-menu-portal');
     menu.style.top = '';
     menu.style.left = '';

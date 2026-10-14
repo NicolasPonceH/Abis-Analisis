@@ -9,6 +9,29 @@ const { generarReporteExcel } = require("../reportes/excelReportService");
 const { generarHashSHA256 } = require("../security/crypto");
 
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_DIFERENCIA_RANGO_DIAS = 3;
+
+function esFechaValida(fecha) {
+  if (!FECHA_REGEX.test(fecha)) return false;
+  const [anio, mes, dia] = fecha.split("-").map(Number);
+  const fechaUtc = new Date(Date.UTC(anio, mes - 1, dia));
+  return (
+    fechaUtc.getUTCFullYear() === anio &&
+    fechaUtc.getUTCMonth() === mes - 1 &&
+    fechaUtc.getUTCDate() === dia
+  );
+}
+
+function obtenerFechasIncluidas(desde, hasta) {
+  const fechas = [];
+  const cursor = new Date(`${desde}T00:00:00Z`);
+  const limite = new Date(`${hasta}T00:00:00Z`);
+  while (cursor <= limite) {
+    fechas.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return fechas;
+}
 
 function escaparHtml(texto) {
   return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -98,6 +121,9 @@ async function manejarComandoAyuda({ token, chatId }) {
     ``,
     `• <code>/reporte YYYY-MM-DD</code>`,
     `  ↳ Genera el reporte completo de una fecha específica (ej: <code>/reporte 2026-08-22</code>).`,
+    ``,
+    `• <code>/rango YYYY-MM-DD YYYY-MM-DD</code>`,
+    `  ↳ Genera un reporte consolidado con captura entre dos fechas, inclusive. Máximo: 3 días de diferencia (ej: <code>/rango 2026-10-09 2026-10-12</code>).`,
     ``,
     `• <code>/excel [YYYY-MM-DD]</code>`,
     `  ↳ Envía directamente la planilla oficial Excel (.xlsx) de la fecha o día más reciente.`,
@@ -381,9 +407,116 @@ async function manejarComandoDescargaDirecta({ token, chatId, pool, args, tipo =
 }
 
 async function manejarComandoReporte({ token, chatId, pool, args }) {
+  if (args.length > 2) {
+    return telegramClient.enviarMensaje({
+      token,
+      chatId,
+      texto: `[ALERTA] Uso: <code>/reporte YYYY-MM-DD</code> o <code>/reporte YYYY-MM-DD YYYY-MM-DD</code>.`,
+    });
+  }
+
+  // Reporte consolidado por rango, con ambas fechas inclusivas.
+  if (args.length === 2) {
+    const [desde, hasta] = args;
+    if (!esFechaValida(desde) || !esFechaValida(hasta)) {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: `[ALERTA] Formato de fecha invÃ¡lido. Usa <code>YYYY-MM-DD</code> (ej: <code>/reporte 2026-10-09 2026-10-12</code>).`,
+      });
+    }
+    if (desde > hasta) {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: `[ALERTA] La fecha inicial no puede ser posterior a la fecha final.`,
+      });
+    }
+
+    const diferenciaDias = Math.round(
+      (Date.parse(`${hasta}T00:00:00Z`) - Date.parse(`${desde}T00:00:00Z`)) / 86400000
+    );
+    if (diferenciaDias > MAX_DIFERENCIA_RANGO_DIAS) {
+      return telegramClient.enviarMensaje({
+        token,
+        chatId,
+        texto: `[ALERTA] El rango no puede superar ${MAX_DIFERENCIA_RANGO_DIAS} días de diferencia entre inicio y fin.`,
+      });
+    }
+
+    const reporte = await obtenerReporteRango(pool, desde, hasta);
+    const texto = formatearReporteExtenso(reporte, {
+      desde,
+      hasta,
+      origen: "Bot Telegram PDI",
+    });
+    const replyMarkup = crearBotonesDescarga({ desde, hasta });
+
+    // En los rangos se envía una captura consolidada del período. Si Chromium
+    // no está disponible, se conserva el envío del reporte textual.
+    try {
+      const {
+        generarCapturaDiaria,
+        generarCapturaRangoPorFecha,
+        generarCapturaDistribucionDiaria,
+        generarCapturaAcumulado,
+      } = require("../reportes/imageReportService");
+      const { obtenerDatosAcumulados } = require("../reportes/reporteFinDeSemana");
+      const anioActual = new Date().getFullYear();
+      const fechasIncluidas = obtenerFechasIncluidas(desde, hasta);
+      const reportesPorFecha = await Promise.all(
+        fechasIncluidas.map((fechaIncluida) => obtenerReporteDiario(pool, fechaIncluida))
+      );
+      const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+        obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+        obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+      ]);
+      const [bufEstados, bufDistribucion, bufAcumEnrolados, bufAcumRegistros] = await Promise.all([
+        generarCapturaRangoPorFecha(reportesPorFecha, desde, hasta),
+        generarCapturaDistribucionDiaria(reporte),
+        generarCapturaAcumulado(dataAcumEnrolados, {
+          titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}`,
+          tipoFiltro: "ENROLADO",
+          anio: anioActual,
+        }),
+        generarCapturaAcumulado(dataAcumRegistros, {
+          titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACUMULADO AL AÑO ${anioActual}`,
+          tipoFiltro: "TODOS",
+          anio: anioActual,
+        }),
+      ]);
+      await telegramClient.enviarGrupoFotos({
+        token,
+        chatId,
+        fotos: [
+          {
+            buffer: bufEstados,
+            caption: `📊 <b>FOTO 1/4: ESTADOS DEL PERÍODO</b>\nPeríodo: <b>${desde} al ${hasta}</b>\nTotal enrolados: <b>${(reporte.total || 0).toLocaleString("es-CL")}</b>`,
+          },
+          {
+            buffer: bufDistribucion,
+            caption: `📋 <b>FOTO 2/4: DISTRIBUCIÓN DEL PERÍODO</b>\nPeríodo: <b>${desde} al ${hasta}</b>`,
+          },
+          {
+            buffer: bufAcumEnrolados,
+            caption: `📈 <b>FOTO 3/4: ENROLADOS ACUMULADOS ${anioActual}</b>`,
+          },
+          {
+            buffer: bufAcumRegistros,
+            caption: `📈 <b>FOTO 4/4: REGISTROS ACUMULADOS ${anioActual}</b>`,
+          },
+        ],
+      });
+    } catch (imgErr) {
+      console.warn("[BOT RANGO] No se pudo generar la captura; se enviará solo el reporte textual:", imgErr.message);
+    }
+
+    return telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+  }
+
   let fecha = args[0];
 
-  if (fecha && !FECHA_REGEX.test(fecha)) {
+  if (fecha && !esFechaValida(fecha)) {
     return telegramClient.enviarMensaje({
       token,
       chatId,
@@ -778,6 +911,8 @@ async function procesarMensaje({ mensaje, token, authorizedChatId, pool }) {
       await manejarComandoDetalleErrores({ token, chatId, pool, args });
       break;
     case "/reporte":
+    case "/rango":
+    case "/reporte-rango":
     case "/resumen":
     case "/informe":
     case "/hoy":

@@ -374,7 +374,7 @@
 
     .abis-orbit {
       position: relative;
-      width: clamp(230px, 27vw, 380px);
+      width: clamp(270px, 31vw, 450px);
       aspect-ratio: 1;
       perspective: 1100px;
       filter: drop-shadow(0 24px 40px rgba(0, 10, 25, 0.34));
@@ -562,15 +562,19 @@
     .abis-core::before { top: 5%; left: 7%; width: 86%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #667997, #1a263b 25%, #111a2a 70%, #7486a1); box-shadow: 0 65px 0 rgba(15, 24, 39, 0.9), 0 66px 0 rgba(99, 121, 151, 0.3); transform: translateZ(12px); }
     .abis-core::after { top: 18%; right: -5%; width: 10px; height: 58%; border: 1px solid rgba(143, 169, 199, 0.48); border-radius: 6px; background: repeating-linear-gradient(180deg, #0e1728 0 8px, #74849d 9px 11px, #1d2a42 12px 18px); box-shadow: 3px 0 0 rgba(0,0,0,0.32); transform: translateZ(15px); }
 
-    .tablet-screen { position: relative; z-index: 2; display: grid; width: 90%; height: 82%; place-items: center; border: 3px solid #0b1321; border-radius: 7px; background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98)); box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28); transform: translateZ(22px); }
-    .tablet-screen::before { position: absolute; inset: 9%; content: ''; border: 1px solid rgba(163, 231, 255, 0.17); border-radius: 3px; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(139, 218, 255, 0.07) 8px, transparent 9px); }
+    .tablet-screen { position: relative; z-index: 2; display: grid; width: 90%; height: 82%; place-items: center; overflow: hidden; border: 3px solid #0b1321; border-radius: 7px; background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98)); box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28); transform: translateZ(22px); }
+    .tablet-screen::before { position: absolute; inset: 9%; content: ''; border: 1px solid rgba(163, 231, 255, 0.17); border-radius: 3px; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(139, 218, 255, 0.07) 8px, transparent 9px); animation: tabletScreenGrid 8s linear infinite; }
+    .tablet-screen::after { position: absolute; inset: 0; z-index: 1; content: ''; pointer-events: none; background: linear-gradient(135deg, rgba(48, 255, 151, 0.62), rgba(5, 103, 67, 0.88)); mix-blend-mode: screen; opacity: 0; animation: tabletScreenCycle 8s steps(1, end) infinite; }
+    .tablet-screen.is-invalid { border-color: rgba(255, 104, 104, 0.9); box-shadow: inset 0 0 0 1px rgba(255, 175, 175, 0.28), inset 0 0 24px rgba(130, 0, 0, 0.72), 0 0 22px rgba(255, 64, 64, 0.5); }
+    .tablet-screen.is-invalid::after { background: linear-gradient(135deg, rgba(255, 61, 61, 0.68), rgba(104, 0, 0, 0.9)); animation: tabletInvalidScreen 8s steps(1, end) infinite; }
+    .tablet-scan-line { position: absolute; top: -12%; left: 5%; z-index: 2; width: 90%; height: 3px; border-radius: 999px; background: linear-gradient(90deg, transparent, #8cf5ff 18%, #6dffb6 50%, #8cf5ff 82%, transparent); box-shadow: 0 0 8px #8cf5ff, 0 0 22px rgba(109, 255, 182, 0.8); opacity: 0; pointer-events: none; animation: tabletFullScan 8s linear infinite; }
 
-    .abis-core span { position: relative; z-index: 2; color: #fff; font-size: clamp(24px, 4vw, 49px); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 3px 15px rgba(0,0,0,0.38), 0 0 18px rgba(130, 220, 255, 0.35); transform: translateZ(25px); }
-    .abis-core small { position: absolute; z-index: 2; bottom: 16%; color: rgba(202, 240, 255, 0.72); font-size: clamp(5px, 0.55vw, 8px); font-weight: 700; letter-spacing: 0.18em; transform: translateZ(28px); white-space: nowrap; }
-    .tablet-enrolled { position: absolute; z-index: 3; bottom: 7%; color: #6dffb6; font-size: clamp(5px, 0.6vw, 8px); font-weight: 900; letter-spacing: 0.14em; line-height: 1; text-shadow: 0 0 8px rgba(75, 255, 169, 0.72); text-transform: uppercase; transform: translateZ(30px); animation: enrolledBlink 1.8s ease-in-out infinite, enrolledGlitch 3.2s steps(1, end) infinite; }
-    .tablet-enrolled::before, .tablet-enrolled::after { position: absolute; inset: 0; content: attr(data-text); pointer-events: none; }
-    .tablet-enrolled::before { color: #ff4da6; clip-path: inset(0 0 58% 0); transform: translate(-1px, 1px); opacity: 0.68; }
-    .tablet-enrolled::after { color: #49dfff; clip-path: inset(58% 0 0 0); transform: translate(1px, -1px); opacity: 0.68; }
+    .abis-core .tablet-brand { position: relative; z-index: 2; display: inline-block; color: #fff; font-size: clamp(13px, 1.9vw, 25px); font-weight: 800; letter-spacing: 0.1em; line-height: 1; text-shadow: 0 3px 15px rgba(0,0,0,0.38), 0 0 18px rgba(130, 220, 255, 0.35); text-transform: uppercase; transform: translateZ(25px); animation: tabletBrandCycle 8s steps(1, end) infinite; }
+    .tablet-brand-text { display: inline-block; background: linear-gradient(90deg, #fff 0%, #fff 38%, #82f1ff 50%, #fff 62%, #fff 100%); background-size: 240% 100%; background-position: 220% 0; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tabletWordScan 8s linear infinite; }
+    .tablet-brand::before { position: absolute; top: -55%; bottom: -55%; left: -12%; width: 2px; content: ''; background: #8cf5ff; box-shadow: 0 0 7px #8cf5ff, 0 0 18px rgba(77, 223, 255, 0.82); opacity: 0; pointer-events: none; animation: tabletScanBeam 8s linear infinite; }
+    .tablet-brand::after { position: absolute; inset: 0; content: attr(data-text); color: #6dffb6; opacity: 0; pointer-events: none; text-shadow: 2px 0 #6dffb6, -2px 0 #30e7ff; animation: tabletBrandGlitch 8s steps(1, end) infinite; }
+    .tablet-enrolled { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; max-width: 100%; padding: 10%; color: #6dffb6; font-size: clamp(12px, 1.8vw, 24px); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1; opacity: 0; text-align: center; text-shadow: 0 0 8px rgba(75, 255, 169, 0.72), 0 0 22px rgba(75, 255, 169, 0.42); text-transform: uppercase; transform: translateZ(30px); animation: tabletEnrolledCycle 8s steps(1, end) infinite, enrolledGlitch 3.2s steps(1, end) infinite; }
+    .tablet-enrolled.is-invalid { color: #ffe08a; text-shadow: 0 0 8px rgba(255, 208, 91, 0.78), 0 0 22px rgba(255, 177, 45, 0.42); }
 
     /* Overlay de validación: conserva la animación de acceso, ahora con una escena 3D. */
     #scanner-overlay {
@@ -589,7 +593,7 @@
 
     .scanner-scene { display: grid; place-items: center; width: min(92vw, 430px); text-align: center; perspective: 900px; }
     .scanner-brand { margin-bottom: 28px; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; }
-    .scanner-stage { position: relative; display: grid; width: 270px; height: 270px; place-items: center; transform-style: preserve-3d; animation: stageFloat 4.4s ease-in-out infinite; }
+    .scanner-stage { position: relative; display: grid; width: min(84vw, 350px); height: min(84vw, 350px); place-items: center; transform-style: preserve-3d; animation: stageFloat 4.4s ease-in-out infinite; }
     .scanner-stage::before, .scanner-stage::after { position: absolute; inset: 9%; content: ''; border: 1px solid rgba(255,209,0,0.45); border-radius: 50%; transform: rotateX(66deg); }
     .scanner-stage::after { inset: 0; border-color: rgba(118, 208, 255, 0.25); transform: rotateY(66deg); }
     .scanner-halo { position: absolute; inset: 16%; border: 1px dashed rgba(255,255,255,0.32); border-radius: 50%; animation: ringSpin 7s linear infinite; }
@@ -598,12 +602,12 @@
     .scan-particle-one { top: 19%; left: 13%; animation: scanParticleOne 3.8s ease-in-out infinite; }
     .scan-particle-two { right: 10%; bottom: 20%; background: var(--gold); box-shadow: 0 0 12px 4px rgba(255, 215, 0, 0.7); animation: scanParticleTwo 4.4s ease-in-out infinite -1.2s; }
     .scan-particle-three { top: 34%; right: 4%; width: 3px; height: 3px; animation: scanParticleThree 5s ease-in-out infinite -2s; }
-    .scanner-frame { position: relative; display: grid; width: 250px; height: 176px; place-items: center; overflow: hidden; border: 7px solid #263650; border-radius: 22px; background: linear-gradient(145deg, #52647f 0%, #1f2d46 18%, #111b2d 54%, #2b3b58 100%); box-shadow: inset 5px 5px 0 rgba(151, 176, 207, 0.22), inset -8px -8px 0 rgba(0, 0, 0, 0.4), 0 0 35px rgba(57, 185, 237, 0.24), 0 14px 0 #101a2b; transform: translateZ(34px) rotateX(7deg) rotateY(-9deg); }
+    .scanner-frame { position: relative; display: grid; width: min(78vw, 320px); height: min(49vw, 225px); place-items: center; overflow: hidden; border: 7px solid #263650; border-radius: 22px; background: linear-gradient(145deg, #52647f 0%, #1f2d46 18%, #111b2d 54%, #2b3b58 100%); box-shadow: inset 5px 5px 0 rgba(151, 176, 207, 0.22), inset -8px -8px 0 rgba(0, 0, 0, 0.4), 0 0 35px rgba(57, 185, 237, 0.24), 0 14px 0 #101a2b; transform: translateZ(34px) rotateX(7deg) rotateY(-9deg); }
     .scanner-frame::before { position: absolute; inset: 14px; content: ''; border: 1px solid rgba(144, 229, 255, 0.2); border-radius: 10px; background: repeating-linear-gradient(0deg, transparent 0 10px, rgba(129, 221, 255, 0.08) 11px, transparent 12px); box-shadow: inset 0 0 30px rgba(75, 196, 241, 0.12); pointer-events: none; }
     .scanner-frame::after { position: absolute; top: 19%; right: -4px; width: 9px; height: 58%; content: ''; border: 1px solid rgba(143, 169, 199, 0.48); border-radius: 5px; background: repeating-linear-gradient(180deg, #0e1728 0 8px, #74849d 9px 11px, #1d2a42 12px 18px); box-shadow: 3px 0 0 rgba(0,0,0,0.32); pointer-events: none; }
-    .loading-device-content { position: relative; z-index: 2; display: flex; width: 88%; height: 82%; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 3px solid #0b1321; border-radius: 7px; background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98)); box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28); transform: translateZ(22px); }
+    .loading-device-content { position: relative; z-index: 2; display: flex; width: 88%; height: 82%; flex-direction: column; align-items: center; justify-content: center; gap: 2px; overflow: hidden; border: 3px solid #0b1321; border-radius: 7px; background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98)); box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28); transform: translateZ(22px); }
     .loading-device-content::before { position: absolute; inset: 9%; content: ''; border: 1px solid rgba(163, 231, 255, 0.17); border-radius: 3px; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(139, 218, 255, 0.07) 8px, transparent 9px); pointer-events: none; }
-    .scanner-frame .fingerprint-icon { position: relative; z-index: 2; width: auto; height: auto; font-size: 38px; line-height: 1; transform: none; }
+    .scanner-frame .fingerprint-icon { position: relative; z-index: 2; width: auto; height: auto; font-size: 44px; line-height: 1; transform: none; }
     .scanner-frame .fingerprint-icon.active { transform: scale(1.12); }
     .loading-device-wordmark { position: relative; z-index: 2; color: #f5fbff; font-size: 29px; font-weight: 800; letter-spacing: 0.08em; line-height: 0.92; text-shadow: 0 0 18px rgba(211, 245, 255, 0.58); }
     .loading-device-status { position: relative; z-index: 2; margin-top: 4px; padding: 3px 8px; border: 1px solid rgba(188, 211, 224, 0.35); border-radius: 999px; color: #b8c5cf; font-size: 7px; font-weight: 800; letter-spacing: 0.18em; line-height: 1; text-transform: uppercase; animation: statusBlink 1.2s ease-in-out infinite; }
@@ -615,7 +619,7 @@
     .top-right { top: 12px; right: 12px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 5px; }
     .bottom-left { bottom: 12px; left: 12px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 5px; }
     .bottom-right { right: 12px; bottom: 12px; border-right-width: 2px; border-bottom-width: 2px; border-bottom-right-radius: 5px; }
-    .laser { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--gold); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.58); animation: scan 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
+    .laser { position: absolute; top: 0; left: 0; z-index: 1; width: 100%; height: 2px; background: var(--gold); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.58); animation: scan 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
     .scanner-text { margin-top: 32px; color: #eaf4fc; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; line-height: 1.6; text-transform: uppercase; animation: textPulse 1s infinite alternate; }
     .scanner-status-row { display: flex; align-items: center; gap: 8px; width: min(100%, 310px); margin-top: 18px; color: rgba(187, 226, 244, 0.76); font-size: 8px; font-weight: 800; letter-spacing: 0.12em; text-align: left; }
     .scanner-status-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #43d9a0; box-shadow: 0 0 10px #43d9a0; animation: statusBlink 1.2s ease-in-out infinite; }
@@ -642,8 +646,8 @@
     @keyframes particleTwo { 0%, 100% { transform: translate3d(0, 0, 20px); opacity: 0.35; } 50% { transform: translate3d(-24px, 33px, 72px); opacity: 1; } }
     @keyframes particleThree { 0%, 100% { transform: translate3d(0, 0, 42px); opacity: 0.3; } 50% { transform: translate3d(42px, -28px, 80px); opacity: 0.95; } }
     @keyframes particleFour { 0%, 100% { transform: translate3d(0, 0, 25px) scale(0.7); opacity: 0.3; } 50% { transform: translate3d(-28px, -30px, 68px) scale(1.2); opacity: 1; } }
-    @keyframes telegramOrbit { from { transform: rotate(0deg) translateX(clamp(105px, 14vw, 150px)) rotate(-7deg) translateZ(42px); } to { transform: rotate(360deg) translateX(clamp(105px, 14vw, 150px)) rotate(-7deg) translateZ(42px); } }
-    @keyframes fingerprintOrbit { from { transform: rotate(180deg) translateX(clamp(112px, 15vw, 160px)) rotate(-180deg) translateZ(55px); } to { transform: rotate(-180deg) translateX(clamp(112px, 15vw, 160px)) rotate(180deg) translateZ(55px); } }
+    @keyframes telegramOrbit { from { transform: rotate(0deg) translateX(clamp(120px, 16vw, 180px)) rotate(-7deg) translateZ(42px); } to { transform: rotate(360deg) translateX(clamp(120px, 16vw, 180px)) rotate(-7deg) translateZ(42px); } }
+    @keyframes fingerprintOrbit { from { transform: rotate(180deg) translateX(clamp(135px, 18vw, 195px)) rotate(-180deg) translateZ(55px); } to { transform: rotate(-180deg) translateX(clamp(135px, 18vw, 195px)) rotate(180deg) translateZ(55px); } }
     @keyframes fingerprintSpin { to { transform: rotate(360deg); } }
     @keyframes gridScan { 0%, 100% { opacity: 0.28; transform: rotateX(65deg) translateZ(-17px) scale(0.92); } 50% { opacity: 0.72; transform: rotateX(65deg) translateZ(-17px) scale(1.06); } }
     @keyframes scanParticleOne { 0%, 100% { transform: translate3d(0, 0, 22px); opacity: 0.25; } 50% { transform: translate3d(30px, 45px, 65px); opacity: 1; } }
@@ -652,8 +656,16 @@
     @keyframes statusBlink { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
     @keyframes fingerprintGlow { 0%, 100% { opacity: 0.68; filter: drop-shadow(0 0 6px rgba(168, 179, 191, 0.24)); } 50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(190, 204, 216, 0.62)); } }
     @keyframes fingerprintVerifiedGlow { from { opacity: 0.85; filter: drop-shadow(0 0 8px rgba(65, 239, 174, 0.55)); } to { opacity: 1; filter: drop-shadow(0 0 20px rgba(65, 239, 174, 1)); } }
-    @keyframes enrolledBlink { 0%, 100% { opacity: 0.68; } 50% { opacity: 1; } }
-    @keyframes enrolledGlitch { 0%, 88%, 100% { transform: translateZ(30px); } 90% { transform: translate3d(-2px, 1px, 30px); } 92% { transform: translate3d(2px, -1px, 30px); } 94% { transform: translate3d(-1px, 0, 30px); } }
+    @keyframes tabletBrandCycle { 0%, 42% { opacity: 1; } 45%, 49% { opacity: 0.2; } 53%, 100% { opacity: 0; } }
+    @keyframes tabletWordScan { 0% { background-position: 220% 0; } 38% { background-position: -20% 0; } 53%, 100% { background-position: -20% 0; } }
+    @keyframes tabletScanBeam { 0%, 4% { left: -12%; opacity: 0; } 8% { opacity: 1; } 42% { left: 112%; opacity: 1; } 48%, 100% { left: 112%; opacity: 0; } }
+    @keyframes tabletFullScan { 0%, 5% { top: -12%; opacity: 0; } 9% { opacity: 0.95; } 42% { top: 112%; opacity: 0.95; } 49%, 100% { top: 112%; opacity: 0; } }
+    @keyframes tabletScreenGrid { 0%, 4% { opacity: 0.18; background-position: 0 0; } 10% { opacity: 0.42; } 42% { opacity: 0.68; background-position: 0 26px; } 49%, 100% { opacity: 0.18; background-position: 0 26px; } }
+    @keyframes tabletBrandGlitch { 0%, 42% { opacity: 0; clip-path: inset(0 0 0 0); transform: translate(0); } 44% { opacity: 0.95; clip-path: inset(12% 0 62% 0); transform: translate(-3px, 1px); } 46% { opacity: 0.85; clip-path: inset(56% 0 18% 0); transform: translate(3px, -1px); } 48% { opacity: 0.7; clip-path: inset(28% 0 42% 0); transform: translate(-1px, 0); } 51%, 100% { opacity: 0; clip-path: inset(0 0 0 0); transform: translate(0); } }
+    @keyframes tabletEnrolledCycle { 0%, 50% { opacity: 0; } 54%, 100% { opacity: 1; } }
+    @keyframes tabletScreenCycle { 0%, 50% { opacity: 0; } 54%, 100% { opacity: 0.38; } }
+    @keyframes tabletInvalidScreen { 0%, 50% { opacity: 0; } 54%, 100% { opacity: 0.5; } }
+    @keyframes enrolledGlitch { 0%, 84%, 100% { transform: translateZ(30px); clip-path: inset(0 0 0 0); } 86% { transform: translate3d(-2px, 1px, 30px); clip-path: inset(12% 0 62% 0); } 88% { transform: translate3d(2px, -1px, 30px); clip-path: inset(56% 0 18% 0); } 90% { transform: translate3d(-1px, 0, 30px); clip-path: inset(28% 0 42% 0); } 92% { transform: translateZ(30px); clip-path: inset(0 0 0 0); } }
     @keyframes registeredBlink { 0%, 100% { opacity: 0.72; } 50% { opacity: 1; } }
     @keyframes ringSpin { from { transform: rotateX(58deg) rotateZ(0deg); } to { transform: rotateX(58deg) rotateZ(360deg); } }
     @keyframes coreFloat { 0%, 100% { transform: rotateX(12deg) rotateY(-18deg) translate3d(0, 8px, 20px); } 50% { transform: rotateX(-10deg) rotateY(16deg) translate3d(0, -10px, 34px); } }
@@ -694,9 +706,21 @@
       .abis-core,
       .orbit-grid,
       .abis-orbit::before,
-      .abis-orbit::after {
+      .abis-orbit::after,
+      .tablet-brand,
+      .tablet-brand-text,
+      .tablet-brand::before,
+      .tablet-brand::after,
+      .tablet-enrolled,
+      .tablet-screen::before,
+      .tablet-screen::after,
+      .tablet-scan-line {
         animation: none !important;
       }
+      .tablet-brand { opacity: 0 !important; }
+      .tablet-enrolled { opacity: 1 !important; }
+      .tablet-screen::before { opacity: 0.18 !important; }
+      .tablet-screen::after { opacity: 0.38 !important; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -860,9 +884,9 @@
           </div>
           <div class="abis-core">
             <div class="tablet-screen">
-              <span>ABIS</span>
-              <small>BIOMETRIC INTELLIGENCE</small>
-              <strong class="tablet-enrolled" data-text="USUARIO ENROLADO">USUARIO ENROLADO</strong>
+              <span class="tablet-scan-line" aria-hidden="true"></span>
+              <span class="tablet-brand" data-text="SISTEMA ABIS"><span class="tablet-brand-text">SISTEMA ABIS</span></span>
+              <strong class="tablet-enrolled">USUARIO ENROLADO</strong>
             </div>
           </div>
         </div>
@@ -892,8 +916,8 @@
               <span class="material-symbols-outlined fingerprint-icon" aria-hidden="true">fingerprint</span>
               <strong class="loading-device-wordmark">ABIS</strong>
               <span class="loading-device-status">VALIDANDO</span>
+              <div class="laser"></div>
             </div>
-            <div class="laser"></div>
           </div>
         </div>
         <div class="scanner-text">Validando credenciales...</div>
@@ -917,8 +941,28 @@
     const laser = document.querySelector('.laser');
     const scannerStatus = document.querySelector('.scanner-status');
     const loadingStatus = document.querySelector('.loading-device-status');
+    const tabletScreen = document.querySelector('.tablet-screen');
+    const tabletStatus = document.querySelector('.tablet-enrolled');
     const progressBar = document.querySelector('.scanner-progress');
     const progressFill = document.querySelector('.scanner-progress-fill');
+
+    const tabletStatusSequence = [
+      { label: 'USUARIO ENROLADO', tone: 'valid' },
+      { label: 'USUARIO NO VÁLIDO', tone: 'invalid' },
+      { label: 'IDENTIDAD VALIDADA', tone: 'valid' },
+      { label: 'HUELLA REGISTRADA', tone: 'valid' }
+    ];
+
+    if (tabletStatus && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let tabletStatusIndex = 0;
+      window.setInterval(() => {
+        tabletStatusIndex = (tabletStatusIndex + 1) % tabletStatusSequence.length;
+        const nextStatus = tabletStatusSequence[tabletStatusIndex];
+        tabletStatus.textContent = nextStatus.label;
+        tabletStatus.classList.toggle('is-invalid', nextStatus.tone === 'invalid');
+        tabletScreen?.classList.toggle('is-invalid', nextStatus.tone === 'invalid');
+      }, 8000);
+    }
 
     function updateScannerProgress(value, message) {
       if (progressFill) progressFill.style.width = `${value}%`;

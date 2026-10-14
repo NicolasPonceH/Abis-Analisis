@@ -160,6 +160,10 @@ El endpoint de integración previsto es:
 POST /api/oracle/populate
 ```
 
+Para integraciÃ³n servidor-a-servidor, Oracle debe enviar el token configurado en
+`ORACLE_INGEST_TOKEN` mediante `Authorization: Bearer <token>` o el header
+`x-abis-integration-token`. Esta modalidad no requiere cookie JWT de navegador.
+
 La integración está diseñada para que Oracle entregue los datos mediante una vista o consulta aprobada, sin exponer las consultas internas al equipo que mantiene ABIS. Las credenciales de Oracle deben existir únicamente en variables de entorno del servidor y nunca en Git.
 
 El contrato lógico de los registros contiene estos campos:
@@ -336,9 +340,8 @@ ENABLE_TELEGRAM_BOT=false
 Si se habilita la integración Oracle, las variables deben configurarse solo en el servidor:
 
 ```env
-ORACLE_CONNECTION_STRING=host:puerto/servicio
-ORACLE_USER=usuario_de_integracion
-ORACLE_PASSWORD=secreto_no_versionado
+ORACLE_INGEST_TOKEN=token_aleatorio_largo
+ORACLE_INGEST_USER=oracle-integration
 ```
 
 ### 4. Crear y preparar la base de datos

@@ -2,7 +2,7 @@ import { state } from '../core/state.js';
 import { escapeHtml } from '../core/utils.js';
 import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
 import { loadMetrics } from './panel-ejecutivo.js';
-import { loadTrendData } from './tendencias.js?v=20261013-2';
+import { loadTrendData } from './tendencias.js?v=20261014-2';
 import { cargarBitacoraAuditoria } from './auditoria.js';
 import { checkSystemHealth, loadAvailableDates } from '../app.js?v=23';
 

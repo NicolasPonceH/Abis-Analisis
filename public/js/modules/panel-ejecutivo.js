@@ -57,6 +57,7 @@ export function applyPreset(preset) {
   const modeSelect = document.getElementById("filter-mode-select");
   if (preset === "latest") {
     state.filterMode = "single";
+    profesionChartMode = "fecha";
     if (modeSelect) modeSelect.value = "single";
     if (state.availableDates.length > 0) {
       state.currentDate = state.availableDates[0].fecha;
@@ -65,6 +66,7 @@ export function applyPreset(preset) {
     }
   } else if (preset === "7days") {
     state.filterMode = "range";
+    profesionChartMode = "total";
     if (modeSelect) modeSelect.value = "range";
     if (state.availableDates.length > 0) {
       state.dateTo = state.availableDates[0].fecha;
@@ -74,6 +76,7 @@ export function applyPreset(preset) {
     }
   } else if (preset === "all") {
     state.filterMode = "range";
+    profesionChartMode = "total";
     if (modeSelect) modeSelect.value = "range";
     if (state.availableDates.length > 0) {
       state.dateTo = state.availableDates[0].fecha;
@@ -873,6 +876,7 @@ export function updateProfesionToggleUI() {
   const btnFecha = document.getElementById("btn-prof-fecha");
   const btnTotal = document.getElementById("btn-prof-total");
   if (btnFecha && btnTotal) {
+    btnFecha.textContent = state.filterMode === "range" ? "Período Filtrado" : "Día Filtrado";
     if (profesionChartMode === "fecha") {
       btnFecha.style.background = "#ffd100";
       btnFecha.style.color = "#00234c";
@@ -892,7 +896,12 @@ export async function loadAndRenderProfesionesChart() {
   updateProfesionToggleUI();
 
   try {
-    let url = `/api/metricas/profesiones?limit=500&agrupar=${profesionChartMode === "total"}`;
+    const isRange = state.filterMode === "range";
+    // Si estamos en modo total acumulado o en un rango de fechas, agrupar por categoría estándar
+    const shouldGroup = profesionChartMode === "total" || isRange;
+    const limit = shouldGroup ? 50 : 15;
+
+    let url = `/api/metricas/profesiones?limit=${limit}&agrupar=${shouldGroup}`;
     if (profesionChartMode === "fecha") {
       if (state.filterMode === "single" && state.currentDate) {
         url += `&fecha=${encodeURIComponent(state.currentDate)}`;

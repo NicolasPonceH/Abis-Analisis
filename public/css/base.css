@@ -259,9 +259,9 @@ body {
 
 /* DARK THEME */
 :root.dark-theme {
-  --bg-app: #0f172a;
+  --bg-app: #020617;
   --bg-surface: #1e293b;
-  --bg-surface-subtle: #0f172a;
+  --bg-surface-subtle: #111827;
   --bg-surface-hover: #334155;
   
   --border-subtle: #334155;
@@ -290,8 +290,8 @@ body {
   --status-info-border: #0369a1;
   --status-info: #38bdf8;
   
-  --pdi-navy: #001229;
-  --pdi-navy-light: #0d2847;
+  --pdi-navy: #00234c;
+  --pdi-navy-light: #003366;
   --pdi-gold-subtle: #3d3100;
 }
 
@@ -335,5 +335,82 @@ body {
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+}
+
+/* ========================================================================== */
+/* DARK THEME - SHARED SURFACES */
+/* ========================================================================== */
+:root.dark-theme {
+  color-scheme: dark;
+}
+
+:root.dark-theme body {
+  background:
+    radial-gradient(circle at 15% 50%, rgba(14, 116, 144, 0.1), transparent 30%),
+    radial-gradient(circle at 85% 20%, rgba(30, 64, 175, 0.12), transparent 30%),
+    #020617 !important;
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .logo-pdi {
+  background: #ffffff;
+}
+
+:root.dark-theme .header-institutional [style*="color: var(--bg-surface)"] {
+  color: #ffffff !important;
+}
+
+:root.dark-theme ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+:root.dark-theme ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+:root.dark-theme .executive-banner,
+:root.dark-theme .kpi-card,
+:root.dark-theme .dashboard-card,
+:root.dark-theme .chart-card,
+:root.dark-theme .filters-card,
+:root.dark-theme .table-card,
+:root.dark-theme .trend-toolbar-card,
+:root.dark-theme .modal-content {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(71, 85, 105, 0.85) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.04) !important;
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .data-table,
+:root.dark-theme .data-table tbody,
+:root.dark-theme .data-table tr,
+:root.dark-theme .data-table td {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+:root.dark-theme .data-table tr:hover {
+  background: rgba(51, 65, 85, 0.55) !important;
+}
+
+:root.dark-theme .data-table th {
+  background: rgba(15, 23, 42, 0.86) !important;
+  color: #f8fafc !important;
+  border-color: var(--border-medium) !important;
+}
+
+:root.dark-theme input,
+:root.dark-theme select,
+:root.dark-theme textarea {
+  background-color: #0f172a !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-medium) !important;
+}
+
+:root.dark-theme input::placeholder,
+:root.dark-theme textarea::placeholder {
+  color: #94a3b8;
 }
 

@@ -950,10 +950,79 @@ async function generarCapturaDiaria(reporteDiario) {
  * - Foto 2: TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL AÑO 2026 (tipoFiltro: 'ENROLADO')
  * - Foto 4: TOTAL DE REGISTROS EN EL SISTEMA ABIS ACOMULADO AL AÑO 2026 (tipoFiltro: 'TODOS')
  */
+async function generarCapturaRangoPorFecha(reportes, desde, hasta) {
+  const filas = Array.isArray(reportes) ? reportes : [];
+  const formatearFecha = (fecha) => {
+    const [y, m, d] = String(fecha || "").split("-");
+    return y && m && d ? `${d}-${m}-${y}` : fecha || "N/D";
+  };
+  const buscarEstado = (reporte, lista, texto) => {
+    const fila = (reporte?.[lista] || []).find((item) =>
+      String(item.descripcion || "").toUpperCase().includes(texto)
+    );
+    return Number(fila?.total || 0);
+  };
+  const totalEstado = (lista, texto) =>
+    filas.reduce((total, reporte) => total + buscarEstado(reporte, lista, texto), 0);
+
+  const grupos = [
+    {
+      titulo: "Sincronización PDI",
+      lista: "sincronizacion",
+      estados: [["Sincronizado", "SINCRONIZADO", "green"], ["Pendiente", "PENDIENTE", "gold"], ["Error", "ERROR", "red"]],
+    },
+    {
+      titulo: "Registración Biométrica",
+      lista: "registro",
+      estados: [["Registrado", "REGISTRADO", "green"], ["Error", "ERROR", "red"], ["No Registrado", "NO REGISTRADO", ""], ["Pendiente", "PENDIENTE", "gold"]],
+    },
+    {
+      titulo: "Estado General",
+      lista: "general",
+      estados: [["Registrado", "REGISTRADO", "green"], ["Error", "ERROR", "red"], ["En Curso", "CURSO", "gold"]],
+    },
+  ];
+
+  const encabezados = filas.map((reporte) => formatearFecha(reporte.fecha)).concat("TOTAL PERÍODO");
+  const renderGrupo = (grupo) => {
+    const encabezado = `<tr><th class="group-title">${grupo.titulo}</th>${encabezados.map(() => `<th class="qty-title">CANTIDAD</th>`).join("")}</tr>`;
+    const cuerpo = grupo.estados.map(([nombre, busqueda, color]) => {
+      const valores = filas.map((reporte) => buscarEstado(reporte, grupo.lista, busqueda));
+      return `<tr><td class="label ${color}">${nombre}</td>${valores.map((valor) => `<td>${fmtNum(valor)}</td>`).join("")}<td class="total">${fmtNum(totalEstado(grupo.lista, busqueda))}</td></tr>`;
+    }).join("");
+    const total = filas.reduce((sum, reporte) => sum + Number(reporte.total || 0), 0);
+    return `${encabezado}${cuerpo}<tr class="total-row"><td>TOTAL</td>${filas.map((reporte) => `<td>${fmtNum(reporte.total || 0)}</td>`).join("")}<td>${fmtNum(total)}</td></tr><tr class="separator"><td colspan="${encabezados.length + 1}"></td></tr>`;
+  };
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: Arial, "Segoe UI", sans-serif; padding: 16px; display: inline-block; }
+  #captura-root { background: #fff; padding: 8px; display: inline-block; }
+  .range-table { border-collapse: collapse; border: 2px solid #000; font-size: 13px; color: #000; }
+  .range-table th, .range-table td { border: 1px solid #000; padding: 5px 12px; text-align: center; white-space: nowrap; }
+  .main-title { font-size: 15px; padding: 8px; }
+  .group-title { text-align: left; min-width: 180px; font-size: 12px; }
+  .qty-title { font-size: 11px; min-width: 90px; }
+  .label { text-align: left; padding-left: 14px; min-width: 150px; }
+  .green { color: #137333; } .gold { color: #b06000; } .red { color: #c5221f; }
+  .total, .total-row { font-weight: bold; }
+  .separator td { height: 12px; padding: 0; background: #fff; }
+</style></head><body><div id="captura-root"><table class="range-table">
+  <thead><tr><th colspan="${encabezados.length + 1}" class="main-title">${formatearFecha(desde)} AL ${formatearFecha(hasta)}</th></tr></thead>
+  <tbody>${grupos.map(renderGrupo).join("")}</tbody>
+</table></div></body></html>`;
+
+  return renderHtmlToPng(html, "#captura-root");
+}
+
 async function generarCapturaDistribucionDiaria(reporteDiario) {
-  const fecha = reporteDiario.fecha || "";
+  const fecha = reporteDiario.fecha || reporteDiario.desde || "";
+  const desde = reporteDiario.desde || fecha;
+  const hasta = reporteDiario.hasta || fecha;
   const [y, m, d] = fecha.split("-");
-  const fechaFmt = y && m && d ? `${d}-${m}-${y}` : fecha;
+  const fechaFmt = desde !== hasta
+    ? `${desde.split("-").reverse().join("-")} AL ${hasta.split("-").reverse().join("-")}`
+    : y && m && d ? `${d}-${m}-${y}` : fecha;
   const html = renderTableroExcelHtml({
     titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS DEL ${fechaFmt}`,
     tipoFiltro: "ENROLADO",
@@ -990,5 +1059,6 @@ module.exports = {
   generarCapturaDistribucionDiaria,
   generarCapturaAcumulado,
   generarCapturaDiaria,
+  generarCapturaRangoPorFecha,
   renderHtmlToPng,
 };
