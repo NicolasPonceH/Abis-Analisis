@@ -28,6 +28,7 @@ const DEFAULT_CONFIG = {
   targetChannel: "telegram",
   telegramChatId: "",
   lastSent: null,
+  automaticSentPeriods: [],
   history: [],
 };
 
@@ -81,6 +82,9 @@ async function getConfig() {
       ...dbConfig,
       times: Array.isArray(dbConfig.times) ? dbConfig.times : DEFAULT_CONFIG.times,
       days: Array.isArray(dbConfig.days) ? dbConfig.days : DEFAULT_CONFIG.days,
+      automaticSentPeriods: Array.isArray(dbConfig.automaticSentPeriods)
+        ? dbConfig.automaticSentPeriods
+        : DEFAULT_CONFIG.automaticSentPeriods,
       history: Array.isArray(dbConfig.history) ? dbConfig.history : [],
     };
   }
@@ -99,6 +103,9 @@ async function getConfig() {
       ...parsed,
       times: Array.isArray(parsed.times) ? parsed.times : DEFAULT_CONFIG.times,
       days: Array.isArray(parsed.days) ? parsed.days : DEFAULT_CONFIG.days,
+      automaticSentPeriods: Array.isArray(parsed.automaticSentPeriods)
+        ? parsed.automaticSentPeriods
+        : DEFAULT_CONFIG.automaticSentPeriods,
       history: Array.isArray(parsed.history) ? parsed.history : [],
     };
     await saveConfigToDB(conf); // Migrar a DB
@@ -225,11 +232,84 @@ function formatearFechaChile(fStr) {
   return `${d}-${m}-${y}`;
 }
 
+// Identificador estable del período operativo. Evita repetir un período si la
+// BD todavía conserva esa fecha como el último registro disponible.
+function obtenerClavePeriodo(periodo) {
+  if (periodo?.esFinDeSemana) {
+    return `FIN_DE_SEMANA:${periodo.fechas.viernes}:${periodo.fechas.domingo}`;
+  }
+  return `DIARIO:${periodo?.fecha || ""}`;
+}
+
+function obtenerEtiquetaPeriodo(periodo) {
+  if (periodo?.esFinDeSemana) {
+    return `${periodo.fechas.desdeFmt} al ${periodo.fechas.hastaFmt}`;
+  }
+  return periodo?.fechaFmt || "";
+}
+
+function fechaChileAClave(fechaChile) {
+  const match = String(fechaChile || "").match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : null;
+}
+
+function obtenerClaveDesdeRegistro(registro) {
+  if (registro?.periodoClave) return registro.periodoClave;
+
+  const etiqueta = String(registro?.fechaReportada || "");
+  const rango = etiqueta.match(/^(\d{2}-\d{2}-\d{4}) al (\d{2}-\d{2}-\d{4})$/);
+  if (rango) {
+    const desde = fechaChileAClave(rango[1]);
+    const hasta = fechaChileAClave(rango[2]);
+    return desde && hasta ? `FIN_DE_SEMANA:${desde}:${hasta}` : null;
+  }
+
+  const fecha = fechaChileAClave(etiqueta);
+  if (fecha) return `DIARIO:${fecha}`;
+
+  const fechaIso = etiqueta.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return fechaIso ? `DIARIO:${fechaIso[1]}-${fechaIso[2]}-${fechaIso[3]}` : null;
+}
+
+function obtenerPeriodosAutomaticos(config) {
+  const periodos = new Set(
+    (config?.automaticSentPeriods || []).filter((periodo) => typeof periodo === "string" && periodo)
+  );
+
+  const registros = [config?.lastSent, ...(config?.history || [])].filter(Boolean);
+  for (const registro of registros) {
+    if (registro.tipo === "PRUEBA_MANUAL_VISUAL") continue;
+    if (registro.estado && registro.estado !== "EXITO") continue;
+    const clave = obtenerClaveDesdeRegistro(registro);
+    if (clave) periodos.add(clave);
+  }
+
+  return periodos;
+}
+
+function periodoYaDespachado(config, periodo, etiquetaPeriodo) {
+  const clavePeriodo = obtenerClavePeriodo(periodo);
+  if (obtenerPeriodosAutomaticos(config).has(clavePeriodo)) return true;
+
+  // Compatibilidad adicional con historiales antiguos que no tengan una fecha
+  // convertible a clave, pero sí conserven exactamente la etiqueta mostrada.
+  const registros = [config?.lastSent, ...(config?.history || [])].filter(Boolean);
+  return registros.some((registro) =>
+    registro.tipo !== "PRUEBA_MANUAL_VISUAL" &&
+    (!registro.estado || registro.estado === "EXITO") &&
+    registro.fechaReportada === etiquetaPeriodo
+  );
+}
+
 // Determina el período operativo según las reglas institucionales:
 // - Lunes: Consolida el Fin de Semana cerrado (Viernes D-3, Sábado D-2, Domingo D-1).
 // - Martes a Viernes: Reporta la jornada de ayer cerrada (D-1).
 // - Fines de semana: Reporta el día de ayer cerrado (D-1).
-async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarModo = null } = {}) {
+// Modo estricto (envíos automáticos): NUNCA retrocede a fechas antiguas. Si la BD no
+// tiene datos del período esperado, se marca `sinDatos` y el envío se omite, de modo
+// que una notificación ya vencida (ej. la jornada del 12 que correspondía el 13) no
+// se repita en los días siguientes.
+async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarModo = null, estricto = false } = {}) {
   const hoyChile = obtenerHoraChile();
   const baseDate = fechaReferencia || hoyChile.dateStr;
 
@@ -238,6 +318,7 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
   const dayOfWeek = dateObj.getUTCDay(); // 0 = Dom, 1 = Lun, 2 = Mar...
 
   const esLunes = forzarModo === "fds" ? true : forzarModo === "diario" ? false : dayOfWeek === 1;
+  let sinDatos = false;
 
   if (esLunes) {
     let fechaViernes = restarDias(baseDate, 3);
@@ -251,15 +332,20 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
         [fechaViernes, fechaDomingo]
       );
       if (rows.length === 0) {
-        fechaViernes = "2026-08-21";
-        fechaSabado = "2026-08-22";
-        fechaDomingo = "2026-08-23";
+        if (estricto) {
+          sinDatos = true;
+        } else {
+          fechaViernes = "2026-08-21";
+          fechaSabado = "2026-08-22";
+          fechaDomingo = "2026-08-23";
+        }
       }
     }
 
     return {
       tipo: "FIN_DE_SEMANA",
       esFinDeSemana: true,
+      sinDatos,
       fechas: {
         viernes: fechaViernes,
         sabado: fechaSabado,
@@ -279,7 +365,9 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
         "SELECT 1 FROM registro_enrolamiento WHERE fecha_enrolamiento = $1 LIMIT 1",
         [fechaAyer]
       );
-      if (rows.length === 0) {
+      if (rows.length === 0 && estricto) {
+        sinDatos = true;
+      } else if (rows.length === 0) {
         const maxRes = await pool.query(
           "SELECT to_char(max(fecha_enrolamiento), 'YYYY-MM-DD') AS max_fecha FROM registro_enrolamiento"
         );
@@ -292,6 +380,7 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
     return {
       tipo: "DIARIO",
       esFinDeSemana: false,
+      sinDatos,
       fecha: fechaAyer,
       fechaFmt: formatearFechaChile(fechaAyer),
     };
@@ -328,8 +417,33 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
   }
 
   // 1. Determinar el período operativo (Fin de semana para Lunes, Diario para Martes-Viernes)
-  const periodo = await calcularPeriodoOperativo(pool, { fechaReferencia, forzarModo });
+  // En envíos automáticos se usa modo estricto: solo se reporta el período esperado
+  // (ayer / fin de semana recién cerrado), nunca una fecha antigua ya vencida.
+  const periodo = await calcularPeriodoOperativo(pool, { fechaReferencia, forzarModo, estricto: !isTest });
   const origen = isTest ? "Ajustes Web PDI (Prueba de Despacho Visual)" : "Automatización Programada PDI";
+  const periodoClave = obtenerClavePeriodo(periodo);
+  const etiquetaPeriodo = obtenerEtiquetaPeriodo(periodo);
+
+  if (!isTest && periodo.sinDatos) {
+    console.log(`[SCHEDULER] Sin datos en BD para el período esperado ${etiquetaPeriodo}; no se reenvían fechas anteriores.`);
+    return {
+      skipped: true,
+      motivo: "SIN_DATOS_PERIODO",
+      periodoClave,
+      fechaReportada: etiquetaPeriodo,
+    };
+  }
+
+  if (!isTest && periodoYaDespachado(config, periodo, etiquetaPeriodo)) {
+    console.log(`[SCHEDULER] Período ${etiquetaPeriodo} ya fue despachado; se omite el envío repetido.`);
+    return {
+      skipped: true,
+      motivo: "PERIODO_YA_DESPACHADO",
+      periodoClave,
+      fechaReportada: etiquetaPeriodo,
+    };
+  }
+
   let totalReportado = 0;
   let slaReportado = 100;
   let labelFecha = "";
@@ -605,6 +719,8 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     timestamp: new Date().toISOString(),
     horaChile: horaChile.full,
     fechaReportada: labelFecha,
+    periodoClave,
+    periodoTipo: periodo.esFinDeSemana ? "FIN_DE_SEMANA" : "DIARIO",
     totalEnrolados: totalReportado,
     slaPDI: slaReportado,
     tipo: isTest ? "PRUEBA_MANUAL_VISUAL" : "AUTOMATICO_PROGRAMADO_VISUAL",
@@ -615,7 +731,10 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
   };
 
   const history = [entry, ...(config.history || [])].slice(0, 25);
-  saveConfig({ lastSent: entry, history });
+  const automaticSentPeriods = isTest
+    ? [...obtenerPeriodosAutomaticos(config)]
+    : [...obtenerPeriodosAutomaticos(config), periodoClave];
+  await saveConfig({ lastSent: entry, history, automaticSentPeriods });
 
   // Registrar en bitácora inmutable de PostgreSQL
   try {
@@ -681,6 +800,13 @@ function iniciarScheduler({ pool, logger = console }) {
 
         try {
           const resultado = await triggerScheduledReport({ pool, isTest: false });
+          if (resultado.skipped) {
+            const motivoTxt = resultado.motivo === "SIN_DATOS_PERIODO"
+              ? "sin datos para el período esperado (no se repite la última fecha)"
+              : "período ya despachado";
+            logger.log(`[REPORTE AUTOMÁTICO OMITIDO] ${resultado.fechaReportada}: ${motivoTxt}.`);
+            return;
+          }
           logger.log(`[REPORTE AUTOMÁTICO ENVIADO] Message ID: ${resultado.messageId}`);
         } catch (dispatchErr) {
           logger.error(`[ERROR ENVÍO PROGRAMADO]`, dispatchErr.message);

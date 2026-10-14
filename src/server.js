@@ -311,11 +311,13 @@ app.post("/login", async (req, res) => {
           }
         }
         const token = jwt.sign({ username, rol: userRole }, JWT_SECRET, { expiresIn: "8h" });
-        res.cookie("abis_auth", token, { 
+        // Cookie de sesión: el navegador debe descartarla al finalizar la sesión
+        // y el guard del frontend también solicita el cierre al abandonar la pestaña.
+        res.cookie("abis_auth", token, {
           httpOnly: true, 
-          maxAge: 8 * 3600 * 1000,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax"
+          sameSite: "lax",
+          path: "/",
         });
         return res.redirect("/");
       }
@@ -359,9 +361,23 @@ app.post("/register", async (req, res) => {
   }
 });
 
+const clearAuthCookie = (res) => {
+  res.clearCookie("abis_auth", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+};
+
 app.get("/logout", (req, res) => {
-  res.clearCookie("abis_auth");
+  clearAuthCookie(res);
   res.redirect("/login");
+});
+
+app.post("/logout", (req, res) => {
+  clearAuthCookie(res);
+  res.status(204).end();
 });
 
 app.get("/", requireAuth, (req, res) => {

@@ -5,6 +5,8 @@ export let pendingAuthFile = null;
 
 export let pendingAuthAction = "ingesta";
 
+let lastFocusedElement = null;
+
 export function promptAuthModal(file, actionType = "ingesta") {
   pendingAuthFile = file;
   pendingAuthAction = actionType;
@@ -21,6 +23,8 @@ export function promptAuthModal(file, actionType = "ingesta") {
   const confirmBtn = document.getElementById("btn-modal-auth-confirm");
 
   if (!modal) return;
+
+  lastFocusedElement = document.activeElement;
   
   if (claveInput) {
     claveInput.value = "";
@@ -200,6 +204,8 @@ export function promptAuthModal(file, actionType = "ingesta") {
   if (confirmBtn) confirmBtn.disabled = false;
 
   modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("auth-modal-open");
   setTimeout(() => {
     if (claveInput) claveInput.focus();
   }, 100);
@@ -207,10 +213,35 @@ export function promptAuthModal(file, actionType = "ingesta") {
 
 export function closeAuthModal() {
   const modal = document.getElementById("modal-auth-ingesta");
-  if (modal) modal.style.display = "none";
+  if (modal) {
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+  }
+  document.body.classList.remove("auth-modal-open");
   pendingAuthFile = null;
+  pendingAuthAction = "ingesta";
   const fileInput = document.getElementById("file-input");
   if (fileInput) fileInput.value = "";
+
+  const claveInput = document.getElementById("input-auth-clave");
+  const btnEye = document.getElementById("btn-toggle-password");
+  const errorMsg = document.getElementById("modal-auth-error");
+  if (claveInput) claveInput.type = "password";
+  if (btnEye) {
+    btnEye.setAttribute("aria-pressed", "false");
+    btnEye.setAttribute("aria-label", "Mostrar contraseña");
+    btnEye.title = "Mostrar contraseña";
+    const eyeIcon = document.getElementById("eye-icon");
+    if (eyeIcon) {
+      eyeIcon.innerHTML = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`;
+    }
+  }
+  if (errorMsg) errorMsg.style.display = "none";
+
+  if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+    lastFocusedElement.focus();
+    lastFocusedElement = null;
+  }
 }
 
 export function setupAuthModalEvents() {
@@ -220,6 +251,9 @@ export function setupAuthModalEvents() {
   const btnConfirm = document.getElementById("btn-modal-auth-confirm");
   const btnEye = document.getElementById("btn-toggle-password");
   const claveInput = document.getElementById("input-auth-clave");
+
+  if (!modal || modal.dataset.eventsBound === "true") return;
+  modal.dataset.eventsBound = "true";
 
   if (btnClose) btnClose.addEventListener("click", closeAuthModal);
   if (btnCancel) btnCancel.addEventListener("click", closeAuthModal);
@@ -231,11 +265,20 @@ export function setupAuthModalEvents() {
     });
   }
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") {
+      closeAuthModal();
+    }
+  });
+
   // Ver / Ocultar clave
   if (btnEye && claveInput) {
     btnEye.addEventListener("click", () => {
       const isPassword = claveInput.type === "password";
       claveInput.type = isPassword ? "text" : "password";
+      btnEye.setAttribute("aria-pressed", String(isPassword));
+      btnEye.setAttribute("aria-label", isPassword ? "Ocultar contraseña" : "Mostrar contraseña");
+      btnEye.title = isPassword ? "Ocultar contraseña" : "Mostrar contraseña";
       const eyeIcon = document.getElementById("eye-icon");
       if (eyeIcon) {
         eyeIcon.innerHTML = isPassword
