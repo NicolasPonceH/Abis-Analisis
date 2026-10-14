@@ -1,0 +1,45 @@
+{
+  "unidades": {
+    "BH ARICA INFORMA CONCURRENCIA SS": "BH ARICA",
+    "BH ARICA INFORMA": "BH ARICA",
+    "BICRIM ARICA INFORMA": "BICRIM ARICA",
+    "REPOL ARICA PARINACOTA": "BICRIM ARICA"
+  },
+  "delitos": {
+    "CONCURRENCIA SS": "HOMICIDIO / HALLAZGO DE CADÁVER",
+    "Infracción Art": "Infracción Art. 4 Ley N° 20.000 (Microtráfico)"
+  },
+  "detenidos_keywords": [],
+  "victimas_keywords": [],
+  "total_correcciones": 4,
+  "historial": [
+    {
+      "fecha": "14-10-2026 11:39",
+      "usuario": "admin",
+      "campo": "unidad",
+      "original": "BH ARICA INFORMA CONCURRENCIA SS",
+      "corregido": "BH ARICA"
+    },
+    {
+      "fecha": "14-10-2026 12:20",
+      "usuario": "admin",
+      "campo": "unidad",
+      "original": "REPOL ARICA PARINACOTA",
+      "corregido": "BICRIM ARICA"
+    },
+    {
+      "fecha": "14-10-2026 12:20",
+      "usuario": "admin",
+      "campo": "unidad",
+      "original": "REPOL ARICA PARINACOTA",
+      "corregido": "BICRIM ARICA"
+    },
+    {
+      "fecha": "14-10-2026 13:34",
+      "usuario": "admin",
+      "campo": "hecho",
+      "original": "Infracción Art",
+      "corregido": "Infracción Art. 4 Ley N° 20.000 (Microtráfico)"
+    }
+  ]
+}

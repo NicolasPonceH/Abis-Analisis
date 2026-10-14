@@ -11,9 +11,84 @@ sustancias, tipos de arma) no lo necesitan porque no son ambiguas.
 """
 
 import re
+import os
+import json
+from datetime import datetime
 
 # pyrefly: ignore [missing-import]
 import markupsafe
+
+LEARNED_RULES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "db", "learned_rules.json")
+
+def get_learned_rules():
+    default_rules = {
+        "unidades": {
+            "BH ARICA INFORMA CONCURRENCIA SS": "BH ARICA",
+            "BH ARICA INFORMA": "BH ARICA",
+            "BICRIM ARICA INFORMA": "BICRIM ARICA"
+        },
+        "delitos": {
+            "CONCURRENCIA SS": "HOMICIDIO / HALLAZGO DE CADÁVER"
+        },
+        "detenidos_keywords": [],
+        "victimas_keywords": [],
+        "total_correcciones": 0,
+        "historial": []
+    }
+    if not os.path.exists(LEARNED_RULES_PATH):
+        try:
+            os.makedirs(os.path.dirname(LEARNED_RULES_PATH), exist_ok=True)
+            with open(LEARNED_RULES_PATH, "w", encoding="utf-8") as f:
+                json.dump(default_rules, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return default_rules
+
+    try:
+        with open(LEARNED_RULES_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default_rules
+
+def save_learned_rule(campo, original, corregido, usuario="operador"):
+    if not original or not corregido:
+        return False
+    original = original.strip()
+    corregido = corregido.strip()
+    if original == corregido:
+        return False
+        
+    rules = get_learned_rules()
+    ahora = datetime.now().strftime("%d-%m-%Y %H:%M")
+    
+    if campo == "unidad":
+        rules.setdefault("unidades", {})[original] = corregido
+    elif campo in ["hecho", "delito"]:
+        rules.setdefault("delitos", {})[original] = corregido
+    elif campo == "detenidos":
+        if corregido not in rules.setdefault("detenidos_keywords", []):
+            rules["detenidos_keywords"].append(corregido)
+    elif campo == "victimas":
+        if corregido not in rules.setdefault("victimas_keywords", []):
+            rules["victimas_keywords"].append(corregido)
+            
+    rules["total_correcciones"] = rules.get("total_correcciones", 0) + 1
+    rules.setdefault("historial", []).append({
+        "fecha": ahora,
+        "usuario": usuario or "operador",
+        "campo": campo,
+        "original": original,
+        "corregido": corregido
+    })
+    
+    try:
+        os.makedirs(os.path.dirname(LEARNED_RULES_PATH), exist_ok=True)
+        with open(LEARNED_RULES_PATH, "w", encoding="utf-8") as f:
+            json.dump(rules, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"Error guardando regla aprendida: {e}")
+        return False
 
 VEHICLE_BRANDS = [
     "Toyota", "Nissan", "Chevrolet", "Hyundai", "Kia", "Suzuki", "Mazda", "Ford",
@@ -121,21 +196,39 @@ def find_ruts(text):
         
     return found
 
+def clean_person_name(raw_name):
+    raw_name = raw_name.strip(" *-\t\r\n:.")
+    # 1. Intentar capturar hasta la palabra "años" o "año"
+    match = re.search(r"^(.*?(?:años?|anos?))\b", raw_name, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+        
+    # 2. Si no especifica edad, truncamos usando las comas (máx 3 elementos)
+    parts = [p.strip() for p in raw_name.split(',')]
+    if len(parts) > 1:
+        return ", ".join(parts[:3])
+        
+    return raw_name
+
+def _is_invalid_person_name(name):
+    if not name or len(name.strip()) < 3:
+        return True
+    upper = name.upper()
+    stopwords = [
+        "AMENAZAS", "FECHA", "VIF", "FUE ", "SAPU", "HOSPITAL",
+        "ESTADO", "HORAS", "LA TARDE", "LA MAÑANA", "LA NOCHE", "SIN SIGNOS",
+        "AL DOMICILIO", "POR PARTE", "ANTECEDENTES", "HECHOS", "ROBO", "HOMICIDIO",
+        "LESIONES", "FLAGRANTE", "FISCALIA", "TRIBUNAL", "DROGAS", "ARMAS", "VEHICULO",
+        "POLICIA", "CARABINEROS", "INSPECCION", "DECLARACION", "MINUTA", "INFORME",
+        "PASAJE", "CALLE", "AVENIDA", "AVDA", "BLOCK", "VILLA", "POBLACION", "POBLACIÓN",
+        "COMUNA", "DOMICILIO", "DOMICILIAD", "GEPOL", "SE DESCONOCE"
+    ]
+    if any(sw in upper for sw in stopwords):
+        return True
+    return False
+
 def find_detenidos_in_text(text):
     text = text.replace('*', '')
-    def clean_name(raw_name):
-        # 1. Intentar capturar hasta la palabra "años" o "año"
-        match = re.search(r"^(.*?(?:años?|anos?))\b", raw_name, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
-            
-        # 2. Si no especifica edad, truncamos usando las comas (máx 3 elementos)
-        parts = [p.strip() for p in raw_name.split(',')]
-        if len(parts) > 1:
-            return ", ".join(parts[:3])
-            
-        return raw_name
-
     found = []
     lines = text.split('\n')
     
@@ -162,8 +255,8 @@ def find_detenidos_in_text(text):
         # Captura inline si tiene formato clásico "DETENIDO: Juan Perez"
         inline_match = re.search(r"^(?:detenid[oa]s?|imputad[oa]s?)\s*[:\-]\s*(.+)", line, re.IGNORECASE)
         if inline_match:
-            cl = clean_name(inline_match.group(1).strip())
-            if cl and cl not in found:
+            cl = clean_person_name(inline_match.group(1).strip())
+            if cl and cl not in found and not _is_invalid_person_name(cl):
                 found.append(cl)
             in_detenidos_block = True
             continue
@@ -179,8 +272,8 @@ def find_detenidos_in_text(text):
             if person_match:
                 # Extraemos la línea entera, pero sin el prefijo "1. -"
                 cleaned_line = re.sub(r"^[\d\.\-\s]+", "", line)
-                cl = clean_name(cleaned_line)
-                if cl and cl not in found:
+                cl = clean_person_name(cleaned_line)
+                if cl and cl not in found and not _is_invalid_person_name(cl):
                     found.append(cl)
                     
     if found:
@@ -191,21 +284,105 @@ def find_detenidos_in_text(text):
         line = line.strip()
         person_match = re.search(r"^[\*\-]?\s*([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑa-záéíóúñ\s]+),\s*(?:[A-Z][a-záéíóúñ]+),\s*nacido en.*?(?:\d{1,2}\s*años?|anos?|C\.I\.|RUT|cédula)", line, re.IGNORECASE)
         if person_match:
-            cl = clean_name(person_match.group(1).strip())
-            if cl and cl not in found:
+            cl = clean_person_name(person_match.group(1).strip())
+            if cl and cl not in found and not _is_invalid_person_name(cl):
                 found.append(cl)
                 
     if found:
         return found
-    # Buscar menciones inline solo con Mayúsculas iniciales para evitar verbos en minúscula
-    for match in re.finditer(r"(?i:el|la)?\s*(?i:detenid[oa]|imputad[oa]|n\.?n\.?a\.?|menor|v[ií]ctima|denunciante)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*){1,4})", text):
+        
+    # Buscar menciones inline de imputados/detenidos
+    for match in re.finditer(r"(?i:el|la)?\s*(?i:detenid[oa]|imputad[oa]|autor|aprehendid[oa])\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*){1,4})", text):
         name = match.group(1).strip()
-        upper_name = name.upper()
-        if "AMENAZAS" not in upper_name and "FECHA" not in upper_name and "VIF" not in upper_name and "DE EDAD" not in upper_name and "FUE " not in upper_name:
-            cl = clean_name(name)
+        if not _is_invalid_person_name(name):
+            cl = clean_person_name(name)
             if cl and cl not in found:
                 found.append(cl)
         
+    return found
+
+def find_victimas_in_text(text):
+    if not text:
+        return []
+    text_clean = text.replace('*', '').replace('_', '')
+    found = []
+    lines = text_clean.split('\n')
+    
+    in_victimas_block = False
+    
+    VICTIMA_KEYWORDS = (
+        "VICTIMA", "VÍCTIMA", "OCCISO", "OCCISA", "AFECTADO", "AFECTADA",
+        "DENUNCIANTE", "FALLECIDO", "FALLECIDA", "PERSONA FALLECIDA", "VICTIMA FATAL", "VÍCTIMA FATAL"
+    )
+    SECTION_HEADERS = (
+        "HECHOS", "HECHO", "DILIGENCIAS", "FISCAL", "FISCALIA", "FISCALÍA",
+        "TRIBUNAL", "JUZGADO", "LUGAR", "LUGAR SS", "SITIO DEL SUCESO",
+        "ANTECEDENTES", "RELATO", "SINTESIS", "SÍNTESIS", "DETENIDO",
+        "DETENIDOS", "IMPUTADO", "IMPUTADOS", "ESPECIES", "ARMAS",
+        "VEHICULOS", "VEHÍCULOS", "DROGAS", "TELEFONO", "TELEFONOS",
+        "CONCLUSION", "CONCLUSIONES", "CUNOCO", "INSTRUCCIONES"
+    )
+    
+    for line in lines:
+        line_str = line.strip()
+        if not line_str:
+            in_victimas_block = False
+            continue
+            
+        upper = line_str.upper()
+        # Verificar si entramos a otra sección conocida
+        first_word = re.split(r'[:\s\.\-]', upper)[0]
+        if in_victimas_block and first_word in SECTION_HEADERS:
+            in_victimas_block = False
+            
+        # 1. Header de bloque: "VÍCTIMA:", "VICTIMAS", "OCCISO:", etc.
+        clean_header = re.sub(r'^[-\d.•*\s]+', '', upper).rstrip(':. ')
+        if clean_header in VICTIMA_KEYWORDS or clean_header in [k + "S" for k in VICTIMA_KEYWORDS]:
+            in_victimas_block = True
+            continue
+            
+        # Si es un encabezado numerado: "Víctima 1." o "Víctima N° 2"
+        if re.match(r"^(?:V[IÍ]CTIMAS?|AFECTAD[OA]S?|DENUNCIANTES?|OCCIS[OA]S?|FALLECID[OA]S?)\s+(?:N[°º\.]\s*)?\d+[\.\-]?.*", clean_header):
+            in_victimas_block = True
+            continue
+            
+        # 2. Captura inline tipo "VÍCTIMA: Juan Pérez, 25 años...", "1. VÍCTIMA FATAL: ...", "- VICTIMA: ..."
+        m_inline = re.search(r'(?:^|[-0-9.•*\s]+)(?:V[IÍ]CTIMAS?(?:\s+FATALES?)?|OCCIS[OA]S?|AFECTAD[OA]S?|DENUNCIANTES?|FALLECID[OA]S?|PERSONA\s+FALLECIDA)\s*[:\-]\s*(.+)', line_str, re.IGNORECASE)
+        if m_inline:
+            val = m_inline.group(1).strip()
+            cl = clean_person_name(val)
+            if cl and not _is_invalid_person_name(cl) and cl not in found:
+                found.append(cl)
+            continue
+            
+        # 3. Línea dentro del bloque de víctimas
+        if in_victimas_block:
+            # Si parece inicio de otra sección (ej: "LUGAR SS: ...", "FISCAL: ...")
+            if re.match(r'^[A-ZÁÉÍÓÚÑ\s]{3,25}\s*[:\-]', line_str):
+                in_victimas_block = False
+                continue
+            clean_item = re.sub(r'^[-\d.•*\s]+', '', line_str).strip()
+            cl = clean_person_name(clean_item)
+            if cl and len(cl) > 3 and not _is_invalid_person_name(cl) and cl not in found:
+                found.append(cl)
+                
+    if found:
+        return found
+        
+    # 4. Búsqueda narrativa fallback
+    narrative_patterns = [
+        r"(?i:la|el)?\s*(?i:v[ií]ctima|afectad[oa]|denunciante|occis[oa]|v[ií]ctima\s+fatal)\s+(?:identificad[oa]\s+(?:como|por)\s+)?(?:de\s+nombre\s+)?([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*){1,4})",
+        r"(?i:en\s+contra\s+de\s+(?:la\s+v[ií]ctima\s+)?)([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*){1,4})",
+        r"(?i:afectando\s+a\s+(?:la\s+v[ií]ctima\s+)?)([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]*){1,4})"
+    ]
+    for pattern in narrative_patterns:
+        for match in re.finditer(pattern, text):
+            name = match.group(1).strip()
+            if not _is_invalid_person_name(name):
+                cl = clean_person_name(name)
+                if cl and cl not in found:
+                    found.append(cl)
+                    
     return found
 
 def split_sentences(text):
@@ -326,9 +503,20 @@ def extract_metadata(text):
             hecho_match = re.search(r"INFORMA\s+(?:DETENID[O|A]S?\s+)?(.*?)(?=\s+FECHA|\n|\.|$)", text, re.IGNORECASE)
             if hecho_match:
                 hecho = hecho_match.group(1).strip()
-        # Ensure hecho is always defined even if no pattern matched
-        if 'hecho' not in locals():
-            hecho = ""
+    # Normalización basada en aprendizaje adaptativo de la IA
+    try:
+        learned = get_learned_rules()
+        for raw_u, learned_u in learned.get("unidades", {}).items():
+            if raw_u.upper() in text.upper() or (unidad and raw_u.upper() in unidad.upper()):
+                unidad = learned_u
+                break
+                
+        for raw_d, learned_d in learned.get("delitos", {}).items():
+            if raw_d.upper() in text.upper() or (hecho and raw_d.upper() in hecho.upper()):
+                hecho = learned_d
+                break
+    except Exception:
+        pass
         
     return {"fecha": fecha, "unidad": unidad, "hecho": hecho, "fecha_futura_warning": fecha_futura_warning}
 
@@ -359,6 +547,7 @@ def _extract_entities_single(raw_text):
     }
     personas = {
         "detenidos": find_detenidos_in_text(plain_text),
+        "victimas": find_victimas_in_text(plain_text),
         "ruts": find_ruts(plain_text),
         "telefonos": find_with_context(sentences, PHONE_KEYWORDS, PHONE_REGEX, upper=False),
         "direcciones": find_with_context(sentences, DIRECCION_KEYWORDS, DIRECCION_REGEX, upper=False),
@@ -401,7 +590,7 @@ EMPTY_ENTITIES = {
     "vehiculos": {"marcas": [], "modelos": [], "colores": [], "anios": [], "patentes": []},
     "armas": {"marcas": [], "modelos": [], "tipos": [], "calibres": [], "series": []},
     "drogas": {"sustancias": [], "medidas": []},
-    "personas": {"detenidos": [], "ruts": [], "telefonos": [], "direcciones": []},
+    "personas": {"detenidos": [], "victimas": [], "ruts": [], "telefonos": [], "direcciones": []},
     "metadata": {"fecha": "", "unidad": "", "hecho": "", "fecha_futura_warning": False}
 }
 
@@ -415,8 +604,10 @@ def normalize_entities(data):
             val = data.get(categoria, {}).get(campo, default_val)
             normalized[categoria][campo] = val
             
-    if "subdocuments" in data:
-        normalized["subdocuments"] = data["subdocuments"]
+    if "filename" in data:
+        normalized["filename"] = data["filename"]
+    if "subdocuments" in data and isinstance(data["subdocuments"], list):
+        normalized["subdocuments"] = [normalize_entities(sub) for sub in data["subdocuments"]]
     return normalized
 
 
@@ -428,7 +619,7 @@ HIGHLIGHT_FIELDS = {
     "vehiculos": ["marcas", "patentes"],
     "armas": ["marcas", "calibres", "series"],
     "drogas": ["sustancias"],
-    "personas": ["detenidos", "ruts", "telefonos", "direcciones"],
+    "personas": ["detenidos", "victimas", "ruts", "telefonos", "direcciones"],
 }
 
 MARK_CLASS = {

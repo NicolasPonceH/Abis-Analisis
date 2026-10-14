@@ -44,6 +44,7 @@ load_dotenv()
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 import db
+import entities
 from entities import extract_entities, highlight_entities_html, normalize_entities
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -293,13 +294,56 @@ def entities_path(filename):
 def load_entities_json(filename):
     """Lee y normaliza el entities.json cacheado, si existe. Si el archivo esta corrupto
     (JSON invalido, truncado a medio escribir) lo trata como si no existiera en vez de
-    tumbar la pagina con un error 500."""
+    tumbar la pagina con un error 500. Auto-recupera víctimas o detenidos si el archivo
+    antiguo no los tenía indexados."""
     path = entities_path(filename)
     if not os.path.isfile(path):
         return None
     try:
         with open(path, encoding="utf-8") as f:
-            return normalize_entities(json.load(f))
+            data = normalize_entities(json.load(f))
+            
+        # Auto-recuperación de víctimas/detenidos si el JSON antiguo se guardó sin ellos
+        txt_path = extracted_text_path(filename)
+        if os.path.isfile(txt_path):
+            try:
+                with open(txt_path, encoding="utf-8") as f_txt:
+                    raw_text = f_txt.read()
+                
+                updated = False
+                p = data.setdefault("personas", {})
+                if not p.get("victimas"):
+                    vics = entities.find_victimas_in_text(raw_text)
+                    if vics:
+                        p["victimas"] = vics
+                        updated = True
+                if not p.get("detenidos"):
+                    dets = entities.find_detenidos_in_text(raw_text)
+                    if dets:
+                        p["detenidos"] = dets
+                        updated = True
+                        
+                if data.get("subdocuments"):
+                    for sub in data["subdocuments"]:
+                        sub_p = sub.setdefault("personas", {})
+                        if not sub_p.get("victimas"):
+                            sub_vics = entities.find_victimas_in_text(raw_text)
+                            if sub_vics:
+                                sub_p["victimas"] = sub_vics
+                                updated = True
+                        if not sub_p.get("detenidos"):
+                            sub_dets = entities.find_detenidos_in_text(raw_text)
+                            if sub_dets:
+                                sub_p["detenidos"] = sub_dets
+                                updated = True
+                                
+                if updated:
+                    with open(path, "w", encoding="utf-8") as f_save:
+                        json.dump(data, f_save, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"Aviso auto-recuperando entidades: {e}")
+                
+        return data
     except (json.JSONDecodeError, OSError):
         return None
 
@@ -376,6 +420,7 @@ def build_docx_context(filename, summary_text, entities_data):
     }
     
     detenidos_lista = personas.get("detenidos", []).copy()
+    victimas_lista = personas.get("victimas", []).copy()
     ruts_lista = personas.get("ruts", []).copy()
     
     if detenidos_lista:
@@ -384,11 +429,16 @@ def build_docx_context(filename, summary_text, entities_data):
         ctx["Detenidos"] = "Identificados por RUT: " + ", ".join(ruts_lista)
     else:
         ctx["Detenidos"] = "No identificado"
+        
+    if victimas_lista:
+        ctx["Victimas"] = "\n".join(victimas_lista)
+    else:
+        ctx["Victimas"] = "No identificada"
     
     tiene_vehiculos = bool(vehiculos.get("marcas") or vehiculos.get("modelos") or vehiculos.get("colores") or vehiculos.get("anios") or vehiculos.get("patentes"))
     tiene_armas = bool(armas.get("marcas") or armas.get("modelos") or armas.get("tipos") or armas.get("calibres") or armas.get("series"))
     tiene_drogas = bool(drogas.get("sustancias") or drogas.get("medidas"))
-    tiene_personas = bool(detenidos_lista or ruts_lista)
+    tiene_personas = bool(detenidos_lista or victimas_lista or ruts_lista)
     
     tiene_entidades = tiene_vehiculos or tiene_armas or tiene_drogas or tiene_personas
     
@@ -492,12 +542,18 @@ def export_to_docx(filename, summary_options, entities_data):
                 pass
 
 
-STATS_SHEET_NAMES = {"vehiculo": "Vehiculos", "arma": "Armas", "droga": "Drogas"}
+STATS_SHEET_NAMES = {
+    "vehiculo": "Vehiculos",
+    "arma": "Armas",
+    "droga": "Drogas",
+    "persona": "Personas",
+    "victima": "Victimas",
+}
 
 
 def build_stats_workbook(filas, detalle=None):
     """Reporte historico exportable (RF-07) separado por categoria: una hoja de Excel por
-    categoria (vehiculo/arma/droga), no todo mezclado en una sola tabla.
+    categoria (vehiculo/arma/droga/persona/victima), no todo mezclado en una sola tabla.
 
     Ademas incluye una hoja "Datos" con el detalle sin agrupar (una fila por entidad
     detectada) formateada como Tabla de Excel real -- es la fuente que hace falta para insertar
@@ -507,7 +563,7 @@ def build_stats_workbook(filas, detalle=None):
     existente al releer un archivo, no para crearlo) -- el riesgo de entregar un .xlsx que Excel
     marque para "reparar" es peor que no tener la funcion. Con los datos ya en una Tabla de
     Excel, insertar la tabla dinamica real es Insertar > Tabla dinamica en dos clics."""
-    agrupado = {"vehiculo": [], "arma": [], "droga": []}
+    agrupado = {"vehiculo": [], "arma": [], "droga": [], "persona": [], "victima": []}
     for categoria, campo, valor, n in filas:
         agrupado.setdefault(categoria, []).append((campo, valor, n))
 
@@ -648,6 +704,91 @@ try:
 except OSError:
     _nlp = None
 
+def preserve_case_replacement(match, replacement):
+    word = match.group(0)
+    if word.isupper():
+        return replacement.upper()
+    elif word[0].isupper():
+        return replacement.capitalize()
+    return replacement.lower()
+
+CORRECCIONES_ORTOGRAFICAS_POLICIALES = {
+    r'\bperona\b': 'persona',
+    r'\bperonas\b': 'personas',
+    r'\bdetencion\b': 'detención',
+    r'\bdetenciones\b': 'detenciones',
+    r'\binfraccion\b': 'infracción',
+    r'\binfracciones\b': 'infracciones',
+    r'\bdeclaracion\b': 'declaración',
+    r'\bdeclaraciones\b': 'declaraciones',
+    r'\bincautacion\b': 'incautación',
+    r'\bincautaciones\b': 'incautaciones',
+    r'\bagrupacion\b': 'agrupación',
+    r'\bagrupaciones\b': 'agrupaciones',
+    r'\bfiscalia\b': 'fiscalía',
+    r'\bfiscalias\b': 'fiscalías',
+    r'\bpolicia\b': 'policía',
+    r'\bpolicias\b': 'policías',
+    r'\bcomisaria\b': 'comisaría',
+    r'\bsubcomisaria\b': 'subcomisaría',
+    r'\bgarantia\b': 'garantía',
+    r'\bgarantias\b': 'garantías',
+    r'\bidentificacion\b': 'identificación',
+    r'\binvestigacion\b': 'investigación',
+    r'\bautorizacion\b': 'autorización',
+    r'\bdisposicion\b': 'disposición',
+    r'\bresolucion\b': 'resolución',
+    r'\bmunicion\b': 'munición',
+    r'\bmuniciones\b': 'municiones',
+    r'\bcocaina\b': 'cocaína',
+    r'\bmicrotrafico\b': 'microtráfico',
+    r'\bvictima\b': 'víctima',
+    r'\bvictimas\b': 'víctimas',
+    r'\bvehiculo\b': 'vehículo',
+    r'\bvehiculos\b': 'vehículos',
+    r'\bcamion\b': 'camión',
+    r'\bcamiones\b': 'camiones',
+    r'\bdireccion\b': 'dirección',
+    r'\bdirecciones\b': 'direcciones',
+    r'\barticulo\b': 'artículo',
+    r'\barticulos\b': 'artículos',
+    r'\bcodigo\b': 'código',
+    r'\bcodigos\b': 'códigos',
+    r'\bpublico\b': 'público',
+    r'\bpublica\b': 'pública',
+    r'\bpublicos\b': 'públicos',
+    r'\bpublicas\b': 'públicas',
+    r'\bjuridico\b': 'jurídico',
+    r'\bjuridica\b': 'jurídica',
+    r'\btelefono\b': 'teléfono',
+    r'\btelefonos\b': 'teléfonos',
+    r'\bnumero\b': 'número',
+    r'\bnumeros\b': 'números',
+    r'\bimputao\b': 'imputado',
+    r'\bimputaos\b': 'imputados',
+    r'\bcalve\b': 'clave',
+    r'\bdelijencias\b': 'diligencias',
+    r'\bdilijencias\b': 'diligencias',
+}
+
+def corregir_ortografia_policial(text):
+    """Corrige errores ortográficos y de OCR frecuentes en actas y partes policiales."""
+    if not text:
+        return ""
+    t = text
+    # Frases gramaticales policiales comunes con errores de concordancia de OCR
+    t = re.sub(r'\b[sS]e [rR]ealizado la entrada\b', 'Se realizó la entrada', t)
+    t = re.sub(r'\b[rR]ealizados las entradas\b', 'Realizadas las entradas', t)
+    t = re.sub(r'\b[rR]ealizado la entrada\b', 'Realizada la entrada', t)
+    t = re.sub(r'\b[rR]ealizado las diligencias\b', 'Realizadas las diligencias', t)
+    t = re.sub(r'\b[sS]e procedio\b', 'Se procedió', t)
+    t = re.sub(r'\bse procedio\b', 'se procedió', t)
+    t = re.sub(r'\bse logro\b', 'se logró', t)
+    t = re.sub(r'\bSe logro\b', 'Se logró', t)
+    for pat, repl in CORRECCIONES_ORTOGRAFICAS_POLICIALES.items():
+        t = re.sub(pat, lambda m, r=repl: preserve_case_replacement(m, r), t, flags=re.IGNORECASE)
+    return t
+
 def clean_narrative_text(text):
     """Limpia delimitadores de sistema, numeración de páginas y saltos de línea rotos."""
     if not text:
@@ -663,7 +804,8 @@ def clean_narrative_text(text):
     text = re.sub(r"(?<![.:;\n])\n(?!\n)", " ", text)
     # Normalizar espacios
     text = re.sub(r"[ \t]+", " ", text)
-    return text.strip()
+    text = text.strip()
+    return corregir_ortografia_policial(text)
 
 def split_sentences_safely(text):
     """Divide un texto en oraciones respetando abreviaturas jurídicas y policiales comunes."""
@@ -723,6 +865,20 @@ def parse_police_report(raw_text):
     
     m_trib = re.search(r"(?:TRIBUNAL|FISCAL[IÍ]A|JUZGADO|MINISTERIO P[UÚ]BLICO)\s*[:\-]\s*(.*?)(?=\n|$)", clean_text, re.I)
     data["tribunal_fiscalia"] = clean_narrative_text(m_trib.group(1)).rstrip(".") if m_trib else ""
+    
+    # Aplicar aprendizaje adaptativo de la IA
+    try:
+        learned = entities.get_learned_rules()
+        for raw_u, learned_u in learned.get("unidades", {}).items():
+            if raw_u.upper() in clean_text.upper() or (data.get("unidad") and raw_u.upper() in data["unidad"].upper()):
+                data["unidad"] = learned_u
+                break
+        for raw_d, learned_d in learned.get("delitos", {}).items():
+            if raw_d.upper() in clean_text.upper() or (data.get("delito") and raw_d.upper() in data["delito"].upper()):
+                data["delito"] = learned_d
+                break
+    except Exception:
+        pass
     
     pattern_hechos = r"(?:^|\n)\s*\*?\s*(HECHOS?|DILIGENCIAS?(?:\s+REALIZADAS)?|SÍNTESIS(?:\s+DE\s+LOS\s+HECHOS|\s+DEL\s+RELATO)?|RELATO|ANTECEDENTES|PROCEDIMIENTO)\*?\s*:\s*(.*?)(?=(?:\n\s*\*?(?:DETENID[OAS]+|IMPUTAD[OAS]+|V[IÍ]CTIMAS?|INCAUTACI[OÓ]N|ESPECIES?|ARMAS?|VEH[IÍ]CULOS?|DROGAS?|TRIBUNAL|FISCAL[IÍ]A|INSTRUCCIONES|DISPOSICI[OÓ]N|CONCLUSI[OÓ]N|OBSERVACIONES|=== FIN DOCUMENTO)\*?\s*:)|=== FIN DOCUMENTO|\Z)"
     matches = list(re.finditer(pattern_hechos, raw_text, re.IGNORECASE | re.DOTALL))
@@ -836,7 +992,10 @@ def build_summary_options(raw_text, entities_data=None, username=None):
             if len(hechos_completos) > 700:
                 hechos_completos = hechos_completos[:697].rsplit(' ', 1)[0] + "..."
     
-    return {"a": hechos_sinteticos, "b": hechos_completos}
+    return {
+        "a": corregir_ortografia_policial(hechos_sinteticos),
+        "b": corregir_ortografia_policial(hechos_completos)
+    }
 
 def summarize_text(raw_text, limit_sentences=3):
     options = build_summary_options(raw_text)
@@ -1368,8 +1527,83 @@ def view_pdf(filename):
         cross_references=cross_references,
         has_export=has_export,
         saved_count=saved_count,
+        learned_rules=entities.get_learned_rules(),
         active_page="procesar",
     )
+
+
+@app.route("/update_ficha/<filename>", methods=["POST"])
+def update_ficha(filename):
+    filename = secure_filename(filename)
+    unidad = request.form.get("unidad", "").strip()
+    hecho = request.form.get("hecho", "").strip()
+    detenidos_raw = request.form.get("detenidos", "").strip()
+    victimas_raw = request.form.get("victimas", "").strip()
+    aprender = request.form.get("aprender", "0")
+    original_unidad = request.form.get("original_unidad", "").strip()
+    original_hecho = request.form.get("original_hecho", "").strip()
+    
+    # 1. Cargar entities.json existente
+    entities_data = load_entities_json(filename) or entities.EMPTY_ENTITIES.copy()
+    if "metadata" not in entities_data:
+        entities_data["metadata"] = {}
+    if "personas" not in entities_data:
+        entities_data["personas"] = {"detenidos": [], "victimas": [], "ruts": [], "telefonos": [], "direcciones": []}
+        
+    # Actualizar valores
+    if unidad:
+        entities_data["metadata"]["unidad"] = unidad
+    if hecho:
+        entities_data["metadata"]["hecho"] = hecho
+        entities_data["metadata"]["delito"] = hecho
+        
+    # Detenidos lista
+    det_list = [d.strip() for d in detenidos_raw.splitlines() if d.strip()]
+    entities_data["personas"]["detenidos"] = det_list
+    
+    # Víctimas lista
+    vic_list = [v.strip() for v in victimas_raw.splitlines() if v.strip()]
+    entities_data["personas"]["victimas"] = vic_list
+    
+    # Guardar en disco
+    with open(entities_path(filename), "w", encoding="utf-8") as f:
+        json.dump(entities_data, f, ensure_ascii=False, indent=2)
+        
+    # 2. Re-generar exportación Word si existe para que refleje los cambios de inmediato
+    try:
+        summary_options = None
+        if os.path.isfile(summary_options_path(filename)):
+            with open(summary_options_path(filename), encoding="utf-8") as f:
+                summary_options = json.load(f)
+        export_to_docx(filename, summary_options, entities_data)
+    except Exception as e:
+        print(f"Aviso actualizando docx tras edición: {e}")
+        
+    # 3. Aprendizaje continuo (retroalimentar IA)
+    username = session.get("username", "operador")
+    reglas_aprendidas = 0
+    if aprender == "1":
+        if original_unidad and unidad and original_unidad.upper() != unidad.upper():
+            if entities.save_learned_rule("unidad", original_unidad, unidad, username):
+                reglas_aprendidas += 1
+            db.save_entity_feedback(username, "unidad", original_unidad, unidad)
+            
+        if original_hecho and hecho and original_hecho.upper() != hecho.upper():
+            if entities.save_learned_rule("hecho", original_hecho, hecho, username):
+                reglas_aprendidas += 1
+            db.save_entity_feedback(username, "hecho", original_hecho, hecho)
+            
+        for det in det_list:
+            entities.save_learned_rule("detenidos", det, det, username)
+        for vic in vic_list:
+            entities.save_learned_rule("victimas", vic, vic, username)
+            
+    if reglas_aprendidas > 0:
+        flash(f"Ficha Operativa actualizada exitosamente. La IA aprendió {reglas_aprendidas} regla(s) de corrección para futuros análisis.", "success")
+    else:
+        flash("Ficha Operativa actualizada correctamente.", "success")
+        
+    return redirect(url_for("view_pdf", filename=filename, _anchor="ficha_operativa"))
 
 
 @app.route("/uploads/<filename>")
@@ -1553,6 +1787,7 @@ def select_summary(filename):
             opt["selected"] = opcion_elegida
             cleaned_text = re.sub(r'</p>|<br\s*/?>', '\n', texto_editado)
             cleaned_text = re.sub(r'<[^>]+>', '', cleaned_text).strip()
+            cleaned_text = corregir_ortografia_policial(cleaned_text)
             opt[opcion_elegida] = cleaned_text
             
             # Aprendizaje adaptativo continuo: registrar feedback de edición
@@ -1571,6 +1806,13 @@ def select_summary(filename):
         sel = first_opt.get("selected", "a")
         with open(summary_text_path(filename), "w", encoding="utf-8") as f:
             f.write(first_opt.get(sel, ""))
+            
+    # Mantener sincronizado el documento Word
+    try:
+        entities_data = load_entities_json(filename)
+        export_to_docx(filename, summary_options, entities_data)
+    except Exception as e:
+        print(f"Aviso actualizando docx tras guardar seleccion: {e}")
             
     flash("Selección guardada. Ahora puedes exportar a Word.", "success")
     return redirect(url_for("view_pdf", filename=filename, _anchor="resumen"))
