@@ -4,9 +4,11 @@ Plataforma unificada para la gestión de enrolamiento biométrico, reportería o
 
 El proyecto integra en una sola aplicación:
 
-- **ABIS:** monitoreo de enrolamientos biométricos, métricas, ETL, auditoría, exportaciones y notificaciones.
-- **SIAD:** análisis documental, OCR, extracción de entidades, búsqueda, historial y estadísticas.
-- **PostgreSQL:** base de datos unificada `Abis_OCR`, con catálogos normalizados, historial de ingestas y persistencia documental.
+- **ABIS (`src/`, `public/`):** Monitoreo de enrolamientos biométricos, métricas, ETL, auditoría, exportaciones y notificaciones en Node.js / Express.
+- **SIAD (`siad/`):** Análisis documental, OCR, extracción de entidades, búsqueda, historial, estadísticas y aprendizaje adaptativo en Python / Flask.
+- **PostgreSQL (`Abis_OCR`):** Base de datos unificada con catálogos normalizados, historial de ingestas y persistencia documental (respaldo en `Abis_OCR_backup.sql`).
+- `CHANGELOG_ACTUALIZACIONES.md`: Documentación detallada de cambios en BD, backend, UI y Aprendizaje Adaptativo en la rama `avances_ashley`.
+- `docs/`: Capturas de pantalla y documentación gráfica de la plataforma integrada.
 
 > Este repositorio contiene código institucional y datos potencialmente sensibles. Nunca se deben subir credenciales, respaldos reales ni archivos de producción.
 

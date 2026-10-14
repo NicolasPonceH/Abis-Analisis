@@ -6,41 +6,80 @@
 <meta name="description" content="Sistema Inteligente de Análisis Documental y Forense (SIAD) para el procesamiento de archivos, OCR y correlación de inteligencia criminal."/>
 <title>{% block title %}SIAD - PDI{% endblock %}</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
+    html {
+      height: 100%;
+    }
+    body {
+      min-height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex !important;
+      flex-direction: column !important;
+      background-color: #001c3d !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overscroll-behavior: none;
+    }
+    #page-content {
+      flex: 1 0 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      min-height: calc(100vh - 67.33px) !important;
+      min-height: calc(100dvh - 67.33px) !important;
+      background-color: #f8fafc;
+      will-change: opacity, transform;
+      transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dark #page-content {
+      background-color: #020617 !important;
+    }
+    main {
+      flex: 1 0 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      background-color: #f8fafc !important;
+    }
+    .dark main {
+      background-color: #020617 !important;
+    }
+    #page-footer {
+      margin-top: auto !important;
+      flex-shrink: 0 !important;
+      width: 100% !important;
+      background-color: #001c3d !important;
+    }
     @layer base {
-      html, body { margin: 0; padding: 0; }
-      body { overscroll-behavior: none; }
       main > :first-child { margin-top: 0 !important; }
       main > :last-child { margin-bottom: 0 !important; }
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f3f5; }
-    ::-webkit-scrollbar-thumb { background: #c5c8d0; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #9da3af; }
-    
-    #page-content,#page-header{transition:opacity .2s ease-out;}
-
-    @view-transition {
-      navigation: auto;
+    .siad-transition-out {
+      opacity: 0.15 !important;
+      transform: translateY(3px) scale(0.999);
+      pointer-events: none;
     }
-
-    @keyframes pageFadeSlideIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
+    .siad-transition-in {
+      opacity: 1 !important;
+      transform: translateY(0) scale(1);
     }
-
-    .animate-page-enter {
-      animation: pageFadeSlideIn 0.2s ease-out forwards;
-    }
-
-    .page-leaving {
-      opacity: 0 !important;
-      transition: opacity 0.15s ease-out !important;
+    #siad-progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3.5px;
+      background: linear-gradient(90deg, #ffd100 0%, #fff275 50%, #ffd100 100%);
+      box-shadow: 0 0 12px rgba(255, 209, 0, 0.9), 0 0 4px rgba(255, 209, 0, 0.6);
+      z-index: 2147483646;
+      pointer-events: none;
+      transition: width 0.18s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+      opacity: 0;
     }
 
     body, html, button, input, select, textarea {
@@ -375,8 +414,6 @@ body.splash-disabled #pdi-splash-overlay,
       }
     }
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 {% block extra_head %}{% endblock %}
 <script>
   (function() {
@@ -390,10 +427,12 @@ body.splash-disabled #pdi-splash-overlay,
   })();
 </script>
 </head>
-<body class="font-sans bg-background dark:bg-slate-950 font-body-md text-on-background dark:text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="font-sans bg-[#001c3d] dark:bg-slate-950 font-body-md text-on-background dark:text-slate-100 min-h-screen flex flex-col antialiased">
 
-<!-- Splash Screen / Intro Institucional PDI -->
-<div id="pdi-splash-overlay" style="position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; min-width: 100%; min-height: 100%; z-index: 2147483647; background: #001430; background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; overflow: hidden;">
+<div id="siad-progress-bar"></div>
+
+<!-- Splash Screen / Intro Institucional PDI (oculto por defecto para evitar parpadeos entre vistas) -->
+<div id="pdi-splash-overlay" style="display: none !important; position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; min-width: 100%; min-height: 100%; z-index: 2147483647; background: #001430; background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%); flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; overflow: hidden;">
   <div class="pdi-splash-box">
     <!-- Emblema con halo dorado pulsante -->
     <div class="pdi-badge-frame">
@@ -418,47 +457,60 @@ body.splash-disabled #pdi-splash-overlay,
 <div class="h-full w-full px-3 lg:px-6 flex items-center justify-between">
 <div class="flex items-center gap-2 -ml-1">
 <a href="{{ url_for('index') }}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
-  <img alt="PDI" class="h-10 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
-  <span class="text-[25px] font-black text-white ml-2 hidden sm:inline-block drop-shadow-md tracking-tight">Análisis Documental</span>
+  <img alt="PDI" class="h-9 w-auto object-contain rounded shadow-sm group-hover:scale-105 transition-transform duration-300" src="{{ url_for('static', filename='img/pdi-logo.jpg') }}"/>
+  <span class="text-[21.5px] font-black text-white ml-1.5 hidden sm:inline-block drop-shadow-sm tracking-tight">Análisis Documental</span>
 </a>
 </div>
-<nav class="hidden md:flex items-center gap-3 h-full py-1.5">
+<nav class="hidden md:flex items-center gap-4 lg:gap-5 h-full py-1.5" id="siad-main-nav">
 
-<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('index') }}">
-  <span class="material-symbols-outlined text-[24px]">document_scanner</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'procesar' or not active_page else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-4.5 py-2 rounded-xl text-sm lg:text-base font-black tracking-wider uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('index') }}">
+  <span class="material-symbols-outlined text-[22px]">document_scanner</span>
   Procesamiento OCR
 </a>
-<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'historial' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('historial') }}">
-  <span class="material-symbols-outlined text-[24px]">history</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'historial' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-4.5 py-2 rounded-xl text-sm lg:text-base font-black tracking-wider uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('historial') }}">
+  <span class="material-symbols-outlined text-[22px]">history</span>
   Historial
 </a>
-<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'estadisticas' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-6 py-2.5 rounded-xl text-base font-black tracking-wider uppercase flex items-center gap-2.5 transition-all duration-200" href="{{ url_for('estadisticas') }}">
-  <span class="material-symbols-outlined text-[24px]">bar_chart</span>
+<a class="{{ 'bg-[#ffd100] text-[#00234c] font-black shadow-lg border-b-2 border-amber-600' if active_page == 'estadisticas' else 'text-white hover:bg-white/15 hover:text-white font-extrabold' }} px-4.5 py-2 rounded-xl text-sm lg:text-base font-black tracking-wider uppercase flex items-center gap-2 transition-all duration-200" href="{{ url_for('estadisticas') }}">
+  <span class="material-symbols-outlined text-[22px]">bar_chart</span>
   Estadísticas
 </a>
-<div id="live-clock" class="hidden lg:flex items-center gap-2.5 bg-white text-[#00234c] border-2 border-[#ffd100] px-4 py-1.5 rounded-xl shadow-md ml-4 lg:ml-8 shrink-0 select-none" title="Hora del Sistema">
-  <span class="material-symbols-outlined text-[22px] text-[#00234c] font-black">schedule</span>
-  <span class="text-xl lg:text-2xl font-mono text-[#00234c] tracking-[0.08em] leading-none" style="font-weight: 900;" id="clock-time">-- : -- : --</span>
+<div id="live-clock" class="hidden lg:flex items-center gap-2 bg-white text-[#00234c] border-2 border-[#ffd100] px-3.5 py-1 rounded-xl shadow-md ml-2 lg:ml-4 shrink-0 select-none" title="Hora del Sistema">
+  <span class="material-symbols-outlined text-[20px] text-[#00234c] font-extrabold">schedule</span>
+  <span class="text-xl font-mono text-[#00234c] font-black tracking-wider leading-none" id="clock-time">-- : -- : --</span>
+  <script>
+    (function() {
+      try {
+        var el = document.getElementById('clock-time');
+        if (el) {
+          var d = new Date();
+          el.textContent = d.toLocaleTimeString('es-CL', { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' }).replace(/:/g, ' : ');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </div>
 </nav>
-<div class="flex items-center gap-3">
-  <a class="hidden md:flex mr-2 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-black px-5 py-2.5 rounded-xl text-base tracking-wide uppercase items-center gap-2.5 transition-all duration-200 shadow-lg transform hover:-translate-y-0.5 border-2 border-[#e6bc00]" href="/">
-    <span class="material-symbols-outlined text-[24px]">fingerprint</span>
+<div class="flex items-center gap-2.5 lg:gap-3">
+  <a class="hidden md:flex mr-3 lg:mr-4 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] hover:text-[#00234c] font-black px-4 py-2 rounded-xl text-sm tracking-wide uppercase items-center gap-2 transition-all duration-200 shadow-md transform hover:-translate-y-0.5 border-2 border-[#e6bc00]" href="/">
+    <span class="material-symbols-outlined text-[20px]">fingerprint</span>
     Sistema ABIS
   </a>
+  <div class="h-6 w-px bg-white/20 hidden md:block mx-0.5"></div>
   {% if current_user %}
-  <div class="flex items-center ml-1 mr-1">
-    <span class="text-white font-black tracking-wide text-base uppercase drop-shadow-sm">{{ current_user }}</span>
+  <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 shadow-xs" title="Usuario conectado">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]"></span>
+    <span class="text-white font-black tracking-wider text-xs uppercase">{{ current_user }}</span>
   </div>
-  <div class="flex items-center gap-2.5">
-    <a href="{{ url_for('configuracion') }}" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-amber-400/25 text-white hover:text-amber-300 border border-white/20 hover:border-amber-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ajustes del Sistema">
-      <span class="material-symbols-outlined text-[24px]">settings</span>
+  <div class="flex items-center gap-2">
+    <a href="{{ url_for('configuracion') }}" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-amber-400/25 text-white hover:text-amber-300 border border-white/20 hover:border-amber-400/60 flex items-center justify-center shadow-md hover:scale-105 transition-all duration-200" title="Ajustes del Sistema">
+      <span class="material-symbols-outlined text-[21px]">settings</span>
     </a>
-    <a href="{{ url_for('perfil') }}" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-sky-400/25 text-white hover:text-sky-300 border border-white/20 hover:border-sky-400/60 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Ver Perfil">
-      <span class="material-symbols-outlined text-[24px]">person</span>
+    <a href="{{ url_for('perfil') }}" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-sky-400/25 text-white hover:text-sky-300 border border-white/20 hover:border-sky-400/60 flex items-center justify-center shadow-md hover:scale-105 transition-all duration-200" title="Ver Perfil">
+      <span class="material-symbols-outlined text-[21px]">person</span>
     </a>
-    <a href="{{ url_for('logout') }}" class="w-11 h-11 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white border border-red-400/40 hover:border-red-500 flex items-center justify-center shadow-md hover:scale-110 transition-all duration-200" title="Cerrar sesión">
-      <span class="material-symbols-outlined text-[24px]">logout</span>
+    <a href="{{ url_for('logout') }}" class="w-10 h-10 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white border border-red-400/40 hover:border-red-500 flex items-center justify-center shadow-md hover:scale-105 transition-all duration-200" title="Cerrar sesión">
+      <span class="material-symbols-outlined text-[21px]">logout</span>
     </a>
   </div>
   {% else %}
@@ -468,8 +520,8 @@ body.splash-disabled #pdi-splash-overlay,
 </div>
 </header>
 
-<div id="page-content" class="w-full flex-grow flex flex-col pt-[67.33px] animate-page-enter">
-  <main class="w-full flex-grow bg-background dark:bg-slate-950 flex flex-col">
+<div id="page-content" class="w-full flex-1 flex flex-col min-h-screen pt-[67.33px]">
+  <main class="w-full flex-1 bg-slate-50 dark:bg-slate-950 flex flex-col">
     <!-- flash messages -->
     <div class="px-6 lg:px-margin-desktop w-full max-w-[1720px] mx-auto mt-6">
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -492,69 +544,106 @@ body.splash-disabled #pdi-splash-overlay,
     {% block content %}{% endblock %}
   </main>
 
+  <!-- 3. Footer Institucional PDI / SIAD - Diseño Limpio, Sencillo y Proporcionado -->
+  <footer id="page-footer" class="w-full mt-auto bg-[#001c3d] text-white border-t-2 border-[#ffd100] shadow-md select-none shrink-0">
+    <div class="w-full max-w-[1720px] mx-auto px-6 sm:px-10 py-7">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-center">
+
+        <!-- Columna 1: Identidad Institucional -->
+        <div class="flex items-center gap-3.5">
+          <img src="{{ url_for('static', filename='img/pdi-logo.jpg') }}" alt="PDI"
+            class="h-11 w-auto object-contain rounded-lg border border-amber-400/40 shadow-xs shrink-0">
+          <div>
+            <h3 class="text-sm font-black text-white leading-tight tracking-wide">Policía de Investigaciones de Chile</h3>
+            <p class="text-xs text-[#ffd100] font-bold mt-0.5">SIAD · Sistema de Análisis Documental y OCR</p>
+          </div>
+        </div>
+
+        <!-- Columna 2: Enlaces Rápidos Centrados -->
+        <nav class="flex flex-wrap items-center justify-center md:justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-200">
+          <a href="{{ url_for('index') }}" class="hover:text-[#ffd100] transition-colors flex items-center gap-1.5 py-1">
+            <span class="material-symbols-outlined text-[17px]">document_scanner</span>
+            <span>Procesamiento OCR</span>
+          </a>
+          <a href="{{ url_for('historial') }}" class="hover:text-[#ffd100] transition-colors flex items-center gap-1.5 py-1">
+            <span class="material-symbols-outlined text-[17px]">history</span>
+            <span>Historial</span>
+          </a>
+          <a href="{{ url_for('estadisticas') }}" class="hover:text-[#ffd100] transition-colors flex items-center gap-1.5 py-1">
+            <span class="material-symbols-outlined text-[17px]">bar_chart</span>
+            <span>Estadísticas</span>
+          </a>
+          <a href="/" class="hover:text-amber-300 transition-colors flex items-center gap-1.5 py-1 font-bold text-[#ffd100]">
+            <span class="material-symbols-outlined text-[17px]">fingerprint</span>
+            <span>Sistema ABIS</span>
+          </a>
+        </nav>
+
+        <!-- Columna 3: Estado y Botón Subir Alineados a la Derecha -->
+        <div class="flex items-center justify-start md:justify-end gap-3.5">
+          <div class="flex items-center gap-2 text-xs text-slate-200 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold">Sistema Operativo</span>
+          </div>
+          <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+            class="bg-white/10 hover:bg-[#ffd100] text-slate-200 hover:text-[#00234c] border border-white/20 hover:border-amber-400 font-bold text-xs py-1.5 px-3.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Volver al inicio de la página">
+            <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+            <span>Volver arriba</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Línea sutil de Copyright -->
+      <div class="border-t border-white/10 mt-6 pt-4 text-center text-[11px] text-slate-400">
+        © 2026 Policía de Investigaciones de Chile • Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
 
 </div>
 
 <script>
 (function () {
   var root = document.documentElement;
+  sessionStorage.setItem('pdi_splash_completed', '1');
+  root.classList.add('splash-disabled');
 
-  // Marcar splash como visto inmediatamente para que NUNCA vuelva a salir entre menús
-  if (!root.classList.contains('splash-disabled')) {
-    sessionStorage.setItem('pdi_splash_completed', '1');
-    setTimeout(function () {
-      root.classList.add('splash-disabled');
-      var fontSize = localStorage.getItem('fontSize');
-      if (fontSize && fontSize !== '100') {
-        root.style.zoom = fontSize + '%';
-      } else {
-        root.style.removeProperty('zoom');
-      }
-    }, 2450);
+  var progressBar = document.getElementById('siad-progress-bar');
+  if (progressBar) {
+    progressBar.style.transition = 'width 0.2s ease, opacity 0.15s ease';
+    progressBar.style.width = '100%';
+    setTimeout(function() {
+      progressBar.style.opacity = '0';
+      setTimeout(function() {
+        progressBar.style.width = '0%';
+      }, 150);
+    }, 80);
   }
 
-  // Transición suave e instantánea al hacer clic en pestañas y enlaces de navegación
-  document.addEventListener('DOMContentLoaded', function () {
-    var pageContent = document.getElementById('page-content');
-    if (!pageContent) return;
+  // Barra de progreso dorada inmediata al hacer clic en cualquier navegación
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href]');
+    if (!link) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    var href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || link.target === '_blank' || link.hasAttribute('download')) return;
 
-    document.querySelectorAll('header a[href], nav a[href]').forEach(function (link) {
-      link.addEventListener('click', function (e) {
-        var href = this.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript:') || this.target === '_blank') return;
-        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        
-        try {
-          var targetUrl = new URL(this.href, window.location.origin);
-          if (window.location.pathname === targetUrl.pathname && window.location.search === targetUrl.search) return;
-        } catch (err) {}
-
-        e.preventDefault();
-        pageContent.classList.add('page-leaving');
-        setTimeout(function () {
-          window.location.href = href;
-        }, 130);
-      });
-    });
-  });
-
-  window.addEventListener('pageshow', function () {
-    var pageContent = document.getElementById('page-content');
-    if (pageContent) {
-      pageContent.classList.remove('page-leaving');
+    if (progressBar) {
+      progressBar.style.transition = 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s ease';
+      progressBar.style.opacity = '1';
+      progressBar.style.width = '70%';
     }
   });
 
-  // Controlador para reproducir bajo demanda (ej: botón en Configuración)
+  // Reproducción bajo demanda para pruebas
   window.triggerPdiSplash = function () {
     var overlay = document.getElementById('pdi-splash-overlay');
     var bar = document.getElementById('pdi-splash-bar');
     if (!overlay) return;
 
-    var fontSize = localStorage.getItem('fontSize');
-    if (fontSize) root.style.zoom = '100%';
-
-    root.classList.remove('splash-disabled');
+    overlay.style.removeProperty('display');
     overlay.style.display = 'flex';
     overlay.style.animation = 'none';
     if (bar) bar.style.animation = 'none';
@@ -564,15 +653,14 @@ body.splash-disabled #pdi-splash-overlay,
       box.offsetHeight;
       box.style.animation = 'pdiBoxScaleOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
     }
-    overlay.offsetHeight; /* trigger reflow */
+    overlay.offsetHeight;
     if (bar) bar.offsetHeight;
 
     overlay.style.animation = 'pdiOverlayFadeOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
     if (bar) bar.style.animation = 'pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
 
     setTimeout(function () {
-      root.classList.add('splash-disabled');
-      if (fontSize) root.style.zoom = fontSize + '%';
+      overlay.style.display = 'none';
     }, 2450);
   };
 })();

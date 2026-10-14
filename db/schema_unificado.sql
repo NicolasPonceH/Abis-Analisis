@@ -215,6 +215,15 @@ CREATE TABLE IF NOT EXISTS usuarios (
     ultimo_ingreso TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS resumenes_feedback (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_username TEXT NOT NULL,
+    documento_id BIGINT,
+    resumen_original TEXT NOT NULL,
+    resumen_editado TEXT NOT NULL,
+    creado_en TIMESTAMPTZ DEFAULT now()
+);
+
 -- Full-Text Search para documentos del SIAD
 ALTER TABLE documentos ADD COLUMN IF NOT EXISTS tsv tsvector;
 CREATE INDEX IF NOT EXISTS idx_documentos_tsv ON documentos USING GIN (tsv);

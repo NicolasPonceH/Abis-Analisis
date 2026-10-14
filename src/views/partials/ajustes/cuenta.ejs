@@ -19,7 +19,7 @@
           <div class="account-profile-identity">
             <span class="account-profile-eyebrow">Perfil institucional</span>
             <h2><%= typeof user !== 'undefined' ? user.username : 'Usuario' %></h2>
-            <p><i class="fa-solid fa-user-shield" aria-hidden="true"></i> <%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %></p>
+            <p><i class="fa-solid fa-user-shield" aria-hidden="true"></i> <%= typeof user !== 'undefined' ? ((user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin')) ? 'Administrador' : 'Operador') : 'Operador' %></p>
           </div>
           <div class="account-profile-state">
             <span>Estado de cuenta</span>

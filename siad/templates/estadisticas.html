@@ -32,6 +32,30 @@
 </script>
 {% endblock %}
 {% block content %}
+<script>
+  window.descargarGrafico = function(cardId, fileName) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    const btn = card.querySelector('button[onclick^="descargarGrafico"]');
+    if (btn) btn.style.visibility = 'hidden';
+    const options = {
+      scale: 2,
+      backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+      useCORS: true
+    };
+    if (typeof html2canvas !== 'undefined') {
+      html2canvas(card, options).then(canvas => {
+        if (btn) btn.style.visibility = '';
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    } else {
+      if (btn) btn.style.visibility = '';
+    }
+  };
+</script>
 
 <div class="px-6 lg:px-margin-desktop py-8 max-w-[1720px] mx-auto w-full flex flex-col">
 <!-- Header -->
@@ -581,32 +605,49 @@
   {{ stats.tendencias | tojson | safe if stats and stats.tendencias else '[]' }}
 </script>
 <script>
-  Chart.defaults.font.family = "'Inter', sans-serif";
-  Chart.defaults.color = "#64748b"; // slate-500
+  (function initEstadisticasCharts() {
+    if (typeof Chart === 'undefined') {
+      setTimeout(initEstadisticasCharts, 50);
+      return;
+    }
+    const canvasTendencias = document.getElementById("chartTendencias");
+    const canvasDistribucion = document.getElementById("chartDistribucion");
+    if (!canvasTendencias || !canvasDistribucion) return;
 
-  // Datos dinámicos desde el backend
-  const rawTendencias = JSON.parse(document.getElementById("tendencias-data").textContent);
+    if (Chart.getChart(canvasTendencias)) {
+      Chart.getChart(canvasTendencias).destroy();
+    }
+    if (Chart.getChart(canvasDistribucion)) {
+      Chart.getChart(canvasDistribucion).destroy();
+    }
 
-  // Trimear meses iniciales sin datos (donde la suma de todas las entidades sea 0)
-  let firstNonZeroIndex = rawTendencias.findIndex(d => 
-    ((d.vehiculos || 0) + (d.drogas || 0) + (d.armas || 0) + (d.personas || 0)) > 0
-  );
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = "#64748b"; // slate-500
 
-  let tendenciasData = rawTendencias;
-  if (firstNonZeroIndex > 0) {
-    const startIndex = Math.max(0, firstNonZeroIndex - 1);
-    tendenciasData = rawTendencias.slice(startIndex);
-  } else if (firstNonZeroIndex === -1 && rawTendencias.length > 0) {
-    tendenciasData = rawTendencias.slice(-1);
-  }
+    // Datos dinámicos desde el backend
+    const rawDataEl = document.getElementById("tendencias-data");
+    const rawTendencias = rawDataEl ? JSON.parse(rawDataEl.textContent || '[]') : [];
 
-  const labelsMeses = tendenciasData.length > 0 ? tendenciasData.map(d => d.label) : ["No hay datos"];
-  const dataVehiculos = tendenciasData.map(d => d.vehiculos || 0);
-  const dataSustancias = tendenciasData.map(d => d.drogas || 0);
-  const dataArmamento = tendenciasData.map(d => d.armas || 0);
-  const dataPersonas = tendenciasData.map(d => d.personas || 0);
-  
-  const ctxTendencias = document.getElementById("chartTendencias").getContext("2d");
+    // Trimear meses iniciales sin datos (donde la suma de todas las entidades sea 0)
+    let firstNonZeroIndex = rawTendencias.findIndex(d => 
+      ((d.vehiculos || 0) + (d.drogas || 0) + (d.armas || 0) + (d.personas || 0)) > 0
+    );
+
+    let tendenciasData = rawTendencias;
+    if (firstNonZeroIndex > 0) {
+      const startIndex = Math.max(0, firstNonZeroIndex - 1);
+      tendenciasData = rawTendencias.slice(startIndex);
+    } else if (firstNonZeroIndex === -1 && rawTendencias.length > 0) {
+      tendenciasData = rawTendencias.slice(-1);
+    }
+
+    const labelsMeses = tendenciasData.length > 0 ? tendenciasData.map(d => d.label) : ["No hay datos"];
+    const dataVehiculos = tendenciasData.map(d => d.vehiculos || 0);
+    const dataSustancias = tendenciasData.map(d => d.drogas || 0);
+    const dataArmamento = tendenciasData.map(d => d.armas || 0);
+    const dataPersonas = tendenciasData.map(d => d.personas || 0);
+    
+    const ctxTendencias = canvasTendencias.getContext("2d");
   
   // Gradientes verticales para las barras
   const barGradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 350);
@@ -885,6 +926,13 @@
       } 
     },
   });
+  window.initEstadisticasCharts = initEstadisticasCharts;
+  window.addEventListener('siad:view-changed', function(e) {
+    if (window.initEstadisticasCharts && document.getElementById('chartTendencias')) {
+      window.initEstadisticasCharts();
+    }
+  });
+})();
 </script>
 </div>
 {% endblock %}

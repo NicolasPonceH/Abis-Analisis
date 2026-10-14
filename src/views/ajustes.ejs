@@ -87,7 +87,7 @@
             <%= typeof user !== 'undefined' ? user.username.charAt(0) : 'U' %>
           </div>
           <div style="display: flex; flex-direction: column; line-height: 1.2;">
-            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;"><%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : 'Operador') : 'Operador' %></span>
+            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;"><%= typeof user !== 'undefined' ? ((user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin')) ? 'Administrador' : 'Operador') : 'Operador' %></span>
             <span style="color: var(--bg-surface); font-weight: 600; font-size: 1rem; text-transform: capitalize; letter-spacing: 0.02em;">
               <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
             </span>
@@ -97,6 +97,7 @@
     </div>
   </header>
 
+  <% const activeSec = (typeof activeSection !== 'undefined' && activeSection) ? activeSection : 'general'; %>
   <div class="ajustes-container">
     <aside class="ajustes-sidebar" id="ajustes-sidebar">
       <div class="ajustes-sidebar-header">
@@ -112,20 +113,20 @@
       </div>
 
       <nav class="ajustes-nav">
-        <a href="/ajustes/general" title="General" class="ajustes-nav-item <%= activeSection === 'general' ? 'active' : '' %>">
+        <a href="/ajustes/general" title="General" class="ajustes-nav-item <%= activeSec === 'general' ? 'active' : '' %>">
           <i class="fa-solid fa-sliders"></i><span class="ajustes-nav-label">General</span>
         </a>
-        <a href="/ajustes/horarios" title="Horarios" class="ajustes-nav-item <%= activeSection === 'horarios' ? 'active' : '' %>">
+        <a href="/ajustes/horarios" title="Horarios" class="ajustes-nav-item <%= activeSec === 'horarios' ? 'active' : '' %>">
           <i class="fa-solid fa-clock"></i><span class="ajustes-nav-label">Horarios</span>
         </a>
-        <a href="/ajustes/cuenta" title="Cuenta" class="ajustes-nav-item <%= activeSection === 'cuenta' ? 'active' : '' %>">
+        <a href="/ajustes/cuenta" title="Cuenta" class="ajustes-nav-item <%= activeSec === 'cuenta' ? 'active' : '' %>">
           <i class="fa-solid fa-user"></i><span class="ajustes-nav-label">Cuenta</span>
         </a>
       </nav>
 
       <div class="ajustes-section-title">ADMINISTRACIÓN</div>
       <nav class="ajustes-nav">
-        <a href="/ajustes/administracion" title="Administración" class="ajustes-nav-item <%= activeSection === 'administracion' ? 'active' : '' %>">
+        <a href="/ajustes/administracion" title="Administración" class="ajustes-nav-item <%= activeSec === 'administracion' ? 'active' : '' %>">
           <i class="fa-solid fa-users-gear"></i><span class="ajustes-nav-label">Administración</span>
         </a>
       </nav>
@@ -142,19 +143,18 @@
     </aside>
 
     <main class="ajustes-content">
-      <% if (activeSection === 'general') { %>
+      <% if (activeSec === 'general') { %>
         <%- include('partials/ajustes/general') %>
-      <% } else if (activeSection === 'horarios') { %>
+      <% } else if (activeSec === 'horarios') { %>
         <%- include('partials/ajustes/horarios') %>
-      <% } else if (activeSection === 'cuenta') { %>
+      <% } else if (activeSec === 'cuenta') { %>
         <%- include('partials/ajustes/cuenta') %>
-      <% } else if (activeSection === 'administracion') { %>
+      <% } else if (activeSec === 'administracion') { %>
         <%- include('partials/ajustes/administracion') %>
       <% } %>
     </main>
   </div>
-
-  <% if (activeSection === 'horarios') { %>
+  <% if (typeof activeSec !== 'undefined' && activeSec === 'horarios') { %>
   <script type="module">
     import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=6';
     const init = () => {

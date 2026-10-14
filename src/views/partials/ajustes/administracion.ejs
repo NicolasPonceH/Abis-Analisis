@@ -4,7 +4,7 @@
     <p style="color: var(--text-muted); font-size: 1.07rem; margin: 0;">Gestiona usuarios, roles y credenciales del Sistema ABIS de forma segura.</p>
   </div>
 
-  <% if (typeof user !== 'undefined' && user.rol === 'admin') { %>
+  <% if (typeof user !== 'undefined' && (user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin'))) { %>
     
     <!-- Nuevo Usuario (Colapsable) -->
     <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px;">
