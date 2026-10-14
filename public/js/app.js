@@ -5,7 +5,7 @@ import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportEx
 import { promptAuthModal } from './modules/auth-modal.js';
 import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js?v=22';
 import { setupDragAndDrop, initSpreadsheetIngest } from './modules/ingesta.js';
-import { loadTrendData, setupTrendControls } from './modules/tendencias.js';
+import { loadTrendData, setupTrendControls } from './modules/tendencias.js?v=20261013-2';
 import { auditState, cargarBitacoraAuditoria } from './modules/auditoria.js';
 import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js';
 

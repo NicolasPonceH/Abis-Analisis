@@ -14,6 +14,12 @@ const {
 } = require("./reportes/reporteRango");
 const { runEtl, runSheetEtl } = require("./etl");
 const {
+  ensureIngestHistory,
+  crearLote,
+  actualizarLote,
+  listarLotes,
+} = require("./ingest/ingestHistory");
+const {
   generarHashSHA256,
   esBufferCifrado,
   cifrarBuffer,
@@ -405,6 +411,84 @@ app.post("/api/admin/create-user", requireAuth, express.json(), async (req, res)
   } catch (err) {
     console.error("Error in create-user:", err);
     return res.status(500).json({ error: "Error de servidor." });
+  }
+});
+
+// Elimina una cuenta de usuario desde el panel de administración.
+// No permite eliminar la cuenta autenticada ni dejar el sistema sin administradores.
+app.delete("/api/admin/users/:id", requireAuth, async (req, res) => {
+  if (req.user.rol !== "admin") {
+    return res.status(403).json({ ok: false, error: "No tienes permisos de administrador." });
+  }
+
+  const userId = Number(req.params.id);
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res.status(400).json({ ok: false, error: "Identificador de usuario no válido." });
+  }
+  if (!password) {
+    return res.status(400).json({ ok: false, error: "Debes introducir tu contraseña para validar la acción." });
+  }
+
+  try {
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: req.user.username, password }),
+    });
+    const authData = await authRes.json();
+    if (!authRes.ok || !authData.ok) {
+      return res.status(401).json({ ok: false, error: "Contraseña incorrecta. No se eliminó ningún usuario." });
+    }
+  } catch (err) {
+    console.error("Error validating admin password for user deletion:", err);
+    return res.status(503).json({ ok: false, error: "No se pudo validar la contraseña en este momento." });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const targetResult = await client.query(
+      "SELECT id, username, rol FROM usuarios WHERE id = $1 FOR UPDATE",
+      [userId]
+    );
+    if (targetResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ ok: false, error: "Usuario no encontrado." });
+    }
+
+    const target = targetResult.rows[0];
+    if (String(target.username).toLowerCase() === String(req.user.username).toLowerCase()) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ ok: false, error: "No puedes eliminar tu propia cuenta." });
+    }
+
+    if (target.rol === "admin") {
+      const adminsResult = await client.query(
+        "SELECT COUNT(*)::int AS total FROM usuarios WHERE rol = 'admin'"
+      );
+      if (adminsResult.rows[0].total <= 1) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({ ok: false, error: "No se puede eliminar al último administrador." });
+      }
+    }
+
+    await client.query("DELETE FROM usuarios WHERE id = $1", [userId]);
+    await client.query("COMMIT");
+
+    console.log(`[ADMIN] Usuario eliminado: ${target.username} por ${req.user.username}`);
+    return res.json({ ok: true, usuario: target.username });
+  } catch (err) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (_) {
+      // La conexión puede haber quedado cerrada; se conserva el error original.
+    }
+    console.error("Error deleting user:", err);
+    return res.status(500).json({ ok: false, error: "No se pudo eliminar el usuario." });
+  } finally {
+    client.release();
   }
 });
 
@@ -1058,6 +1142,7 @@ function transformOracleToPostgre(rows, cols) {
 module.exports = { transformOracleToPostgre };
 
 app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
+  let idLote = null;
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
@@ -1083,13 +1168,27 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
     const hashSHA256 = generarHashSHA256(fileBuffer);
     const estaCifrado = esBufferCifrado(fileBuffer);
 
+    await ensureIngestHistory(pool);
+    idLote = await crearLote(pool, {
+      tipoIngesta: "ARCHIVO",
+      nombreArchivo: nombreOriginal,
+      hashSha256: hashSHA256,
+      usuario: req.user.username,
+    });
+
     console.log(`[UPLOAD AUTORIZADO] Procesando ${nombreOriginal} (${(tamañoBytes / 1024 / 1024).toFixed(2)} MB) - Cifrado: ${estaCifrado}`);
 
     const tiempoInicio = Date.now();
-    const resultadoEtl = await runEtl(fileBuffer, pool);
+    const resultadoEtl = await runEtl(fileBuffer, pool, { idLote });
     const duracionMs = Date.now() - tiempoInicio;
 
     if (!resultadoEtl.headerValidation.ok) {
+      await actualizarLote(pool, idLote, {
+        estado: "ERROR",
+        finalizado: true,
+        filasError: 1,
+        detalle: "Estructura de cabeceras invalida",
+      });
       return res.status(422).json({
         ok: false,
         error: "Estructura de cabeceras inválida",
@@ -1100,6 +1199,18 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
     }
 
     const totalInsertadas = resultadoEtl.insertResult ? resultadoEtl.insertResult.inserted : 0;
+    const detalleErrores = resultadoEtl.errors.length > 0
+      ? JSON.stringify(resultadoEtl.errors.slice(0, 50))
+      : null;
+    await actualizarLote(pool, idLote, {
+      estado: "COMPLETADO",
+      finalizado: true,
+      filasRecibidas: resultadoEtl.rows.length + resultadoEtl.errors.length,
+      filasValidas: resultadoEtl.rows.length,
+      filasInsertadas: totalInsertadas,
+      filasError: resultadoEtl.errors.length,
+      detalle: detalleErrores,
+    });
 
     // Registro formal en bitácora de auditoría inmutable
     try {
@@ -1125,8 +1236,20 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
       totalInsertadas,
       erroresFilas: resultadoEtl.errors.length,
       erroresDetalle: resultadoEtl.errors.slice(0, 50),
+      idLote,
     });
   } catch (err) {
+    if (idLote) {
+      try {
+        await actualizarLote(pool, idLote, {
+          estado: "ERROR",
+          finalizado: true,
+          detalle: err.message,
+        });
+      } catch (historyErr) {
+        console.error("[INGESTA HISTORIAL ERROR]", historyErr.message);
+      }
+    }
     console.error("[UPLOAD ERROR]", err);
     res.status(500).json({ ok: false, error: err.message });
   }
@@ -1134,6 +1257,7 @@ app.post("/api/ingest/upload", upload.single("archivo"), async (req, res) => {
 
 // Ingesta directa desde Hoja de Cálculo / Portapapeles (Copiar y Pegar desde Oracle/Excel)
 app.post("/api/ingest/sheet", async (req, res) => {
+  let idLote = null;
   try {
     // 1. Verificación estricta de la clave de autorización policial
     const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
@@ -1161,13 +1285,28 @@ app.post("/api/ingest/sheet", async (req, res) => {
     const payloadSummary = JSON.stringify({ headers, count: rows.length, muestra: rows.slice(0, 3) });
     const hashSHA256 = generarHashSHA256(payloadSummary);
 
+    await ensureIngestHistory(pool);
+    idLote = await crearLote(pool, {
+      tipoIngesta: "HOJA",
+      nombreArchivo: "Portapapeles / Oracle Sheet",
+      hashSha256: hashSHA256,
+      usuario: req.user.username,
+      filasRecibidas: rows.length,
+    });
+
     console.log(`[SHEET INGEST AUTORIZADO] Procesando ${rows.length} filas desde portapapeles/hoja de cálculo...`);
 
     const tiempoInicio = Date.now();
-    const resultadoEtl = await runSheetEtl(headers, rows, pool);
+    const resultadoEtl = await runSheetEtl(headers, rows, pool, { idLote });
     const duracionMs = Date.now() - tiempoInicio;
 
     if (!resultadoEtl.headerValidation.ok) {
+      await actualizarLote(pool, idLote, {
+        estado: "ERROR",
+        finalizado: true,
+        filasError: rows.length,
+        detalle: "Estructura de columnas invalida",
+      });
       return res.status(422).json({
         ok: false,
         error: "Estructura de columnas inválida. No se detectaron las columnas requeridas del sistema ABIS.",
@@ -1177,6 +1316,18 @@ app.post("/api/ingest/sheet", async (req, res) => {
     }
 
     const totalInsertadas = resultadoEtl.insertResult ? resultadoEtl.insertResult.inserted : 0;
+    const detalleErrores = resultadoEtl.errors.length > 0
+      ? JSON.stringify(resultadoEtl.errors.slice(0, 50))
+      : null;
+    await actualizarLote(pool, idLote, {
+      estado: "COMPLETADO",
+      finalizado: true,
+      filasRecibidas: rows.length,
+      filasValidas: resultadoEtl.rows.length,
+      filasInsertadas: totalInsertadas,
+      filasError: resultadoEtl.errors.length,
+      detalle: detalleErrores,
+    });
 
     // Registro formal en bitácora de auditoría inmutable
     try {
@@ -1204,10 +1355,124 @@ app.post("/api/ingest/sheet", async (req, res) => {
       totalMapeadas: resultadoEtl.rows.length,
       erroresFilas: resultadoEtl.errors.length,
       erroresDetalle: resultadoEtl.errors.slice(0, 50),
+      idLote,
     });
   } catch (err) {
+    if (idLote) {
+      try {
+        await actualizarLote(pool, idLote, {
+          estado: "ERROR",
+          finalizado: true,
+          detalle: err.message,
+        });
+      } catch (historyErr) {
+        console.error("[INGESTA HISTORIAL ERROR]", historyErr.message);
+      }
+    }
     console.error("[SHEET INGEST ERROR]", err);
     res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Historial de lotes cargados desde archivo o portapapeles.
+app.get("/api/ingest/historial", async (req, res) => {
+  try {
+    await ensureIngestHistory(pool);
+    res.json({ ok: true, lotes: await listarLotes(pool) });
+  } catch (err) {
+    console.error("[INGESTA HISTORIAL ERROR]", err);
+    res.status(500).json({ ok: false, error: "No se pudo cargar el historial de ingestas." });
+  }
+});
+
+// Elimina solo los registros asociados a un lote y conserva el historial.
+// La contraseña se valida contra el usuario autenticado antes de borrar.
+app.delete("/api/ingest/lotes/:id", async (req, res) => {
+  const idLote = Number(req.params.id);
+  const claveEnviada = req.headers["x-ingesta-auth"] || req.body?.clave || req.body?.password;
+
+  if (!Number.isInteger(idLote) || idLote <= 0) {
+    return res.status(400).json({ ok: false, error: "Identificador de lote invalido." });
+  }
+  if (!claveEnviada) {
+    return res.status(401).json({ ok: false, error: "Contraseña requerida.", codigo: "AUTH_REQUIRED" });
+  }
+
+  try {
+    const authRes = await fetch(`${process.env.SIAD_URL || "http://127.0.0.1:5001"}/api/verify_password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: req.user.username, password: claveEnviada }),
+    });
+    const authData = await authRes.json();
+    if (!authData.ok) {
+      return res.status(401).json({
+        ok: false,
+        error: "Contraseña no valida. No se eliminaron registros.",
+        codigo: "AUTH_REQUIRED",
+      });
+    }
+
+    await ensureIngestHistory(pool);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const loteResult = await client.query(
+        "SELECT id_lote, nombre_archivo, estado, filas_insertadas FROM ingesta_lote WHERE id_lote = $1 FOR UPDATE",
+        [idLote]
+      );
+      if (loteResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ ok: false, error: "Lote de ingesta no encontrado." });
+      }
+
+      const lote = loteResult.rows[0];
+      if (lote.estado === "ELIMINADO") {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ ok: false, error: "Este lote ya fue eliminado." });
+      }
+
+      const deletedResult = await client.query(
+        "DELETE FROM registro_enrolamiento WHERE id_lote_ingesta = $1",
+        [idLote]
+      );
+      const eliminados = deletedResult.rowCount || 0;
+
+      await client.query(
+        `UPDATE ingesta_lote
+         SET estado = 'ELIMINADO', finalizado_en = NOW(), filas_eliminadas = $2,
+             detalle = $3
+         WHERE id_lote = $1`,
+        [idLote, eliminados, `Eliminado por ${req.user.username}.`]
+      );
+
+      try {
+        await client.query(
+          `INSERT INTO registro_auditoria_cifrada
+            (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
+           VALUES (NOW(), 'ELIMINACION_INGESTA_AUTORIZADA', $1, $2, $3, $4)`,
+          [
+            `Lote_${idLote}`,
+            generarHashSHA256(Buffer.from(`lote:${idLote}:${eliminados}`)),
+            `Registros eliminados: ${eliminados}. Archivo: ${lote.nombre_archivo || "sin nombre"}.`,
+            req.user.username,
+          ]
+        );
+      } catch (auditErr) {
+        console.warn("[AUDITORIA] No se pudo registrar la eliminacion:", auditErr.message);
+      }
+
+      await client.query("COMMIT");
+      res.json({ ok: true, idLote, eliminados, mensaje: "Lote eliminado correctamente." });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error("[INGESTA ELIMINACION ERROR]", err);
+    res.status(500).json({ ok: false, error: "No se pudo eliminar el lote de ingesta." });
   }
 });
 
@@ -1249,6 +1514,59 @@ app.post("/api/telegram/enviar", async (req, res) => {
 
     const replyMarkup = crearBotonesDescarga({ fecha: reporte.fecha || fecha, desde, hasta });
     let envio = null;
+
+    // El envio manual diario usa el mismo album de 4 capturas que el programador.
+    if (!desde || !hasta) {
+      try {
+        const {
+          generarCapturaDiaria,
+          generarCapturaDistribucionDiaria,
+          generarCapturaAcumulado,
+        } = require("./reportes/imageReportService");
+        const { obtenerDatosAcumulados } = require("./reportes/reporteFinDeSemana");
+        const anioActual = new Date().getFullYear();
+        const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+          obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+          obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+        ]);
+        const [bufferDiario, bufferDistribucion, bufferAcumEnrolados, bufferAcumRegistros] = await Promise.all([
+          generarCapturaDiaria(reporte),
+          generarCapturaDistribucionDiaria(reporte),
+          generarCapturaAcumulado(dataAcumEnrolados, {
+            titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL ANIO ${anioActual}`,
+            tipoFiltro: "ENROLADO",
+            anio: anioActual,
+          }),
+          generarCapturaAcumulado(dataAcumRegistros, {
+            titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACUMULADO AL ANIO ${anioActual}`,
+            tipoFiltro: "TODOS",
+            anio: anioActual,
+          }),
+        ]);
+
+        envio = await telegramClient.enviarGrupoFotos({
+          token,
+          chatId,
+          fotos: [
+            { buffer: bufferDiario, caption: `FOTO 1/4: ESTADOS DE LA JORNADA ${fecha}` },
+            { buffer: bufferDistribucion, caption: `FOTO 2/4: DISTRIBUCION DE LA JORNADA ${fecha}` },
+            { buffer: bufferAcumEnrolados, caption: `FOTO 3/4: ENROLADOS ACUMULADOS ${anioActual}` },
+            { buffer: bufferAcumRegistros, caption: `FOTO 4/4: REGISTROS ACUMULADOS ${anioActual}` },
+          ],
+        });
+
+        const resTexto = await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
+        const primerEnvio = Array.isArray(envio) ? envio[0] : envio;
+        return res.json({
+          ok: true,
+          mensaje: `Reporte visual de la jornada ${periodo} enviado exitosamente al canal de Telegram institucional`,
+          messageId: primerEnvio?.message_id || resTexto?.message_id,
+        });
+      } catch (dailyErr) {
+        console.error("[TELEGRAM ENVIAR DIARIO ERROR]", dailyErr);
+        return res.status(500).json({ ok: false, error: dailyErr.message });
+      }
+    }
 
     // Generar captura visual dinámica según la fecha o rango seleccionado en la web
     try {
@@ -1447,13 +1765,14 @@ app.post("/api/settings/schedule", async (req, res) => {
       });
     }
 
-    const { enabled, times, days, reportType, telegramChatId } = req.body || {};
+    const { enabled, times, days, reportType, telegramChatId, sendFourPhotosDaily } = req.body || {};
     const updated = await schedulerService.saveConfig({
       enabled: enabled !== undefined ? Boolean(enabled) : undefined,
       times,
       days,
       reportType,
       telegramChatId,
+      sendFourPhotosDaily: sendFourPhotosDaily !== undefined ? Boolean(sendFourPhotosDaily) : undefined,
     });
     const next = schedulerService.getNextExecution(updated);
 
@@ -1738,6 +2057,10 @@ const server = app.listen(port, () => {
     console.warn("Advertencia al inicializar destinatarios de Telegram:", err.message);
   });
 
+  ensureIngestHistory(pool).catch((err) => {
+    console.warn("Advertencia al inicializar historial de ingestas:", err.message);
+  });
+
   // Iniciar servicio de horarios y reportes automáticos
   schedulerService.iniciarScheduler({ pool });
 
@@ -1759,5 +2082,3 @@ function cerrarServidor() {
 
 process.on("SIGINT", cerrarServidor);
 process.on("SIGTERM", cerrarServidor);
-
-

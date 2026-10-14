@@ -111,6 +111,128 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Historial de lotes y eliminacion autorizada */
+.ingesta-history-card {
+  margin-top: 24px;
+  padding: 22px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.ingesta-history-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ingesta-history-title {
+  margin: 0;
+  color: var(--pdi-navy);
+  font-size: 1.12rem;
+  font-weight: 800;
+}
+
+.ingesta-history-subtitle {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.ingesta-history-table-wrap {
+  overflow-x: auto;
+}
+
+.ingesta-history-table {
+  min-width: 850px;
+}
+
+.ingesta-history-table th,
+.ingesta-history-table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.ingesta-history-empty {
+  padding: 24px !important;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.ingesta-history-feedback {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+}
+
+.ingesta-history-feedback.success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+.ingesta-history-feedback.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.ingesta-lote-file {
+  display: block;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--pdi-navy);
+  font-weight: 650;
+}
+
+.ingesta-lote-meta {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.ingesta-lote-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.ingesta-lote-status.completado { background: #dcfce7; color: #166534; }
+.ingesta-lote-status.procesando { background: #e0f2fe; color: #0369a1; }
+.ingesta-lote-status.error { background: #fee2e2; color: #991b1b; }
+.ingesta-lote-status.eliminado { background: #f1f5f9; color: #475569; }
+
+.btn-ingesta-eliminar {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  background: #fff1f2;
+  color: #be123c;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.btn-ingesta-eliminar:hover { background: #ffe4e6; }
+.btn-ingesta-eliminar:disabled { cursor: not-allowed; opacity: 0.5; }
+
+@media (max-width: 700px) {
+  .ingesta-history-header { flex-direction: column; }
+  .ingesta-history-header .btn { width: 100%; justify-content: center; }
+}
+
 /* Spinner de Carga */
 .spinner {
   border: 3px solid rgba(0, 43, 73, 0.15);
@@ -702,6 +824,52 @@
   border-top: 1px solid rgba(0, 35, 76, 0.08);
   flex-wrap: wrap;
   gap: 14px;
+}
+
+.sheet-preview-action-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #dbeafe;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 7px 10px;
+  border: 1px solid rgba(219, 234, 254, 0.22);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.16);
+  white-space: nowrap;
+}
+
+.sheet-preview-action-hint svg {
+  stroke: #a7f3d0;
+}
+
+.sheet-preview-primary-action {
+  min-height: 42px;
+  padding: 0 18px;
+  box-shadow: 0 8px 18px rgba(255, 209, 0, 0.22);
+}
+
+.sheet-preview-primary-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(255, 209, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .sheet-preview-action-hint {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sheet-preview-footer {
+    align-items: stretch;
+  }
+
+  .sheet-preview-primary-action {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .sheet-footer-info {

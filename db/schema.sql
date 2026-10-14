@@ -47,6 +47,24 @@ CREATE TABLE IF NOT EXISTS profesion (
     nombre_profesion VARCHAR(150) NOT NULL UNIQUE
 );
 
+-- Historial de lotes de ingesta y trazabilidad para eliminacion controlada.
+CREATE TABLE IF NOT EXISTS ingesta_lote (
+    id_lote             BIGSERIAL PRIMARY KEY,
+    tipo_ingesta        VARCHAR(30) NOT NULL,
+    nombre_archivo      VARCHAR(255),
+    hash_sha256         VARCHAR(64),
+    usuario             VARCHAR(120),
+    iniciado_en         TIMESTAMP NOT NULL DEFAULT NOW(),
+    finalizado_en       TIMESTAMP,
+    filas_recibidas     INTEGER NOT NULL DEFAULT 0,
+    filas_validas       INTEGER NOT NULL DEFAULT 0,
+    filas_insertadas    INTEGER NOT NULL DEFAULT 0,
+    filas_error         INTEGER NOT NULL DEFAULT 0,
+    filas_eliminadas    INTEGER NOT NULL DEFAULT 0,
+    estado              VARCHAR(20) NOT NULL DEFAULT 'PROCESANDO',
+    detalle             TEXT
+);
+
 CREATE TABLE IF NOT EXISTS registro_enrolamiento (
     id_registro               BIGSERIAL PRIMARY KEY,
     fecha_enrolamiento        DATE NOT NULL,
@@ -60,13 +78,15 @@ CREATE TABLE IF NOT EXISTS registro_enrolamiento (
     edad_exacta               SMALLINT,
     id_estado_sincronizacion  INTEGER NOT NULL REFERENCES estado_proceso(id_estado),
     id_estado_registro        INTEGER NOT NULL REFERENCES estado_proceso(id_estado),
-    id_estado_general         INTEGER NOT NULL REFERENCES estado_proceso(id_estado)
+    id_estado_general         INTEGER NOT NULL REFERENCES estado_proceso(id_estado),
+    id_lote_ingesta            BIGINT REFERENCES ingesta_lote(id_lote) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_registro_fecha_enrolamiento ON registro_enrolamiento (fecha_enrolamiento);
 CREATE INDEX IF NOT EXISTS idx_registro_cuartel ON registro_enrolamiento (id_cuartel);
 CREATE INDEX IF NOT EXISTS idx_registro_nacionalidad ON registro_enrolamiento (id_nacionalidad);
 CREATE INDEX IF NOT EXISTS idx_registro_profesion ON registro_enrolamiento (id_profesion);
+CREATE INDEX IF NOT EXISTS idx_registro_lote_ingesta ON registro_enrolamiento (id_lote_ingesta);
 
 -- Sprint 4: soportan las agrupaciones por estado del reporte diario (sincronizados/pendientes/
 -- error, registrados/pendientes, general OK/con error) sin escanear toda la tabla historica.

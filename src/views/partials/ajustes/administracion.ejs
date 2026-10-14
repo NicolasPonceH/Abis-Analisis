@@ -108,8 +108,11 @@
                       <button type="button" onclick="openRoleModal(<%= u.id %>, '<%= u.rol %>')" style="background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">
                         <i class="fa-solid fa-pen" style="color: var(--text-muted);"></i> Rol
                       </button>
-                      <button type="button" data-username="<%= u.username %>" onclick="openPasswordModal(<%= u.id %>, this)" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
-                        <i class="fa-solid fa-key" style="color: #ef4444;"></i> Clave
+                      <button type="button" data-username="<%= u.username %>" onclick="openPasswordModal(<%= u.id %>, this)" style="background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ecfdf5'">
+                        <i class="fa-solid fa-key" style="color: #16a34a;"></i> Clave
+                      </button>
+                      <button type="button" data-username="<%= u.username %>" onclick="eliminarUsuarioAdmin(<%= u.id %>, this)" style="background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'" title="Eliminar usuario">
+                        <i class="fa-solid fa-trash" style="color: #e11d48;"></i> Eliminar
                       </button>
                     </div>
                   </td>
@@ -124,8 +127,41 @@
     </div>
 
     <!-- Modals de Acción (Ocultos por defecto) -->
-    <div id="admin-action-modal" style="position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
-      <div style="background: var(--bg-surface); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden; transform: scale(0.95); transition: transform 0.2s;">
+    <style>
+      @keyframes adminModalBackdropIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes adminModalCardIn {
+        from { opacity: 0; transform: translateY(24px) scale(0.92); }
+        70% { transform: translateY(-3px) scale(1.01); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      @keyframes adminModalCardOut {
+        from { opacity: 1; transform: translateY(0) scale(1); }
+        to { opacity: 0; transform: translateY(16px) scale(0.94); }
+      }
+
+      #admin-action-modal.admin-modal-opening {
+        animation: adminModalBackdropIn 260ms ease-out both !important;
+      }
+
+      #admin-action-modal.admin-modal-opening > div {
+        animation: adminModalCardIn 360ms cubic-bezier(.2,.8,.2,1) both !important;
+      }
+
+      #admin-action-modal.admin-modal-closing {
+        animation: adminModalBackdropIn 180ms ease-in reverse both !important;
+      }
+
+      #admin-action-modal.admin-modal-closing > div {
+        animation: adminModalCardOut 180ms ease-in both !important;
+      }
+    </style>
+    <div id="admin-action-modal" style="position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0;">
+      <div style="background: var(--bg-surface); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden;">
         <div style="padding: 24px 32px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
           <div>
             <h2 id="admin-modal-title" style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: var(--text-primary);">Administrar</h2>
@@ -177,16 +213,39 @@
               <button type="submit" style="background: #DC2626; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(220,38,38,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(220,38,38,0.25)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(220,38,38,0.15)'">Forzar Cambio</button>
             </div>
           </form>
+
+          <!-- Form de validación para eliminar usuario -->
+          <form id="form-eliminar-usuario-admin" hidden novalidate>
+            <div style="background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316; padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; color: #9a3412; font-size: 0.92rem; line-height: 1.45;">
+              <strong>Acción sensible.</strong> Vas a eliminar definitivamente a <strong id="admin-delete-username"></strong>. Introduce tu contraseña para validar esta acción.
+            </div>
+            <div style="margin-bottom: 24px;">
+              <label for="admin-delete-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Tu contraseña</label>
+              <div class="password-wrapper" style="position:relative; width:100%;">
+                <input type="password" id="admin-delete-password" minlength="1" autocomplete="current-password" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s; padding-right: 48px !important;" onfocus="this.style.borderColor='#f97316'" onblur="this.style.borderColor='var(--border-subtle)'">
+                <button type="button" class="btn-toggle-eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer; width:24px; height:24px; padding:0; display:flex; align-items:center; justify-content:center; z-index:10;" onclick="togglePasswordVisibility('admin-delete-password', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                </button>
+              </div>
+            </div>
+            <p id="admin-delete-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button type="button" onclick="closeAdminModal()" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer;">Cancelar</button>
+              <button type="submit" style="background: #e11d48; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(225,29,72,0.2);"><i class="fa-solid fa-trash"></i> Validar y eliminar</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
     <script>
       let currentAdminTargetId = null;
+      let currentAdminTargetUsername = '';
 
       const modalEl = document.getElementById('admin-action-modal');
       const formRole = document.getElementById('form-editar-rol');
       const formPwd = document.getElementById('form-cambiar-password-admin');
+      const formDelete = document.getElementById('form-eliminar-usuario-admin');
       const modalTitle = document.getElementById('admin-modal-title');
       const modalSubtitle = document.getElementById('admin-modal-subtitle');
 
@@ -214,24 +273,27 @@
       }
 
       function openModal() {
+        modalEl.classList.remove('admin-modal-closing');
+        modalEl.classList.add('admin-modal-opening');
         modalEl.style.display = 'flex';
-        // force reflow
         void modalEl.offsetWidth;
-        modalEl.style.opacity = '1';
-        modalEl.querySelector('div').style.transform = 'scale(1)';
       }
 
       window.closeAdminModal = function() {
-        modalEl.style.opacity = '0';
-        modalEl.querySelector('div').style.transform = 'scale(0.95)';
+        modalEl.classList.remove('admin-modal-opening');
+        modalEl.classList.add('admin-modal-closing');
         setTimeout(() => {
           modalEl.style.display = 'none';
+          modalEl.classList.remove('admin-modal-closing');
           formRole.hidden = true;
           formPwd.hidden = true;
+          formDelete.hidden = true;
           formRole.reset();
           formPwd.reset();
+          formDelete.reset();
           setFeedback('editar-rol-feedback', '', '');
           setFeedback('admin-password-feedback', '', '');
+          setFeedback('admin-delete-feedback', '', '');
         }, 200);
       };
 
@@ -251,6 +313,18 @@
         modalSubtitle.textContent = `Cambio forzado para: ${username}`;
         formPwd.hidden = false;
         openModal();
+      };
+
+      window.openDeleteModal = function(id, btn) {
+        currentAdminTargetId = id;
+        currentAdminTargetUsername = btn.getAttribute('data-username') || '';
+        document.getElementById('admin-delete-username').textContent = currentAdminTargetUsername;
+        document.getElementById('admin-delete-password').value = '';
+        modalTitle.textContent = 'Validar eliminación';
+        modalSubtitle.textContent = 'Se requiere tu contraseña para confirmar esta acción.';
+        formDelete.hidden = false;
+        openModal();
+        setTimeout(() => document.getElementById('admin-delete-password')?.focus(), 200);
       };
 
       // El formulario de alta se muestra únicamente dentro de un popup.
@@ -393,6 +467,38 @@
         } finally {
           btn.disabled = false;
           btn.innerHTML = 'Forzar Cambio';
+        }
+      });
+
+      window.eliminarUsuarioAdmin = function(id, button) {
+        openDeleteModal(id, button);
+      };
+
+      formDelete?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const password = document.getElementById('admin-delete-password').value;
+        const btn = formDelete.querySelector('button[type="submit"]');
+        if (!password) return setFeedback('admin-delete-feedback', 'Introduce tu contraseña para continuar.', 'error');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validando...';
+        setFeedback('admin-delete-feedback', 'Validando contraseña...', '');
+
+        try {
+          const res = await fetch(`/api/admin/users/${encodeURIComponent(currentAdminTargetId)}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo eliminar el usuario.');
+
+          setFeedback('admin-delete-feedback', 'Usuario eliminado. Recargando...', 'success');
+          setTimeout(() => window.location.reload(), 700);
+        } catch (err) {
+          setFeedback('admin-delete-feedback', err.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-trash"></i> Validar y eliminar';
         }
       });
     </script>

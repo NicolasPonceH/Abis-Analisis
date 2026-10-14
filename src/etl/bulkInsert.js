@@ -18,15 +18,17 @@ const COLUMNS = [
 // como la historica de 95k+ registros).
 const BATCH_SIZE = 5000;
 
-function buildInsertQuery(rows, paramOffset = 0) {
+function buildInsertQuery(rows, paramOffset = 0, idLote = null) {
+  const columns = idLote ? [...COLUMNS, "id_lote_ingesta"] : COLUMNS;
   const values = [];
   const placeholders = rows.map((row, i) => {
-    const base = paramOffset + i * COLUMNS.length;
+    const base = paramOffset + i * columns.length;
     COLUMNS.forEach((col) => values.push(row[col]));
-    const rowPlaceholders = COLUMNS.map((_, j) => `$${base + j + 1}`).join(", ");
+    if (idLote) values.push(idLote);
+    const rowPlaceholders = columns.map((_, j) => `$${base + j + 1}`).join(", ");
     return `(${rowPlaceholders})`;
   });
-  const sql = `INSERT INTO registro_enrolamiento (${COLUMNS.join(", ")}) VALUES ${placeholders.join(", ")}`;
+  const sql = `INSERT INTO registro_enrolamiento (${columns.join(", ")}) VALUES ${placeholders.join(", ")}`;
   return { sql, values };
 }
 
@@ -35,7 +37,7 @@ function buildInsertQuery(rows, paramOffset = 0) {
 // transaccion: si un lote falla a mitad de una carga historica grande, se hace ROLLBACK de
 // todo (ningun registro parcial queda insertado), no solo del lote que fallo.
 async function bulkInsertRegistros(pool, rows, options = {}) {
-  const { onBatchInserted } = options;
+  const { onBatchInserted, idLote = null } = options;
   if (rows.length === 0) return { inserted: 0, batches: 0 };
 
   const client = await pool.connect();
@@ -46,7 +48,7 @@ async function bulkInsertRegistros(pool, rows, options = {}) {
     let batches = 0;
     for (let start = 0; start < rows.length; start += BATCH_SIZE) {
       const batch = rows.slice(start, start + BATCH_SIZE);
-      const { sql, values } = buildInsertQuery(batch);
+      const { sql, values } = buildInsertQuery(batch, 0, idLote);
       await client.query(sql, values);
       inserted += batch.length;
       batches += 1;

@@ -10,6 +10,7 @@ export const state = {
   trendRange: "30", // "15" | "30" | "90" | "365" | "all"
   trendGranularity: "day", // "day" | "month"
   trendExpanded: false,
+  trendMatrixVisible: true,
   charts: {},
 };
 
@@ -42,4 +43,3 @@ export const CHART_PALETTE = {
     "#06b6d4", "#f43f5e", "#6366f1", "#14b8a6", "#3b82f6"
   ]
 };
-

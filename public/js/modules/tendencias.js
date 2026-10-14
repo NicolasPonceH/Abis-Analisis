@@ -346,18 +346,35 @@ export function setupTrendControls() {
   const btnExpandTrend = document.getElementById("btn-toggle-expand-trend");
   if (btnExpandTrend) {
     btnExpandTrend.addEventListener("click", () => {
-      state.trendExpanded = !state.trendExpanded;
       const chartBody = document.getElementById("trend-chart-body");
       const matrixCard = document.getElementById("trend-detail-matrix");
       const expandText = document.getElementById("trend-expand-text");
+      const matrixIsHidden = matrixCard
+        ? window.getComputedStyle(matrixCard).display === "none"
+        : false;
+      const shouldExpand = matrixIsHidden || !state.trendExpanded;
+
+      state.trendExpanded = shouldExpand;
 
       if (chartBody) {
         chartBody.classList.toggle("is-expanded", state.trendExpanded);
       }
       if (matrixCard) {
-        matrixCard.style.display = state.trendExpanded ? "block" : "none";
         if (state.trendExpanded) {
+          state.trendMatrixVisible = true;
+          matrixCard.style.display = "block";
+          const matrixToggle = document.getElementById("btn-collapse-trend");
+          matrixToggle?.setAttribute("aria-expanded", "true");
+          const matrixToggleLabel = matrixToggle?.querySelector("span");
+          if (matrixToggleLabel) matrixToggleLabel.textContent = "Ocultar Tabla";
           matrixCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } else {
+          state.trendMatrixVisible = false;
+          matrixCard.style.display = "none";
+          const matrixToggle = document.getElementById("btn-collapse-trend");
+          matrixToggle?.setAttribute("aria-expanded", "false");
+          const matrixToggleLabel = matrixToggle?.querySelector("span");
+          if (matrixToggleLabel) matrixToggleLabel.textContent = "Mostrar Tabla";
         }
       }
       if (expandText) {
@@ -373,9 +390,21 @@ export function setupTrendControls() {
 
   // Botón contraer dentro de la tabla
   const btnCollapseTrend = document.getElementById("btn-collapse-trend");
+  const initialMatrixCard = document.getElementById("trend-detail-matrix");
+  if (initialMatrixCard) {
+    state.trendMatrixVisible = window.getComputedStyle(initialMatrixCard).display !== "none";
+  }
   if (btnCollapseTrend) {
     btnCollapseTrend.addEventListener("click", () => {
-      btnExpandTrend?.click();
+      const matrixCard = document.getElementById("trend-detail-matrix");
+      if (!matrixCard) return;
+
+      const matrixIsVisible = window.getComputedStyle(matrixCard).display !== "none";
+      state.trendMatrixVisible = !matrixIsVisible;
+      matrixCard.style.display = state.trendMatrixVisible ? "block" : "none";
+      btnCollapseTrend.setAttribute("aria-expanded", String(state.trendMatrixVisible));
+      const label = btnCollapseTrend.querySelector("span");
+      if (label) label.textContent = state.trendMatrixVisible ? "Ocultar Tabla" : "Mostrar Tabla";
     });
   }
 

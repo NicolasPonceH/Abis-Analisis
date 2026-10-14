@@ -2,9 +2,9 @@ import { state } from '../core/state.js';
 import { escapeHtml } from '../core/utils.js';
 import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
 import { loadMetrics } from './panel-ejecutivo.js';
-import { loadTrendData } from './tendencias.js';
+import { loadTrendData } from './tendencias.js?v=20261013-2';
 import { cargarBitacoraAuditoria } from './auditoria.js';
-import { checkSystemHealth, loadAvailableDates } from '../app.js';
+import { checkSystemHealth, loadAvailableDates } from '../app.js?v=23';
 
 export const sheetState = {
   headers: [],
@@ -26,6 +26,133 @@ export const SHEET_SCHEMA = [
   { field: "estadoGeneral", label: "Estado General", required: true, aliases: ["estado general", "estado_general"] },
   { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación", "region 2", "región 2", "REGION2"] },
 ];
+
+// Formato institucional que puede llegar pegado desde Oracle/Excel sin cabeceras.
+// Las columnas adicionales se conservan en la vista previa, pero solo las columnas
+// reconocidas por SHEET_SCHEMA participan en el mapeo e insercion.
+const HEADERLESS_ORACLE_HEADERS_28 = [
+  "Fecha Enrolamiento", "Hora", "Equipo", "Usuario", "Unidad",
+  "Nombre Completo", "Tipo de Documento", "Documento", "Emitido En",
+  "Nacionalidad", "Estado Sincronizacion", "Estado Registro", "Estado General",
+  "Cuartel", "Region", "Fecha Nacimiento", "Edad Exacta", "Mayor de Edad",
+  "ID Origen", "IP", "Cuartel New", "Nombre Funcionario", "Profesion",
+  "Genero", "Tipo Registro", "Latitud", "Longitud", "ID Registro",
+];
+
+function formatoFechaIngesta(valor) {
+  if (!valor) return "-";
+  const fecha = new Date(valor);
+  if (Number.isNaN(fecha.getTime())) return String(valor);
+  return fecha.toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short" });
+}
+
+function claseEstadoIngesta(estado) {
+  return String(estado || "").toLowerCase().replace(/[^a-z]/g, "") || "error";
+}
+
+export async function cargarHistorialIngestas() {
+  const body = document.getElementById("ingesta-history-body");
+  const feedback = document.getElementById("ingesta-history-feedback");
+  if (!body) return;
+
+  try {
+    const res = await fetch("/api/ingest/historial");
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo cargar el historial.");
+
+    if (!data.lotes || data.lotes.length === 0) {
+      body.innerHTML = `<tr><td colspan="7" class="ingesta-history-empty">No hay ingestas registradas.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = data.lotes.map((lote) => {
+      const puedeEliminar = lote.estado !== "ELIMINADO" && lote.estado !== "PROCESANDO";
+      const archivo = lote.nombre_archivo || lote.tipo_ingesta || "Sin nombre";
+      return `
+        <tr>
+          <td><strong>#${escapeHtml(String(lote.id_lote))}</strong></td>
+          <td>${escapeHtml(formatoFechaIngesta(lote.iniciado_en))}</td>
+          <td>
+            <span class="ingesta-lote-file" title="${escapeHtml(archivo)}">${escapeHtml(archivo)}</span>
+            <span class="ingesta-lote-meta">${escapeHtml(lote.tipo_ingesta || "-")}</span>
+          </td>
+          <td>${escapeHtml(lote.usuario || "-")}</td>
+          <td>${Number(lote.filas_insertadas || 0).toLocaleString("es-CL")}</td>
+          <td><span class="ingesta-lote-status ${claseEstadoIngesta(lote.estado)}">${escapeHtml(lote.estado || "-")}</span></td>
+          <td>
+            ${puedeEliminar
+              ? `<button type="button" class="btn-ingesta-eliminar" data-ingesta-delete="${escapeHtml(String(lote.id_lote))}" data-ingesta-file="${escapeHtml(archivo)}" data-ingesta-count="${Number(lote.filas_insertadas || 0)}">Eliminar</button>`
+              : `<span class="ingesta-lote-meta">${lote.estado === "ELIMINADO" ? "Ya eliminado" : "En proceso"}</span>`}
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    body.querySelectorAll("[data-ingesta-delete]").forEach((button) => {
+      button.addEventListener("click", () => {
+        promptAuthModal({
+          idLote: Number(button.dataset.ingestaDelete),
+          archivo: button.dataset.ingestaFile,
+          cantidad: Number(button.dataset.ingestaCount || 0),
+        }, "ingesta_eliminar");
+      });
+    });
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="7" class="ingesta-history-empty">No se pudo cargar el historial.</td></tr>`;
+    if (feedback) {
+      feedback.className = "ingesta-history-feedback error";
+      feedback.textContent = err.message;
+      feedback.style.display = "block";
+    }
+  }
+}
+
+export async function executeDeleteIngestAuthorized(payload, clave) {
+  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
+  const errorMsg = document.getElementById("modal-auth-error");
+  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  const feedback = document.getElementById("ingesta-history-feedback");
+
+  try {
+    const res = await fetch(`/api/ingest/lotes/${encodeURIComponent(payload.idLote)}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ingesta-Auth": clave,
+      },
+      body: JSON.stringify({ clave }),
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo eliminar el lote.");
+
+    closeAuthModal();
+    if (feedback) {
+      feedback.className = "ingesta-history-feedback success";
+      feedback.textContent = `Lote #${payload.idLote} eliminado. Registros eliminados: ${Number(data.eliminados || 0).toLocaleString("es-CL")}.`;
+      feedback.style.display = "block";
+    }
+    await cargarHistorialIngestas();
+    await loadAvailableDates();
+    await loadMetrics();
+    await loadTrendData();
+    await checkSystemHealth();
+  } catch (err) {
+    if (modalDialog) {
+      modalDialog.classList.remove("modal-shake");
+      void modalDialog.offsetWidth;
+      modalDialog.classList.add("modal-shake");
+    }
+    if (errorMsg) {
+      errorMsg.textContent = err.message;
+      errorMsg.style.display = "flex";
+    }
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = "<span>Autorizar y Eliminar Registros</span>";
+    }
+  }
+}
 
 export function setupDragAndDrop() {
   const dropzone = document.getElementById("upload-dropzone");
@@ -64,6 +191,9 @@ export function setupDragAndDrop() {
 
   // Eventos del Modal de Autorización Policial
   setupAuthModalEvents();
+  const refreshHistory = document.getElementById("btn-refresh-ingesta-history");
+  if (refreshHistory) refreshHistory.addEventListener("click", cargarHistorialIngestas);
+  cargarHistorialIngestas();
 }
 
 export async function handleFileUpload(file, clave) {
@@ -158,6 +288,7 @@ export async function handleFileUpload(file, clave) {
       await loadMetrics();
       await loadTrendData();
       await checkSystemHealth();
+      await cargarHistorialIngestas();
     } else {
       if (statusDiv) {
         statusDiv.innerHTML = `
@@ -372,7 +503,17 @@ export function parseClipboardData(text) {
   let headers = [];
   let dataRows = [];
 
-  if (hasHeaderKeywords) {
+  // Si la primera fila parece un registro real (fecha + hora + equipo),
+  // nunca debe convertirse en encabezado aunque contenga palabras conocidas.
+  const looksLikeHeaderlessOracleRow = firstRow.length >= HEADERLESS_ORACLE_HEADERS_28.length
+    && /^(\d{1,2}[-/]\d{1,2}[-/]\d{4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})$/.test(String(firstRow[0] || "").trim())
+    && /^\d{1,2}:\d{2}(?::\d{2})?$/.test(String(firstRow[1] || "").trim())
+    && /^(PC DE ESCRITORIO|TABLET)$/i.test(String(firstRow[2] || "").trim());
+
+  if (looksLikeHeaderlessOracleRow) {
+    headers = HEADERLESS_ORACLE_HEADERS_28.slice();
+    dataRows = grid;
+  } else if (hasHeaderKeywords) {
     headers = firstRow.map((h) => String(h || "").trim());
     dataRows = grid.slice(1);
   } else {
@@ -396,7 +537,7 @@ export function parseClipboardData(text) {
   return { headers, rows: dataRows };
 }
 
-export function loadSampleOracleData() {
+function loadLegacySampleOracleData() {
   const hoy = new Date().toISOString().split("T")[0];
   const sampleHeaders = [
     "Acciones", "Fecha", "hora", "EQUIPO", "Usuario", "UNIDAD",
@@ -420,6 +561,26 @@ export function loadSampleOracleData() {
   ].join("\n");
 
   handlePastedClipboardText(tsvText);
+}
+
+// Muestra una muestra anonima con la misma estructura de 28 columnas que
+// normalmente se copia desde Oracle/Excel. Las columnas no modeladas se
+// conservan en la previsualizacion y no se insertan en PostgreSQL.
+export function loadSampleOracleData() {
+  const fecha = new Date().toISOString().split("T")[0];
+  const sampleHeaders = HEADERLESS_ORACLE_HEADERS_28.slice();
+  const sampleRows = [
+    [fecha, "08:15:00", "PC DE ESCRITORIO", "operador_demo", "PREPOLIN ARICA", "GOMEZ PEREZ JUAN", "DNI", "87654321", "VENEZUELA", "VENEZUELA", "SINCRONIZADO", "REGISTRADO", "OK", "CHACALLUTA", "ARICA Y PARINACOTA", "1994-02-10", "32", "MAYOR DE EDAD", "demo-001", "10.20.1.15", "CHACALLUTA", "FUNCIONARIO DEMO", "COMERCIANTE", "HOMBRE", "ENROLADO", "-18.4783", "-70.3126", "20820001"],
+    [fecha, "09:30:22", "TABLET", "operador_demo", "PREPOLIN ARICA", "SILVA MORA LAURA", "PASAPORTE", "PA123456", "COLOMBIA", "COLOMBIA", "SINCRONIZADO", "REGISTRADO", "OK", "CHUNGARA", "ARICA Y PARINACOTA", "1998-07-25", "28", "MAYOR DE EDAD", "demo-002", "10.20.1.18", "CHUNGARA", "FUNCIONARIO DEMO", "PROFESIONAL", "MUJER", "ENROLADO", "-18.9050", "-69.2725", "20820002"],
+    [fecha, "10:45:10", "PC DE ESCRITORIO", "operador_demo", "JENATID", "MAMANI CHOQUE CARLOS", "CEDULA", "65432198", "BOLIVIA", "BOLIVIA", "SINCRONIZADO", "REGISTRADO", "OK", "COLCHANES", "TARAPACA", "2012-11-03", "14", "MENOR DE EDAD", "demo-003", "10.20.2.11", "COLCHANES", "FUNCIONARIO DEMO", "ESTUDIANTE", "HOMBRE", "ENROLADO", "-20.5300", "-69.0500", "20820003"],
+    [fecha, "11:20:05", "TABLET", "operador_demo", "PREPOLIN ARICA", "JEAN BAPTISTE MARIE", "PASAPORTE", "HT998877", "HAITI", "HAITI", "SINCRONIZADO", "REGISTRADO", "OK", "BELEN", "ARICA Y PARINACOTA", "1985-04-12", "41", "MAYOR DE EDAD", "demo-004", "10.20.1.20", "BELEN", "FUNCIONARIO DEMO", "TECNICO", "MUJER", "ENROLADO", "-18.4739", "-70.3000", "20820004"],
+    [fecha, "12:05:40", "PC DE ESCRITORIO", "operador_demo", "PREPOLIN ARICA", "QUISPE MAMANI LUIS", "DNI", "45678912", "PERU", "PERU", "SINCRONIZADO", "REGISTRADO", "OK", "CHACALLUTA", "ARICA Y PARINACOTA", "1987-09-30", "39", "MAYOR DE EDAD", "demo-005", "10.20.1.22", "CHACALLUTA", "FUNCIONARIO DEMO", "VENDEDOR", "HOMBRE", "ENROLADO", "-18.4783", "-70.3126", "20820005"],
+  ];
+
+  handlePastedClipboardText([
+    sampleHeaders.join("\t"),
+    ...sampleRows.map((row) => row.join("\t")),
+  ].join("\n"));
 }
 
 export function renderSpreadsheetGrid() {
@@ -668,6 +829,16 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
     if (feedbackDiv) feedbackDiv.style.display = "block";
 
     if (res.ok && data.ok) {
+      const detalleErrores = Array.isArray(data.erroresDetalle)
+        ? data.erroresDetalle
+          .slice(0, 5)
+          .map((item) => {
+            const detalle = Array.isArray(item.errors) ? item.errors.join("; ") : "Error de mapeo";
+            const fila = item.fila ? `Fila ${item.fila}: ` : "";
+            return `${fila}${detalle}`;
+          })
+          .filter(Boolean)
+        : [];
       if (feedbackDiv) {
         feedbackDiv.innerHTML = `
           <div class="alert alert-success">
@@ -680,6 +851,7 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
                 &bull; <strong>Modo de Carga:</strong> <span class="badge badge-success">Portapapeles Directo Oracle DB / Excel</span><br>
                 &bull; <strong>Filas Procesadas:</strong> <strong>${(data.totalMapeadas || sheetData.rows.length).toLocaleString()}</strong> recibidas &bull; <strong>${(data.totalInsertadas || 0).toLocaleString()}</strong> insertadas en PostgreSQL<br>
                 &bull; <strong>Inconsistencias Registradas:</strong> ${data.erroresFilas || 0}<br>
+                ${detalleErrores.length > 0 ? `&bull; <strong>Detalle:</strong> ${escapeHtml(detalleErrores.join(" | "))}<br>` : ""}
                 &bull; <strong>Tiempo de Inserción:</strong> ${((data.duracionMs || 0) / 1000).toFixed(2)} segundos<br>
                 &bull; <strong>Huella Criptográfica SHA-256:</strong> <code>${data.hashSHA256}</code><br>
                 &bull; <strong>Auditoría:</strong> Evento <code>INGESTA_PORTAPAPELES_AUTORIZADA</code> registrado en la bitácora inmutable.
@@ -695,6 +867,7 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
       await loadMetrics();
       await loadTrendData();
       await checkSystemHealth();
+      await cargarHistorialIngestas();
       if (typeof cargarBitacoraAuditoria === "function") {
         cargarBitacoraAuditoria();
       }
