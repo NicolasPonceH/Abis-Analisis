@@ -476,5 +476,17 @@
 
   </div>
 
+  <script>
+    (function () {
+      if (new URLSearchParams(window.location.search).get('loader') === '1') {
+        sessionStorage.setItem('siad_show_splash', '1');
+      }
+      var form = document.querySelector('form.card');
+      if (!form) return;
+      form.addEventListener('submit', function () {
+        sessionStorage.setItem('siad_show_splash', '1');
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -215,6 +215,20 @@ async function obtenerInfoBot({ token }) {
   }
 }
 
+async function registrarComandosBot({ token, commands }) {
+  const url = `${TELEGRAM_API}/bot${token}/setMyCommands`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ commands }),
+  });
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error(`Telegram API setMyCommands: ${data.description || "error desconocido"}`);
+  }
+  return data.result;
+}
+
 module.exports = {
   enviarMensaje,
   enviarFoto,
@@ -223,6 +237,7 @@ module.exports = {
   responderCallback,
   obtenerActualizaciones,
   obtenerInfoBot,
+  registrarComandosBot,
 };
 
 

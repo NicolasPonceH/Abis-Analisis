@@ -339,25 +339,36 @@ def get_stats(dias=None, agrupacion=None):
                 entidades_filter = "WHERE documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 ent_params = [int(dias)]
 
+            # Las edades de detenidos y víctimas se conservan dentro del texto de la
+            # entidad (p. ej. "Juan Pérez, 15 años"). Esta expresión cubre 0-17 años
+            # y las etiquetas institucionales explícitas para documentos sin edad numérica.
+            menor_edad_sql = "(nombre ~* '(^|[^0-9])(0|[1-9]|1[0-7])[[:space:]]*(años?|anos?)([^[:alpha:]]|$)' OR nombre ILIKE '%%menor de edad%%' OR nombre ILIKE '%%NNA%%')"
+
             if dias:
                 imputados_filter = "WHERE (nombre NOT LIKE '(Víctima)%%' OR nombre IS NULL) AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 victimas_filter = "WHERE nombre LIKE '(Víctima)%%' AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
+                detenidos_menores_filter = f"WHERE nombre NOT LIKE '(Víctima)%%' AND nombre NOT LIKE '(Cómplice)%%' AND {menor_edad_sql} AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
+                victimas_menores_filter = f"WHERE nombre LIKE '(Víctima)%%' AND {menor_edad_sql} AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 cur.execute(f"""
                     SELECT 
                         (SELECT COUNT(*) FROM entidades_vehiculos {entidades_filter}) as v, 
                         (SELECT COUNT(*) FROM entidades_armas {entidades_filter}) as a, 
                         (SELECT COUNT(*) FROM entidades_drogas {entidades_filter}) as d, 
                         (SELECT COUNT(*) FROM entidades_personas {imputados_filter}) as p,
-                        (SELECT COUNT(*) FROM entidades_personas {victimas_filter}) as vic
-                """, [int(dias)] * 5)
+                        (SELECT COUNT(*) FROM entidades_personas {victimas_filter}) as vic,
+                        (SELECT COUNT(*) FROM entidades_personas {detenidos_menores_filter}) as det_menores,
+                        (SELECT COUNT(*) FROM entidades_personas {victimas_menores_filter}) as vic_menores
+                """, [int(dias)] * 7)
             else:
-                cur.execute("""
+                cur.execute(f"""
                     SELECT 
                         (SELECT COUNT(*) FROM entidades_vehiculos) as v, 
                         (SELECT COUNT(*) FROM entidades_armas) as a, 
                         (SELECT COUNT(*) FROM entidades_drogas) as d, 
                         (SELECT COUNT(*) FROM entidades_personas WHERE nombre NOT LIKE '(Víctima)%' OR nombre IS NULL) as p,
-                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre LIKE '(Víctima)%') as vic
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre LIKE '(Víctima)%') as vic,
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre NOT LIKE '(Víctima)%' AND nombre NOT LIKE '(Cómplice)%' AND {menor_edad_sql}) as det_menores,
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre LIKE '(Víctima)%' AND {menor_edad_sql}) as vic_menores
                 """)
             counts = cur.fetchone()
             por_categoria = {
@@ -365,7 +376,9 @@ def get_stats(dias=None, agrupacion=None):
                 "arma": counts[1],
                 "droga": counts[2],
                 "persona": counts[3],
-                "victima": counts[4]
+                "victima": counts[4],
+                "detenido_menor": counts[5],
+                "victima_menor": counts[6]
             }
 
             def top_valores(tabla, campo, limite=5, extra_where=""):

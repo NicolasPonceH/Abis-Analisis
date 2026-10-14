@@ -903,48 +903,23 @@
               
                           <div id="ficha_operativa_{{ loop.index0 }}" class="border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all overflow-hidden mb-6">
                 
-                <!-- Cabecera de la Ficha Operativa con Botón de Modificación y Aprendizaje IA -->
-                <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-white">
+                <!-- Cabecera de la Ficha Operativa -->
+                <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 sm:px-5 py-3 flex items-center justify-between gap-3 text-white">
                   <div class="flex items-center gap-2.5">
                     <span class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
                       <span class="material-symbols-outlined text-[19px]">badge</span>
                     </span>
                     <div>
                       <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-white leading-tight">Ficha Operativa de la Causa</h4>
-                      <p class="text-[11px] text-blue-200 font-medium">Metadatos estructurados para el informe oficial Word</p>
+                      <p class="text-[11px] text-blue-200 font-medium">Metadatos estructurados identificados automáticamente para el informe oficial Word</p>
                     </div>
-                  </div>
-                  
-                  <div class="flex items-center gap-2">
-                    {% if learned_rules and learned_rules.total_correcciones > 0 %}
-                    <span class="inline-flex items-center gap-1.5 bg-blue-900/80 border border-blue-400/30 text-amber-300 px-2.5 py-1 rounded-lg text-[11px] font-bold shadow-inner" title="La IA ha aprendido {{ learned_rules.total_correcciones }} correcciones para este y futuros partes">
-                      <span class="material-symbols-outlined text-[15px] text-[#ffd100]">psychology</span>
-                      <span>IA: {{ learned_rules.total_correcciones }} aprendidas</span>
-                    </span>
-                    {% endif %}
-                    <button type="button"
-                      data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                      data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                      data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                      data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                      onclick="abrirModalEdicionFichaFromBtn(this)"
-                      class="bg-[#ffd100] hover:bg-[#ffe040] active:scale-95 text-[#00234c] font-black text-xs uppercase px-3.5 py-2 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 transform hover:-translate-y-0.5">
-                      <span class="material-symbols-outlined text-[17px]">edit_note</span>
-                      <span>Modificar Ficha</span>
-                    </button>
                   </div>
                 </div>
 
                 <div class="p-4 sm:p-5 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                   <!-- Card Unidad -->
-                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-3 flex items-center justify-between gap-2.5 border border-blue-100 dark:border-blue-900/40 group hover:border-blue-300 transition-all cursor-pointer"
-                    data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                    data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                    data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                    data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                    data-focus="inputFichaUnidad"
-                    onclick="abrirModalEdicionFichaFromBtn(this)" title="Clic para editar Unidad Policial">
+                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-3 flex items-center gap-2.5 border border-blue-100 dark:border-blue-900/40">
                     <div class="flex items-center gap-2.5 min-w-0">
                       <div class="text-blue-600 dark:text-blue-400 flex-shrink-0 bg-blue-100 dark:bg-blue-900/50 rounded-lg p-1.5">
                         <span class="material-symbols-outlined text-[20px]">local_police</span>
@@ -954,17 +929,23 @@
                         <span class="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
                       </div>
                     </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-blue-600 text-[18px] shrink-0 transition-colors">edit</span>
+                  </div>
+
+                  <!-- Card Fecha Procedimiento / Reporte -->
+                  <div class="bg-emerald-50/80 dark:bg-emerald-900/20 rounded-xl p-3 flex items-center gap-2.5 border border-emerald-100 dark:border-emerald-900/40">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="text-emerald-600 dark:text-emerald-400 flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg p-1.5">
+                        <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Fecha Reporte / Hecho</span>
+                        <span class="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{{ doc_data.metadata.fecha if doc_data and doc_data.metadata and doc_data.metadata.fecha else 'No especificada' }}</span>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- Card Delito -->
-                  <div class="bg-amber-50/80 dark:bg-amber-900/20 rounded-xl p-3 flex items-center justify-between gap-2.5 border border-amber-100 dark:border-amber-900/40 group hover:border-amber-300 transition-all cursor-pointer"
-                    data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                    data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                    data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                    data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                    data-focus="inputFichaHecho"
-                    onclick="abrirModalEdicionFichaFromBtn(this)" title="Clic para editar Motivo o Delito">
+                  <div class="bg-amber-50/80 dark:bg-amber-900/20 rounded-xl p-3 flex items-center gap-2.5 border border-amber-100 dark:border-amber-900/40">
                     <div class="flex items-center gap-2.5 min-w-0">
                       <div class="text-amber-600 dark:text-amber-400 flex-shrink-0 bg-amber-100 dark:bg-amber-900/50 rounded-lg p-1.5">
                         <span class="material-symbols-outlined text-[20px]">warning</span>
@@ -974,30 +955,21 @@
                         <span class="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
                       </div>
                     </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-amber-600 text-[18px] shrink-0 transition-colors">edit</span>
                   </div>
                 </div>
 
+                <!-- Detenidos Identificados -->
                 <div>
                   <div class="flex items-center justify-between mb-2.5">
                     <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                       <span class="material-symbols-outlined text-indigo-500 text-[18px]">groups</span>
                       Detenidos Identificados
                     </h4>
-                    <button type="button"
-                      data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                      data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                      data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                      data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                      data-focus="textareaFichaDetenidos"
-                      onclick="abrirModalEdicionFichaFromBtn(this)" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 flex items-center gap-0.5">
-                      <span class="material-symbols-outlined text-[15px]">add_circle</span> Gestionar
-                    </button>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
                       {% for detenido in doc_data.personas.detenidos %}
-                      <!-- Avatar Card -->
+                      <!-- Avatar Card Detenido -->
                       <div class="flex items-center gap-2.5 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl">
                         <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
                           <span class="material-symbols-outlined text-[20px]">person</span>
@@ -1010,15 +982,8 @@
                       </div>
                       {% endfor %}
                     {% else %}
-                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic flex items-center justify-between">
-                        <span>No se registran detenidos.</span>
-                        <button type="button"
-                          data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                          data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                          data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                          data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                          data-focus="textareaFichaDetenidos"
-                          onclick="abrirModalEdicionFichaFromBtn(this)" class="text-indigo-600 hover:underline font-bold text-[11px] not-italic">+ Agregar</button>
+                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
+                        <span>No se registran detenidos identificados.</span>
                       </div>
                     {% endif %}
                   </div>
@@ -1031,15 +996,6 @@
                       <span class="material-symbols-outlined text-rose-500 text-[18px]">person_alert</span>
                       Víctimas Identificadas
                     </h4>
-                    <button type="button"
-                      data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                      data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                      data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                      data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                      data-focus="textareaFichaVictimas"
-                      onclick="abrirModalEdicionFichaFromBtn(this)" class="text-[11px] font-bold text-rose-600 hover:text-rose-800 dark:text-rose-400 flex items-center gap-0.5">
-                      <span class="material-symbols-outlined text-[15px]">add_circle</span> Gestionar
-                    </button>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {% if doc_data and doc_data.personas and doc_data.personas.victimas %}
@@ -1057,15 +1013,8 @@
                       </div>
                       {% endfor %}
                     {% else %}
-                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic flex items-center justify-between">
+                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
                         <span>No se registran víctimas identificadas.</span>
-                        <button type="button"
-                          data-unidad="{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else '' }}"
-                          data-hecho="{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else '') }}"
-                          data-detenidos="{{ (doc_data.personas.detenidos if doc_data and doc_data.personas and doc_data.personas.detenidos else []) | join('\n') }}"
-                          data-victimas="{{ (doc_data.personas.victimas if doc_data and doc_data.personas and doc_data.personas.victimas else []) | join('\n') }}"
-                          data-focus="textareaFichaVictimas"
-                          onclick="abrirModalEdicionFichaFromBtn(this)" class="text-rose-600 hover:underline font-bold text-[11px] not-italic">+ Agregar</button>
                       </div>
                     {% endif %}
                   </div>
@@ -1511,202 +1460,7 @@
   </div>
 </dialog>
 
-<!-- Modal Modificar Ficha Operativa & Aprendizaje Continuo IA -->
-<dialog id="editFichaModal" class="p-0 rounded-3xl shadow-2xl border-2 border-blue-300 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop:bg-slate-900/60 backdrop:backdrop-blur-md w-full max-w-2xl overflow-hidden m-auto">
-  <form action="{{ url_for('update_ficha', filename=viewing) if viewing else '#' }}" method="post" class="flex flex-col h-full m-0" id="formEditFicha">
-    <!-- Cabecera Institucional PDI con Distintivo de Aprendizaje IA -->
-    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex justify-between items-center text-white shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
-          <span class="material-symbols-outlined text-[24px]">psychology</span>
-        </div>
-        <div>
-          <h3 class="font-black text-lg text-white leading-tight flex items-center gap-2">
-            Modificar Ficha Operativa
-            <span class="text-[10px] font-bold bg-[#ffd100] text-[#00234c] px-2 py-0.5 rounded-full uppercase tracking-wider">Aprendizaje IA</span>
-          </h3>
-          <p class="text-xs text-blue-100 font-medium">Corrección de metadatos y retroalimentación inteligente del motor NER</p>
-        </div>
-      </div>
-      <button type="button" onclick="document.getElementById('editFichaModal').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all">
-        <span class="material-symbols-outlined text-[20px]">close</span>
-      </button>
-    </div>
-
-    <!-- Valores Originales para Registro de Regla de Aprendizaje -->
-    <input type="hidden" name="original_unidad" id="inputOriginalUnidad" value="{{ (entities_data.subdocuments[0].metadata.unidad if entities_data and entities_data.subdocuments and entities_data.subdocuments[0].metadata.unidad else (entities_data.metadata.unidad if entities_data and entities_data.metadata and entities_data.metadata.unidad else '')) if entities_data else '' }}">
-    <input type="hidden" name="original_hecho" id="inputOriginalHecho" value="{{ (entities_data.subdocuments[0].metadata.hecho if entities_data and entities_data.subdocuments and entities_data.subdocuments[0].metadata.hecho else (entities_data.metadata.hecho if entities_data and entities_data.metadata and entities_data.metadata.hecho else (entities_data.metadata.delito if entities_data and entities_data.metadata and entities_data.metadata.delito else ''))) if entities_data else '' }}">
-
-    <!-- Cuerpo del Formulario -->
-    <div class="p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
-      <!-- Campo 1: Unidad Policial -->
-      <div class="flex flex-col gap-1.5">
-        <div class="flex items-center justify-between">
-          <label for="inputFichaUnidad" class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[18px] text-blue-600">local_police</span> Unidad Policial Responsable
-          </label>
-          <span class="text-[11px] font-semibold text-slate-400">Haz clic en una brigada para autocompletar</span>
-        </div>
-        <input type="text" id="inputFichaUnidad" name="unidad"
-          value="{{ (entities_data.subdocuments[0].metadata.unidad if entities_data and entities_data.subdocuments and entities_data.subdocuments[0].metadata.unidad else (entities_data.metadata.unidad if entities_data and entities_data.metadata and entities_data.metadata.unidad else '')) if entities_data else '' }}"
-          class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400"
-          placeholder="Ej: BH ARICA, BICRIM ARICA, BRISEX ARICA...">
-        <!-- Chips de Unidades Populares -->
-        <div class="flex flex-wrap gap-1.5 pt-1">
-          {% for u_btn in ['BH ARICA', 'BICRIM ARICA', 'BRISEX ARICA', 'BRIDEC ARICA', 'BIPE ARICA', 'BIDEMA ARICA', 'BRIANCO ARICA', 'DEPREM ARICA'] %}
-          <button type="button" onclick="document.getElementById('inputFichaUnidad').value='{{ u_btn }}'"
-            class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-blue-100/70 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/70 text-blue-900 dark:text-blue-200 transition-colors border border-blue-200 dark:border-blue-800">
-            {{ u_btn }}
-          </button>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Campo 2: Motivo o Delito Principal -->
-      <div class="flex flex-col gap-1.5">
-        <div class="flex items-center justify-between">
-          <label for="inputFichaHecho" class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[18px] text-amber-600">warning</span> Motivo, Delito o Hecho Principal
-          </label>
-          <span class="text-[11px] font-semibold text-slate-400">Selecciona o escribe el delito</span>
-        </div>
-        <input type="text" id="inputFichaHecho" name="hecho"
-          value="{{ (entities_data.subdocuments[0].metadata.hecho if entities_data and entities_data.subdocuments and entities_data.subdocuments[0].metadata.hecho else (entities_data.metadata.hecho if entities_data and entities_data.metadata and entities_data.metadata.hecho else (entities_data.metadata.delito if entities_data and entities_data.metadata and entities_data.metadata.delito else ''))) if entities_data else '' }}"
-          class="w-full bg-amber-50/30 dark:bg-slate-800/50 border-2 border-amber-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-500/20 transition-all shadow-sm placeholder:text-slate-400"
-          placeholder="Ej: HOMICIDIO, HALLAZGO DE CADÁVER, ROBO CON INTIMIDACIÓN...">
-        <!-- Chips de Delitos Populares -->
-        <div class="flex flex-wrap gap-1.5 pt-1">
-          {% for d_btn in ['HOMICIDIO', 'HALLAZGO DE CADÁVER', 'ROBO CON INTIMIDACIÓN', 'ROBO CON VIOLENCIA', 'INFRACCIÓN LEY 20.000', 'INFRACCIÓN LEY DE ARMAS', 'LESIONES GRAVES', 'AMENAZAS'] %}
-          <button type="button" onclick="document.getElementById('inputFichaHecho').value='{{ d_btn }}'"
-            class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-100/70 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/70 text-amber-950 dark:text-amber-200 transition-colors border border-amber-200 dark:border-amber-800">
-            {{ d_btn }}
-          </button>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Campo 3: Detenidos Identificados -->
-      <div class="flex flex-col gap-1.5">
-        <label for="textareaFichaDetenidos" class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center justify-between">
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[18px] text-indigo-600">groups</span> Detenidos Identificados
-          </span>
-          <span class="text-[11px] font-normal text-slate-400">Un detenido por renglón</span>
-        </label>
-        <textarea id="textareaFichaDetenidos" name="detenidos" rows="3"
-          class="w-full bg-indigo-50/20 dark:bg-slate-800/50 border-2 border-indigo-200 dark:border-slate-700 rounded-xl p-3 text-xs sm:text-sm font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 transition-all shadow-inner placeholder:text-slate-400"
-          placeholder="Ej: JUAN PEREZ SOTO, 25 AÑOS, 18.234.567-8&#10;MARIA LOPEZ GOMEZ, 31 AÑOS">{% if entities_data and entities_data.personas and entities_data.personas.detenidos %}{{ entities_data.personas.detenidos | join('\n') }}{% elif entities_data and entities_data.subdocuments and entities_data.subdocuments[0].personas.detenidos %}{{ entities_data.subdocuments[0].personas.detenidos | join('\n') }}{% endif %}</textarea>
-      </div>
-
-      <!-- Campo 4: Víctimas Identificadas -->
-      <div class="flex flex-col gap-1.5">
-        <label for="textareaFichaVictimas" class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center justify-between">
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[18px] text-rose-600">person_alert</span> Víctimas Identificadas
-          </span>
-          <span class="text-[11px] font-normal text-slate-400">Una víctima por renglón</span>
-        </label>
-        <textarea id="textareaFichaVictimas" name="victimas" rows="3"
-          class="w-full bg-rose-50/20 dark:bg-slate-800/50 border-2 border-rose-200 dark:border-slate-700 rounded-xl p-3 text-xs sm:text-sm font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-rose-600 focus:ring-4 focus:ring-rose-500/20 transition-all shadow-inner placeholder:text-slate-400"
-          placeholder="Ej: CARLOS MENDEZ ROJAS, 42 AÑOS, FALLECIDO&#10;ANA MORALES, 35 AÑOS">{% if entities_data and entities_data.personas and entities_data.personas.victimas %}{{ entities_data.personas.victimas | join('\n') }}{% elif entities_data and entities_data.subdocuments and entities_data.subdocuments[0].personas.victimas %}{{ entities_data.subdocuments[0].personas.victimas | join('\n') }}{% endif %}</textarea>
-      </div>
-
-      <!-- Sección de Aprendizaje Continuo IA -->
-      <div class="bg-gradient-to-r from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-slate-800/80 dark:to-indigo-950/40 p-4 rounded-2xl border-2 border-indigo-200/80 dark:border-indigo-800/60 shadow-sm flex flex-col gap-2">
-        <label class="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" name="aprender" value="1" checked id="checkboxAprenderIA"
-            class="w-5 h-5 mt-0.5 rounded text-[#00234c] focus:ring-[#00234c] border-slate-300">
-          <div class="flex flex-col">
-            <span class="text-xs font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-[18px] text-indigo-600">neurology</span>
-              Retroalimentar Inteligencia Artificial (Aprendizaje Continuo)
-            </span>
-            <span class="text-[11.5px] text-slate-600 dark:text-slate-300 leading-snug">
-              Al guardar con esta opción activa, la IA aprenderá la asociación de este texto OCR y la aplicará <strong>automáticamente en futuros partes y minutas</strong> sin requerir edición manual.
-            </span>
-          </div>
-        </label>
-        
-        {% if learned_rules and learned_rules.historial and learned_rules.historial|length > 0 %}
-        <details class="text-[11.5px] text-slate-600 dark:text-slate-300 border-t border-indigo-100 dark:border-indigo-900/50 pt-2 mt-1">
-          <summary class="cursor-pointer font-bold text-indigo-700 dark:text-indigo-400 hover:underline flex items-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">history_edu</span> Ver últimas correcciones aprendidas por la IA (Total: {{ learned_rules.total_correcciones }})
-          </summary>
-          <div class="mt-2 space-y-1.5 pl-2 max-h-32 overflow-y-auto font-mono text-[11px]">
-            {% for item in learned_rules.historial[-4:] | reverse %}
-            <div class="bg-white/80 dark:bg-slate-900/80 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
-              <span class="font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px]">{{ item.campo }}:</span>
-              <span class="line-through text-red-500 truncate max-w-[140px]">{{ item.original }}</span>
-              <span class="material-symbols-outlined text-[13px] text-slate-400 shrink-0">arrow_forward</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[160px]">{{ item.corregido }}</span>
-              <span class="text-[9px] text-slate-400 shrink-0">{{ item.fecha.split(' ')[0] if item.fecha else '' }}</span>
-            </div>
-            {% endfor %}
-          </div>
-        </details>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Footer del Modal -->
-    <div class="p-4 px-6 border-t-2 border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/80 dark:bg-slate-900/80">
-      <button type="button" onclick="document.getElementById('editFichaModal').close()"
-        class="px-5 py-2.5 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-300 dark:border-slate-700">
-        Cancelar
-      </button>
-      <button type="submit"
-        class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white text-xs sm:text-sm font-black uppercase tracking-wider px-7 py-3 rounded-xl border-b-4 border-[#ffd100] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-        <span class="material-symbols-outlined text-[19px] text-[#ffd100]">save_as</span>
-        <span>Guardar Cambios y Entrenar IA</span>
-      </button>
-    </div>
-  </form>
-</dialog>
-
 <script>
-  function abrirModalEdicionFicha(unidad, hecho, detenidos, victimas, focusField) {
-    const modal = document.getElementById('editFichaModal');
-    if (!modal) return;
-    if (unidad !== undefined && unidad !== null && unidad !== '') {
-      const el = document.getElementById('inputFichaUnidad');
-      const orig = document.getElementById('inputOriginalUnidad');
-      if (el) el.value = unidad;
-      if (orig) orig.value = unidad;
-    }
-    if (hecho !== undefined && hecho !== null && hecho !== '') {
-      const el = document.getElementById('inputFichaHecho');
-      const orig = document.getElementById('inputOriginalHecho');
-      if (el) el.value = hecho;
-      if (orig) orig.value = hecho;
-    }
-    if (detenidos !== undefined && detenidos !== null) {
-      const el = document.getElementById('textareaFichaDetenidos');
-      if (el) el.value = Array.isArray(detenidos) ? detenidos.join('\n') : detenidos;
-    }
-    if (victimas !== undefined && victimas !== null) {
-      const el = document.getElementById('textareaFichaVictimas');
-      if (el) el.value = Array.isArray(victimas) ? victimas.join('\n') : victimas;
-    }
-    modal.showModal();
-    if (focusField) {
-      setTimeout(() => {
-        const target = document.getElementById(focusField);
-        if (target) {
-          target.focus();
-          if (target.select) target.select();
-        }
-      }, 50);
-    }
-  }
-
-  function abrirModalEdicionFichaFromBtn(btn) {
-    const unidad = btn.getAttribute('data-unidad') || '';
-    const hecho = btn.getAttribute('data-hecho') || '';
-    const detenidos = btn.getAttribute('data-detenidos') || '';
-    const victimas = btn.getAttribute('data-victimas') || '';
-    const focusField = btn.getAttribute('data-focus') || null;
-    abrirModalEdicionFicha(unidad, hecho, detenidos, victimas, focusField);
-  }
   function addTextArea() {
     const container = document.getElementById('textAreasContainer');
     const count = container.querySelectorAll('.report-block').length + 1;

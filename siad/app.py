@@ -368,6 +368,22 @@ def join_or_placeholder(values):
     return ", ".join(values) if values else "No identificado"
 
 
+def contar_menores_edad(personas):
+    """Cuenta personas de 0 a 17 años a partir del texto normalizado de la entidad.
+
+    La extracción actual conserva la edad junto al nombre (por ejemplo, ``17 años``),
+    y también permite que el operador indique explícitamente ``menor de edad`` o ``NNA``.
+    """
+    total = 0
+    for persona in personas or []:
+        texto = str(persona or "")
+        if re.search(r"(?<!\d)(?:0|[1-9]|1[0-7])\s*(?:años?|anos?)\b", texto, re.IGNORECASE):
+            total += 1
+        elif re.search(r"\bmenor(?:es)?\s+de\s+edad\b|\bNNA\b", texto, re.IGNORECASE):
+            total += 1
+    return total
+
+
 def build_docx_context(filename, summary_text, entities_data):
     """Claves alineadas a las etiquetas Jinja de word_templates/acta_template.docx (plantilla
     institucional provista por el usuario). "Marcas"/"Modelos" quedan reservados para vehiculos;
@@ -396,6 +412,7 @@ def build_docx_context(filename, summary_text, entities_data):
         s = re.sub(r'<[^>]+>', '', s)
         s = re.sub(r'\n{3,}', '\n\n', s)
         clean_summary = s.strip() if s.strip() else "No generado."
+        clean_summary = normalizar_referencias_temporales(clean_summary, fecha_hecho if fecha_hecho != "No identificada" else None)
 
     ctx = {
         "Nombre_Documento": filename,
@@ -422,6 +439,8 @@ def build_docx_context(filename, summary_text, entities_data):
     detenidos_lista = personas.get("detenidos", []).copy()
     victimas_lista = personas.get("victimas", []).copy()
     ruts_lista = personas.get("ruts", []).copy()
+    detenidos_menores = contar_menores_edad(detenidos_lista)
+    victimas_menores = contar_menores_edad(victimas_lista)
     
     if detenidos_lista:
         ctx["Detenidos"] = "\n".join(detenidos_lista)
@@ -434,6 +453,9 @@ def build_docx_context(filename, summary_text, entities_data):
         ctx["Victimas"] = "\n".join(victimas_lista)
     else:
         ctx["Victimas"] = "No identificada"
+
+    ctx["Detenidos_Menores"] = str(detenidos_menores)
+    ctx["Victimas_Menores"] = str(victimas_menores)
     
     tiene_vehiculos = bool(vehiculos.get("marcas") or vehiculos.get("modelos") or vehiculos.get("colores") or vehiculos.get("anios") or vehiculos.get("patentes"))
     tiene_armas = bool(armas.get("marcas") or armas.get("modelos") or armas.get("tipos") or armas.get("calibres") or armas.get("series"))
@@ -844,6 +866,46 @@ def split_sentences_safely(text):
             clean_sents.append(unmasked)
     return clean_sents
 
+def normalizar_referencias_temporales(texto, fecha_referencia=None):
+    """
+    Reemplaza expresiones temporales ambiguas o relativas como 'el día de hoy', 'hoy en horas de...',
+    'detenido hoy' por referencias contextualizadas con la fecha real del parte/informe.
+    Evita que partes policiales emitidos ayer o días anteriores digan erróneamente 'hoy'.
+    """
+    if not texto:
+        return ""
+    
+    fecha_txt = str(fecha_referencia).strip().rstrip(".") if fecha_referencia else ""
+    reemplazo_fecha = f"el día {fecha_txt}" if fecha_txt else "en la fecha informada"
+    reemplazo_con_fecha = f"con fecha {fecha_txt}" if fecha_txt else "en la fecha del procedimiento"
+    
+    t = texto
+    t = re.sub(r"\bsiendo\s+el\s+d[ií]a\s+de\s+hoy\b", reemplazo_con_fecha, t, flags=re.IGNORECASE)
+    t = re.sub(r"\bcon\s+fecha\s+de\s+hoy\b", reemplazo_con_fecha, t, flags=re.IGNORECASE)
+    t = re.sub(r"\ben\s+el\s+d[ií]a\s+de\s+hoy\b", reemplazo_con_fecha, t, flags=re.IGNORECASE)
+    
+    # Manejar mayúscula inicial si comienza oración
+    def rep_dia_hoy(m):
+        orig = m.group(0)
+        rep = reemplazo_fecha
+        return rep[0].upper() + rep[1:] if orig[0].isupper() else rep
+    t = re.sub(r"\bel\s+d[ií]a\s+de\s+hoy\b", rep_dia_hoy, t, flags=re.IGNORECASE)
+    
+    # Detenido hoy / Detenidos hoy
+    if fecha_txt:
+        t = re.sub(r"\b(detenid[oas]+)\s+hoy\b", rf"\1 con fecha {fecha_txt}", t, flags=re.IGNORECASE)
+    else:
+        t = re.sub(r"\b(detenid[oas]+)\s+hoy\b", r"\1 en la fecha informada", t, flags=re.IGNORECASE)
+        
+    t = re.sub(r"\bhoy\s+en\s+horas\s+de\b", f"{reemplazo_con_fecha} en horas de", t, flags=re.IGNORECASE)
+    t = re.sub(r"\bhoy\s+siendo\s+las\b", f"{reemplazo_fecha} siendo las", t, flags=re.IGNORECASE)
+    t = re.sub(r"\bhoy\s+a\s+las\b", f"{reemplazo_fecha} a las", t, flags=re.IGNORECASE)
+    t = re.sub(r"\bhoy\s+alrededor\s+de\b", f"{reemplazo_fecha} alrededor de", t, flags=re.IGNORECASE)
+    t = re.sub(r"\bHoy,\s*", "En dicha fecha, ", t)
+    t = re.sub(r"\bhoy,\s*", "en dicha fecha, ", t)
+    
+    return t
+
 def parse_police_report(raw_text):
     """Extrae metadatos policiales (delito, tribunal, fecha, brigada, hechos) para estructurar el resumen."""
     data = {}
@@ -857,8 +919,15 @@ def parse_police_report(raw_text):
     else:
         data["unidad"] = ""
         
-    m_fec = re.search(r"(?:FECHA)\s*[:\-]?\s*([0-9A-Za-z\.\-/]+)", clean_text, re.I)
-    data["fecha"] = m_fec.group(1).strip().rstrip(".") if m_fec else ""
+    m_fec = re.search(r"(?:FECHA)\s*[:\-]?\s*([0-9]{1,2}\s*[\.\/\-]\s*[A-Za-z]{3,4}\s*[\.\/\-]\s*[0-9]{2,4}|[0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4}|[0-9]{1,2}\s+de\s+[a-záéíóúñA-ZÁÉÍÓÚÑ]+\s+de(?:l)?\s+[0-9]{4}|[0-9A-Za-z\.\-/]+)", clean_text, re.I)
+    if m_fec:
+        f_val = m_fec.group(1).strip().rstrip(".")
+        m_pdi = re.search(r"\b0(\d{2})\b", f_val)
+        if m_pdi:
+            f_val = re.sub(r"\b0" + m_pdi.group(1) + r"\b", "20" + m_pdi.group(1), f_val)
+        data["fecha"] = f_val
+    else:
+        data["fecha"] = ""
     
     m_del = re.search(r"(?:DELITO|PROCEDIMIENTO|MOTIVO|ORDEN DE)\s*[:\-]\s*(.*?)(?=\n|$)", clean_text, re.I)
     data["delito"] = clean_narrative_text(m_del.group(1)).rstrip(".") if m_del else ""
@@ -992,6 +1061,13 @@ def build_summary_options(raw_text, entities_data=None, username=None):
             if len(hechos_completos) > 700:
                 hechos_completos = hechos_completos[:697].rsplit(' ', 1)[0] + "..."
     
+    doc_fecha = meta.get("fecha")
+    if not doc_fecha and entities_data and isinstance(entities_data, dict):
+        doc_fecha = entities_data.get("metadata", {}).get("fecha", "")
+
+    hechos_sinteticos = normalizar_referencias_temporales(hechos_sinteticos, doc_fecha)
+    hechos_completos = normalizar_referencias_temporales(hechos_completos, doc_fecha)
+
     return {
         "a": corregir_ortografia_policial(hechos_sinteticos),
         "b": corregir_ortografia_policial(hechos_completos)
@@ -1537,11 +1613,13 @@ def update_ficha(filename):
     filename = secure_filename(filename)
     unidad = request.form.get("unidad", "").strip()
     hecho = request.form.get("hecho", "").strip()
+    fecha = request.form.get("fecha", "").strip()
     detenidos_raw = request.form.get("detenidos", "").strip()
     victimas_raw = request.form.get("victimas", "").strip()
     aprender = request.form.get("aprender", "0")
     original_unidad = request.form.get("original_unidad", "").strip()
     original_hecho = request.form.get("original_hecho", "").strip()
+    original_fecha = request.form.get("original_fecha", "").strip()
     
     # 1. Cargar entities.json existente
     entities_data = load_entities_json(filename) or entities.EMPTY_ENTITIES.copy()
@@ -1556,6 +1634,8 @@ def update_ficha(filename):
     if hecho:
         entities_data["metadata"]["hecho"] = hecho
         entities_data["metadata"]["delito"] = hecho
+    if fecha:
+        entities_data["metadata"]["fecha"] = fecha
         
     # Detenidos lista
     det_list = [d.strip() for d in detenidos_raw.splitlines() if d.strip()]
@@ -1569,12 +1649,22 @@ def update_ficha(filename):
     with open(entities_path(filename), "w", encoding="utf-8") as f:
         json.dump(entities_data, f, ensure_ascii=False, indent=2)
         
-    # 2. Re-generar exportación Word si existe para que refleje los cambios de inmediato
+    # 2. Re-generar opciones de resumen y exportación Word para reflejar la fecha correcta de inmediato
     try:
         summary_options = None
         if os.path.isfile(summary_options_path(filename)):
             with open(summary_options_path(filename), encoding="utf-8") as f:
                 summary_options = json.load(f)
+            fecha_ref = fecha or entities_data.get("metadata", {}).get("fecha")
+            if fecha_ref and isinstance(summary_options, list):
+                for opt in summary_options:
+                    opt["a"] = normalizar_referencias_temporales(opt.get("a", ""), fecha_ref)
+                    opt["b"] = normalizar_referencias_temporales(opt.get("b", ""), fecha_ref)
+                with open(summary_options_path(filename), "w", encoding="utf-8") as f:
+                    json.dump(summary_options, f, ensure_ascii=False, indent=2)
+                if os.path.isfile(summary_text_path(filename)) and summary_options:
+                    with open(summary_text_path(filename), "w", encoding="utf-8") as f:
+                        f.write(summary_options[0].get("a", ""))
         export_to_docx(filename, summary_options, entities_data)
     except Exception as e:
         print(f"Aviso actualizando docx tras edición: {e}")

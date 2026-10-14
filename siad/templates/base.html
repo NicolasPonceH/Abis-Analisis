@@ -142,13 +142,19 @@
   z-index: 2147483647 !important;
   background: #001430 !important;
   background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%) !important;
-  display: flex !important;
+  display: none !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   user-select: none !important;
   pointer-events: all !important;
   overflow: hidden !important;
+  opacity: 0 !important;
+}
+
+html.siad-splash-active #pdi-splash-overlay {
+  display: flex !important;
+  opacity: 1 !important;
   animation: pdiOverlayFadeOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
 }
 
@@ -171,7 +177,7 @@
 }
 
 .pdi-splash-box {
-  animation: pdiBoxScaleOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  animation: none !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -181,6 +187,10 @@
   max-width: 90vw !important;
   box-sizing: border-box !important;
   margin: auto !important;
+}
+
+html.siad-splash-active .pdi-splash-box {
+  animation: pdiBoxScaleOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
 }
 
 @keyframes pdiBoxScaleOut {
@@ -278,8 +288,9 @@
   background: linear-gradient(90deg, #FFD700, #FFF9C4, #FFD700);
   border-radius: 999px;
   box-shadow: 0 0 14px #FFD700;
-  animation: pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: none;
 }
+html.siad-splash-active .pdi-bar-fill { animation: pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 .pdi-splash-loading-text {
   color: rgba(255, 255, 255, 0.45);
   font-family: monospace;
@@ -288,28 +299,22 @@
   text-transform: uppercase;
   margin-top: 10px;
 }
-html.splash-disabled #pdi-splash-overlay,
-body.splash-disabled #pdi-splash-overlay,
-.splash-disabled #pdi-splash-overlay {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  animation: none !important;
-  opacity: 0 !important;
-}
 </style>
 
 <script>(function(){
   var root = document.documentElement;
   if (localStorage.getItem('darkMode') === '1') root.classList.add('dark');
-  if (sessionStorage.getItem('pdi_splash_completed') === '1') {
-    root.classList.add('splash-disabled');
-    var fontSize = localStorage.getItem('fontSize');
-    if (fontSize && fontSize !== '100') {
-      root.style.zoom = fontSize + '%';
-    } else {
-      root.style.removeProperty('zoom');
-    }
+  var showSiadSplash = sessionStorage.getItem('siad_show_splash') === '1'
+    || new URLSearchParams(window.location.search).get('loader') === '1';
+  if (showSiadSplash) {
+    sessionStorage.removeItem('siad_show_splash');
+    root.classList.add('siad-splash-active');
+  }
+  var fontSize = localStorage.getItem('fontSize');
+  if (fontSize && fontSize !== '100') {
+    root.style.zoom = fontSize + '%';
+  } else {
+    root.style.removeProperty('zoom');
   }
 })();</script>
 
@@ -431,8 +436,8 @@ body.splash-disabled #pdi-splash-overlay,
 
 <div id="siad-progress-bar"></div>
 
-<!-- Splash Screen / Intro Institucional PDI (oculto por defecto para evitar parpadeos entre vistas) -->
-<div id="pdi-splash-overlay" style="display: none !important; position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; min-width: 100%; min-height: 100%; z-index: 2147483647; background: #001430; background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%); flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; overflow: hidden;">
+<!-- Pantalla de carga propia de SIAD: sólo se activa al ingresar al módulo. -->
+<div id="pdi-splash-overlay">
   <div class="pdi-splash-box">
     <!-- Emblema con halo dorado pulsante -->
     <div class="pdi-badge-frame">
@@ -607,9 +612,6 @@ body.splash-disabled #pdi-splash-overlay,
 <script>
 (function () {
   var root = document.documentElement;
-  sessionStorage.setItem('pdi_splash_completed', '1');
-  root.classList.add('splash-disabled');
-
   var progressBar = document.getElementById('siad-progress-bar');
   if (progressBar) {
     progressBar.style.transition = 'width 0.2s ease, opacity 0.15s ease';
@@ -643,7 +645,7 @@ body.splash-disabled #pdi-splash-overlay,
     var bar = document.getElementById('pdi-splash-bar');
     if (!overlay) return;
 
-    overlay.style.removeProperty('display');
+    root.classList.add('siad-splash-active');
     overlay.style.display = 'flex';
     overlay.style.animation = 'none';
     if (bar) bar.style.animation = 'none';
@@ -660,9 +662,17 @@ body.splash-disabled #pdi-splash-overlay,
     if (bar) bar.style.animation = 'pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
 
     setTimeout(function () {
-      overlay.style.display = 'none';
+      root.classList.remove('siad-splash-active');
+      overlay.style.removeProperty('display');
+      overlay.style.removeProperty('animation');
+      if (box) box.style.removeProperty('animation');
+      if (bar) bar.style.removeProperty('animation');
     }, 2450);
   };
+
+  if (root.classList.contains('siad-splash-active')) {
+    window.triggerPdiSplash();
+  }
 })();
 </script>
 

@@ -966,6 +966,27 @@ async function iniciarBot({ token, chatId, pool, logger = console }) {
   let offset = 0;
   logger.log("Bot de Telegram interactivo iniciado (Long Polling y Botones Activos)...");
 
+  // Registrar comandos en Telegram para autocompletado y menú al escribir /
+  try {
+    await telegramClient.registrarComandosBot({
+      token,
+      commands: [
+        { command: "reporte", description: "Generar reporte diario o de fecha" },
+        { command: "rango", description: "Reporte consolidado entre 2 fechas" },
+        { command: "excel", description: "Descargar planilla Excel (.xlsx)" },
+        { command: "word", description: "Descargar informe Word (.docx)" },
+        { command: "errores", description: "Ver fallas e inconsistencias por cuartel" },
+        { command: "estado", description: "Estado de la BD y registros acumulados" },
+        { command: "logs", description: "Detalle de la última carga ETL" },
+        { command: "id", description: "Ver Chat ID para registro" },
+        { command: "ayuda", description: "Guía de comandos disponibles" },
+      ],
+    });
+    logger.log("Comandos registrados exitosamente en Telegram.");
+  } catch (cmdErr) {
+    logger.warn("[TELEGRAM] No se pudieron registrar comandos:", cmdErr.message);
+  }
+
   while (botActivo) {
     try {
       const updates = await telegramClient.obtenerActualizaciones({ token, offset, timeout: 25 });

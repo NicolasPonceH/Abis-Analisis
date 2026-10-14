@@ -471,18 +471,49 @@ def extract_metadata(text):
     
     fecha_futura_warning = False
     
-    fecha_match = re.search(r"FECHA\s*[:\-]?\s*([0-9]{1,2}\.[A-Z]{3}\.([0-9]{2,4}))", text, re.IGNORECASE)
+    # Detección exhaustiva de fecha de emisión/procedimiento
+    # 1. Formato policial chileno tradicional: 13.OCT.026 o 13.OCT.2026
+    fecha_match = re.search(r"FECHA\s*[:\-]?\s*([0-9]{1,2}\s*[\.\/\-]\s*[A-Z]{3,4}\s*[\.\/\-]\s*([0-9]{2,4}))", text, re.IGNORECASE)
     if fecha_match:
-        fecha = fecha_match.group(1).strip()
+        fecha_raw = fecha_match.group(1).strip()
         year_str = fecha_match.group(2).strip()
         try:
-            from datetime import datetime
             current_year = datetime.now().year
-            year_int = int(year_str) if len(year_str) == 4 else 2000 + int(year_str)
+            if len(year_str) == 3 and year_str.startswith("0"):
+                year_int = 2000 + int(year_str[1:])
+                fecha = re.sub(r"\b" + year_str + r"\b", str(year_int), fecha_raw)
+            else:
+                fecha = fecha_raw
+                year_int = int(year_str) if len(year_str) == 4 else 2000 + int(year_str)
             if year_int > current_year:
                 fecha_futura_warning = True
-        except:
-            pass
+        except Exception:
+            fecha = fecha_raw
+    else:
+        # 2. Formato numérico DD/MM/AAAA o DD-MM-AAAA
+        fecha_num_match = re.search(r"FECHA\s*[:\-]?\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-]([0-9]{2,4}))", text, re.IGNORECASE)
+        if fecha_num_match:
+            fecha = fecha_num_match.group(1).strip()
+            year_str = fecha_num_match.group(2).strip()
+            try:
+                current_year = datetime.now().year
+                year_int = int(year_str) if len(year_str) == 4 else 2000 + int(year_str)
+                if year_int > current_year:
+                    fecha_futura_warning = True
+            except Exception:
+                pass
+        else:
+            # 3. Formato textual: DD de Mes de AAAA
+            fecha_txt_match = re.search(r"FECHA\s*[:\-]?\s*([0-9]{1,2}\s+de\s+[a-záéíóúñA-ZÁÉÍÓÚÑ]+\s+de(?:l)?\s+([0-9]{4}))", text, re.IGNORECASE)
+            if fecha_txt_match:
+                fecha = fecha_txt_match.group(1).strip()
+                try:
+                    current_year = datetime.now().year
+                    year_int = int(fecha_txt_match.group(2))
+                    if year_int > current_year:
+                        fecha_futura_warning = True
+                except Exception:
+                    pass
         
     unidad_match = re.search(r"UNIDAD\s*[:\-]?\s*([^\n]+)", text, re.IGNORECASE)
     if unidad_match:

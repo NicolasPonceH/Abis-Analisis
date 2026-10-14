@@ -264,7 +264,7 @@ def build():
     p_h1.paragraph_format.keep_with_next = True
     add_apa_styled_run(p_h1, "1. Resumen de Diligencia", bold=True, size_pt=12, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-    ficha_table = doc.add_table(rows=6, cols=2)
+    ficha_table = doc.add_table(rows=8, cols=2)
     ficha_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     ficha_table.autofit = False
     apply_grid_borders(ficha_table, border_color="000000")
@@ -277,6 +277,8 @@ def build():
         ("Hecho", "{{ Hecho }}", False),
         ("Detenido", "{{ Detenidos }}", False),
         ("Víctima", "{{ Victimas }}", False),
+        ("Detenidos menores de edad", "{{ Detenidos_Menores }}", False),
+        ("Víctimas menores de edad", "{{ Victimas_Menores }}", False),
         ("Resumen Diligencia", "{{ Resumen_Relato }}", False),
     ]
 
@@ -380,6 +382,8 @@ def build():
     create_entity_recuadro(doc, [
         ("Detenidos / Imputados:", "{{ Detenidos }}"),
         ("Víctimas Identificadas:", "{{ Victimas }}"),
+        ("Detenidos menores de edad:", "{{ Detenidos_Menores }}"),
+        ("Víctimas menores de edad:", "{{ Victimas_Menores }}"),
     ])
     doc.add_paragraph("{%p endif %}")
 
