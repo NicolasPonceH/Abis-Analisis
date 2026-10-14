@@ -676,9 +676,10 @@ app.get("/api/metricas/profesiones", async (req, res) => {
       total: total.toString()
     }));
 
-    // Ordenar de mayor a menor y aplicar el límite
+    // Ordenar de mayor a menor y aplicar el límite (máx 50 para agrupadas, máx 15 para específicas sin agrupar)
     rows.sort((a, b) => b.total - a.total);
-    const finalLimit = Math.min(Math.max(Number(limit) || 10, 1), 500);
+    const maxAllowed = debeAgrupar ? 50 : 15;
+    const finalLimit = Math.min(Math.max(Number(limit) || 10, 1), maxAllowed);
     rows = rows.slice(0, finalLimit);
 
     const totalQuery = `
