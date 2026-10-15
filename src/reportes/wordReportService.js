@@ -1,45 +1,506 @@
+const fs = require("fs");
+const path = require("path");
+
 const {
   Document,
   Packer,
   Paragraph,
   TextRun,
   Table,
-  TableRow,
+  TableRow: DocxTableRow,
   TableCell,
   WidthType,
   AlignmentType,
   BorderStyle,
-  HeadingLevel,
   Header,
   Footer,
+  VerticalAlign,
+  ImageRun,
+  HorizontalPositionAlign,
+  HorizontalPositionRelativeFrom,
+  VerticalPositionAlign,
+  VerticalPositionRelativeFrom,
+  TextWrappingType,
 } = require("docx");
 
+const LOGO_PATH = path.join(__dirname, "../../public/assets/acta-template-logo.png");
+
+function TableRow(options) {
+  return new DocxTableRow({ cantSplit: true, ...options });
+}
+
+function leerLogo() {
+  try {
+    return fs.readFileSync(LOGO_PATH);
+  } catch (error) {
+    console.warn("[WORD] No se pudo cargar el logo del template:", error.message);
+    return null;
+  }
+}
+
+function logoInline(logoBuffer, width = 68, height = 37) {
+  if (!logoBuffer) return run("PDI", { size: 24, bold: true, color: "FFFFFF" });
+  return new ImageRun({
+    type: "png",
+    data: logoBuffer,
+    transformation: { width, height },
+  });
+}
+
+function logoMarcaAgua(logoBuffer) {
+  if (!logoBuffer) return null;
+  const encoded = logoBuffer.toString("base64");
+  const svg = Buffer.from(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="760" height="420" viewBox="0 0 760 420">
+      <image href="data:image/png;base64,${encoded}" x="70" y="70" width="620" height="280" opacity="0.075" preserveAspectRatio="xMidYMid meet" />
+    </svg>
+  `);
+
+  return new Paragraph({
+    spacing: { before: 0, after: 0, line: 1 },
+    children: [new ImageRun({
+      type: "svg",
+      data: svg,
+      fallback: { type: "png", data: logoBuffer },
+      transformation: { width: 380, height: 210 },
+      floating: {
+        horizontalPosition: {
+          relative: HorizontalPositionRelativeFrom.PAGE,
+          align: HorizontalPositionAlign.CENTER,
+        },
+        verticalPosition: {
+          relative: VerticalPositionRelativeFrom.PAGE,
+          align: VerticalPositionAlign.CENTER,
+        },
+        wrap: { type: TextWrappingType.NONE },
+        behindDocument: true,
+        allowOverlap: true,
+        zIndex: 0,
+      },
+    })],
+  });
+}
+
+const COLORS = {
+  navy: "0B2A5B",
+  teal: "0F766E",
+  blue: "2B5FAE",
+  pink: "C2255C",
+  red: "D92D20",
+  gold: "C69214",
+  text: "1F2937",
+  muted: "64748B",
+  border: "CBD5E1",
+  light: "E8EDF5",
+};
+
+const FONT = "Arial";
+
+function numero(valor) {
+  return Number(valor || 0).toLocaleString("es-CL");
+}
+
+function porcentaje(valor, fallback = 0) {
+  const n = Number(valor);
+  return `${Number.isFinite(n) ? n : fallback}%`;
+}
+
+function fechaCorta(fecha) {
+  if (!fecha) return "N/D";
+  const match = String(fecha).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : String(fecha);
+}
+
+function fechaPeriodo(data, meta) {
+  if (data.desde && data.hasta) {
+    const jornadas = data.diasConDatos ? ` (${numero(data.diasConDatos)} jornadas operativas)` : "";
+    return `Desde ${fechaCorta(data.desde)} hasta ${fechaCorta(data.hasta)}${jornadas}`;
+  }
+  return fechaCorta(data.fecha || meta.fecha);
+}
+
+function textoSeguro(valor, fallback = "N/D") {
+  return valor === undefined || valor === null || String(valor).trim() === ""
+    ? fallback
+    : String(valor);
+}
+
+function bordes(color = COLORS.border, size = 1) {
+  const borde = { style: BorderStyle.SINGLE, size, color };
+  return { top: borde, bottom: borde, left: borde, right: borde };
+}
+
+const SIN_BORDES = {
+  top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+  bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+  left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+  right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+};
+
+function run(text, options = {}) {
+  return new TextRun({
+    text: String(text),
+    font: FONT,
+    size: options.size || 19,
+    color: options.color || COLORS.text,
+    bold: Boolean(options.bold),
+    italics: Boolean(options.italics),
+  });
+}
+
+function parrafo(text = "", options = {}) {
+  return new Paragraph({
+    alignment: options.alignment,
+    spacing: options.spacing,
+    keepNext: options.keepNext,
+    children: options.children || [run(text, options)],
+  });
+}
+
+function celda(text, options = {}) {
+  return new TableCell({
+    children: options.children || [
+      parrafo(textoSeguro(text, ""), {
+        alignment: options.alignment,
+        spacing: { before: 45, after: 45 },
+        children: [run(textoSeguro(text, ""), {
+          size: options.size || 18,
+          color: options.color || COLORS.text,
+          bold: options.bold,
+          italics: options.italics,
+        })],
+      }),
+    ],
+    width: options.width ? { size: options.width, type: WidthType.PERCENTAGE } : undefined,
+    borders: options.borders,
+    shading: options.fill ? { fill: options.fill } : undefined,
+    verticalAlign: VerticalAlign.CENTER,
+    columnSpan: options.columnSpan,
+  });
+}
+
+function celdaCabecera(text, width, fill = COLORS.navy, alignment = AlignmentType.LEFT) {
+  return celda(text, {
+    width,
+    fill,
+    alignment,
+    bold: true,
+    color: "FFFFFF",
+    size: 17,
+    borders: bordes("FFFFFF", 1),
+  });
+}
+
+function tabla(rows, options = {}) {
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: options.borders || bordes(),
+    rows,
+  });
+}
+
+function espacio(after = 100) {
+  return parrafo("", { spacing: { after } });
+}
+
+function tituloSeccion(numeroSeccion, titulo, descripcion) {
+  return [
+    parrafo(`${numeroSeccion}. ${titulo}`, {
+      spacing: { before: 190, after: 55 },
+      keepNext: true,
+      children: [run(`${numeroSeccion}. ${titulo}`, { size: 21, bold: true, color: COLORS.navy })],
+    }),
+    parrafo(descripcion, {
+      spacing: { after: 110 },
+      keepNext: true,
+      children: [run(descripcion, { size: 16, color: COLORS.muted, italics: true })],
+    }),
+  ];
+}
+
+function crearMembrete(logoBuffer) {
+  return tabla([
+    new TableRow({
+      children: [
+        celda("", {
+          width: 18,
+          fill: "FFFFFF",
+          alignment: AlignmentType.CENTER,
+          borders: SIN_BORDES,
+          children: [parrafo("", {
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 45, after: 45 },
+            children: [logoInline(logoBuffer, 74, 41)],
+          })],
+        }),
+        celda("POLICÍA DE INVESTIGACIONES DE CHILE\nSISTEMA ABIS\nINFORME ESTADÍSTICO DE IDENTIFICACIÓN BIOMÉTRICA", {
+          width: 82,
+          alignment: AlignmentType.LEFT,
+          bold: true,
+          color: COLORS.navy,
+          size: 18,
+          borders: SIN_BORDES,
+        }),
+      ],
+    }),
+  ], { borders: SIN_BORDES });
+}
+
+function crearTablaMetadatos(periodo, fechaEmision) {
+  return tabla([
+    new TableRow({ children: [celda("PERÍODO CONSULTADO", { width: 25, fill: COLORS.light, bold: true, size: 17 }), celda(periodo, { width: 75, size: 17 })] }),
+    new TableRow({ children: [celda("FECHA DE EMISIÓN", { width: 25, fill: COLORS.light, bold: true, size: 17 }), celda(fechaEmision, { width: 75, size: 17 })] }),
+    new TableRow({ children: [celda("CLASIFICACIÓN", { width: 25, fill: COLORS.light, bold: true, size: 17 }), celda("RESERVADO - USO OFICIAL EXCLUSIVO", { width: 75, bold: true, color: COLORS.red, size: 17 })] }),
+  ]);
+}
+
+function crearTablaResumen(data) {
+  const exec = data.resumenEjecutivo || {};
+  const kpis = [
+    ["TOTAL ENROLAMIENTOS", numero(data.total), COLORS.navy],
+    ["SINCRONIZACIÓN PDI", porcentaje(exec.tasaSincronizacion, 100), COLORS.teal],
+    ["REGISTRO ABIS VÁLIDO", porcentaje(exec.tasaRegistroBiometrico), COLORS.blue],
+    ["INCONSISTENCIAS / ERROR", porcentaje(exec.tasaError), COLORS.red],
+  ];
+
+  return tabla([
+    new TableRow({
+      children: kpis.map(([label, , color]) => celda(label, {
+        width: 25,
+        fill: color,
+        alignment: AlignmentType.CENTER,
+        bold: true,
+        color: "FFFFFF",
+        size: 15,
+        borders: SIN_BORDES,
+      })),
+    }),
+    new TableRow({
+      children: kpis.map(([, value, color]) => celda(value, {
+        width: 25,
+        alignment: AlignmentType.CENTER,
+        bold: true,
+        color,
+        size: 25,
+        borders: bordes(COLORS.border),
+      })),
+    }),
+  ]);
+}
+
+function crearTablaIndicadores(data) {
+  const exec = data.resumenEjecutivo || {};
+  const filas = [
+    ["Total de Enrolamientos Procesados", numero(data.total), "Volumen consolidado"],
+    ["Sincronización PDI", porcentaje(exec.tasaSincronizacion, 100), `Meta: ≥ 95% (${textoSeguro(exec.estadoSLA, "Óptimo")})`],
+    ["Eficacia Registro Biométrico ABIS", porcentaje(exec.tasaRegistroBiometrico), "Captura biométrica válida"],
+    ["Tasa de Inconsistencias o Error", porcentaje(exec.tasaError), "Indicador de control operativo"],
+    ["Cuartel con Mayor Demanda", exec.cuartelLider ? `${textoSeguro(exec.cuartelLider.nombre)} (${porcentaje(exec.cuartelLider.porcentaje)})` : "N/D", "Principal concentración operativa"],
+    ["Nacionalidad Predominante", exec.nacionalidadLider ? `${textoSeguro(exec.nacionalidadLider.nombre)} (${porcentaje(exec.nacionalidadLider.porcentaje)})` : "N/D", "Mayor presencia registrada"],
+  ];
+
+  return tabla([
+    new TableRow({
+      tableHeader: true,
+      children: [
+        celdaCabecera("INDICADOR INSTITUCIONAL", 45),
+        celdaCabecera("VALOR REGISTRADO", 25, COLORS.navy, AlignmentType.CENTER),
+        celdaCabecera("ESTADO / META", 30),
+      ],
+    }),
+    ...filas.map(([label, value, detail]) => new TableRow({
+      children: [
+        celda(label, { width: 45, bold: true }),
+        celda(value, { width: 25, alignment: AlignmentType.CENTER, bold: true }),
+        celda(detail, { width: 30, alignment: AlignmentType.CENTER, color: COLORS.muted }),
+      ],
+    })),
+  ]);
+}
+
+function crearTablaRendimiento(cuarteles) {
+  const filas = (cuarteles || []).slice(0, 20);
+  const rows = [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        celdaCabecera("PUESTO / CUARTEL", 30, COLORS.teal),
+        celdaCabecera("UNIDAD POLICIAL", 25, COLORS.teal, AlignmentType.CENTER),
+        celdaCabecera("TOTAL ENROLADOS", 15, COLORS.teal, AlignmentType.CENTER),
+        celdaCabecera("SINCRONIZADOS PDI", 15, COLORS.teal, AlignmentType.CENTER),
+        celdaCabecera("TASA ÉXITO (%)", 15, COLORS.teal, AlignmentType.CENTER),
+      ],
+    }),
+  ];
+
+  if (!filas.length) {
+    rows.push(new TableRow({ children: [celda("Sin registros para el período", { columnSpan: 5, alignment: AlignmentType.CENTER, color: COLORS.muted })] }));
+  } else {
+    filas.forEach((item) => {
+      rows.push(new TableRow({
+        children: [
+          celda(textoSeguro(item.cuartel), { width: 30, bold: true }),
+          celda(textoSeguro(item.unidad), { width: 25 }),
+          celda(numero(item.total), { width: 15, alignment: AlignmentType.RIGHT }),
+          celda(numero(item.sincronizados), { width: 15, alignment: AlignmentType.RIGHT }),
+          celda(porcentaje(item.tasaExito), { width: 15, alignment: AlignmentType.RIGHT, bold: true, color: Number(item.tasaExito) >= 95 ? "16803C" : COLORS.red }),
+        ],
+      }));
+    });
+  }
+
+  return tabla(rows);
+}
+
+function crearTablaNacionalidades(nacionalidades) {
+  const rows = [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        celdaCabecera("PAÍS / NACIONALIDAD", 45, COLORS.blue),
+        celdaCabecera("CÓDIGO ISO", 20, COLORS.blue, AlignmentType.CENTER),
+        celdaCabecera("TOTAL ENROLAMIENTOS", 20, COLORS.blue, AlignmentType.CENTER),
+        celdaCabecera("PROPORCIÓN (%)", 15, COLORS.blue, AlignmentType.CENTER),
+      ],
+    }),
+  ];
+
+  (nacionalidades || []).slice(0, 10).forEach((item) => {
+    rows.push(new TableRow({
+      children: [
+        celda(textoSeguro(item.nacionalidad), { width: 45, bold: true }),
+        celda(textoSeguro(item.codigo_iso || item.codigoIso), { width: 20, alignment: AlignmentType.CENTER }),
+        celda(numero(item.total), { width: 20, alignment: AlignmentType.RIGHT }),
+        celda(porcentaje(item.porcentaje), { width: 15, alignment: AlignmentType.RIGHT, bold: true }),
+      ],
+    }));
+  });
+
+  if (rows.length === 1) rows.push(new TableRow({ children: [celda("Sin datos de nacionalidad para el período", { columnSpan: 4, alignment: AlignmentType.CENTER, color: COLORS.muted })] }));
+  return tabla(rows);
+}
+
+function crearTablaDemografia(data) {
+  let hombresAdultos = 0;
+  let mujeresAdultas = 0;
+  let hombresNna = 0;
+  let mujeresNna = 0;
+
+  (data.demografiaCruzada || []).forEach((item) => {
+    const total = Number(item.total || 0);
+    const esHombre = String(item.genero || "").toUpperCase().startsWith("M");
+    if (item.esMayorEdad) {
+      if (esHombre) hombresAdultos += total;
+      else mujeresAdultas += total;
+    } else if (esHombre) {
+      hombresNna += total;
+    } else {
+      mujeresNna += total;
+    }
+  });
+
+  return tabla([
+    new TableRow({
+      tableHeader: true,
+      children: [
+        celdaCabecera("GRUPO POBLACIONAL / RANGO ETARIO", 50, COLORS.navy),
+        celdaCabecera("HOMBRES (M)", 25, "1D5FBF", AlignmentType.CENTER),
+        celdaCabecera("MUJERES (F)", 25, COLORS.pink, AlignmentType.CENTER),
+      ],
+    }),
+    new TableRow({
+      children: [
+        celda("Adultos (≥ 18)", { width: 50, bold: true }),
+        celda(numero(hombresAdultos), { width: 25, alignment: AlignmentType.RIGHT }),
+        celda(numero(mujeresAdultas), { width: 25, alignment: AlignmentType.RIGHT }),
+      ],
+    }),
+    new TableRow({
+      children: [
+        celda("Niños, Niñas y Adolescentes (0–17)", { width: 50, bold: true, color: "8A4B08" }),
+        celda(numero(hombresNna), { width: 25, alignment: AlignmentType.RIGHT, color: "8A4B08" }),
+        celda(numero(mujeresNna), { width: 25, alignment: AlignmentType.RIGHT, color: "8A4B08" }),
+      ],
+    }),
+  ]);
+}
+
+function crearTablaControl(periodo, fechaEmision) {
+  const idReporte = `RPT-${Date.now()}`;
+  return tabla([
+    new TableRow({ children: [celda("ID DE REPORTE", { width: 30, fill: COLORS.light, bold: true }), celda(idReporte, { width: 70 })] }),
+    new TableRow({ children: [celda("FUENTE DE DATOS", { width: 30, fill: COLORS.light, bold: true }), celda("SISTEMA ABIS PDI", { width: 70 })] }),
+    new TableRow({ children: [celda("PERÍODO INFORMADO", { width: 30, fill: COLORS.light, bold: true }), celda(periodo, { width: 70 })] }),
+    new TableRow({ children: [celda("FECHA/HORA DE GENERACIÓN", { width: 30, fill: COLORS.light, bold: true }), celda(fechaEmision, { width: 70 })] }),
+  ]);
+}
+
 /**
- * Genera un documento Microsoft Word (.docx) formal institucional con membrete oficial de la PDI
- * @param {object} data Datos consolidados del reporte diario o rango
- * @param {object} meta Información de fecha y parámetros de consulta
- * @returns {Promise<Buffer>} Buffer del archivo .docx
+ * Genera un informe Word ejecutivo, inspirado en el formato SIAD.
+ * El documento presenta resultados y contexto operativo; no expone detalles
+ * internos de cifrado, hashes, ETL ni estructura técnica de la base de datos.
  */
 async function generarReporteWord(data, meta = {}) {
-  const fechaPeriodo = data.desde && data.hasta
-    ? `Desde ${data.desde} hasta ${data.hasta} (${data.diasConDatos || 0} jornadas operativas)`
-    : (data.fecha || meta.fecha || "Jornada más reciente");
-
-  const totalEnrolados = (data.total || 0).toLocaleString();
-  const exec = data.resumenEjecutivo || {};
+  const periodo = fechaPeriodo(data, meta);
   const fechaEmision = new Date().toLocaleString("es-CL", {
     dateStyle: "full",
     timeStyle: "medium",
   });
+  const logoBuffer = leerLogo();
+
+  const children = [
+    crearMembrete(logoBuffer),
+    espacio(70),
+    parrafo("REPORTE EJECUTIVO DE ENROLAMIENTO BIOMÉTRICO", {
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 70 },
+      children: [run("REPORTE EJECUTIVO DE ENROLAMIENTO BIOMÉTRICO", { size: 23, bold: true, color: COLORS.navy })],
+    }),
+    parrafo("Sistema Analítico ABIS | PDI", {
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 150 },
+      children: [run("Sistema Analítico ABIS | PDI", { size: 17, color: COLORS.gold, bold: true })],
+    }),
+    crearTablaMetadatos(periodo, fechaEmision),
+    espacio(120),
+    ...tituloSeccion("1", "RESUMEN EJECUTIVO", "Consolidado automático del período seleccionado."),
+    parrafo("Este informe presenta los principales resultados de enrolamiento biométrico registrados por el Sistema ABIS en pasos fronterizos y unidades operativas de la Policía de Investigaciones de Chile.", {
+      spacing: { after: 120 },
+      children: [run("Este informe presenta los principales resultados de enrolamiento biométrico registrados por el Sistema ABIS en pasos fronterizos y unidades operativas de la Policía de Investigaciones de Chile.", { size: 17 })],
+    }),
+    crearTablaResumen(data),
+    espacio(120),
+    crearTablaIndicadores(data),
+    espacio(80),
+    ...tituloSeccion("2", "MATRIZ DE RENDIMIENTO OPERATIVO", "Carga operativa y sincronización efectiva con los servicios centrales de la PDI."),
+    crearTablaRendimiento(data.rendimientoCuarteles),
+    espacio(120),
+    ...tituloSeccion("3", "FLUJOS MIGRATORIOS PREDOMINANTES", "Distribución de nacionalidades detectadas durante el período."),
+    crearTablaNacionalidades(data.nacionalidadesPrincipales),
+    espacio(120),
+    ...tituloSeccion("4", "ANÁLISIS DEMOGRÁFICO Y PROTECCIÓN DE MENORES (N.N.A.)", "Seguimiento diferenciado por género y rango etario."),
+    crearTablaDemografia(data),
+    espacio(120),
+    ...tituloSeccion("5", "CONTROL DE GENERACIÓN", "Identificación básica del documento y de su período informado."),
+    crearTablaControl(periodo, fechaEmision),
+  ];
+
+  const headerChildren = [
+    logoMarcaAgua(logoBuffer),
+    parrafo("SISTEMA ABIS | INFORME EJECUTIVO", {
+      alignment: AlignmentType.RIGHT,
+      children: [run("SISTEMA ABIS | INFORME EJECUTIVO", { size: 14, color: COLORS.muted, bold: true })],
+    }),
+  ].filter(Boolean);
 
   const doc = new Document({
     styles: {
       default: {
         document: {
           run: {
-            font: "Calibri",
-            size: 22, // 11pt
-            color: "1E293B",
+            font: FONT,
+            size: 18,
+            color: COLORS.text,
           },
         },
       },
@@ -49,577 +510,37 @@ async function generarReporteWord(data, meta = {}) {
         properties: {
           page: {
             margin: {
-              top: 1440, // 1 pulgada = 1440 dxa
-              right: 1440,
-              bottom: 1440,
-              left: 1440,
+              top: 720,
+              right: 820,
+              bottom: 720,
+              left: 820,
             },
           },
         },
         headers: {
-          default: new Header({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                children: [
-                  new TextRun({
-                    text: "POLICÍA DE INVESTIGACIONES DE CHILE | SISTEMA ABIS",
-                    size: 16,
-                    color: "64748B",
-                    bold: true,
-                  }),
-                ],
-              }),
-            ],
-          }),
+          default: new Header({ children: headerChildren }),
         },
         footers: {
           default: new Footer({
             children: [
-              new Paragraph({
+              parrafo("Informe generado por Sistema Analítico ABIS | PDI", {
                 alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({
-                    text: "DOCUMENTO RESERVADO - JEFATURA NACIONAL DE MIGRACIONES Y POLICÍA INTERNACIONAL - PDI CHILE",
-                    size: 16,
-                    color: "94A3B8",
-                    bold: true,
-                  }),
-                ],
+                spacing: { after: 15 },
+                children: [run("Informe generado por Sistema Analítico ABIS | PDI", { size: 13, color: COLORS.muted, bold: true })],
+              }),
+              parrafo("DOCUMENTO RESERVADO - USO OFICIAL EXCLUSIVO", {
+                alignment: AlignmentType.CENTER,
+                children: [run("DOCUMENTO RESERVADO - USO OFICIAL EXCLUSIVO", { size: 11, color: "94A3B8" })],
               }),
             ],
           }),
         },
-        children: [
-          // MEMBRETE INSTITUCIONAL FORMAL
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: "POLICÍA DE INVESTIGACIONES DE CHILE",
-                bold: true,
-                size: 28, // 14pt
-                color: "002B49",
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: "JEFATURA NACIONAL DE MIGRACIONES Y POLICÍA INTERNACIONAL",
-                bold: true,
-                size: 22,
-                color: "C69214",
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: "DEPARTAMENTO DE INFORMACIÓN Y CONTROL BIOMÉTRICO (ABIS)",
-                italics: true,
-                size: 20,
-                color: "475569",
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: "_______________________________________________________________________________",
-                color: "C69214",
-                size: 18,
-              }),
-            ],
-            spacing: { after: 240 },
-          }),
-
-          // TÍTULO DEL INFORME
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            heading: HeadingLevel.HEADING_2,
-            children: [
-              new TextRun({
-                text: "INFORME GERENCIAL Y ESTADÍSTICO DE IDENTIFICACIÓN BIOMÉTRICA",
-                bold: true,
-                size: 24,
-                color: "002B49",
-              }),
-            ],
-            spacing: { after: 120 },
-          }),
-
-          // METADATOS DEL DOCUMENTO
-          crearTablaMetadatos(fechaPeriodo, fechaEmision, data),
-
-          new Paragraph({ text: "", spacing: { after: 200 } }),
-
-          // 1. RESUMEN EJECUTIVO Y CUMPLIMIENTO SLA
-          new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-            children: [
-              new TextRun({
-                text: "1. RESUMEN EJECUTIVO Y NIVEL DE SERVICIO (SLA)",
-                bold: true,
-                size: 22,
-                color: "002B49",
-              }),
-            ],
-            spacing: { before: 200, after: 120 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "El presente informe consolida los registros de enrolamiento biométrico capturados y procesados por el Sistema ABIS en los distintos pasos fronterizos y unidades operativas de la Policía de Investigaciones de Chile. Todos los registros han sido verificados mediante mecanismos de normalización relacional 3NF y cifrado institucional AES-256-GCM.",
-                size: 21,
-              }),
-            ],
-            spacing: { after: 160 },
-          }),
-          crearTablaKPIs(data, exec, totalEnrolados),
-
-          new Paragraph({ text: "", spacing: { after: 240 } }),
-
-          // 2. MATRIZ DE RENDIMIENTO POR CUARTEL Y UNIDAD
-          new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-            children: [
-              new TextRun({
-                text: "2. MATRIZ DE RENDIMIENTO OPERATIVO POR CUARTEL Y UNIDAD",
-                bold: true,
-                size: 22,
-                color: "002B49",
-              }),
-            ],
-            spacing: { before: 240, after: 120 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Desglose de carga operativa y porcentaje de sincronización efectiva con los servicios centrales de la PDI:",
-                size: 21,
-              }),
-            ],
-            spacing: { after: 140 },
-          }),
-          crearTablaRendimientoCuarteles(data.rendimientoCuarteles || []),
-
-          new Paragraph({ text: "", spacing: { after: 240 } }),
-
-          // 3. DESGLOSE MIGRATORIO POR NACIONALIDAD
-          new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-            children: [
-              new TextRun({
-                text: "3. FLUJOS MIGRATORIOS PREDOMINANTES (TOP PAÍSES DE ORIGEN)",
-                bold: true,
-                size: 22,
-                color: "002B49",
-              }),
-            ],
-            spacing: { before: 240, after: 120 },
-          }),
-          crearTablaNacionalidades(data.nacionalidadesPrincipales || []),
-
-          new Paragraph({ text: "", spacing: { after: 240 } }),
-
-          // 4. ANÁLISIS DEMOGRÁFICO Y PROTECCIÓN DE MENORES N.N.A.
-          new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-            children: [
-              new TextRun({
-                text: "4. ANÁLISIS DEMOGRÁFICO Y PROTECCIÓN DE MENORES (N.N.A.)",
-                bold: true,
-                size: 22,
-                color: "002B49",
-              }),
-            ],
-            spacing: { before: 240, after: 120 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Conforme a los protocolos institucionales de la PDI y tratados internacionales de protección de derechos de la niñez, se realiza especial seguimiento a la población de Niños, Niñas y Adolescentes (N.N.A. 0 a 17 años) enrolados en las zonas de control fronterizo:",
-                size: 21,
-              }),
-            ],
-            spacing: { after: 140 },
-          }),
-          crearTablaDemografia(data),
-
-          new Paragraph({ text: "", spacing: { after: 360 } }),
-
-          // 5. BLOQUE DE FIRMAS Y VALIDEZ INSTITUCIONAL
-          new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-            children: [
-              new TextRun({
-                text: "5. CERTIFICACIÓN Y AUDITORÍA CRIPTOGRÁFICA",
-                bold: true,
-                size: 22,
-                color: "002B49",
-              }),
-            ],
-            spacing: { before: 240, after: 120 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se certifica la autenticidad e integridad inalterable de los datos aquí descritos, procesados a través del motor ETL del Sistema ABIS y resguardados con protocolo criptográfico AES-256-GCM bajo clave institucional autorizada.",
-                size: 20,
-                italics: true,
-              }),
-            ],
-            spacing: { after: 360 },
-          }),
-          crearBloqueFirmas(),
-        ],
+        children,
       },
     ],
   });
 
-  return await Packer.toBuffer(doc);
-}
-
-// Genera la tabla de metadatos del reporte
-function crearTablaMetadatos(fechaPeriodo, fechaEmision, data) {
-  const borderNone = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
-  const borders = { top: borderNone, bottom: borderNone, left: borderNone, right: borderNone };
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders,
-    rows: [
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: "Período Consultado:", bold: true, size: 20 })] })],
-            width: { size: 25, type: WidthType.PERCENTAGE },
-          }),
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: fechaPeriodo, size: 20 })] })],
-            width: { size: 75, type: WidthType.PERCENTAGE },
-          }),
-        ],
-      }),
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: "Fecha de Emisión:", bold: true, size: 20 })] })],
-          }),
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: fechaEmision, size: 20 })] })],
-          }),
-        ],
-      }),
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: "Clasificación:", bold: true, size: 20 })] })],
-          }),
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: "RESERVADO - USO OFICIAL EXCLUSIVO POLICÍA DE INVESTIGACIONES", bold: true, color: "DC2626", size: 20 })] })],
-          }),
-        ],
-      }),
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: "Seguridad Criptográfica:", bold: true, size: 20 })] })],
-          }),
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: "AES-256-GCM / Integridad Autenticada SHA-256", size: 20, color: "059669" })] })],
-          }),
-        ],
-      }),
-    ],
-  });
-}
-
-// Genera la tabla de KPIs principales
-function crearTablaKPIs(data, exec, totalEnrolados) {
-  const headerFill = "002B49";
-  const borderLight = { style: BorderStyle.SINGLE, size: 1, color: "CBD5E1" };
-  const borders = { top: borderLight, bottom: borderLight, left: borderLight, right: borderLight };
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders,
-    rows: [
-      new TableRow({
-        children: [
-          celdaHeader("Indicador Institucional", 45, headerFill),
-          celdaHeader("Valor Registrado", 25, headerFill, AlignmentType.RIGHT),
-          celdaHeader("Estado / Meta Institucional", 30, headerFill, AlignmentType.CENTER),
-        ],
-      }),
-      filaKPI("Total de Enrolamientos Procesados", `${totalEnrolados} registros`, "Volumen consolidado", borders),
-      filaKPI("Cumplimiento SLA Sincronización PDI", `${exec.tasaSincronizacion || 100}%`, `Meta: >= 95% (${exec.estadoSLA || "Óptimo"})`, borders),
-      filaKPI("Eficacia Registro Biométrico ABIS", `${exec.tasaRegistroBiometrico || 0}%`, "Captura biométrica válida", borders),
-      filaKPI("Tasa de Inconsistencias o Error", `${exec.tasaError || 0}%`, "Bajo control institucional", borders),
-      filaKPI("Cuartel con Mayor Demanda Operativa", exec.cuartelLider ? `${exec.cuartelLider.nombre} (${exec.cuartelLider.porcentaje}%)` : "N/D", "Puesto fronterizo líder", borders),
-      filaKPI("Flujo Migratorio Predominante", exec.nacionalidadLider ? `${exec.nacionalidadLider.nombre} (${exec.nacionalidadLider.porcentaje}%)` : "N/D", "País de mayor incidencia", borders),
-    ],
-  });
-}
-
-// Genera la tabla de rendimiento de cuarteles
-function crearTablaRendimientoCuarteles(cuarteles) {
-  const headerFill = "002B49";
-  const borderLight = { style: BorderStyle.SINGLE, size: 1, color: "CBD5E1" };
-  const borders = { top: borderLight, bottom: borderLight, left: borderLight, right: borderLight };
-
-  const rows = [
-    new TableRow({
-      children: [
-        celdaHeader("Puesto / Cuartel Fronterizo", 30, headerFill),
-        celdaHeader("Unidad Policial", 25, headerFill),
-        celdaHeader("Total Enrolados", 15, headerFill, AlignmentType.RIGHT),
-        celdaHeader("Sincronizados PDI", 15, headerFill, AlignmentType.RIGHT),
-        celdaHeader("Tasa Éxito (%)", 15, headerFill, AlignmentType.RIGHT),
-      ],
-    }),
-  ];
-
-  if (cuarteles.length === 0) {
-    rows.push(
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ text: "Sin registros para el período", alignment: AlignmentType.CENTER })],
-            columnSpan: 5,
-            borders,
-          }),
-        ],
-      })
-    );
-  } else {
-    cuarteles.forEach((c) => {
-      rows.push(
-        new TableRow({
-          children: [
-            celdaDato(c.cuartel, borders, true),
-            celdaDato(c.unidad, borders),
-            celdaDato(c.total.toLocaleString(), borders, false, AlignmentType.RIGHT),
-            celdaDato(c.sincronizados.toLocaleString(), borders, false, AlignmentType.RIGHT),
-            celdaDato(`${c.tasaExito}%`, borders, true, AlignmentType.RIGHT, c.tasaExito >= 95 ? "059669" : "DC2626"),
-          ],
-        })
-      );
-    });
-  }
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders,
-    rows,
-  });
-}
-
-// Genera la tabla de nacionalidades
-function crearTablaNacionalidades(nacionalidades) {
-  const headerFill = "002B49";
-  const borderLight = { style: BorderStyle.SINGLE, size: 1, color: "CBD5E1" };
-  const borders = { top: borderLight, bottom: borderLight, left: borderLight, right: borderLight };
-
-  const rows = [
-    new TableRow({
-      children: [
-        celdaHeader("País / Nacionalidad", 45, headerFill),
-        celdaHeader("Código ISO", 20, headerFill, AlignmentType.CENTER),
-        celdaHeader("Total Enrolamientos", 20, headerFill, AlignmentType.RIGHT),
-        celdaHeader("Proporción (%)", 15, headerFill, AlignmentType.RIGHT),
-      ],
-    }),
-  ];
-
-  nacionalidades.forEach((n) => {
-    rows.push(
-      new TableRow({
-        children: [
-          celdaDato(n.nacionalidad, borders, true),
-          celdaDato(n.codigo_iso || "N/D", borders, false, AlignmentType.CENTER),
-          celdaDato(n.total.toLocaleString(), borders, false, AlignmentType.RIGHT),
-          celdaDato(`${n.porcentaje}%`, borders, true, AlignmentType.RIGHT),
-        ],
-      })
-    );
-  });
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders,
-    rows,
-  });
-}
-
-// Genera la tabla demográfica cruzada
-function crearTablaDemografia(data) {
-  const headerFill = "002B49";
-  const borderLight = { style: BorderStyle.SINGLE, size: 1, color: "CBD5E1" };
-  const borders = { top: borderLight, bottom: borderLight, left: borderLight, right: borderLight };
-
-  const demografia = data.demografiaCruzada || [];
-  let mascAdultos = 0, mascMenores = 0;
-  let femAdultos = 0, femMenores = 0;
-
-  demografia.forEach((d) => {
-    if (d.genero === "M") {
-      if (d.esMayorEdad) mascAdultos += d.total;
-      else mascMenores += d.total;
-    } else if (d.genero === "F") {
-      if (d.esMayorEdad) femAdultos += d.total;
-      else femMenores += d.total;
-    }
-  });
-
-  const total = data.total || 1;
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders,
-    rows: [
-      new TableRow({
-        children: [
-          celdaHeader("Grupo Poblacional / Rango Etario", 50, headerFill),
-          celdaHeader("Hombres (M)", 25, headerFill, AlignmentType.RIGHT),
-          celdaHeader("Mujeres (F)", 25, headerFill, AlignmentType.RIGHT),
-        ],
-      }),
-      new TableRow({
-        children: [
-          celdaDato("Adultos (Mayores de Edad >= 18)", borders, true),
-          celdaDato(`${mascAdultos.toLocaleString()} (${((mascAdultos / total) * 100).toFixed(1)}%)`, borders, false, AlignmentType.RIGHT),
-          celdaDato(`${femAdultos.toLocaleString()} (${((femAdultos / total) * 100).toFixed(1)}%)`, borders, false, AlignmentType.RIGHT),
-        ],
-      }),
-      new TableRow({
-        children: [
-          celdaDato("Niños, Niñas y Adolescentes (N.N.A. 0 a 17 años)", borders, true, AlignmentType.LEFT, "D97706"),
-          celdaDato(`${mascMenores.toLocaleString()} (${((mascMenores / total) * 100).toFixed(1)}%)`, borders, true, AlignmentType.RIGHT, "D97706"),
-          celdaDato(`${femMenores.toLocaleString()} (${((femMenores / total) * 100).toFixed(1)}%)`, borders, true, AlignmentType.RIGHT, "D97706"),
-        ],
-      }),
-    ],
-  });
-}
-
-// Bloque de firmas institucionales
-function crearBloqueFirmas() {
-  const borderNone = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
-  const borders = { top: borderNone, bottom: borderNone, left: borderNone, right: borderNone };
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders,
-    rows: [
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({ text: "", spacing: { before: 720 } }),
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: "____________________________________", size: 20 }),
-                ],
-              }),
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: "OFICIAL RESPONSABLE SISTEMA ABIS", bold: true, size: 18 }),
-                ],
-              }),
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: "Departamento de Identificación Biométrica", size: 16, color: "64748B" }),
-                ],
-              }),
-            ],
-            width: { size: 50, type: WidthType.PERCENTAGE },
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({ text: "", spacing: { before: 720 } }),
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: "____________________________________", size: 20 }),
-                ],
-              }),
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: "JEFE DEPARTAMENTO DE MIGRACIONES", bold: true, size: 18 }),
-                ],
-              }),
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [
-                  new TextRun({ text: "Policía Internacional - PDI Chile", size: 16, color: "64748B" }),
-                ],
-              }),
-            ],
-            width: { size: 50, type: WidthType.PERCENTAGE },
-          }),
-        ],
-      }),
-    ],
-  });
-}
-
-// Helpers para construcción de celdas
-function celdaHeader(texto, anchoPorcentaje, bgHex, alignment = AlignmentType.LEFT) {
-  return new TableCell({
-    children: [
-      new Paragraph({
-        alignment,
-        children: [
-          new TextRun({
-            text: texto,
-            bold: true,
-            size: 20,
-            color: "FFFFFF",
-          }),
-        ],
-      }),
-    ],
-    width: { size: anchoPorcentaje, type: WidthType.PERCENTAGE },
-    shading: { fill: bgHex },
-  });
-}
-
-function celdaDato(texto, borders, bold = false, alignment = AlignmentType.LEFT, colorHex = "1E293B") {
-  return new TableCell({
-    children: [
-      new Paragraph({
-        alignment,
-        children: [
-          new TextRun({
-            text: String(texto),
-            bold,
-            size: 20,
-            color: colorHex,
-          }),
-        ],
-      }),
-    ],
-    borders,
-  });
-}
-
-function filaKPI(label, valor, detalle, borders) {
-  return new TableRow({
-    children: [
-      celdaDato(label, borders, true),
-      celdaDato(valor, borders, true, AlignmentType.RIGHT),
-      celdaDato(detalle, borders, false, AlignmentType.CENTER),
-    ],
-  });
+  return Packer.toBuffer(doc);
 }
 
 module.exports = { generarReporteWord };
