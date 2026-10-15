@@ -955,22 +955,34 @@ async function generarReporteExcel(data, meta = {}) {
   wsVisual.getCell("B6").alignment = { horizontal: "left", vertical: "middle" };
 
   const visualKpis = [
-    ["TOTAL ENROLAMIENTOS", totalEnrolados, "Registros procesados", "FF0B2A5B", "FFEAF1F7"],
-    ["SINCRONIZADOS", `${exec.tasaSincronizacion || 100}%`, "Envío correcto a PDI", "FF0F766E", "FFE8F7F1"],
-    ["REGISTROS VÁLIDOS", `${exec.tasaRegistroBiometrico || 100}%`, "Captura biométrica", "FF2563A8", "FFEAF3FB"],
-    ["PARA REVISAR", `${exec.tasaError || 0}%`, "Con observaciones", "FFB42318", "FFFFF0ED"],
+    ["▦  TOTAL DE ENROLAMIENTOS", totalEnrolados, "Registros procesados", "Volumen bruto", "FF0B2A5B", "FFEAF1F7", 1],
+    ["↻  SINCRONIZADOS CON PDI", `${exec.tasaSincronizacion || 100}%`, "Envío correcto a PDI", "Meta cumplida", "FF0F766E", "FFE8F7F1", Number(exec.tasaSincronizacion || 100) / 100],
+    ["◉  REGISTRO BIOMÉTRICO ABIS", `${exec.tasaRegistroBiometrico || 100}%`, "Captura biométrica", "Captura OK", "FF1687C2", "FFEAF3FB", Number(exec.tasaRegistroBiometrico || 100) / 100],
+    ["⚠  INCONSISTENCIAS", `${exec.tasaError || 0}%`, "Casos para revisar", "Sin incidentes", "FFB42318", "FFFFF0ED", Number(exec.tasaError || 0) / 100],
   ];
   const visualKpiColumns = [["B", "D"], ["E", "G"], ["H", "J"], ["K", "M"]];
-  visualKpis.forEach(([title, value, subtitle, color, background], index) => {
+  visualKpis.forEach(([title, value, subtitle, badge, color, background, progress], index) => {
     const [fromCol, toCol] = visualKpiColumns[index];
-    [7, 8, 9].forEach((row) => wsVisual.mergeCells(`${fromCol}${row}:${toCol}${row}`));
+    const [fromIndex, toIndex] = [fromCol.charCodeAt(0) - 64, toCol.charCodeAt(0) - 64];
+    wsVisual.mergeCells(`${fromCol}8:${toCol}8`);
+    wsVisual.mergeCells(`${fromCol}9:${toCol}9`);
     const titleCell = wsVisual.getCell(`${fromCol}7`);
+    const badgeCell = wsVisual.getCell(`${toCol}7`);
     const valueCell = wsVisual.getCell(`${fromCol}8`);
     const subtitleCell = wsVisual.getCell(`${fromCol}9`);
     titleCell.value = title;
+    badgeCell.value = badge;
     valueCell.value = value;
     subtitleCell.value = subtitle;
-    [titleCell, valueCell, subtitleCell].forEach((cell) => {
+    titleCell.font = { name: "Segoe UI", size: 8, bold: true, color: { argb: color } };
+    badgeCell.font = { name: "Segoe UI", size: 7, bold: true, color: { argb: color } };
+    valueCell.font = { name: "Segoe UI", size: 21, bold: true, color: { argb: color } };
+    subtitleCell.font = { name: "Segoe UI", size: 8, italic: true, color: { argb: "FF64748B" } };
+    titleCell.alignment = { horizontal: "left", vertical: "middle" };
+    badgeCell.alignment = { horizontal: "right", vertical: "middle" };
+    valueCell.alignment = { horizontal: "left", vertical: "middle" };
+    subtitleCell.alignment = { horizontal: "left", vertical: "middle" };
+    [titleCell, badgeCell, valueCell, subtitleCell].forEach((cell) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: background } };
       cell.border = {
         top: { style: "thin", color: { argb: color } },
@@ -978,15 +990,23 @@ async function generarReporteExcel(data, meta = {}) {
         left: { style: "thin", color: { argb: color } },
         right: { style: "thin", color: { argb: color } },
       };
-      cell.alignment = { horizontal: "center", vertical: "middle" };
     });
-    titleCell.font = { name: "Segoe UI", size: 8, bold: true, color: { argb: color } };
-    valueCell.font = { name: "Segoe UI", size: 18, bold: true, color: { argb: color } };
-    subtitleCell.font = { name: "Segoe UI", size: 8, italic: true, color: { argb: "FF64748B" } };
+    for (let col = fromIndex; col <= toIndex; col += 1) {
+      const barCell = wsVisual.getCell(10, col);
+      const fillBar = progress >= (col - fromIndex + 1) / (toIndex - fromIndex + 1)
+        ? color
+        : "FFDCE5ED";
+      barCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: fillBar } };
+      barCell.border = {
+        top: { style: "thin", color: { argb: background } },
+        bottom: { style: "thin", color: { argb: background } },
+      };
+    }
   });
-  wsVisual.getRow(7).height = 20;
-  wsVisual.getRow(8).height = 31;
+  wsVisual.getRow(7).height = 22;
+  wsVisual.getRow(8).height = 34;
   wsVisual.getRow(9).height = 19;
+  wsVisual.getRow(10).height = 7;
 
   const visualPanels = [
     [11, 22, 2, 8], [11, 22, 9, 15],
