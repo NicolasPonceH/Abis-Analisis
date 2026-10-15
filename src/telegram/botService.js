@@ -543,20 +543,54 @@ async function manejarComandoReporte({ token, chatId, pool, args }) {
   const replyMarkup = crearBotonesDescarga({ fecha });
 
   try {
-    const { generarCapturaDiaria } = require("../reportes/imageReportService");
-    const buffer = await generarCapturaDiaria(reporte);
-    await telegramClient.enviarFoto({
+    const {
+      generarCapturaDiaria,
+      generarCapturaDistribucionDiaria,
+      generarCapturaAcumulado,
+    } = require("../reportes/imageReportService");
+    const { obtenerDatosAcumulados } = require("../reportes/reporteFinDeSemana");
+    const anioActual = new Date().getFullYear();
+    const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+      obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+      obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+    ]);
+    const [bufDiario, bufDistribucion, bufAcumEnrolados, bufAcumRegistros] = await Promise.all([
+      generarCapturaDiaria(reporte),
+      generarCapturaDistribucionDiaria(reporte),
+      generarCapturaAcumulado(dataAcumEnrolados, {
+        titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL ANO ${anioActual}`,
+        tipoFiltro: "ENROLADO",
+        anio: anioActual,
+      }),
+      generarCapturaAcumulado(dataAcumRegistros, {
+        titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACUMULADO AL ANO ${anioActual}`,
+        tipoFiltro: "TODOS",
+        anio: anioActual,
+      }),
+    ]);
+    await telegramClient.enviarGrupoFotos({
       token,
       chatId,
-      buffer,
-      caption: `📊 <b>REPORTE OFICIAL ABIS - ${fecha}</b>\n👥 Total Enrolados: <b>${(reporte.total || 0).toLocaleString("es-CL")}</b>`,
+      fotos: [
+        {
+          buffer: bufDiario,
+          caption: `REPORTE OFICIAL ABIS - FOTO 1/4: ESTADOS DE LA JORNADA ${fecha}\nTotal enrolados: ${(reporte.total || 0).toLocaleString("es-CL")}`,
+        },
+        {
+          buffer: bufDistribucion,
+          caption: `FOTO 2/4: DISTRIBUCION DE LA JORNADA ${fecha}`,
+        },
+        {
+          buffer: bufAcumEnrolados,
+          caption: `FOTO 3/4: ENROLADOS ACUMULADOS ${anioActual}`,
+        },
+        {
+          buffer: bufAcumRegistros,
+          caption: `FOTO 4/4: REGISTROS ACUMULADOS ${anioActual}`,
+        },
+      ],
     });
-    await telegramClient.enviarMensaje({
-      token,
-      chatId,
-      texto,
-      replyMarkup,
-    });
+    await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
   } catch (imgErr) {
     console.warn("[BOT REPORTE] Fallback a mensaje de texto:", imgErr.message);
     await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
@@ -965,27 +999,6 @@ async function iniciarBot({ token, chatId, pool, logger = console }) {
   botActivo = true;
   let offset = 0;
   logger.log("Bot de Telegram interactivo iniciado (Long Polling y Botones Activos)...");
-
-  // Registrar comandos en Telegram para autocompletado y menú al escribir /
-  try {
-    await telegramClient.registrarComandosBot({
-      token,
-      commands: [
-        { command: "reporte", description: "Generar reporte diario o de fecha" },
-        { command: "rango", description: "Reporte consolidado entre 2 fechas" },
-        { command: "excel", description: "Descargar planilla Excel (.xlsx)" },
-        { command: "word", description: "Descargar informe Word (.docx)" },
-        { command: "errores", description: "Ver fallas e inconsistencias por cuartel" },
-        { command: "estado", description: "Estado de la BD y registros acumulados" },
-        { command: "logs", description: "Detalle de la última carga ETL" },
-        { command: "id", description: "Ver Chat ID para registro" },
-        { command: "ayuda", description: "Guía de comandos disponibles" },
-      ],
-    });
-    logger.log("Comandos registrados exitosamente en Telegram.");
-  } catch (cmdErr) {
-    logger.warn("[TELEGRAM] No se pudieron registrar comandos:", cmdErr.message);
-  }
 
   while (botActivo) {
     try {

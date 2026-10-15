@@ -1,6 +1,6 @@
 import { state } from '../core/state.js?v=3';
 import { escapeHtml } from '../core/utils.js?v=3';
-import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js?v=4';
+import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
 
 export var liveClockInterval = null;
 
