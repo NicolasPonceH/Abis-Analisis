@@ -602,8 +602,13 @@ select.form-control {
 /* Presentación ejecutiva inspirada en las cards de SIAD */
 .kpi-top {
   display: block;
-  min-height: 76px;
+  min-height: 60px;
   margin-bottom: 5px;
+}
+
+/* El badge se posiciona respecto de la card completa, no del encabezado. */
+.kpi-card > .kpi-top {
+  position: static;
 }
 
 .kpi-top::before {
@@ -711,7 +716,7 @@ select.form-control {
 .kpi-pill {
   position: absolute;
   left: 20px;
-  bottom: 15px;
+  bottom: 6px;
   display: inline-flex;
   align-items: center;
   min-height: 24px;
