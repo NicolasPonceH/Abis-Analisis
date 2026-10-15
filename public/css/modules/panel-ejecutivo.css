@@ -521,13 +521,13 @@ select.form-control {
 
 .kpi-watermark {
   position: absolute;
-  right: -16px;
-  bottom: -24px;
+  right: -10px;
+  bottom: -18px;
   z-index: 0;
   color: var(--kpi-accent, var(--pdi-navy));
-  opacity: 0.075;
+  opacity: 0.1;
   pointer-events: none;
-  transform: rotate(-8deg);
+  transform: rotate(-8deg) scale(1.05);
 }
 
 .kpi-watermark .svg-icon {
