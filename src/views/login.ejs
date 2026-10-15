@@ -265,11 +265,11 @@
       width: 100%;
       height: 48px;
       margin-top: 20px;
-      border: 0;
+      border: 1px solid #e5b900;
       border-radius: 12px;
-      background: #003B73;
-      box-shadow: 0 4px 12px rgba(0, 59, 115, 0.16);
-      color: #FFD400;
+      background: linear-gradient(135deg, #ffe566 0%, #ffd100 48%, #f2b900 100%);
+      box-shadow: 0 5px 14px rgba(255, 209, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      color: #00234c;
       font-size: 15px;
       font-weight: 800;
       letter-spacing: 0.02em;
@@ -277,10 +277,11 @@
       transition: all 0.2s ease;
     }
 
-    .submit-button svg { width: 18px; height: 18px; transition: transform 0.2s ease; color: #FFD400; }
-    .submit-button:hover { background: #062B57; box-shadow: 0 8px 16px rgba(0, 59, 115, 0.24); transform: translateY(-2px); }
+    .submit-button svg { width: 18px; height: 18px; transition: transform 0.2s ease; color: #00234c; }
+    .submit-button:hover { background: linear-gradient(135deg, #ffed8a 0%, #ffe04d 48%, #ffd100 100%); border-color: #d5aa00; box-shadow: 0 8px 20px rgba(255, 209, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.55); transform: translateY(-2px); }
     .submit-button:hover svg:last-child { transform: translateX(3px); }
     .submit-button:active { transform: translateY(0); }
+    .submit-button:focus-visible { outline: 3px solid rgba(255, 209, 0, 0.42); outline-offset: 3px; }
     .submit-button:disabled { cursor: wait; opacity: 0.75; transform: none; }
 
     .card-links {

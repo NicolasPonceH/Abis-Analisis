@@ -340,20 +340,23 @@ select.form-control {
 }
 
 .kpi-card {
-  background: var(--bg-surface);
+  background: linear-gradient(135deg, var(--kpi-wash, rgba(59, 130, 246, 0.08)) 0%, rgba(255, 255, 255, 0.78) 48%, var(--kpi-wash-strong, rgba(59, 130, 246, 0.12)) 100%);
   border: 1px solid var(--border-subtle);
+  border-left: 5px solid var(--kpi-accent, var(--pdi-navy));
   border-radius: var(--radius-lg);
-  padding: 20px;
+  min-height: 158px;
+  padding: 18px 20px 16px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
+  isolation: isolate;
+  box-shadow: 0 8px 24px rgba(15, 42, 73, 0.08), 0 2px 5px rgba(15, 42, 73, 0.04);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   box-sizing: border-box;
 }
 
 .kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 30px rgba(15, 42, 73, 0.13), 0 4px 8px rgba(15, 42, 73, 0.05);
   border-color: var(--border-medium);
 }
 
@@ -362,20 +365,38 @@ select.form-control {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  height: 4px;
+  bottom: 0;
+  width: 5px;
   background: var(--kpi-accent, var(--pdi-navy));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 35%, transparent);
+  z-index: 2;
+}
+
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  width: 185px;
+  height: 185px;
+  right: -72px;
+  bottom: -90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--kpi-wash-strong, rgba(59, 130, 246, 0.16)) 0%, transparent 70%);
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Tarjeta 1: Total Enrolamientos (Azul Marino PDI) */
 .kpi-card.blue {
   --kpi-accent: var(--pdi-navy);
-  background: linear-gradient(180deg, #f0f5fa 0%, #f9fbfd 100%);
+  --kpi-wash: rgba(59, 130, 246, 0.08);
+  --kpi-wash-strong: rgba(59, 130, 246, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #0b3d70, #00234c);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #d2e1ee;
 }
 .kpi-card.blue:hover {
-  border-color: #ffd100; box-shadow: 0 0 16px rgba(255, 209, 0, 0.8);
-  box-shadow: 0 8px 20px rgba(0, 43, 73, 0.1);
+  border-color: #9bb8d2;
 }
 .kpi-card.blue .kpi-title {
   color: #1a365d;
@@ -390,12 +411,14 @@ select.form-control {
 /* Tarjeta 2: Sincronizados con PDI (Verde Éxito) */
 .kpi-card.success {
   --kpi-accent: var(--status-success);
-  background: linear-gradient(180deg, #edfdf5 0%, #f7fdf9 100%);
+  --kpi-wash: rgba(16, 185, 129, 0.08);
+  --kpi-wash-strong: rgba(16, 185, 129, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #059669, #047857);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #a7f3d0;
 }
 .kpi-card.success:hover {
   border-color: var(--status-success);
-  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.12);
 }
 .kpi-card.success .kpi-title {
   color: #065f46;
@@ -410,12 +433,14 @@ select.form-control {
 /* Tarjeta 3: Registro Biométrico ABIS (Azul / Cyan Info) */
 .kpi-card.info {
   --kpi-accent: var(--status-info);
-  background: linear-gradient(180deg, #f0f9ff 0%, #f8fcff 100%);
+  --kpi-wash: rgba(14, 165, 233, 0.08);
+  --kpi-wash-strong: rgba(14, 165, 233, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #0284c7, #075985);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #bae6fd;
 }
 .kpi-card.info:hover {
   border-color: var(--status-info);
-  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.12);
 }
 .kpi-card.info .kpi-title {
   color: #075985;
@@ -430,12 +455,14 @@ select.form-control {
 /* Tarjeta 4: Inconsistencias / Errores (Rojo Alerta) */
 .kpi-card.danger {
   --kpi-accent: var(--status-danger);
-  background: linear-gradient(180deg, #fef2f2 0%, #fffafa 100%);
+  --kpi-wash: rgba(239, 68, 68, 0.08);
+  --kpi-wash-strong: rgba(239, 68, 68, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #dc2626, #991b1b);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #fecaca;
 }
 .kpi-card.danger:hover {
   border-color: var(--status-danger);
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.12);
 }
 .kpi-card.danger .kpi-title {
   color: #991b1b;
@@ -451,22 +478,82 @@ select.form-control {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 10px;
+  min-height: 28px;
+  margin-bottom: 9px;
 }
 
 .kpi-title {
-  font-size: 0.76rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.72rem;
   color: var(--text-muted);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.55px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 9px;
+  color: #ffffff;
+  background: var(--kpi-icon-bg, var(--kpi-accent, var(--pdi-navy)));
+  box-shadow: 0 7px 14px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 24%, transparent), 0 0 0 3px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 11%, transparent);
+  box-sizing: border-box;
+}
+
+.kpi-icon .svg-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2.25;
+}
+
+.kpi-watermark {
+  position: absolute;
+  right: -10px;
+  bottom: -18px;
+  z-index: 1;
+  color: var(--kpi-accent, var(--pdi-navy));
+  opacity: 0.14;
+  pointer-events: none;
+  transform: rotate(-8deg) scale(1.05);
+  filter: blur(0.35px);
+}
+
+.kpi-watermark .svg-icon {
+  display: block;
+  width: 104px;
+  height: 104px;
+  stroke-width: 1.4;
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
+.kpi-card > :not(.kpi-watermark) {
+  position: relative;
+  z-index: 2;
 }
 
 .kpi-pill {
-  font-size: 0.7rem;
+  flex: 0 0 auto;
+  font-size: 0.66rem;
   font-weight: 700;
-  padding: 2px 7px;
+  line-height: 1;
+  padding: 6px 9px;
   border-radius: var(--radius-full);
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  box-shadow: 0 2px 5px rgba(15, 42, 73, 0.05);
 }
 
 .kpi-card.blue .kpi-pill    { background: #eff6ff; color: #1e40af; }
@@ -476,35 +563,167 @@ select.form-control {
 
 .kpi-value {
   font-family: var(--font-heading);
-  font-size: 2.2rem;
+  font-size: 2.55rem;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
   line-height: 1.1;
-  margin-bottom: 6px;
+  margin: 2px 0 5px;
+  text-shadow: 0 2px 8px rgba(15, 42, 73, 0.08);
 }
 
 .kpi-subtext {
-  font-size: 0.8rem;
+  min-height: 18px;
+  font-size: 0.77rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 6px;
+  line-height: 1.35;
 }
 
 .kpi-progress {
-  height: 6px;
+  height: 7px;
   background: #ffd100;
   border-radius: var(--radius-full);
-  margin-top: 12px;
+  margin-top: 13px;
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15, 42, 73, 0.08);
 }
 
 .kpi-progress-bar {
   height: 100%;
-  background: var(--kpi-accent, var(--pdi-navy));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 82%, white), var(--kpi-accent, var(--pdi-navy)));
   border-radius: var(--radius-full);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 32%, transparent);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 180ms ease;
+}
+
+/* Presentación ejecutiva inspirada en las cards de SIAD */
+.kpi-top {
+  display: block;
+  min-height: 60px;
+  margin-bottom: 5px;
+}
+
+/* El badge se posiciona respecto de la card completa, no del encabezado. */
+.kpi-card > .kpi-top {
+  position: static;
+}
+
+.kpi-top::before {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--radius-full);
+  font-size: 0.57rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  border: 1px solid color-mix(in srgb, var(--kpi-accent) 30%, white);
+  background: color-mix(in srgb, var(--kpi-accent) 8%, white);
+  color: color-mix(in srgb, var(--kpi-accent) 86%, #111827);
+}
+
+.kpi-top::after {
+  content: "";
+  display: block;
+}
+
+.kpi-card.blue .kpi-top::before { content: "•  VOLUMEN OPERATIVO"; }
+.kpi-card.success .kpi-top::before { content: "•  CONTROL DE SINCRONIZACIÓN"; }
+.kpi-card.info .kpi-top::before { content: "•  CONTROL BIOMÉTRICO"; }
+.kpi-card.danger .kpi-top::before { content: "•  CONTROL DE CALIDAD"; }
+
+.kpi-title {
+  display: block;
+  width: calc(100% - 52px);
+  margin-top: 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.66rem;
+  letter-spacing: 0.35px;
+  line-height: 1.25;
+}
+
+.kpi-title::after {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.kpi-card.blue .kpi-title::after { content: "REGISTROS PROCESADOS"; }
+.kpi-card.success .kpi-title::after { content: "ENVÍO CORRECTO A PDI"; }
+.kpi-card.info .kpi-title::after { content: "CAPTURA BIOMÉTRICA VÁLIDA"; }
+.kpi-card.danger .kpi-title::after { content: "CASOS PARA REVISAR"; }
+
+.kpi-icon {
+  position: absolute;
+  top: 17px;
+  right: 19px;
+  width: 39px;
+  height: 39px;
+  border-radius: 13px;
+  box-shadow: 0 8px 15px color-mix(in srgb, var(--kpi-accent) 27%, transparent), 0 0 0 3px color-mix(in srgb, var(--kpi-accent) 12%, transparent);
+}
+
+.kpi-icon .svg-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.kpi-value {
+  display: inline-block;
+  margin: 0;
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.kpi-subtext {
+  display: inline-flex;
+  max-width: calc(100% - 82px);
+  margin: 0 0 0 7px;
+  vertical-align: baseline;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.35px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.kpi-card.blue .kpi-subtext {
+  font-size: 0;
+}
+
+.kpi-card.blue .kpi-subtext::after {
+  content: "ENROLAMIENTOS";
+  font-size: 0.6rem;
+}
+
+.kpi-progress {
+  display: none;
+}
+
+.kpi-pill {
+  position: absolute;
+  left: 20px;
+  bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  font-size: 0.58rem;
+  letter-spacing: 0.2px;
+  box-shadow: 0 3px 7px rgba(15, 42, 73, 0.06);
 }
 
 

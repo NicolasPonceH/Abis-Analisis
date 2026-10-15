@@ -119,15 +119,16 @@
         <!-- KPI 1: Total Enrolamientos -->
         <div class="kpi-card blue">
           <div class="kpi-top">
-            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
-                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+            <span class="kpi-title">
+              <span class="kpi-icon" aria-hidden="true">
+              <svg class="svg-icon" viewBox="0 0 24 24">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
                 <line x1="16" y1="13" x2="8" y2="13" />
                 <line x1="16" y1="17" x2="8" y2="17" />
                 <polyline points="10 9 9 9 8 9" />
               </svg>
+              </span>
               Total de Enrolamientos
             </span>
             <span class="kpi-pill">Volumen Bruto</span>
@@ -137,16 +138,20 @@
           <div class="kpi-progress">
             <div class="kpi-progress-bar" style="width: 100%;"></div>
           </div>
+          <div class="kpi-watermark" aria-hidden="true">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
         </div>
 
         <!-- KPI 2: Sincronización PDI -->
         <div class="kpi-card success">
           <div class="kpi-top">
-            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
-                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+            <span class="kpi-title">
+              <span class="kpi-icon" aria-hidden="true">
+              <svg class="svg-icon" viewBox="0 0 24 24">
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-12.28l5.07 5.07" />
               </svg>
+              </span>
               Sincronizados con PDI
             </span>
             <span class="kpi-pill" id="kpi-sinc-tag">Conforme</span>
@@ -156,14 +161,17 @@
           <div class="kpi-progress">
             <div class="kpi-progress-bar" id="kpi-sinc-bar" style="width: 0%;"></div>
           </div>
+          <div class="kpi-watermark" aria-hidden="true">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-12.28l5.07 5.07"/></svg>
+          </div>
         </div>
 
         <!-- KPI 3: Registrados Biométricos -->
         <div class="kpi-card info">
           <div class="kpi-top">
-            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
-                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+            <span class="kpi-title">
+              <span class="kpi-icon" aria-hidden="true">
+              <svg class="svg-icon" viewBox="0 0 24 24">
                 <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
                 <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
                 <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
@@ -173,6 +181,7 @@
                 <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .14-1.26" />
                 <path d="M8.65 22c.21-.66.45-1.32.57-2" />
               </svg>
+              </span>
               Registro Biométrico ABIS
             </span>
             <span class="kpi-pill">Captura OK</span>
@@ -182,18 +191,22 @@
           <div class="kpi-progress">
             <div class="kpi-progress-bar" id="kpi-reg-bar" style="width: 0%;"></div>
           </div>
+          <div class="kpi-watermark" aria-hidden="true">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .13-4-.01-5.3"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .14-1.26"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/></svg>
+          </div>
         </div>
 
         <!-- KPI 4: Con Error / Incidentes -->
         <div class="kpi-card danger">
           <div class="kpi-top">
-            <span class="kpi-title" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"
-                style="stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+            <span class="kpi-title">
+              <span class="kpi-icon" aria-hidden="true">
+              <svg class="svg-icon" viewBox="0 0 24 24">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
+              </span>
               Inconsistencias
             </span>
             <span class="kpi-pill" id="kpi-err-tag">Sin Alerta</span>
@@ -202,6 +215,9 @@
           <div class="kpi-subtext" id="kpi-err-pct">0% del total procesado</div>
           <div class="kpi-progress">
             <div class="kpi-progress-bar" id="kpi-err-bar" style="width: 0%;"></div>
+          </div>
+          <div class="kpi-watermark" aria-hidden="true">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
         </div>
       </div>
