@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Estadisticas - SIAD{% endblock %}
 {% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+  // Respaldo para redes donde jsDelivr no responde o carga de forma intermitente.
+  (function ensureChartLibrary() {
+    if (window.Chart) return;
+    var fallback = document.createElement('script');
+    fallback.src = 'https://unpkg.com/chart.js@4/dist/chart.umd.min.js';
+    fallback.async = true;
+    document.head.appendChild(fallback);
+  })();
+</script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
   // Función para descargar la tarjeta completa (gráfico + texto)
@@ -85,19 +95,19 @@
       </button>
       <!-- Dropdown menu -->
       <div id="filtroMenu" style="display: none;" class="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 rounded-2xl shadow-xl py-2 z-50 border-2 border-slate-100 dark:border-slate-800 overflow-hidden">
-        <a href="{{ url_for('estadisticas', dias=7, agrupacion=agrupacion_actual) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if dias_actuales == 7 }}">
+        <a href="{{ url_for('estadisticas', dias=7, agrupacion=agrupacion_actual, menores=filtro_menores) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if dias_actuales == 7 }}">
           <span>Últimos 7 días</span>
           {% if dias_actuales == 7 %}<span class="material-symbols-outlined text-[16px] text-blue-600">check</span>{% endif %}
         </a>
-        <a href="{{ url_for('estadisticas', dias=30, agrupacion=agrupacion_actual) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if dias_actuales == 30 }}">
+        <a href="{{ url_for('estadisticas', dias=30, agrupacion=agrupacion_actual, menores=filtro_menores) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if dias_actuales == 30 }}">
           <span>Últimos 30 días</span>
           {% if dias_actuales == 30 %}<span class="material-symbols-outlined text-[16px] text-blue-600">check</span>{% endif %}
         </a>
-        <a href="{{ url_for('estadisticas', dias=90, agrupacion=agrupacion_actual) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if dias_actuales == 90 }}">
+        <a href="{{ url_for('estadisticas', dias=90, agrupacion=agrupacion_actual, menores=filtro_menores) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if dias_actuales == 90 }}">
           <span>Últimos 90 días</span>
           {% if dias_actuales == 90 %}<span class="material-symbols-outlined text-[16px] text-blue-600">check</span>{% endif %}
         </a>
-        <a href="{{ url_for('estadisticas', agrupacion=agrupacion_actual) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 border-t border-slate-100 dark:border-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if not dias_actuales }}">
+        <a href="{{ url_for('estadisticas', agrupacion=agrupacion_actual, menores=filtro_menores) }}" class="flex items-center justify-between px-4 py-2.5 text-xs lg:text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 border-t border-slate-100 dark:border-slate-800 transition-colors {{ 'font-black bg-blue-50/80 dark:bg-slate-800 text-blue-700 dark:text-blue-400' if not dias_actuales }}">
           <span>Histórico Completo</span>
           {% if not dias_actuales %}<span class="material-symbols-outlined text-[16px] text-blue-600">check</span>{% endif %}
         </a>
@@ -123,7 +133,7 @@
 </div>
 
 <!-- 6 Summary KPI Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-8 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
   <!-- Doc Procesados -->
   <div class="bg-gradient-to-br from-white via-blue-50/40 to-blue-100/30 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl shadow-md hover:shadow-xl border-l-4 border-l-[#4d82bc] border-y border-r border-slate-200/80 dark:border-slate-800 p-5 relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
     <div class="flex justify-between items-start">
@@ -306,68 +316,166 @@
   
   <!-- Line Chart -->
   <div id="cardTendencias" class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col relative overflow-hidden transition-all">
-    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 z-10 text-white shadow-sm">
-      <div>
-        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#ffd100] text-[#00234c] text-[10px] font-black uppercase tracking-widest mb-1 shadow-sm">
-          <span class="material-symbols-outlined text-[12px] text-[#00234c]">show_chart</span> HISTÓRICO MULTIVARIABLE
-        </div>
-        <h3 class="text-xl font-black text-white leading-tight">Tendencias Históricas de Procesamiento</h3>
-        <p class="text-xs text-blue-100 mt-1 max-w-md font-bold leading-relaxed">Evolución periódica correlacionando entidades detectadas en partes policiales.</p>
-      </div>
+    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex flex-col gap-3.5 z-10 text-white shadow-sm">
       
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0 w-full lg:w-auto justify-between lg:justify-end">
-        <!-- Leyenda Inline en 1 sola línea horizontal -->
-        <div class="flex items-center gap-2 whitespace-nowrap bg-white/10 dark:bg-slate-900/80 p-1.5 rounded-2xl border border-white/20 shadow-sm overflow-x-auto max-w-full">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 text-white border border-white/30 text-xs font-black shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#ffd100]"></span> Vehículos
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-200 border border-amber-400/40 text-xs font-black shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Sustancias
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 text-red-200 border border-red-400/40 text-xs font-black shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span> Armamento
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-200 border border-purple-400/40 text-xs font-black shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Personas
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 text-xs font-black shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Víctimas
-          </span>
+      <!-- Fila 1: Título y Controles de Acción -->
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#ffd100] text-[#00234c] text-[10px] font-black uppercase tracking-widest mb-1 shadow-sm">
+            <span class="material-symbols-outlined text-[12px] text-[#00234c]">show_chart</span> HISTÓRICO MULTIVARIABLE
+          </div>
+          <h3 class="text-xl font-black text-white leading-tight">Tendencias Históricas de Procesamiento</h3>
+          <p class="text-xs text-blue-100 mt-1 max-w-md font-bold leading-relaxed">Evolución periódica correlacionando entidades detectadas en partes policiales.</p>
         </div>
-
-        <div class="flex flex-col items-end gap-2 shrink-0 w-full sm:w-auto">
-          <!-- Botón Exportar PNG arriba -->
-          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] text-xs font-black tracking-wide uppercase transition-all shadow-md border-b-2 border-amber-600 active:scale-95">
-            <span class="material-symbols-outlined text-[16px] text-[#00234c]">download</span> Exportar PNG
-          </button>
-
-          <!-- Dropdown Agrupación Abajo -->
-          <div class="relative w-full sm:w-auto">
-            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="w-full flex items-center justify-between gap-2 px-3.5 py-1.5 bg-white/20 text-white border border-white/30 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
-                <span class="flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[15px] text-[#ffd100]">bar_chart</span> 
-                  {% if agrupacion_actual == 'ano' %}Anual
-                  {% elif agrupacion_actual == 'semana' %}Semanal
-                  {% elif agrupacion_actual == 'mes' %}Mensual
-                  {% else %}Diaria{% endif %}
-                </span>
-                <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+        
+        <!-- Acciones: Dropdowns y Exportar en una fila horizontal ordenada -->
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0 w-full lg:w-auto justify-start lg:justify-end">
+          <!-- Dropdown Agrupación -->
+          <div class="relative">
+            <button onclick="document.getElementById('agrupacionMenuCard').style.display = document.getElementById('agrupacionMenuCard').style.display === 'none' ? 'block' : 'none'" class="flex items-center justify-between gap-2 px-3.5 py-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
+              <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-[#ffd100]">bar_chart</span> 
+                {% if agrupacion_actual == 'ano' %}Anual
+                {% elif agrupacion_actual == 'semana' %}Semanal
+                {% elif agrupacion_actual == 'mes' %}Mensual
+                {% else %}Diaria{% endif %}
+              </span>
+              <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
             </button>
-            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl py-1 z-50 border border-slate-200 dark:border-slate-700 text-left text-slate-900 dark:text-slate-100">
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'semana' }}">Semanal</a>
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'mes' }}">Mensual</a>
-                <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano') }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'ano' }}">Anual</a>
+            <div id="agrupacionMenuCard" style="display: none;" class="absolute right-0 mt-1.5 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-2xl py-1 z-50 border border-slate-200 dark:border-slate-700 text-left text-slate-900 dark:text-slate-100">
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='dia', menores=filtro_menores) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if not agrupacion_actual or agrupacion_actual == 'dia' }}">Diaria</a>
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='semana', menores=filtro_menores) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'semana' }}">Semanal</a>
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='mes', menores=filtro_menores) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'mes' }}">Mensual</a>
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion='ano', menores=filtro_menores) }}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if agrupacion_actual == 'ano' }}">Anual</a>
             </div>
           </div>
+
+          <!-- Dropdown Filtro Menores -->
+          <div class="relative">
+            <button onclick="document.getElementById('menoresMenuCard').style.display = document.getElementById('menoresMenuCard').style.display === 'none' ? 'block' : 'none'" class="flex items-center justify-between gap-2 px-3.5 py-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-xl text-xs font-bold tracking-wide uppercase transition-all shadow-sm">
+              <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-[#ffd100]">filter_alt</span>
+                {% if filtro_menores == 'victimas' %}Víctimas menores
+                {% elif filtro_menores == 'detenidos' %}Detenidos menores
+                {% else %}Todas las entidades{% endif %}
+              </span>
+              <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+            </button>
+            <div id="menoresMenuCard" style="display: none;" class="absolute right-0 mt-1.5 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-2xl py-1 z-50 border border-slate-200 dark:border-slate-700 text-left text-slate-900 dark:text-slate-100">
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="block px-4 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if filtro_menores == 'todos' }}">Todas las entidades</a>
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='victimas') }}" class="block px-4 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if filtro_menores == 'victimas' }}">Solo víctimas menores</a>
+              <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='detenidos') }}" class="block px-4 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700 {{ 'font-bold bg-slate-50 dark:bg-slate-700' if filtro_menores == 'detenidos' }}">Solo detenidos menores</a>
+            </div>
+          </div>
+
+          <!-- Botón Exportar PNG -->
+          <button onclick="descargarGrafico('cardTendencias', 'Tendencias_Historicas.png')" class="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#ffd100] text-[#00234c] hover:bg-[#ffe566] text-xs font-black tracking-wide uppercase transition-all shadow-md rounded-xl border-b-2 border-amber-600 active:scale-95">
+            <span class="material-symbols-outlined text-[16px] text-[#00234c]">download</span> Exportar PNG
+          </button>
         </div>
       </div>
+
+      <!-- Fila 2: Barra de Leyendas (Full Width, interactiva con estado activo) -->
+      <div class="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2">
+        <span class="text-[10px] font-black uppercase tracking-wider text-blue-200/70 mr-1 hidden sm:inline-flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">palette</span> Series:
+        </span>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/15 text-white border border-white/25 text-xs font-bold shadow-sm transition-all hover:bg-white/25 {{ 'opacity-35 hover:opacity-100' if filtro_menores != 'todos' }}">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#ffd100] shadow-sm"></span> Vehículos
+        </a>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/20 text-amber-200 border border-amber-400/40 text-xs font-bold shadow-sm transition-all hover:bg-amber-500/30 {{ 'opacity-35 hover:opacity-100' if filtro_menores != 'todos' }}">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></span> Sustancias
+        </a>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-500/20 text-red-200 border border-red-400/40 text-xs font-bold shadow-sm transition-all hover:bg-red-500/30 {{ 'opacity-35 hover:opacity-100' if filtro_menores != 'todos' }}">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-400 shadow-sm"></span> Armamento
+        </a>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-500/20 text-purple-200 border border-purple-400/40 text-xs font-bold shadow-sm transition-all hover:bg-purple-500/30 {{ 'opacity-35 hover:opacity-100' if filtro_menores != 'todos' }}">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-sm"></span> Personas
+        </a>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 text-xs font-bold shadow-sm transition-all hover:bg-emerald-500/30 {{ 'opacity-35 hover:opacity-100' if filtro_menores != 'todos' }}">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm"></span> Víctimas
+        </a>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='victimas') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl {{ 'bg-cyan-500/40 text-white border-2 border-cyan-300 ring-2 ring-cyan-400/50 font-black shadow-md scale-105' if filtro_menores == 'victimas' else ('opacity-35 hover:opacity-100 bg-cyan-500/20 text-cyan-200 border border-cyan-400/40 font-bold') }} text-xs shadow-sm transition-all">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm"></span> Víctimas menores
+          {% if filtro_menores == 'victimas' %}<span class="text-[9px] bg-cyan-600 px-1.5 py-0.2 rounded font-black tracking-wider uppercase ml-1">ACTIVO</span>{% endif %}
+        </a>
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='detenidos') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl {{ 'bg-orange-500/40 text-white border-2 border-orange-300 ring-2 ring-orange-400/50 font-black shadow-md scale-105' if filtro_menores == 'detenidos' else ('opacity-35 hover:opacity-100 bg-orange-500/20 text-orange-200 border border-orange-400/40 font-bold') }} text-xs shadow-sm transition-all">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-sm"></span> Detenidos menores
+          {% if filtro_menores == 'detenidos' %}<span class="text-[9px] bg-orange-600 px-1.5 py-0.2 rounded font-black tracking-wider uppercase ml-1">ACTIVO</span>{% endif %}
+        </a>
+        {% if filtro_menores != 'todos' %}
+        <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="inline-flex items-center gap-1 text-[11px] text-amber-300 hover:text-white underline font-bold ml-auto transition-colors">
+          <span class="material-symbols-outlined text-[14px]">refresh</span> Restablecer todas
+        </a>
+        {% endif %}
+      </div>
+
     </div>
-    <div class="w-full relative flex-1 min-h-[380px] p-6 bg-white dark:bg-slate-900/50 flex flex-col justify-center">
+    <div class="w-full p-6 bg-white dark:bg-slate-900/50 flex flex-col">
+      {% if filtro_menores == 'victimas' %}
+      <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-slate-900/90 to-cyan-950/30 border border-cyan-500/40 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center shrink-0 shadow-inner">
+            <span class="material-symbols-outlined text-cyan-300 text-2xl">child_care</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black uppercase tracking-wider text-cyan-300">Filtro Especializado N.N.A.</span>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 text-[10px] font-extrabold uppercase">Víctimas Menores</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">Mostrando registros de niños, niñas y adolescentes en calidad de víctimas en partes policiales.</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <div class="px-3.5 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-400/30 text-center">
+            <span class="text-[9px] font-bold text-cyan-300/80 uppercase block">Víctimas N.N.A.</span>
+            <span class="text-xs font-black text-cyan-200">{{ '{:,}'.format(stats.por_categoria.victima_menor if stats and stats.por_categoria.victima_menor is defined else 0) }} casos</span>
+          </div>
+          <div class="px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Total Víctimas</span>
+            <span class="text-xs font-black text-white">{{ '{:,}'.format(stats.por_categoria.victimas if stats and stats.por_categoria.victimas is defined else 0) }} casos</span>
+          </div>
+          <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 no-underline">
+            <span class="material-symbols-outlined text-[15px]">close</span> Quitar filtro
+          </a>
+        </div>
+      </div>
+      {% elif filtro_menores == 'detenidos' %}
+      <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-orange-950/50 via-slate-900/90 to-orange-950/30 border border-orange-500/40 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-400/40 flex items-center justify-center shrink-0 shadow-inner">
+            <span class="material-symbols-outlined text-orange-300 text-2xl">front_hand</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black uppercase tracking-wider text-orange-300">Filtro Especializado N.N.A.</span>
+              <span class="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-orange-200 text-[10px] font-extrabold uppercase">Detenidos Menores</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">Mostrando registros de adolescentes infractores (Ley N° 20.084 RPA) aprehendidos en partes policiales.</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <div class="px-3.5 py-1.5 rounded-xl bg-orange-500/15 border border-orange-400/30 text-center">
+            <span class="text-[9px] font-bold text-orange-300/80 uppercase block">Detenidos N.N.A.</span>
+            <span class="text-xs font-black text-orange-200">{{ '{:,}'.format(stats.por_categoria.detenido_menor if stats and stats.por_categoria.detenido_menor is defined else 0) }} casos</span>
+          </div>
+          <div class="px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Total Imputados</span>
+            <span class="text-xs font-black text-white">{{ '{:,}'.format(stats.por_categoria.personas if stats and stats.por_categoria.personas is defined else 0) }} casos</span>
+          </div>
+          <a href="{{ url_for('estadisticas', dias=dias_actuales, agrupacion=agrupacion_actual, menores='todos') }}" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 no-underline">
+            <span class="material-symbols-outlined text-[15px]">close</span> Quitar filtro
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
       {% if stats and stats.tendencias and stats.tendencias|length > 0 %}
-      <canvas id="chartTendencias" class="w-full h-full"></canvas>
+      <div class="relative w-full h-[360px] flex items-center justify-center">
+        <canvas id="chartTendencias"></canvas>
+      </div>
       {% else %}
-      <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-10 w-full">
+      <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-16 w-full h-[360px]">
         <span class="material-symbols-outlined text-[48px] mb-3 opacity-30">query_stats</span>
         <p class="font-bold text-sm text-slate-500">No hay registros de tendencias en este período</p>
         <p class="text-xs mt-1">Intenta seleccionar un rango de fechas más amplio (Ej. Últimos 90 días o Histórico Completo).</p>
@@ -742,12 +850,12 @@
     }
     const canvasTendencias = document.getElementById("chartTendencias");
     const canvasDistribucion = document.getElementById("chartDistribucion");
-    if (!canvasTendencias || !canvasDistribucion) return;
+    if (!canvasTendencias && !canvasDistribucion) return;
 
-    if (Chart.getChart(canvasTendencias)) {
+    if (canvasTendencias && Chart.getChart(canvasTendencias)) {
       Chart.getChart(canvasTendencias).destroy();
     }
-    if (Chart.getChart(canvasDistribucion)) {
+    if (canvasDistribucion && Chart.getChart(canvasDistribucion)) {
       Chart.getChart(canvasDistribucion).destroy();
     }
 
@@ -755,20 +863,30 @@
     Chart.defaults.color = "#64748b"; // slate-500
 
     // Datos dinámicos desde el backend
+    if (canvasTendencias) {
     const rawDataEl = document.getElementById("tendencias-data");
-    const rawTendencias = rawDataEl ? JSON.parse(rawDataEl.textContent || '[]') : [];
+    let rawTendencias = [];
+    try {
+      rawTendencias = rawDataEl ? JSON.parse(rawDataEl.textContent || '[]') : [];
+    } catch (error) {
+      console.error('[SIAD] No se pudieron leer los datos de tendencias:', error);
+    }
 
-    // Trimear meses iniciales sin datos (donde la suma de todas las entidades sea 0)
+    // Trimear meses iniciales sin datos, pero conservando al menos 6 periodos para perspectiva histórica elegante
     let firstNonZeroIndex = rawTendencias.findIndex(d => 
-      ((d.vehiculos || 0) + (d.drogas || 0) + (d.armas || 0) + (d.personas || 0) + (d.victimas || 0)) > 0
+      ((d.vehiculos || 0) + (d.drogas || 0) + (d.armas || 0) + (d.personas || 0) + (d.victimas || 0) + (d.victimas_menores || 0) + (d.detenidos_menores || 0)) > 0
     );
 
     let tendenciasData = rawTendencias;
-    if (firstNonZeroIndex > 0) {
-      const startIndex = Math.max(0, firstNonZeroIndex - 1);
-      tendenciasData = rawTendencias.slice(startIndex);
-    } else if (firstNonZeroIndex === -1 && rawTendencias.length > 0) {
-      tendenciasData = rawTendencias.slice(-1);
+    if (rawTendencias.length > 6) {
+      if (firstNonZeroIndex !== -1) {
+        // Garantizar al menos 6 periodos para que el eje temporal sea simétrico y profesional
+        const minPeriods = Math.min(6, rawTendencias.length);
+        const startIdx = Math.min(Math.max(0, firstNonZeroIndex - 2), rawTendencias.length - minPeriods);
+        tendenciasData = rawTendencias.slice(Math.max(0, startIdx));
+      } else {
+        tendenciasData = rawTendencias.slice(-6);
+      }
     }
 
     const labelsMeses = tendenciasData.length > 0 ? tendenciasData.map(d => d.label) : ["No hay datos"];
@@ -777,236 +895,415 @@
     const dataArmamento = tendenciasData.map(d => d.armas || 0);
     const dataPersonas = tendenciasData.map(d => d.personas || 0);
     const dataVictimas = tendenciasData.map(d => d.victimas || 0);
+    const dataVictimasMenores = tendenciasData.map(d => d.victimas_menores || 0);
+    const dataDetenidosMenores = tendenciasData.map(d => d.detenidos_menores || 0);
     
     const ctxTendencias = canvasTendencias.getContext("2d");
   
-  // Gradientes verticales para las barras
-  const barGradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 350);
-  barGradientVehiculos.addColorStop(0, '#0052cc');
-  barGradientVehiculos.addColorStop(1, '#001a35');
+    // Helper para generar gradientes dinámicos adaptados a la altura exacta de cada barra
+    function createDynamicGradient(ctx, element, chartArea, colorStops) {
+      let yBottom = chartArea ? chartArea.bottom : 320;
+      let yTop = chartArea ? chartArea.top : 40;
+      if (element && typeof element.base === 'number' && typeof element.y === 'number' && element.base !== element.y) {
+        yBottom = element.base;
+        yTop = element.y;
+      }
+      const grad = ctx.createLinearGradient(0, yBottom, 0, yTop);
+      colorStops.forEach(stop => grad.addColorStop(stop.offset, stop.color));
+      return grad;
+    }
 
-  const barGradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 350);
-  barGradientSustancias.addColorStop(0, '#fbbf24');
-  barGradientSustancias.addColorStop(1, '#b45309');
+    // Gradientes estáticos para entidades generales en modo barra
+    const barGradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    barGradientVehiculos.addColorStop(0, '#0052cc');
+    barGradientVehiculos.addColorStop(1, '#001a35');
 
-  const barGradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 350);
-  barGradientArmamento.addColorStop(0, '#f87171');
-  barGradientArmamento.addColorStop(1, '#991b1b');
+    const barGradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    barGradientSustancias.addColorStop(0, '#fbbf24');
+    barGradientSustancias.addColorStop(1, '#b45309');
 
-  const barGradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
-  barGradientPersonas.addColorStop(0, '#c084fc');
-  barGradientPersonas.addColorStop(1, '#6b21a8');
+    const barGradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    barGradientArmamento.addColorStop(0, '#f87171');
+    barGradientArmamento.addColorStop(1, '#991b1b');
 
-  const barGradientVictimas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
-  barGradientVictimas.addColorStop(0, '#34d399');
-  barGradientVictimas.addColorStop(1, '#065f46');
+    const barGradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    barGradientPersonas.addColorStop(0, '#c084fc');
+    barGradientPersonas.addColorStop(1, '#6b21a8');
 
-  // Gradientes para modo Área / Línea
-  const gradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.3)');
-  gradientVehiculos.addColorStop(1, 'rgba(0, 71, 171, 0)');
-  
-  const gradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.25)');
-  gradientSustancias.addColorStop(1, 'rgba(234, 179, 8, 0)');
+    const barGradientVictimas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    barGradientVictimas.addColorStop(0, '#34d399');
+    barGradientVictimas.addColorStop(1, '#065f46');
 
-  const gradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.25)');
-  gradientArmamento.addColorStop(1, 'rgba(239, 68, 68, 0)');
+    // Gradientes para modo Área / Línea
+    const gradientVehiculos = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    gradientVehiculos.addColorStop(0, 'rgba(0, 71, 171, 0.35)');
+    gradientVehiculos.addColorStop(1, 'rgba(0, 71, 171, 0)');
+    
+    const gradientSustancias = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    gradientSustancias.addColorStop(0, 'rgba(234, 179, 8, 0.3)');
+    gradientSustancias.addColorStop(1, 'rgba(234, 179, 8, 0)');
 
-  const gradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientPersonas.addColorStop(0, 'rgba(168, 85, 247, 0.25)');
-  gradientPersonas.addColorStop(1, 'rgba(168, 85, 247, 0)');
+    const gradientArmamento = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    gradientArmamento.addColorStop(0, 'rgba(239, 68, 68, 0.3)');
+    gradientArmamento.addColorStop(1, 'rgba(239, 68, 68, 0)');
 
-  const gradientVictimas = ctxTendencias.createLinearGradient(0, 0, 0, 400);
-  gradientVictimas.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
-  gradientVictimas.addColorStop(1, 'rgba(16, 185, 129, 0)');
+    const gradientPersonas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    gradientPersonas.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
+    gradientPersonas.addColorStop(1, 'rgba(168, 85, 247, 0)');
 
-  const agrupacionActual = "{{ agrupacion_actual or 'dia' }}";
-  let chartType = "bar";
-  let isLine = false;
-  let isArea = false;
-  
-  if (agrupacionActual === "mes" || agrupacionActual === "semana") {
+    const gradientVictimas = ctxTendencias.createLinearGradient(0, 0, 0, 350);
+    gradientVictimas.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+    gradientVictimas.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+    const agrupacionActual = "{{ agrupacion_actual or ('dia' if dias_actuales else 'mes') }}";
+    const filtroMenores = "{{ filtro_menores or 'todos' }}";
+    let chartType = "bar";
+    let isLine = false;
+    let isArea = false;
+    
+    if (filtroMenores !== 'todos') {
+      // Para filtros focalizados en menores, siempre usar barras estilizadas para visualización clara y contundente
+      chartType = "bar";
+      isLine = false;
+      isArea = false;
+    } else if (agrupacionActual === "mes" || agrupacionActual === "semana") {
       chartType = "line";
       isLine = true;
-      isArea = true; // Habilitar relleno degradado tanto para Semana como para Mes
-  }
+      isArea = true;
+    }
 
-  new Chart(ctxTendencias, {
-    type: chartType,
-    data: {
-      labels: labelsMeses,
-      datasets: [
-        {
-          label: "Vehículos",
-          data: dataVehiculos,
-          backgroundColor: isArea ? gradientVehiculos : (isLine ? "#0047AB" : barGradientVehiculos),
-          borderColor: isLine ? "#0047AB" : "transparent",
-          borderWidth: isLine ? 3.5 : 0,
-          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
-          fill: isArea,
-          tension: 0.35,
-          pointRadius: isLine ? 5 : 0,
-          pointHoverRadius: 9,
-          pointBorderWidth: isLine ? 3 : 0,
-          pointHoverBorderWidth: 4,
-          pointBorderColor: "#ffffff",
-          pointBackgroundColor: "#0047AB"
-        },
-        {
-          label: "Sustancias",
-          data: dataSustancias,
-          backgroundColor: isArea ? gradientSustancias : (isLine ? "#eab308" : barGradientSustancias),
-          borderColor: isLine ? "#eab308" : "transparent",
-          borderWidth: isLine ? 3.5 : 0,
-          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
-          fill: isArea,
-          tension: 0.35,
-          pointRadius: isLine ? 5 : 0,
-          pointHoverRadius: 9,
-          pointBorderWidth: isLine ? 3 : 0,
-          pointHoverBorderWidth: 4,
-          pointBorderColor: "#ffffff",
-          pointBackgroundColor: "#eab308"
-        },
-        {
-          label: "Armamento",
-          data: dataArmamento,
-          backgroundColor: isArea ? gradientArmamento : (isLine ? "#ef4444" : barGradientArmamento),
-          borderColor: isLine ? "#ef4444" : "transparent",
-          borderWidth: isLine ? 3.5 : 0,
-          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
-          fill: isArea,
-          tension: 0.35,
-          pointRadius: isLine ? 5 : 0,
-          pointHoverRadius: 9,
-          pointBorderWidth: isLine ? 3 : 0,
-          pointHoverBorderWidth: 4,
-          pointBorderColor: "#ffffff",
-          pointBackgroundColor: "#ef4444"
-        },
-        {
-          label: "Personas",
-          data: dataPersonas,
-          backgroundColor: isArea ? gradientPersonas : (isLine ? "#a855f7" : barGradientPersonas),
-          borderColor: isLine ? "#a855f7" : "transparent",
-          borderWidth: isLine ? 3.5 : 0,
-          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
-          fill: isArea,
-          tension: 0.35,
-          pointRadius: isLine ? 5 : 0,
-          pointHoverRadius: 9,
-          pointBorderWidth: isLine ? 3 : 0,
-          pointHoverBorderWidth: 4,
-          pointBorderColor: "#ffffff",
-          pointBackgroundColor: "#a855f7"
-        },
-        {
-          label: "Víctimas",
-          data: dataVictimas,
-          backgroundColor: isArea ? gradientVictimas : (isLine ? "#10b981" : barGradientVictimas),
-          borderColor: isLine ? "#10b981" : "transparent",
-          borderWidth: isLine ? 3.5 : 0,
-          borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
-          fill: isArea,
-          tension: 0.35,
-          pointRadius: isLine ? 5 : 0,
-          pointHoverRadius: 9,
-          pointBorderWidth: isLine ? 3 : 0,
-          pointHoverBorderWidth: 4,
-          pointBorderColor: "#ffffff",
-          pointBackgroundColor: "#10b981"
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      barPercentage: 0.7,
-      categoryPercentage: 0.65,
-      animation: {
-        duration: 1000,
-        easing: 'easeOutQuart'
+    // Ancho máximo contenido para evitar bloques monolíticos (máximo 40px)
+    const maxBarWidth = filtroMenores !== 'todos' ? 42 : 36;
+
+    new Chart(ctxTendencias, {
+      type: chartType,
+      data: {
+        labels: labelsMeses,
+        datasets: (() => { 
+          const datasets = [
+            {
+              label: "Vehículos",
+              data: dataVehiculos,
+              backgroundColor: isArea ? gradientVehiculos : (isLine ? "#0047AB" : barGradientVehiculos),
+              borderColor: isLine ? "#0047AB" : "transparent",
+              borderWidth: isLine ? 3.5 : 0,
+              borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
+              maxBarThickness: maxBarWidth,
+              fill: isArea,
+              tension: 0.35,
+              pointRadius: isLine ? 5 : 0,
+              pointHoverRadius: 9,
+              pointBorderWidth: isLine ? 3 : 0,
+              pointHoverBorderWidth: 4,
+              pointBorderColor: "#ffffff",
+              pointBackgroundColor: "#0047AB"
+            },
+            {
+              label: "Sustancias",
+              data: dataSustancias,
+              backgroundColor: isArea ? gradientSustancias : (isLine ? "#eab308" : barGradientSustancias),
+              borderColor: isLine ? "#eab308" : "transparent",
+              borderWidth: isLine ? 3.5 : 0,
+              borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
+              maxBarThickness: maxBarWidth,
+              fill: isArea,
+              tension: 0.35,
+              pointRadius: isLine ? 5 : 0,
+              pointHoverRadius: 9,
+              pointBorderWidth: isLine ? 3 : 0,
+              pointHoverBorderWidth: 4,
+              pointBorderColor: "#ffffff",
+              pointBackgroundColor: "#eab308"
+            },
+            {
+              label: "Armamento",
+              data: dataArmamento,
+              backgroundColor: isArea ? gradientArmamento : (isLine ? "#ef4444" : barGradientArmamento),
+              borderColor: isLine ? "#ef4444" : "transparent",
+              borderWidth: isLine ? 3.5 : 0,
+              borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
+              maxBarThickness: maxBarWidth,
+              fill: isArea,
+              tension: 0.35,
+              pointRadius: isLine ? 5 : 0,
+              pointHoverRadius: 9,
+              pointBorderWidth: isLine ? 3 : 0,
+              pointHoverBorderWidth: 4,
+              pointBorderColor: "#ffffff",
+              pointBackgroundColor: "#ef4444"
+            },
+            {
+              label: "Personas",
+              data: dataPersonas,
+              backgroundColor: isArea ? gradientPersonas : (isLine ? "#a855f7" : barGradientPersonas),
+              borderColor: isLine ? "#a855f7" : "transparent",
+              borderWidth: isLine ? 3.5 : 0,
+              borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
+              maxBarThickness: maxBarWidth,
+              fill: isArea,
+              tension: 0.35,
+              pointRadius: isLine ? 5 : 0,
+              pointHoverRadius: 9,
+              pointBorderWidth: isLine ? 3 : 0,
+              pointHoverBorderWidth: 4,
+              pointBorderColor: "#ffffff",
+              pointBackgroundColor: "#a855f7"
+            },
+            {
+              label: "Víctimas",
+              data: dataVictimas,
+              backgroundColor: isArea ? gradientVictimas : (isLine ? "#10b981" : barGradientVictimas),
+              borderColor: isLine ? "#10b981" : "transparent",
+              borderWidth: isLine ? 3.5 : 0,
+              borderRadius: isLine ? 0 : { topLeft: 6, topRight: 6, bottomLeft: 2, bottomRight: 2 },
+              maxBarThickness: maxBarWidth,
+              fill: isArea,
+              tension: 0.35,
+              pointRadius: isLine ? 5 : 0,
+              pointHoverRadius: 9,
+              pointBorderWidth: isLine ? 3 : 0,
+              pointHoverBorderWidth: 4,
+              pointBorderColor: "#ffffff",
+              pointBackgroundColor: "#10b981"
+            },
+            {
+              label: "Víctimas menores",
+              data: dataVictimasMenores,
+              backgroundColor: function(context) {
+                const { ctx, chartArea } = context.chart;
+                return createDynamicGradient(ctx, context.element, chartArea, [
+                  { offset: 0, color: 'rgba(3, 53, 94, 0.95)' },
+                  { offset: 0.35, color: '#0284c7' },
+                  { offset: 0.8, color: '#00e5ff' },
+                  { offset: 1, color: '#e0f2fe' }
+                ]);
+              },
+              borderColor: "#38bdf8",
+              borderWidth: { top: 2.5, left: 1.2, right: 1.2, bottom: 0 },
+              borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 3, bottomRight: 3 },
+              maxBarThickness: maxBarWidth,
+              fill: false,
+              tension: 0.35
+            },
+            {
+              label: "Detenidos menores",
+              data: dataDetenidosMenores,
+              backgroundColor: function(context) {
+                const { ctx, chartArea } = context.chart;
+                return createDynamicGradient(ctx, context.element, chartArea, [
+                  { offset: 0, color: 'rgba(124, 45, 18, 0.95)' },
+                  { offset: 0.35, color: '#ea580c' },
+                  { offset: 0.8, color: '#fb923c' },
+                  { offset: 1, color: '#fef08a' }
+                ]);
+              },
+              borderColor: "#fb923c",
+              borderWidth: { top: 2.5, left: 1.2, right: 1.2, bottom: 0 },
+              borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 3, bottomRight: 3 },
+              maxBarThickness: maxBarWidth,
+              fill: false,
+              tension: 0.35
+            }
+          ];
+          if (filtroMenores === "victimas") return datasets.filter(d => d.label === "Víctimas menores");
+          if (filtroMenores === "detenidos") return datasets.filter(d => d.label === "Detenidos menores");
+          return datasets;
+        })()
       },
-      plugins: { 
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.94)',
-          titleColor: '#ffd100',
-          bodyColor: '#f8fafc',
-          borderColor: 'rgba(255, 255, 255, 0.15)',
-          borderWidth: 1,
-          padding: 14,
-          titleFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
-          bodyFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
-          displayColors: true,
-          usePointStyle: true,
-          boxWidth: 8,
-          boxHeight: 8,
-          cornerRadius: 12,
-          // Mostrar solamente la barra (o punto) sobre la que está el cursor.
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        maxBarThickness: maxBarWidth,
+        barPercentage: filtroMenores !== 'todos' ? 0.38 : 0.7,
+        categoryPercentage: filtroMenores !== 'todos' ? 0.45 : 0.65,
+        animation: {
+          duration: 900,
+          easing: 'easeOutQuart'
+        },
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            titleColor: '#ffd100',
+            bodyColor: '#f8fafc',
+            borderColor: 'rgba(255, 255, 255, 0.18)',
+            borderWidth: 1,
+            padding: 14,
+            titleFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
+            bodyFont: { size: 12, weight: 'bold', family: "'Inter', sans-serif" },
+            displayColors: true,
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            cornerRadius: 12,
+            mode: 'nearest',
+            intersect: true,
+            callbacks: {
+              title: function(items) {
+                return `📅 PERÍODO: ${items[0].label}`;
+              },
+              label: function(context) {
+                let val = context.raw || 0;
+                let desc = val === 1 ? 'caso' : 'casos';
+                if (filtroMenores === 'victimas') {
+                  desc = val === 1 ? 'víctima menor de edad' : 'víctimas menores de edad';
+                } else if (filtroMenores === 'detenidos') {
+                  desc = val === 1 ? 'menor detenido (infractor)' : 'menores detenidos (infractores)';
+                }
+                return ` ${context.dataset.label}: ${val} ${desc}`;
+              }
+            }
+          }
+        },
+        scales: { 
+          x: { 
+            grid: { display: false, drawBorder: false },
+            ticks: { font: { weight: 'bold', size: 11 }, padding: 8, color: '#64748b' }
+          },
+          y: { 
+            beginAtZero: true,
+            suggestedMax: (() => {
+              const activeData = (() => {
+                if (filtroMenores === "victimas") return dataVictimasMenores;
+                if (filtroMenores === "detenidos") return dataDetenidosMenores;
+                return [...dataVehiculos, ...dataSustancias, ...dataArmamento, ...dataPersonas, ...dataVictimas, ...dataVictimasMenores, ...dataDetenidosMenores];
+              })();
+              const maxVal = Math.max(...activeData, 0);
+              if (maxVal <= 1) return 4;
+              if (maxVal <= 3) return 5;
+              if (maxVal <= 5) return 8;
+              return undefined;
+            })(),
+            ticks: { 
+              precision: 0,
+              stepSize: 1,
+              font: { weight: 'bold', size: 11 },
+              color: '#64748b',
+              padding: 10,
+              callback: function(value) {
+                if (Math.floor(value) !== value) return '';
+                if (value >= 1000) return (value/1000) + 'k';
+                return value;
+              }
+            },
+            border: { display: false },
+            grid: { 
+              color: 'rgba(226, 232, 240, 0.6)', 
+              drawBorder: false,
+              borderDash: [3, 3]
+            }
+          } 
+        },
+        interaction: {
           mode: 'nearest',
           intersect: true,
-          callbacks: {
-            title: function(items) {
-              let totalPeriod = items.reduce((sum, item) => sum + (item.raw || 0), 0);
-              return `📅 PERÍODO: ${items[0].label}  •  TOTAL: ${totalPeriod}`;
-            },
-            label: function(context) {
-              let val = context.raw || 0;
-              return ` ${context.dataset.label}: ${val} ${val === 1 ? 'registro' : 'registros'}`;
+        },
+      },
+      plugins: [
+        {
+          id: 'barValueLabels',
+          afterDatasetsDraw: (chart) => {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, i) => {
+              const meta = chart.getDatasetMeta(i);
+              if (!meta.hidden && meta.type === 'bar') {
+                meta.data.forEach((bar, index) => {
+                  const val = dataset.data[index];
+                  if (val > 0) {
+                    ctx.save();
+                    ctx.font = 'bold 11px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    let labelText = `${val}`;
+                    if (filtroMenores === 'victimas') {
+                      labelText = `${val} ${val === 1 ? 'Víctima N.N.A.' : 'Víctimas N.N.A.'}`;
+                    } else if (filtroMenores === 'detenidos') {
+                      labelText = `${val} ${val === 1 ? 'Menor Detenido' : 'Menores Detenidos'}`;
+                    }
+
+                    const textMetrics = ctx.measureText(labelText);
+                    const textWidth = textMetrics.width;
+                    const padX = 10;
+                    const rectH = 22;
+                    const rectW = textWidth + padX * 2;
+                    const rectX = bar.x - rectW / 2;
+                    const rectY = bar.y - rectH - 9;
+                    
+                    // Sombra sutil para elevación tipo badge
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowOffsetY = 3;
+
+                    // Fondo de la cápsula
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+                    ctx.beginPath();
+                    if (ctx.roundRect) {
+                      ctx.roundRect(rectX, rectY, rectW, rectH, 6);
+                    } else {
+                      ctx.rect(rectX, rectY, rectW, rectH);
+                    }
+                    ctx.fill();
+
+                    // Borde de la cápsula
+                    ctx.shadowColor = 'transparent';
+                    ctx.strokeStyle = filtroMenores === 'victimas' ? '#00e5ff' : (filtroMenores === 'detenidos' ? '#f97316' : '#ffd100');
+                    ctx.lineWidth = 1.3;
+                    ctx.stroke();
+
+                    // Pequeña flecha/triángulo hacia la barra
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+                    ctx.beginPath();
+                    ctx.moveTo(bar.x - 4, rectY + rectH);
+                    ctx.lineTo(bar.x + 4, rectY + rectH);
+                    ctx.lineTo(bar.x, rectY + rectH + 4);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Texto del badge
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText(labelText, bar.x, rectY + rectH / 2);
+                    ctx.restore();
+                  } else if (filtroMenores !== 'todos') {
+                    // Marcador de punto cero estilizado en meses sin incidencias
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(bar.x, bar.base - 3, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                  }
+                });
+              }
+            });
+          }
+        },
+        {
+          id: 'verticalLine',
+          afterDraw: chart => {
+            if (chart.tooltip?._active?.length) {
+              let x = chart.tooltip._active[0].element.x;
+              let yAxis = chart.scales.y;
+              let ctx = chart.ctx;
+              ctx.save();
+              ctx.beginPath();
+              ctx.moveTo(x, yAxis.top);
+              ctx.lineTo(x, yAxis.bottom);
+              ctx.lineWidth = 1.5;
+              ctx.strokeStyle = 'rgba(0, 35, 76, 0.3)';
+              ctx.setLineDash([5, 5]);
+              ctx.stroke();
+              ctx.restore();
             }
           }
         }
-      },
-      scales: { 
-        x: { 
-          grid: { display: false, drawBorder: false },
-          ticks: { font: { weight: 'bold', size: 11 }, padding: 8, color: '#64748b' }
-        },
-        y: { 
-          beginAtZero: true,
-          ticks: { 
-            font: { weight: 'bold', size: 11 },
-            color: '#64748b',
-            padding: 10,
-            callback: function(value) {
-              if (value >= 1000) return (value/1000) + 'k';
-              return value;
-            }
-          },
-          border: { display: false },
-          grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false }
-        } 
-      },
-      interaction: {
-        mode: 'nearest',
-        intersect: true,
-      },
-    },
-    plugins: [{
-      id: 'verticalLine',
-      afterDraw: chart => {
-        if (chart.tooltip?._active?.length) {
-          let x = chart.tooltip._active[0].element.x;
-          let yAxis = chart.scales.y;
-          let ctx = chart.ctx;
-          ctx.save();
-          ctx.beginPath();
-          ctx.moveTo(x, yAxis.top);
-          ctx.lineTo(x, yAxis.bottom);
-          ctx.lineWidth = 1.5;
-          ctx.strokeStyle = 'rgba(0, 35, 76, 0.3)';
-          ctx.setLineDash([5, 5]);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-    }]
-  });
+      ]
+    });
 
-  const ctxDistribucion = document.getElementById("chartDistribucion").getContext("2d");
+    }
+
+    if (canvasDistribucion) {
+    const ctxDistribucion = document.getElementById("chartDistribucion").getContext("2d");
   
   const valVehiculos = Number("{{ stats.por_categoria.vehiculo if stats else 0 }}");
   const valArmas = Number("{{ stats.por_categoria.arma if stats else 0 }}");
@@ -1083,9 +1380,10 @@
       } 
     },
   });
+    }
   window.initEstadisticasCharts = initEstadisticasCharts;
   window.addEventListener('siad:view-changed', function(e) {
-    if (window.initEstadisticasCharts && document.getElementById('chartTendencias')) {
+    if (window.initEstadisticasCharts && (document.getElementById('chartTendencias') || document.getElementById('chartDistribucion'))) {
       window.initEstadisticasCharts();
     }
   });
