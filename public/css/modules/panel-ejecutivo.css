@@ -523,22 +523,26 @@ select.form-control {
   position: absolute;
   right: -10px;
   bottom: -18px;
-  z-index: 0;
+  z-index: 1;
   color: var(--kpi-accent, var(--pdi-navy));
-  opacity: 0.1;
+  opacity: 0.14;
   pointer-events: none;
   transform: rotate(-8deg) scale(1.05);
+  filter: blur(0.35px);
 }
 
 .kpi-watermark .svg-icon {
+  display: block;
   width: 104px;
   height: 104px;
   stroke-width: 1.4;
+  stroke: currentColor !important;
+  fill: none !important;
 }
 
 .kpi-card > :not(.kpi-watermark) {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .kpi-pill {
