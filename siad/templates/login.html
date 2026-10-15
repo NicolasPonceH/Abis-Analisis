@@ -392,12 +392,116 @@
   @media (prefers-reduced-motion: reduce) {
     .warning-banner, .warning-inner, .warning-icon-anim, .card, .bg-photo { animation: none; }
   }
+
+  /* Cortina de salida: evita que el cambio login -> SIAD se sienta como un salto. */
+  #siad-login-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(0, 102, 204, 0.22), transparent 42%),
+      linear-gradient(135deg, #001b38, #020b18 72%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  body.siad-login-leaving #siad-login-transition {
+    visibility: visible;
+    pointer-events: all;
+    animation: siadLoginCurtainIn 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .siad-login-transition-card {
+    width: min(360px, calc(100vw - 48px));
+    padding: 28px 30px 24px;
+    text-align: center;
+    border: 1px solid rgba(0, 210, 255, 0.34);
+    border-radius: 18px;
+    background: rgba(2, 20, 45, 0.82);
+    box-shadow: 0 25px 70px rgba(0,0,0,0.55), 0 0 35px rgba(0, 118, 255, 0.16);
+    transform: translateY(10px) scale(0.98);
+    animation: siadLoginCardIn 0.45s 0.06s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .siad-login-transition-logo {
+    width: 74px;
+    height: 54px;
+    object-fit: contain;
+    filter: brightness(0) invert(1) drop-shadow(0 0 12px rgba(0, 210, 255, 0.6));
+    opacity: 0.92;
+  }
+  .siad-login-transition-kicker {
+    margin-top: 13px;
+    color: #ffd100;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .siad-login-transition-title {
+    margin-top: 7px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+  }
+  .siad-login-transition-line {
+    height: 3px;
+    margin-top: 17px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+  }
+  .siad-login-transition-line::after {
+    content: '';
+    display: block;
+    width: 42%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0070ea, #00d2ff, #ffd100);
+    box-shadow: 0 0 13px #00d2ff;
+    animation: siadLoginLoading 0.9s ease-in-out infinite alternate;
+  }
+  .siad-login-transition-status {
+    margin-top: 11px;
+    color: rgba(214, 232, 255, 0.7);
+    font: 600 10px/1.4 'Inter', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  @keyframes siadLoginCurtainIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes siadLoginCardIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes siadLoginLoading {
+    from { transform: translateX(-115%); }
+    to { transform: translateX(235%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.siad-login-leaving #siad-login-transition,
+    .siad-login-transition-card,
+    .siad-login-transition-line::after { animation: none; opacity: 1; transform: none; }
+  }
 </style>
 </head>
 <body>
 
   <div class="bg-photo"></div>
   <div class="bg-overlay"></div>
+
+  <div id="siad-login-transition" aria-hidden="true">
+    <div class="siad-login-transition-card">
+      <img class="siad-login-transition-logo" src="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}" alt="">
+      <div class="siad-login-transition-kicker">PDI · MÓDULO FORENSE</div>
+      <div class="siad-login-transition-title">Abriendo SIAD</div>
+      <div class="siad-login-transition-line"></div>
+      <div class="siad-login-transition-status">Validando sesión segura...</div>
+    </div>
+  </div>
 
   <!-- ADVERTENCIA FIJA EN LA PARTE SUPERIOR - MUY NOTORIA -->
   <div class="warning-banner">
@@ -476,5 +580,22 @@
 
   </div>
 
+  <script>
+    (function () {
+      if (new URLSearchParams(window.location.search).get('loader') === '1') {
+        sessionStorage.setItem('siad_show_splash', '1');
+      }
+      var form = document.querySelector('form.card');
+      if (!form) return;
+      form.addEventListener('submit', function (event) {
+        if (form.dataset.transitioning === '1') return;
+        event.preventDefault();
+        form.dataset.transitioning = '1';
+        sessionStorage.setItem('siad_show_splash', '1');
+        document.body.classList.add('siad-login-leaving');
+        window.setTimeout(function () { form.submit(); }, 260);
+      });
+    })();
+  </script>
 </body>
 </html>

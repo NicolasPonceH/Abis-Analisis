@@ -104,10 +104,11 @@ def save_document(filename, texto_original, resumen, entities_data, usuario_user
 
             p_data = entities_data.get("personas", {})
             
-            # Unir detenidos y complices en la lista de nombres para la DB, marcando los complices
+            # Unir detenidos, complices y victimas en la lista de nombres para la DB, marcando los prefijos
             detenidos = p_data.get("detenidos", [])
             complices = p_data.get("complices", [])
-            nombres_db = detenidos + [f"(Cómplice) {c}" for c in complices]
+            victimas = p_data.get("victimas", [])
+            nombres_db = detenidos + [f"(Cómplice) {c}" for c in complices] + [f"(Víctima) {v}" for v in victimas]
             
             max_p = max([len(nombres_db), len(p_data.get("ruts", [])), len(p_data.get("telefonos", []))] + [0])
             for i in range(max_p):
@@ -144,6 +145,10 @@ def list_history(fecha_desde=None, fecha_hasta=None, categoria=None, palabra_cla
             joins.append("JOIN entidades_armas e ON e.documento_id = d.id")
         elif categoria == 'droga':
             joins.append("JOIN entidades_drogas e ON e.documento_id = d.id")
+        elif categoria == 'persona' or categoria == 'imputado':
+            joins.append("JOIN entidades_personas e ON e.documento_id = d.id AND (e.nombre NOT LIKE '(Víctima)%' OR e.nombre IS NULL)")
+        elif categoria == 'victima':
+            joins.append("JOIN entidades_personas e ON e.documento_id = d.id AND e.nombre LIKE '(Víctima)%'")
     if fecha_desde:
         conditions.append("d.fecha_procesamiento >= %s")
         params.append(fecha_desde)
@@ -300,11 +305,12 @@ def get_document_entities(documento_id):
                 UNION ALL SELECT 'arma', 'series', serie FROM entidades_armas WHERE documento_id = %s AND serie IS NOT NULL
                 UNION ALL SELECT 'droga', 'sustancias', sustancia FROM entidades_drogas WHERE documento_id = %s AND sustancia IS NOT NULL
                 UNION ALL SELECT 'droga', 'medidas', medida FROM entidades_drogas WHERE documento_id = %s AND medida IS NOT NULL
-                UNION ALL SELECT 'personas', 'detenidos', nombre FROM entidades_personas WHERE documento_id = %s AND nombre IS NOT NULL AND nombre NOT LIKE '(Cómplice)%%'
+                UNION ALL SELECT 'personas', 'detenidos', nombre FROM entidades_personas WHERE documento_id = %s AND nombre IS NOT NULL AND nombre NOT LIKE '(Cómplice)%%' AND nombre NOT LIKE '(Víctima)%%'
                 UNION ALL SELECT 'personas', 'complices', SUBSTRING(nombre FROM 12) FROM entidades_personas WHERE documento_id = %s AND nombre IS NOT NULL AND nombre LIKE '(Cómplice)%%'
+                UNION ALL SELECT 'personas', 'victimas', SUBSTRING(nombre FROM 11) FROM entidades_personas WHERE documento_id = %s AND nombre IS NOT NULL AND nombre LIKE '(Víctima)%%'
                 UNION ALL SELECT 'personas', 'ruts', rut FROM entidades_personas WHERE documento_id = %s AND rut IS NOT NULL
                 UNION ALL SELECT 'personas', 'telefonos', telefono FROM entidades_personas WHERE documento_id = %s AND telefono IS NOT NULL
-            """, [documento_id] * 16)
+            """, [documento_id] * 17)
             
             return [
                 {"categoria": categoria, "campo": campo, "valor": valor}
@@ -333,12 +339,50 @@ def get_stats(dias=None, agrupacion=None):
                 entidades_filter = "WHERE documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 ent_params = [int(dias)]
 
-            cur.execute(f"SELECT (SELECT COUNT(*) FROM entidades_vehiculos {entidades_filter}) as v, (SELECT COUNT(*) FROM entidades_armas {entidades_filter}) as a, (SELECT COUNT(*) FROM entidades_drogas {entidades_filter}) as d, (SELECT COUNT(*) FROM entidades_personas {entidades_filter}) as p", ent_params * 4)
-            counts = cur.fetchone()
-            por_categoria = {"vehiculo": counts[0], "arma": counts[1], "droga": counts[2], "persona": counts[3]}
+            # Las edades de detenidos y víctimas se conservan dentro del texto de la
+            # entidad (p. ej. "Juan Pérez, 15 años"). Esta expresión cubre 0-17 años
+            # y las etiquetas institucionales explícitas para documentos sin edad numérica.
+            menor_edad_sql = "(nombre ~* '(^|[^0-9])(0|[1-9]|1[0-7])[[:space:]]*(años?|anos?)([^[:alpha:]]|$)' OR nombre ILIKE '%%menor de edad%%' OR nombre ILIKE '%%NNA%%')"
 
-            def top_valores(tabla, campo, limite=5):
-                where_clause = f"WHERE {campo} IS NOT NULL "
+            if dias:
+                imputados_filter = "WHERE (nombre NOT LIKE '(Víctima)%%' OR nombre IS NULL) AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
+                victimas_filter = "WHERE nombre LIKE '(Víctima)%%' AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
+                detenidos_menores_filter = f"WHERE nombre NOT LIKE '(Víctima)%%' AND nombre NOT LIKE '(Cómplice)%%' AND {menor_edad_sql} AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
+                victimas_menores_filter = f"WHERE nombre LIKE '(Víctima)%%' AND {menor_edad_sql} AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
+                cur.execute(f"""
+                    SELECT 
+                        (SELECT COUNT(*) FROM entidades_vehiculos {entidades_filter}) as v, 
+                        (SELECT COUNT(*) FROM entidades_armas {entidades_filter}) as a, 
+                        (SELECT COUNT(*) FROM entidades_drogas {entidades_filter}) as d, 
+                        (SELECT COUNT(*) FROM entidades_personas {imputados_filter}) as p,
+                        (SELECT COUNT(*) FROM entidades_personas {victimas_filter}) as vic,
+                        (SELECT COUNT(*) FROM entidades_personas {detenidos_menores_filter}) as det_menores,
+                        (SELECT COUNT(*) FROM entidades_personas {victimas_menores_filter}) as vic_menores
+                """, [int(dias)] * 7)
+            else:
+                cur.execute(f"""
+                    SELECT 
+                        (SELECT COUNT(*) FROM entidades_vehiculos) as v, 
+                        (SELECT COUNT(*) FROM entidades_armas) as a, 
+                        (SELECT COUNT(*) FROM entidades_drogas) as d, 
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre NOT LIKE '(Víctima)%' OR nombre IS NULL) as p,
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre LIKE '(Víctima)%') as vic,
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre NOT LIKE '(Víctima)%' AND nombre NOT LIKE '(Cómplice)%' AND {menor_edad_sql}) as det_menores,
+                        (SELECT COUNT(*) FROM entidades_personas WHERE nombre LIKE '(Víctima)%' AND {menor_edad_sql}) as vic_menores
+                """)
+            counts = cur.fetchone()
+            por_categoria = {
+                "vehiculo": counts[0],
+                "arma": counts[1],
+                "droga": counts[2],
+                "persona": counts[3],
+                "victima": counts[4],
+                "detenido_menor": counts[5],
+                "victima_menor": counts[6]
+            }
+
+            def top_valores(tabla, campo, limite=5, extra_where=""):
+                where_clause = f"WHERE {campo} IS NOT NULL {extra_where} "
                 q_params = []
                 if dias:
                     where_clause += "AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days') "
@@ -356,7 +400,10 @@ def get_stats(dias=None, agrupacion=None):
             top_marcas_vehiculos = top_valores("entidades_vehiculos", "marca")
             top_marcas_armas = top_valores("entidades_armas", "marca")
             top_sustancias = top_valores("entidades_drogas", "sustancia")
-            top_nacionalidades = top_valores("entidades_personas", "nombre")
+            top_nacionalidades = top_valores("entidades_personas", "nombre", extra_where="AND (nombre NOT LIKE '(Víctima)%%' AND nombre NOT LIKE '(Cómplice)%%')")
+            top_victimas = top_valores("entidades_personas", "SUBSTRING(nombre FROM 11)", extra_where="AND nombre LIKE '(Víctima)%%'")
+            top_victimas_menores = top_valores("entidades_personas", "SUBSTRING(nombre FROM 11)", extra_where=f"AND nombre LIKE '(Víctima)%%' AND {menor_edad_sql}")
+            top_detenidos_menores = top_valores("entidades_personas", "nombre", extra_where=f"AND (nombre NOT LIKE '(Víctima)%%' AND nombre NOT LIKE '(Cómplice)%%') AND {menor_edad_sql}")
 
             cur.execute(
                 f"SELECT fecha_procesamiento::date AS dia, COUNT(*) FROM documentos "
@@ -401,7 +448,10 @@ def get_stats(dias=None, agrupacion=None):
                     (SELECT COUNT(*) FROM entidades_vehiculos ev JOIN documentos d ON ev.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as vehiculos,
                     (SELECT COUNT(*) FROM entidades_armas ea JOIN documentos d ON ea.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as armas,
                     (SELECT COUNT(*) FROM entidades_drogas ed JOIN documentos d ON ed.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as drogas,
-                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as personas
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE (ep.nombre NOT LIKE '(Víctima)%' OR ep.nombre IS NULL) AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as personas,
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre LIKE '(Víctima)%' AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as victimas,
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre LIKE '(Víctima)%' AND {menor_edad_sql.replace('nombre', 'ep.nombre')} AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as victimas_menores,
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre NOT LIKE '(Víctima)%' AND ep.nombre NOT LIKE '(Cómplice)%' AND {menor_edad_sql.replace('nombre', 'ep.nombre')} AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as detenidos_menores
                 FROM series s
                 ORDER BY s.p_date;
             """
@@ -412,7 +462,7 @@ def get_stats(dias=None, agrupacion=None):
             meses_es = {"01": "Ene", "02": "Feb", "03": "Mar", "04": "Abr", "05": "May", "06": "Jun", 
                         "07": "Jul", "08": "Ago", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dic"}
             
-            for orig_date, v, a, d, p in tendencias_raw:
+            for orig_date, v, a, d, p, vic, vic_menores, det_menores in tendencias_raw:
                 if agrupacion == "dia":
                     label_final = orig_date.strftime("%d/%m")
                 elif agrupacion == "semana":
@@ -427,7 +477,10 @@ def get_stats(dias=None, agrupacion=None):
                     "vehiculos": v,
                     "armas": a,
                     "drogas": d,
-                    "personas": p
+                    "personas": p,
+                    "victimas": vic,
+                    "victimas_menores": vic_menores,
+                    "detenidos_menores": det_menores
                 })
 
     return {
@@ -437,6 +490,9 @@ def get_stats(dias=None, agrupacion=None):
         "top_marcas_armas": top_marcas_armas,
         "top_sustancias": top_sustancias,
         "top_nacionalidades": top_nacionalidades,
+        "top_victimas": top_victimas,
+        "top_victimas_menores": top_victimas_menores,
+        "top_detenidos_menores": top_detenidos_menores,
         "documentos_por_dia": documentos_por_dia,
         "tendencias": tendencias,
     }
@@ -450,6 +506,8 @@ def get_entidades_resumen():
                     SELECT 'vehiculo' as categoria, 'marcas' as campo, marca as valor FROM entidades_vehiculos WHERE marca IS NOT NULL
                     UNION ALL SELECT 'arma', 'marcas', marca FROM entidades_armas WHERE marca IS NOT NULL
                     UNION ALL SELECT 'droga', 'sustancias', sustancia FROM entidades_drogas WHERE sustancia IS NOT NULL
+                    UNION ALL SELECT 'persona', 'imputados', nombre FROM entidades_personas WHERE nombre IS NOT NULL AND nombre NOT LIKE '(Víctima)%'
+                    UNION ALL SELECT 'victima', 'victimas', SUBSTRING(nombre FROM 11) FROM entidades_personas WHERE nombre IS NOT NULL AND nombre LIKE '(Víctima)%'
                 ) t GROUP BY categoria, campo, valor ORDER BY categoria, campo, n DESC
             """)
             return cur.fetchall()
@@ -473,6 +531,8 @@ def get_entidades_detalle():
                     UNION ALL SELECT documento_id, 'arma', 'series', serie FROM entidades_armas WHERE serie IS NOT NULL
                     UNION ALL SELECT documento_id, 'droga', 'sustancias', sustancia FROM entidades_drogas WHERE sustancia IS NOT NULL
                     UNION ALL SELECT documento_id, 'droga', 'medidas', medida FROM entidades_drogas WHERE medida IS NOT NULL
+                    UNION ALL SELECT documento_id, 'persona', 'imputados', nombre FROM entidades_personas WHERE nombre IS NOT NULL AND nombre NOT LIKE '(Víctima)%'
+                    UNION ALL SELECT documento_id, 'victima', 'victimas', SUBSTRING(nombre FROM 11) FROM entidades_personas WHERE nombre IS NOT NULL AND nombre LIKE '(Víctima)%'
                 ) e JOIN documentos d ON e.documento_id = d.id 
                 ORDER BY d.fecha_procesamiento, e.categoria, e.campo
             """)
@@ -617,3 +677,29 @@ def get_summary_feedback_count(username):
         with conn.cursor() as cur:
             cur.execute("SELECT COUNT(*) FROM resumenes_feedback WHERE usuario_username = %s", (username,))
             return cur.fetchone()[0]
+
+
+def save_entity_feedback(username, campo, valor_original, valor_corregido, documento_id=None):
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS entidades_feedback (
+                        id BIGSERIAL PRIMARY KEY,
+                        usuario_username TEXT,
+                        documento_id BIGINT,
+                        campo TEXT NOT NULL,
+                        valor_original TEXT,
+                        valor_corregido TEXT NOT NULL,
+                        creado_en TIMESTAMPTZ DEFAULT now()
+                    )
+                """)
+                cur.execute("""
+                    INSERT INTO entidades_feedback (usuario_username, documento_id, campo, valor_original, valor_corregido)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (username, documento_id, campo, valor_original, valor_corregido))
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"Nota: DB feedback entidades opcional: {e}")
+        return False

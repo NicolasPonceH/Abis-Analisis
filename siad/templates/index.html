@@ -124,7 +124,8 @@
 <div class="px-4 lg:px-8 xl:px-12 py-8 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
 
   {% if not viewing %}
-  <!-- 2. Contenedor Principal: Tarjetas de Ingesta y Espacio de Trabajo -->
+
+  <!-- 2. Contenedor Principal: Tarjetas de Ingesta y Espacio de Trabajo -->
   <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[340px_1fr] gap-6 xl:gap-8 w-full max-w-[1850px] mx-auto items-stretch">
 
     <!-- Tarjeta de Guía Operativa (Columna Izquierda - Con el mismo largo que Carga de Documentos) -->
@@ -140,46 +141,66 @@
       </div>
 
       <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between gap-2.5 overflow-y-auto custom-doc-scroll min-h-0">
-        <div class="flex items-start gap-3 p-2.5 sm:p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
-          <span class="w-7 h-7 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">1</span>
+        <!-- Paso 1: Ingesta (Azul / Sky) -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-blue-50/90 via-sky-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-blue-200/80 dark:border-blue-900/50 border-l-4 border-l-blue-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+          <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20 mt-0.5 border border-blue-400/30">1</span>
           <div>
-            <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ingresa Documentos</h4>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+              <h4 class="text-xs font-black text-blue-950 dark:text-sky-200 uppercase tracking-wide">Ingresa Documentos</h4>
+            </div>
             <p class="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-0.5 leading-snug">Arrastra archivos o usa la opción de copiar/pegar texto directamente.</p>
           </div>
         </div>
 
-        <div class="flex items-start gap-3 p-2.5 sm:p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
-          <span class="w-7 h-7 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">2</span>
+        <!-- Paso 2: IA & OCR (Índigo / Violeta) -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-purple-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-indigo-200/80 dark:border-indigo-900/50 border-l-4 border-l-indigo-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+          <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20 mt-0.5 border border-indigo-400/30">2</span>
           <div>
-            <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Ejecuta OCR & NER</h4>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              <h4 class="text-xs font-black text-indigo-950 dark:text-indigo-200 uppercase tracking-wide">Ejecuta OCR & NER</h4>
+            </div>
             <p class="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-0.5 leading-snug">El sistema extrae automáticamente texto y cataloga hallazgos estandarizados.</p>
           </div>
         </div>
 
-        <div class="flex items-start gap-3 p-2.5 sm:p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
-          <span class="w-7 h-7 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">3</span>
+        <!-- Paso 3: Inteligencia & Análisis (Ámbar / Oro Institucional) -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50/90 via-yellow-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-amber-200/80 dark:border-amber-900/50 border-l-4 border-l-amber-500 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+          <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20 mt-0.5 border border-amber-300">3</span>
           <div>
-            <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Consulta Inteligencia</h4>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <h4 class="text-xs font-black text-amber-950 dark:text-amber-200 uppercase tracking-wide">Consulta Inteligencia</h4>
+            </div>
             <p class="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-0.5 leading-snug">Filtra hallazgos por expedientes en el Historial y descarga reportes en Estadísticas.</p>
           </div>
         </div>
 
-        <div class="flex items-start gap-3 p-2.5 sm:p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-blue-50/60 shadow-2xs">
-          <span class="w-7 h-7 rounded-xl bg-[#00234c] text-[#ffd100] font-black text-xs flex items-center justify-center shrink-0 shadow-sm mt-0.5 border border-blue-900">4</span>
+        <!-- Paso 4: Informes & Entrega (Esmeralda / Teal) -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-emerald-200/80 dark:border-emerald-900/50 border-l-4 border-l-emerald-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+          <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20 mt-0.5 border border-emerald-400/30">4</span>
           <div>
-            <h4 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">Genera Informes</h4>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h4 class="text-xs font-black text-emerald-950 dark:text-emerald-200 uppercase tracking-wide">Genera Informes</h4>
+            </div>
             <p class="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-0.5 leading-snug">Exporta actas en Word oficial (.docx), reportes ejecutivos y métricas forenses.</p>
           </div>
         </div>
 
+        <!-- Custodia Forense PDI: Sello Institucional Oficial -->
         <div class="pt-1 mt-1 shrink-0">
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50/60 dark:from-slate-800/90 dark:to-slate-800/50 border border-blue-200/80 dark:border-blue-900/60 rounded-2xl p-3 flex items-start gap-3 shadow-xs">
-            <div class="w-8 h-8 rounded-xl bg-[#00234c] text-[#ffd100] flex items-center justify-center shrink-0 font-black shadow-xs">
-              <span class="material-symbols-outlined text-[18px]">verified_user</span>
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-2 border-[#ffd100] rounded-2xl p-3 flex items-start gap-3 shadow-md">
+            <div class="w-9 h-9 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center shrink-0 font-black shadow-md border border-amber-300">
+              <span class="material-symbols-outlined text-[20px]">verified_user</span>
             </div>
             <div class="flex flex-col min-w-0">
-              <span class="text-xs font-black text-[#00234c] dark:text-[#ffd100] uppercase tracking-wider">Custodia Forense PDI</span>
-              <p class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-tight">
+              <span class="text-xs font-black text-[#ffd100] uppercase tracking-wider flex items-center gap-1">
+                Custodia Forense PDI
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              </span>
+              <p class="text-[11px] font-medium text-blue-100 mt-0.5 leading-tight">
                 Procesamiento local, seguro y aislado para resguardo de la evidencia pericial.
               </p>
             </div>
@@ -666,24 +687,29 @@
   <div class="flex flex-col lg:flex-row gap-5 items-stretch -mt-4" id="split-container">
 
     <!-- 3. Panel Izquierdo (Documento Original y OCR) -->
-    <div class="flex flex-col gap-6 w-full lg:w-[18%] flex-shrink-0" id="split-left">
+    <div class="flex flex-col gap-6 w-full lg:w-[25%] xl:w-[24%] flex-shrink-0 transition-all duration-300" id="split-left">
 
       <!-- Visor Documento Original -->
       <div
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
         <div
-          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 py-4 flex items-center justify-between text-white shadow-sm">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
-              <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-4 py-3 flex items-center justify-between text-white shadow-sm">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
+              <span class="material-symbols-outlined text-[17px]">document_scanner</span>
             </div>
             <span class="text-xs font-black uppercase tracking-wider text-white">Documento Original (PDF)</span>
           </div>
-          <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10" title="Abrir en pestaña nueva">
-            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
-          </a>
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="togglePdfWidth()" title="Ampliar / Ajustar ancho del visor" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10 text-xs font-bold gap-1" id="btn-toggle-pdf-width">
+              <span class="material-symbols-outlined text-[18px]" id="pdf-width-icon">fit_screen</span>
+            </button>
+            <a href="{{ url_for('serve_upload', filename=viewing) }}" target="_blank" class="text-white hover:text-[#ffd100] transition-colors flex items-center justify-center p-1.5 rounded-lg hover:bg-white/10" title="Abrir en pestaña nueva">
+              <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+            </a>
+          </div>
         </div>
-        <div class="overflow-auto custom-scrollbar relative w-full bg-slate-800" style="height: 65vh;">
+        <div class="overflow-auto custom-scrollbar relative w-full bg-slate-800" style="height: 68vh; min-height: 540px;">
           <iframe id="pdf-viewer-iframe" src="{{ url_for('serve_upload', filename=viewing) }}#toolbar=0&navpanes=0&view=FitH" class="w-full h-full border-0 transition-transform duration-200"></iframe>
         </div>
         <div
@@ -763,7 +789,7 @@
     <!-- 4 & 5. Módulos de Inteligencia (8 Columnas) -->
 
     <!-- 4. Panel Derecho (Entidades y Resumen) -->
-    <div class="flex flex-col gap-6 w-full lg:flex-1" id="split-right">
+    <div class="flex flex-col gap-6 w-full lg:flex-1 min-w-0" id="split-right">
 
       <!-- Alertas Cruzadas -->
       {% if cross_references %}
@@ -797,10 +823,10 @@
       {% endif %}
 
       <!-- Contenedor Flex para Resumen y Entidades -->
-      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 w-full items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-start">
 
       <!-- Módulo de Resúmenes Inteligentes -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 xl:col-span-7 2xl:col-span-7">
+      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 lg:col-span-7 xl:col-span-7 2xl:col-span-7 min-w-0">
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center justify-between text-white shadow-sm flex-wrap gap-3">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border border-amber-400">
@@ -852,7 +878,7 @@
                   data-index="{{ loop.index0 }}"
                   data-active-class="{{ c.active }}"
                   data-inactive-class="{{ c.inactive }}">
-            📄 {{ opt.filename | default('Doc ' ~ loop.index) }}
+            📄 {{ opt.filename | default('Doc ' ~ loop.index) }}{% if summary_options|length > 1 %} <span class="text-xs opacity-90">(Doc {{ loop.index }})</span>{% endif %}
           </button>
           {% endfor %}
         </div>
@@ -875,43 +901,75 @@
             {% set doc_data = docs_to_render[loop.index0] if docs_to_render|length > loop.index0 else None %}
             <div id="resumen_pane_{{ loop.index0 }}" class="resumen-pane {{ 'hidden' if not loop.first }}">
               
-              <!-- Caja Metadatos -->
-              {% if doc_data %}
-              <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
-                <div class="p-4 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <!-- Card Unidad -->
-                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-2.5 flex items-center gap-2.5">
-                    <div class="text-blue-500 dark:text-blue-400 flex-shrink-0 bg-blue-100/50 dark:bg-blue-900/50 rounded-lg p-1">
-                      <span class="material-symbols-outlined text-[18px]">local_police</span>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Unidad Policial</span>
-                      <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Card Delito -->
-                  <div class="bg-orange-50/80 dark:bg-orange-900/20 rounded-xl p-2.5 flex items-center gap-2.5">
-                    <div class="text-orange-500 dark:text-orange-400 flex-shrink-0 bg-orange-100/50 dark:bg-orange-900/50 rounded-lg p-1">
-                      <span class="material-symbols-outlined text-[18px]">warning</span>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Motivo o Delito</span>
-                      <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
+                          <div id="ficha_operativa_{{ loop.index0 }}" class="border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all overflow-hidden mb-6">
+                
+                <!-- Cabecera de la Ficha Operativa -->
+                <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 sm:px-5 py-3 flex items-center justify-between gap-3 text-white">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-lg bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-sm shrink-0">
+                      <span class="material-symbols-outlined text-[19px]">badge</span>
+                    </span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-white leading-tight">Ficha Operativa de la Causa</h4>
+                      <p class="text-[11px] text-blue-200 font-medium">Metadatos estructurados identificados automáticamente para el informe oficial Word</p>
                     </div>
                   </div>
                 </div>
 
+                <div class="p-4 sm:p-5 flex flex-col gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                  <!-- Card Unidad -->
+                  <div class="bg-blue-50/80 dark:bg-blue-900/20 rounded-xl p-3 flex items-center gap-2.5 border border-blue-100 dark:border-blue-900/40">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="text-blue-600 dark:text-blue-400 flex-shrink-0 bg-blue-100 dark:bg-blue-900/50 rounded-lg p-1.5">
+                        <span class="material-symbols-outlined text-[20px]">local_police</span>
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Unidad Policial</span>
+                        <span class="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{{ doc_data.metadata.unidad if doc_data and doc_data.metadata and doc_data.metadata.unidad else 'No identificada' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card Fecha Procedimiento / Reporte -->
+                  <div class="bg-emerald-50/80 dark:bg-emerald-900/20 rounded-xl p-3 flex items-center gap-2.5 border border-emerald-100 dark:border-emerald-900/40">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="text-emerald-600 dark:text-emerald-400 flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg p-1.5">
+                        <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Fecha Reporte / Hecho</span>
+                        <span class="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{{ doc_data.metadata.fecha if doc_data and doc_data.metadata and doc_data.metadata.fecha else 'No especificada' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card Delito -->
+                  <div class="bg-amber-50/80 dark:bg-amber-900/20 rounded-xl p-3 flex items-center gap-2.5 border border-amber-100 dark:border-amber-900/40">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="text-amber-600 dark:text-amber-400 flex-shrink-0 bg-amber-100 dark:bg-amber-900/50 rounded-lg p-1.5">
+                        <span class="material-symbols-outlined text-[20px]">warning</span>
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-0.5">Motivo o Delito</span>
+                        <span class="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{{ doc_data.metadata.hecho if doc_data and doc_data.metadata and doc_data.metadata.hecho else (doc_data.metadata.delito if doc_data and doc_data.metadata and doc_data.metadata.delito else 'No identificado') }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Detenidos Identificados -->
                 <div>
-                  <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 mb-2.5 flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-indigo-500 text-[18px]">groups</span>
-                    Detenidos Identificados
-                  </h4>
+                  <div class="flex items-center justify-between mb-2.5">
+                    <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-indigo-500 text-[18px]">groups</span>
+                      Detenidos Identificados
+                    </h4>
+                  </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
                       {% for detenido in doc_data.personas.detenidos %}
-                      <!-- Avatar Card -->
+                      <!-- Avatar Card Detenido -->
                       <div class="flex items-center gap-2.5 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl">
                         <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
                           <span class="material-symbols-outlined text-[20px]">person</span>
@@ -925,14 +983,45 @@
                       {% endfor %}
                     {% else %}
                       <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
-                        No se registran detenidos.
+                        <span>No se registran detenidos identificados.</span>
                       </div>
                     {% endif %}
                   </div>
                 </div>
+
+                <!-- Víctimas Identificadas -->
+                <div>
+                  <div class="flex items-center justify-between mb-2.5">
+                    <h4 class="text-[13px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-rose-500 text-[18px]">person_alert</span>
+                      Víctimas Identificadas
+                    </h4>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% if doc_data and doc_data.personas and doc_data.personas.victimas %}
+                      {% for victima in doc_data.personas.victimas %}
+                      <!-- Avatar Card Víctima -->
+                      <div class="flex items-center gap-2.5 bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 px-3 py-2 rounded-xl">
+                        <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-500 dark:text-rose-400 overflow-hidden shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">support_agent</span>
+                        </div>
+                        <div class="flex flex-col">
+                          {% set partes = victima.split(',') %}
+                          <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(victima) }}</span>
+                          <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Víctima identificada' }}</span>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-xl text-[12px] text-slate-500 italic">
+                        <span>No se registran víctimas identificadas.</span>
+                      </div>
+                    {% endif %}
+                  </div>
                 </div>
-                </div>
-              {% endif %}
+              </div>
+            </div>
+
               <!-- Caja Resumen (Sin envoltorio) -->
               {% if opt %}
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -958,21 +1047,23 @@
                       <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
                     </div>
 
-                    <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
-                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">A</span>
-                      </div>
-                      <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Resumen Corto</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Sintético (Max 6 Líneas)</span>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
+                          <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">A</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Resumen Corto</span>
+                          <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Sintético (Max 6 Líneas)</span>
+                        </div>
                       </div>
                     </div>
                     
-
+                    <!-- Banner Dinámico de Auditoría Ortográfica -->
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
                     <div class="editor-wrapper mt-auto">
-                      <div id="editor_{{ loop.index0 }}_a" class="custom-scrollbar" style="height: 280px; font-size: 15px; line-height: 1.5;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
+                      <div id="editor_{{ loop.index0 }}_a" spellcheck="true" lang="es" class="custom-scrollbar" style="height: 280px; font-size: 15px; line-height: 1.5;">{{ opt.a | replace('\n', '<br>') | safe }}</div>
                     </div>
                   </div>
                 </label>
@@ -987,21 +1078,23 @@
                       <span class="material-symbols-outlined text-blue-500 text-[26px]">check_circle</span>
                     </div>
 
-                    <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
-                        <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">B</span>
-                      </div>
-                      <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Resumen Extendido</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Relato Fluido (Max 12 Líneas)</span>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 peer-checked:bg-blue-600 flex items-center justify-center transition-colors shadow-sm">
+                          <span class="font-black text-slate-500 dark:text-slate-400 peer-checked:text-white text-lg">B</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-extrabold text-slate-800 dark:text-slate-100 text-sm peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-colors">Resumen Extendido</span>
+                          <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Relato Fluido (Max 12 Líneas)</span>
+                        </div>
                       </div>
                     </div>
                     
-
+                    <!-- Banner Dinámico de Auditoría Ortográfica -->
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
                     <div class="editor-wrapper mt-auto">
-                      <div id="editor_{{ loop.index0 }}_b" class="custom-scrollbar" style="height: 280px; font-size: 15px; line-height: 1.5;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
+                      <div id="editor_{{ loop.index0 }}_b" spellcheck="true" lang="es" class="custom-scrollbar" style="height: 280px; font-size: 15px; line-height: 1.5;">{{ opt.b | replace('\n', '<br>') | safe }}</div>
                     </div>
                   </div>
                 </label>
@@ -1045,7 +1138,7 @@
       </div>
 
       <!-- Módulo de Extracción y Clasificación de Entidades -->
-      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden xl:col-span-5 2xl:col-span-5"
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden lg:col-span-5 xl:col-span-5 2xl:col-span-5 min-w-0"
         id="entidades">
         <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-4 flex items-center justify-between text-white shadow-sm">
           <div class="flex items-center gap-3">
@@ -1165,7 +1258,8 @@
                   <span class="bg-white dark:bg-slate-900 border border-indigo-200 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{ p_count }} Datos</span>
                 </div>
                 <div class="space-y-3">
-                  {{ campo_valor('Nombres', doc_data.personas.detenidos, 'indigo') }}
+                  {{ campo_valor('Detenidos / Imputados', doc_data.personas.detenidos, 'indigo') }}
+                  {{ campo_valor('Víctimas Identificadas', doc_data.personas.victimas, 'rose') }}
                   {{ campo_valor('RUTs / Identificación (Ext)', doc_data.personas.ruts, 'indigo') }}
                   {{ campo_valor('Teléfonos', doc_data.personas.telefonos, 'indigo') }}
                   {{ campo_valor('Direcciones', doc_data.personas.direcciones, 'indigo') }}
@@ -1206,99 +1300,104 @@
 
 <!-- Modal Pegar Texto -->
 <dialog id="pasteModal"
-  class="p-0 rounded-3xl shadow-2xl border-4 border-[#00234c] bg-white dark:bg-slate-900 backdrop:bg-slate-900/60 backdrop:backdrop-blur-md w-full max-w-2xl overflow-hidden m-auto">
+  class="p-0 rounded-3xl shadow-2xl border-4 border-[#00234c] bg-white dark:bg-slate-900 backdrop:bg-slate-900/70 backdrop:backdrop-blur-md w-[95vw] max-w-5xl xl:max-w-6xl max-h-[92vh] overflow-hidden m-auto">
   <form action="{{ url_for('upload_pasted_text') }}" method="post" class="flex flex-col h-full m-0 js-processing-form">
     
     <!-- Cabecera Institucional PDI (Azul Marino + Franja Amarilla + Texto Blanco) -->
-    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 py-5 flex justify-between items-center text-white shadow-md">
-      <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border-2 border-amber-400">
-          <span class="material-symbols-outlined text-[26px]">content_paste</span>
+    <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-6 sm:px-8 py-5 flex justify-between items-center text-white shadow-md">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black shadow-md shrink-0 border-2 border-amber-400">
+          <span class="material-symbols-outlined text-[28px]">content_paste</span>
         </div>
         <div>
-          <h3 class="font-black text-xl text-white leading-tight flex items-center gap-2">
+          <h3 class="font-black text-xl sm:text-2xl text-white leading-tight flex items-center gap-2">
             Ingreso de Texto Directo
           </h3>
-          <p class="text-xs text-blue-100 font-bold mt-0.5">Pegado de reportes WhatsApp, minutas policiales o extractos de chat</p>
+          <p class="text-xs sm:text-sm text-blue-100 font-bold mt-0.5">Pegado de reportes WhatsApp, minutas policiales, partes o extractos de chat</p>
         </div>
       </div>
       <button type="button" onclick="document.getElementById('pasteModal').close()"
-        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex items-center justify-center font-black border border-white/20 hover:scale-105">
-        <span class="material-symbols-outlined text-[20px]">close</span>
+        class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex items-center justify-center font-black border border-white/20 hover:scale-105" title="Cerrar ventana">
+        <span class="material-symbols-outlined text-[24px]">close</span>
       </button>
     </div>
 
     <!-- Cuerpo del Modal -->
-    <div class="p-6 flex flex-col gap-5 max-h-[75vh] overflow-y-auto bg-slate-50/50 dark:bg-slate-950">
+    <div class="p-6 sm:p-8 flex flex-col gap-6 max-h-[76vh] overflow-y-auto bg-slate-50/50 dark:bg-slate-950">
       
       <!-- Bloque Título General -->
-      <div class="bg-gradient-to-r from-blue-50/90 to-amber-50/50 dark:from-slate-800 dark:to-slate-800/80 p-5 rounded-2xl border-2 border-blue-200 dark:border-slate-700 flex flex-col gap-2.5 shadow-md">
-        <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-2">
-          <span class="w-6 h-6 rounded-lg bg-[#00234c] text-[#ffd100] flex items-center justify-center font-black shadow-sm shrink-0">
-            <span class="material-symbols-outlined text-[15px]">topic</span>
+      <div class="bg-gradient-to-r from-blue-50/90 to-amber-50/50 dark:from-slate-800 dark:to-slate-800/80 p-5 sm:p-6 rounded-2xl border-2 border-blue-200 dark:border-slate-700 flex flex-col gap-2.5 shadow-md">
+        <label class="text-xs sm:text-sm font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-[#00234c] text-[#ffd100] flex items-center justify-center font-black shadow-sm shrink-0">
+            <span class="material-symbols-outlined text-[17px]">topic</span>
           </span>
           Título General del Expediente (Opcional)
         </label>
-        <p class="text-[11px] text-slate-600 dark:text-slate-400 font-bold">Nombre identificador con el que se agruparán los mensajes ingresados.</p>
+        <p class="text-xs text-slate-600 dark:text-slate-400 font-bold">Nombre identificador con el que se agruparán los mensajes ingresados.</p>
         <input type="text" name="titulo_general" maxlength="60"
-          class="w-full bg-white dark:bg-slate-900 border-2 border-blue-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400 placeholder:font-normal"
-          placeholder="Ej: Reportes Operativos WhatsApp - BICRIM Arica">
+          class="w-full bg-white dark:bg-slate-900 border-2 border-blue-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400 placeholder:font-normal"
+          placeholder="Ej: Reportes Operativos WhatsApp - Caso Robos Oriente">
       </div>
 
       <!-- Contenedor de Mensajes -->
-      <div id="textAreasContainer" class="flex flex-col gap-5">
+      <div id="textAreasContainer" class="flex flex-col gap-6">
         <!-- Primer Mensaje -->
-        <div class="report-block bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4">
-          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 py-3 -mx-5 -mt-5 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
-            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+        <div class="report-block bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4">
+          <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-5 sm:px-6 py-3.5 -mx-6 sm:-mx-7 -mt-6 sm:-mt-7 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
+            <span class="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-2.5">
               <span class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] text-xs font-black flex items-center justify-center shadow-inner">1</span>
               Mensaje Principal #1
             </span>
-            <span class="text-[10px] font-black uppercase tracking-wider bg-[#ffd100] text-[#00234c] px-3 py-1 rounded-lg border border-amber-400 shadow-sm">Texto Base</span>
+            <span class="text-[11px] font-black uppercase tracking-wider bg-[#ffd100] text-[#00234c] px-3 py-1 rounded-lg border border-amber-400 shadow-sm">Texto Base</span>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-[16px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
+            <label class="text-xs sm:text-sm font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
             </label>
             <input type="text" name="pasted_title" maxlength="60"
-              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400"
-              placeholder="Sub-Título (Ej: Minuta BICRIM Arica)">
+              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400"
+              placeholder="Sub-Título (Ej: Minuta BICRIM Arica / Extracto Chat Turno Noche)">
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-[16px] text-blue-600">edit_note</span> Contenido del Mensaje
-            </label>
-            <textarea name="pasted_text" rows="5"
-              class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-semibold"
-              placeholder="Pega el texto del mensaje o acta policial aquí..."></textarea>
+            <div class="flex items-center justify-between">
+              <label class="text-xs sm:text-sm font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px] text-blue-600">edit_note</span> Contenido del Mensaje o Acta
+              </label>
+              <span class="text-[11px] font-bold text-slate-400 hidden sm:inline-flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">unfold_more</span> Puedes redimensionar esta área arrastrando la esquina inferior
+              </span>
+            </div>
+            <textarea name="pasted_text" rows="11"
+              class="w-full min-h-[250px] sm:min-h-[280px] bg-blue-50/20 dark:bg-slate-800/40 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-4 sm:p-5 text-sm sm:text-[15px] font-mono leading-relaxed text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-medium"
+              placeholder="Pega aquí el contenido completo del mensaje, acta policial, denuncia o minuta..."></textarea>
           </div>
         </div>
       </div>
 
       <!-- Botón Agregar Otro Mensaje -->
       <button type="button" onclick="addTextArea()"
-        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white border-2 border-[#ffd100] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
-        <span class="material-symbols-outlined text-[20px] text-[#ffd100]">add_circle</span>
+        class="w-full py-4 rounded-2xl bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white border-2 border-[#ffd100] font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+        <span class="material-symbols-outlined text-[22px] text-[#ffd100]">add_circle</span>
         <span>Agregar Otro Mensaje al Lote</span>
       </button>
 
     </div>
 
     <!-- Footer del Modal -->
-    <div class="p-4 px-6 border-t-2 border-blue-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-slate-100 via-blue-50/60 to-slate-100 dark:from-slate-900 dark:to-slate-800 shadow-inner">
-      <span class="text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">
-        <span class="material-symbols-outlined text-[18px] text-amber-600">info</span> Se aplicará OCR y extracción NER a todos los bloques ingresados
+    <div class="p-4 px-6 sm:px-8 border-t-2 border-blue-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-slate-100 via-blue-50/60 to-slate-100 dark:from-slate-900 dark:to-slate-800 shadow-inner">
+      <span class="text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[20px] text-amber-600">info</span> Se aplicará OCR y extracción NER inteligente a todos los bloques ingresados
       </span>
       <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
         <button type="button" onclick="document.getElementById('pasteModal').close()"
-          class="px-4 py-2.5 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-300 dark:border-slate-700">
+          class="px-5 py-3 text-xs sm:text-sm font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-300 dark:border-slate-700">
           Cancelar
         </button>
         <button type="submit"
-          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white text-xs font-black uppercase tracking-wider px-7 py-3 rounded-xl border-b-4 border-[#ffd100] shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-          <span class="material-symbols-outlined text-[18px] text-[#ffd100]">bolt</span>
+          class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] hover:from-[#003366] hover:to-[#0047AB] text-white text-xs sm:text-sm font-black uppercase tracking-wider px-8 py-3.5 rounded-xl border-b-4 border-[#ffd100] shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+          <span class="material-symbols-outlined text-[20px] text-[#ffd100]">bolt</span>
           <span class="js-btn-label">Procesar Texto Directo</span>
         </button>
       </div>
@@ -1346,28 +1445,33 @@
     const container = document.getElementById('textAreasContainer');
     const count = container.querySelectorAll('.report-block').length + 1;
     const div = document.createElement('div');
-    div.className = 'report-block bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4 anim-in mt-2';
+    div.className = 'report-block bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-2xl border-2 border-blue-300 dark:border-slate-700/80 shadow-md hover:shadow-lg transition-all flex flex-col gap-4 anim-in mt-2';
     div.innerHTML = `
-        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-4 py-3 -mx-5 -mt-5 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
-          <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-2 border-[#ffd100] px-5 sm:px-6 py-3.5 -mx-6 sm:-mx-7 -mt-6 sm:-mt-7 rounded-t-2xl flex items-center justify-between text-white shadow-sm">
+          <span class="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-2.5">
             <span class="w-7 h-7 rounded-lg bg-[#ffd100] text-[#00234c] text-xs font-black flex items-center justify-center shadow-inner">${count}</span>
             Mensaje Adicional #${count}
           </span>
-          <button type="button" onclick="this.closest('.report-block').remove()" class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 text-[10px] font-black uppercase px-2.5 py-1 rounded-md shadow-sm transition-all flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">delete</span> Eliminar
+          <button type="button" onclick="this.closest('.report-block').remove()" class="bg-red-500/20 hover:bg-red-600 text-white border border-red-300/40 text-xs font-black uppercase px-3 py-1.5 rounded-lg shadow-sm transition-all flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[17px]">delete</span> Eliminar
           </button>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
+          <label class="text-xs sm:text-sm font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px] text-blue-600">subtitles</span> Sub-Título o Unidad de Origen (Opcional)
           </label>
-          <input type="text" name="pasted_title" maxlength="60" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400" placeholder="Sub-Título (Ej: Minuta BRIDEC Arica)">
+          <input type="text" name="pasted_title" maxlength="60" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all shadow-sm placeholder:text-slate-400" placeholder="Sub-Título (Ej: Minuta BRIDEC Arica / Extracto Chat Turno Noche)">
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px] text-blue-600">edit_note</span> Contenido del Mensaje
-          </label>
-          <textarea name="pasted_text" rows="5" class="w-full bg-blue-50/30 dark:bg-slate-800/50 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-3.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:bg-white focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-semibold" placeholder="Pega el texto del mensaje aquí..."></textarea>
+          <div class="flex items-center justify-between">
+            <label class="text-xs sm:text-sm font-black text-[#00234c] dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-blue-600">edit_note</span> Contenido del Mensaje
+            </label>
+            <span class="text-[11px] font-bold text-slate-400 hidden sm:inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">unfold_more</span> Redimensionable
+            </span>
+          </div>
+          <textarea name="pasted_text" rows="11" class="w-full min-h-[250px] sm:min-h-[280px] bg-blue-50/20 dark:bg-slate-800/40 border-2 border-blue-200 dark:border-slate-700 rounded-xl p-4 sm:p-5 text-sm sm:text-[15px] font-mono leading-relaxed text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-[#00234c] focus:ring-4 focus:ring-[#00234c]/20 transition-all resize-y shadow-inner placeholder:text-slate-400 font-medium" placeholder="Pega el texto del mensaje aquí..."></textarea>
         </div>
     `;
     container.appendChild(div);
@@ -1497,21 +1601,206 @@
       ['clean']
     ];
     
+    // Reglas de corrección ortográfica y de OCR policial
+    window.SPELL_RULES = [
+      { pattern: /\bperonas\b/gi, replacement: 'personas' },
+      { pattern: /\bperona\b/gi, replacement: 'persona' },
+      { pattern: /\bdetencion\b/gi, replacement: 'detención' },
+      { pattern: /\bdetenciones\b/gi, replacement: 'detenciones' },
+      { pattern: /\binfraccion\b/gi, replacement: 'infracción' },
+      { pattern: /\binfracciones\b/gi, replacement: 'infracciones' },
+      { pattern: /\bdeclaracion\b/gi, replacement: 'declaración' },
+      { pattern: /\bdeclaraciones\b/gi, replacement: 'declaraciones' },
+      { pattern: /\bincautacion\b/gi, replacement: 'incautación' },
+      { pattern: /\bincautaciones\b/gi, replacement: 'incautaciones' },
+      { pattern: /\bagrupacion\b/gi, replacement: 'agrupación' },
+      { pattern: /\bagrupaciones\b/gi, replacement: 'agrupaciones' },
+      { pattern: /\bfiscalia\b/gi, replacement: 'fiscalía' },
+      { pattern: /\bfiscalias\b/gi, replacement: 'fiscalías' },
+      { pattern: /\bpolicia\b/gi, replacement: 'policía' },
+      { pattern: /\bpolicias\b/gi, replacement: 'policías' },
+      { pattern: /\bcomisaria\b/gi, replacement: 'comisaría' },
+      { pattern: /\bsubcomisaria\b/gi, replacement: 'subcomisaría' },
+      { pattern: /\bgarantia\b/gi, replacement: 'garantía' },
+      { pattern: /\bgarantias\b/gi, replacement: 'garantías' },
+      { pattern: /\bidentificacion\b/gi, replacement: 'identificación' },
+      { pattern: /\binvestigacion\b/gi, replacement: 'investigación' },
+      { pattern: /\bautorizacion\b/gi, replacement: 'autorización' },
+      { pattern: /\bdisposicion\b/gi, replacement: 'disposición' },
+      { pattern: /\bresolucion\b/gi, replacement: 'resolución' },
+      { pattern: /\bmunicion\b/gi, replacement: 'munición' },
+      { pattern: /\bmuniciones\b/gi, replacement: 'municiones' },
+      { pattern: /\bcocaina\b/gi, replacement: 'cocaína' },
+      { pattern: /\bmicrotrafico\b/gi, replacement: 'microtráfico' },
+      { pattern: /\btrafico\b/gi, replacement: 'tráfico' },
+      { pattern: /\bvictima\b/gi, replacement: 'víctima' },
+      { pattern: /\bvictimas\b/gi, replacement: 'víctimas' },
+      { pattern: /\bvehiculo\b/gi, replacement: 'vehículo' },
+      { pattern: /\bvehiculos\b/gi, replacement: 'vehículos' },
+      { pattern: /\bcamion\b/gi, replacement: 'camión' },
+      { pattern: /\bcamiones\b/gi, replacement: 'camiones' },
+      { pattern: /\bdireccion\b/gi, replacement: 'dirección' },
+      { pattern: /\bdirecciones\b/gi, replacement: 'direcciones' },
+      { pattern: /\barticulo\b/gi, replacement: 'artículo' },
+      { pattern: /\barticulos\b/gi, replacement: 'artículos' },
+      { pattern: /\bcodigo\b/gi, replacement: 'código' },
+      { pattern: /\bcodigos\b/gi, replacement: 'códigos' },
+      { pattern: /\bpublico\b/gi, replacement: 'público' },
+      { pattern: /\bpublica\b/gi, replacement: 'pública' },
+      { pattern: /\bpublicos\b/gi, replacement: 'públicos' },
+      { pattern: /\bpublicas\b/gi, replacement: 'públicas' },
+      { pattern: /\bjuridico\b/gi, replacement: 'jurídico' },
+      { pattern: /\bjuridica\b/gi, replacement: 'jurídica' },
+      { pattern: /\btelefono\b/gi, replacement: 'teléfono' },
+      { pattern: /\btelefonos\b/gi, replacement: 'teléfonos' },
+      { pattern: /\bnumero\b/gi, replacement: 'número' },
+      { pattern: /\bnumeros\b/gi, replacement: 'números' },
+      { pattern: /\bimputao\b/gi, replacement: 'imputado' },
+      { pattern: /\bimputaos\b/gi, replacement: 'imputados' },
+      { pattern: /\bcalve\b/gi, replacement: 'clave' },
+      { pattern: /\bdelijencias\b/gi, replacement: 'diligencias' },
+      { pattern: /\bdilijencias\b/gi, replacement: 'diligencias' },
+      { pattern: /\b[sS]e [rR]ealizado la entrada\b/g, replacement: 'Se realizó la entrada' },
+      { pattern: /\b[rR]ealizados las entradas\b/g, replacement: 'Realizadas las entradas' },
+      { pattern: /\b[rR]ealizado la entrada\b/g, replacement: 'Realizada la entrada' },
+      { pattern: /\b[rR]ealizado las diligencias\b/g, replacement: 'Realizadas las diligencias' },
+      { pattern: /\bse procedio\b/gi, replacement: 'se procedió' },
+      { pattern: /\bse logro\b/gi, replacement: 'se logró' }
+    ];
+
+    // Auditoría ortográfica y de OCR en tiempo real
+    window.auditarOrtografia = function(quill, index, optLetter) {
+      const banner = document.getElementById('spell_banner_' + index + '_' + optLetter);
+      if (!banner || !quill) return;
+
+      const plainText = quill.getText();
+      const detected = [];
+
+      window.SPELL_RULES.forEach(rule => {
+        const matches = plainText.match(rule.pattern);
+        if (matches) {
+          matches.forEach(m => {
+            const word = m.trim();
+            if (word && !detected.some(w => w.toLowerCase() === word.toLowerCase())) {
+              detected.push(word);
+            }
+          });
+        }
+      });
+
+      if (detected.length > 0) {
+        const previewList = detected.slice(0, 3).map(w => `«${w}»`).join(', ');
+        const extraCount = detected.length > 3 ? ` (+${detected.length - 3} más)` : '';
+        banner.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-600 rounded-xl shadow-sm">
+            <div class="flex items-start sm:items-center gap-2.5 min-w-0">
+              <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl flex-shrink-0 animate-bounce mt-0.5 sm:mt-0">warning</span>
+              <div class="text-xs text-amber-900 dark:text-amber-200 leading-snug">
+                <div class="font-black text-amber-800 dark:text-amber-300 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                  <span>Aviso de Ortografía / OCR Detectado</span>
+                  <span class="bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">${detected.length} falta(s)</span>
+                </div>
+                <div class="mt-0.5">Palabras dudosas o con falta: <strong class="text-red-600 dark:text-red-400 font-bold underline">${previewList}${extraCount}</strong></div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        banner.innerHTML = `
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 rounded-xl text-xs text-emerald-800 dark:text-emerald-200">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">verified</span>
+              <span class="font-bold text-emerald-900 dark:text-emerald-100">Ortografía auditada:</span>
+              <span class="text-emerald-700 dark:text-emerald-300 font-medium">Sin faltas ni errores de OCR detectados en esta versión.</span>
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    // Compatibilidad heredada: ya no existe corrección manual desde la interfaz.
+    window.corregirOrtografiaEnEditor = function(index, optLetter, event) {
+      // La corrección manual fue retirada de la interfaz; la auditoría queda sólo informativa.
+      return;
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const instance = window.quillInstances[index];
+      if (!instance) return;
+      const q = instance[optLetter];
+      if (!q) return;
+
+      let html = q.root.innerHTML;
+      let changesCount = 0;
+
+      // Reemplazo seguro sobre texto plano respetando etiquetas HTML
+      let parts = html.split(/(<[^>]+>)/g);
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0 && parts[i]) {
+          window.SPELL_RULES.forEach(rule => {
+            const matches = parts[i].match(rule.pattern);
+            if (matches) {
+              changesCount += matches.length;
+              parts[i] = parts[i].replace(rule.pattern, function(matched) {
+                if (typeof rule.replacement === 'string') {
+                  return preserveCase(matched, rule.replacement);
+                }
+                return rule.replacement;
+              });
+            }
+          });
+        }
+      }
+      q.root.innerHTML = parts.join('');
+
+      window.highlightIntelligence(q);
+      window.auditarOrtografia(q, index, optLetter);
+
+      // Feedback visual flotante
+      const oldToast = document.getElementById('spell-toast');
+      if (oldToast) oldToast.remove();
+
+      const toast = document.createElement('div');
+      toast.id = 'spell-toast';
+      toast.className = 'fixed bottom-6 right-6 z-50 bg-[#00234c] text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-[#ffd100] flex items-center gap-3 font-bold text-sm transform transition-all duration-300 translate-y-10 opacity-0';
+      toast.innerHTML = `
+        <span class="w-8 h-8 rounded-full bg-[#ffd100] text-[#00234c] flex items-center justify-center font-black flex-shrink-0">
+          <span class="material-symbols-outlined text-[20px]">task_alt</span>
+        </span>
+        <div>
+          <div class="text-[#ffd100] text-xs font-black uppercase tracking-wider">Corrección Ortográfica Aplicada</div>
+          <div class="text-white text-xs font-medium">${changesCount > 0 ? changesCount + ' corrección(es) automática(s) realizadas.' : 'El texto ya se encuentra verificado sin errores.'}</div>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('translate-y-10', 'opacity-0');
+      }, 50);
+      setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => toast.remove(), 400);
+      }, 3500);
+    };
+
     // Mockups interactivos
     window.highlightIntelligence = function(q) {
       let html = q.root.innerHTML;
       
+      // Unidades Policiales / Siglas - Azul (con spellcheck="false" para evitar falsos positivos del navegador)
+      html = html.replace(/(Bicrim Arica|Bicrim|MT-0|BRIANCO|BRIDEC|BH ARICA|DEPREM|BIPE|PDI)/gi, '<span spellcheck="false" class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border-b-2 border-blue-500 font-bold px-1 rounded cursor-help" title="Unidad Policial / Sigla Oficial">$&</span>');
+
       // Nombres (Sujeto de Interés) - Morado
-      html = html.replace(/(Renato Javier RAMIREZ MESÍAS|Renato RAMIREZ|Ana María Paz MESÍAS LEUQUÉN|Ivonne Ayline Denisse BAINA GARCIA)/gi, '<span class="bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border-b-2 border-purple-500 font-bold px-1 rounded cursor-help" title="Sujeto de Interés / Involucrado">$&</span>');
+      html = html.replace(/(Renato Javier RAMIREZ MESÍAS|Renato RAMIREZ|Ana María Paz MESÍAS LEUQUÉN|Ivonne Ayline Denisse BAINA GARCIA|Diego Ignacio FLORES MADRIAGA|Jonathan Eduardo FLORES MAMANI)/gi, '<span spellcheck="false" class="bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border-b-2 border-purple-500 font-bold px-1 rounded cursor-help" title="Sujeto de Interés / Involucrado">$&</span>');
       
       // RUTs - Rojo
-      html = html.replace(/(\d{1,2}\.\d{3}\.\d{3}-[\dkK])/g, '<span class="bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 border-b-2 border-red-500 font-bold px-1 rounded cursor-help" title="Identificador de Persona (RUT)">$&</span>');
+      html = html.replace(/(\d{1,2}\.\d{3}\.\d{3}-[\dkK])/g, '<span spellcheck="false" class="bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 border-b-2 border-red-500 font-bold px-1 rounded cursor-help" title="Identificador de Persona (RUT)">$&</span>');
       
       // Direcciones - Verde
-      html = html.replace(/(Calle Valdivia N° 1265)/gi, '<span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border-b-2 border-emerald-500 font-bold px-1 rounded cursor-help" title="Ubicación / Domicilio">$&</span>');
+      html = html.replace(/(Calle Valdivia N° 1265|calle Humberto Arellano N° 0382|Santiago de Arata N° 4351)/gi, '<span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border-b-2 border-emerald-500 font-bold px-1 rounded cursor-help" title="Ubicación / Domicilio">$&</span>');
       
       // Delitos / Clasificación - Naranja
-      html = html.replace(/(Amenazas simples en contexto VIF|Amenazas Simples|Robo en Bienes Nacionales)/gi, '<span class="bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 border-b-2 border-orange-500 font-bold px-1 rounded cursor-help" title="Clasificación Penal">$&</span>');
+      html = html.replace(/(Amenazas simples en contexto VIF|Amenazas Simples|Robo en Bienes Nacionales|Microtráfico flagrante|Microtráfico|Tenencia Arma de Fuego Flagrante)/gi, '<span class="bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 border-b-2 border-orange-500 font-bold px-1 rounded cursor-help" title="Clasificación Penal">$&</span>');
 
       q.root.innerHTML = html;
     };
@@ -1527,15 +1816,22 @@
             theme: 'snow',
             modules: { toolbar: toolbarOptions }
         });
+        quillA.root.setAttribute('spellcheck', 'true');
+        quillA.root.setAttribute('lang', 'es');
+        quillA.root.spellcheck = true;
         
         let elB = editorsB[index];
         let quillB = new Quill('#' + elB.id, {
             theme: 'snow',
             modules: { toolbar: toolbarOptions }
         });
+        quillB.root.setAttribute('spellcheck', 'true');
+        quillB.root.setAttribute('lang', 'es');
+        quillB.root.spellcheck = true;
         
         window.quillInstances.push({ a: quillA, b: quillB });
 
+        // Auditoría en tiempo real con cada pulsación o cambio
         setTimeout(() => {
             window.highlightIntelligence(quillA);
             window.highlightIntelligence(quillB);
@@ -1706,9 +2002,15 @@
   }
 
   function switchTab(group, index) {
-      document.querySelectorAll(`.${group}-pane`).forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll(`.${group}-pane`).forEach(el => {
+          el.classList.add('hidden');
+          el.style.display = 'none';
+      });
       const selectedPane = document.getElementById(`${group}_pane_${index}`);
-      if (selectedPane) selectedPane.classList.remove('hidden');
+      if (selectedPane) {
+          selectedPane.classList.remove('hidden');
+          selectedPane.style.display = 'block';
+      }
 
       document.querySelectorAll(`.${group}-tab-btn`).forEach(btn => {
           const baseClasses = `${group}-tab-btn px-7 py-3 rounded-xl font-black text-sm uppercase tracking-wider whitespace-nowrap transition-all duration-300 shadow-md`;
@@ -1726,6 +2028,13 @@
               }
           }
       });
+
+      // Asegurar re-renderizado de editores de texto y layouts dependientes
+      setTimeout(() => {
+          try {
+              window.dispatchEvent(new window.Event('resize'));
+          } catch (e) {}
+      }, 50);
   }
 
   let currentOcrFontSize = 12;
@@ -1746,6 +2055,35 @@
       const lbl = document.getElementById('resumen-font-size-label');
       if (lbl) lbl.innerText = `${currentResumenFontSize}px`;
   }
+
+  function togglePdfWidth() {
+      const panel = document.getElementById('split-left');
+      const icon = document.getElementById('pdf-width-icon');
+      if (!panel) return;
+      if (panel.classList.contains('lg:w-[38%]')) {
+          panel.classList.remove('lg:w-[38%]', 'xl:w-[36%]');
+          panel.classList.add('lg:w-[28%]', 'xl:w-[27%]');
+          if (icon) icon.innerText = 'fit_screen';
+          localStorage.setItem('pdf_panel_expanded', '0');
+      } else {
+          panel.classList.remove('lg:w-[28%]', 'xl:w-[27%]');
+          panel.classList.add('lg:w-[38%]', 'xl:w-[36%]');
+          if (icon) icon.innerText = 'close_fullscreen';
+          localStorage.setItem('pdf_panel_expanded', '1');
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('pdf_panel_expanded') === '1') {
+          const panel = document.getElementById('split-left');
+          const icon = document.getElementById('pdf-width-icon');
+          if (panel) {
+              panel.classList.remove('lg:w-[28%]', 'xl:w-[27%]');
+              panel.classList.add('lg:w-[38%]', 'xl:w-[36%]');
+          }
+          if (icon) icon.innerText = 'close_fullscreen';
+      }
+  });
 
 </script>
 
