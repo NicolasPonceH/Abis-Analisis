@@ -543,20 +543,54 @@ async function manejarComandoReporte({ token, chatId, pool, args }) {
   const replyMarkup = crearBotonesDescarga({ fecha });
 
   try {
-    const { generarCapturaDiaria } = require("../reportes/imageReportService");
-    const buffer = await generarCapturaDiaria(reporte);
-    await telegramClient.enviarFoto({
+    const {
+      generarCapturaDiaria,
+      generarCapturaDistribucionDiaria,
+      generarCapturaAcumulado,
+    } = require("../reportes/imageReportService");
+    const { obtenerDatosAcumulados } = require("../reportes/reporteFinDeSemana");
+    const anioActual = new Date().getFullYear();
+    const [dataAcumEnrolados, dataAcumRegistros] = await Promise.all([
+      obtenerDatosAcumulados(pool, { soloEnrolados: true }),
+      obtenerDatosAcumulados(pool, { soloEnrolados: false }),
+    ]);
+    const [bufDiario, bufDistribucion, bufAcumEnrolados, bufAcumRegistros] = await Promise.all([
+      generarCapturaDiaria(reporte),
+      generarCapturaDistribucionDiaria(reporte),
+      generarCapturaAcumulado(dataAcumEnrolados, {
+        titulo: `TOTAL DE ENROLADOS EN EL SISTEMA ABIS ACUMULADO AL ANO ${anioActual}`,
+        tipoFiltro: "ENROLADO",
+        anio: anioActual,
+      }),
+      generarCapturaAcumulado(dataAcumRegistros, {
+        titulo: `TOTAL DE REGISTROS EN EL SISTEMA ABIS ACUMULADO AL ANO ${anioActual}`,
+        tipoFiltro: "TODOS",
+        anio: anioActual,
+      }),
+    ]);
+    await telegramClient.enviarGrupoFotos({
       token,
       chatId,
-      buffer,
-      caption: `📊 <b>REPORTE OFICIAL ABIS - ${fecha}</b>\n👥 Total Enrolados: <b>${(reporte.total || 0).toLocaleString("es-CL")}</b>`,
+      fotos: [
+        {
+          buffer: bufDiario,
+          caption: `REPORTE OFICIAL ABIS - FOTO 1/4: ESTADOS DE LA JORNADA ${fecha}\nTotal enrolados: ${(reporte.total || 0).toLocaleString("es-CL")}`,
+        },
+        {
+          buffer: bufDistribucion,
+          caption: `FOTO 2/4: DISTRIBUCION DE LA JORNADA ${fecha}`,
+        },
+        {
+          buffer: bufAcumEnrolados,
+          caption: `FOTO 3/4: ENROLADOS ACUMULADOS ${anioActual}`,
+        },
+        {
+          buffer: bufAcumRegistros,
+          caption: `FOTO 4/4: REGISTROS ACUMULADOS ${anioActual}`,
+        },
+      ],
     });
-    await telegramClient.enviarMensaje({
-      token,
-      chatId,
-      texto,
-      replyMarkup,
-    });
+    await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });
   } catch (imgErr) {
     console.warn("[BOT REPORTE] Fallback a mensaje de texto:", imgErr.message);
     await telegramClient.enviarMensaje({ token, chatId, texto, replyMarkup });

@@ -36,6 +36,39 @@ async function renderHtmlToPng(html, selector = "#captura-root") {
     if (!element) {
       throw new Error(`Elemento selector ${selector} no encontrado en la plantilla HTML.`);
     }
+
+    // Identificacion visual institucional aplicada a todas las capturas.
+    // Se agrega como pie de imagen para no cubrir filas, tablas ni graficos.
+    await page.evaluate(() => {
+      const root = document.querySelector("#captura-root");
+      if (!root || root.querySelector(".abis-watermark")) return;
+
+      const watermark = document.createElement("div");
+      watermark.className = "abis-watermark";
+      watermark.setAttribute("aria-hidden", "true");
+      watermark.textContent = "Generado por Sistema Analítico ABIS | PDI";
+      Object.assign(watermark.style, {
+        display: "table",
+        marginTop: "10px",
+        marginLeft: "auto",
+        padding: "5px 10px",
+        border: "1px solid rgba(125, 211, 252, 0.68)",
+        borderRadius: "999px",
+        background: "rgba(0, 31, 68, 0.88)",
+        boxShadow: "0 2px 6px rgba(0, 15, 35, 0.22)",
+        color: "#ffffff",
+        fontFamily: "Arial, Segoe UI, sans-serif",
+        fontSize: "11px",
+        fontWeight: "700",
+        lineHeight: "1",
+        letterSpacing: "0.1px",
+        whiteSpace: "nowrap",
+        pointerEvents: "none",
+      });
+
+      root.appendChild(watermark);
+    });
+
     const buffer = await element.screenshot({ type: "png", omitBackground: false });
     return buffer;
   } finally {
