@@ -30,7 +30,10 @@ from docxcompose.composer import Composer
 # pyrefly: ignore [missing-import]
 from openpyxl import Workbook
 # pyrefly: ignore [missing-import]
-from openpyxl.styles import Font
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.chart.label import DataLabelList
+from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 # pyrefly: ignore [missing-import]
 from PIL import Image, ImageOps
@@ -589,81 +592,15 @@ def export_to_docx(filename, summary_options, entities_data):
                 pass
 
 
-STATS_SHEET_NAMES = {
-    "vehiculo": "Vehiculos",
-    "arma": "Armas",
-    "droga": "Drogas",
-    "persona": "Personas",
-    "victima": "Victimas",
-}
-
-
-def build_stats_workbook(filas, detalle=None):
-    """Reporte historico exportable (RF-07) separado por categoria: una hoja de Excel por
-    categoria (vehiculo/arma/droga/persona/victima), no todo mezclado en una sola tabla.
-
-    Ademas incluye una hoja "Datos" con el detalle sin agrupar (una fila por entidad
-    detectada) formateada como Tabla de Excel real -- es la fuente que hace falta para insertar
-    una tabla dinamica: un pivot table resume datos en bruto, no un reporte que ya viene sumado
-    por categoria/campo/valor como las otras hojas. openpyxl no puede generar un objeto
-    PivotTable nativo de forma confiable desde cero (solo esta pensado para preservar uno ya
-    existente al releer un archivo, no para crearlo) -- el riesgo de entregar un .xlsx que Excel
-    marque para "reparar" es peor que no tener la funcion. Con los datos ya en una Tabla de
-    Excel, insertar la tabla dinamica real es Insertar > Tabla dinamica en dos clics."""
-    agrupado = {"vehiculo": [], "arma": [], "droga": [], "persona": [], "victima": []}
-    for categoria, campo, valor, n in filas:
-        agrupado.setdefault(categoria, []).append((campo, valor, n))
-
-    workbook = Workbook()
-    workbook.remove(workbook.active)
-    for categoria, nombre_hoja in STATS_SHEET_NAMES.items():
-        hoja = workbook.create_sheet(nombre_hoja)
-        hoja.append(["Campo", "Valor", "Conteo"])
-        
-        # Insertar los datos
-        for campo, valor, n in agrupado.get(categoria, []):
-            hoja.append([campo, valor, n])
-            
-        # Ajustar anchos
-        hoja.column_dimensions["A"].width = 16
-        hoja.column_dimensions["B"].width = 32
-        hoja.column_dimensions["C"].width = 10
-        
-        # Aplicar estilo de tabla oficial si hay datos
-        if hoja.max_row > 1:
-            tabla = Table(displayName=f"Tabla{nombre_hoja}", ref=f"A1:C{hoja.max_row}")
-            tabla.tableStyleInfo = TableStyleInfo(
-                name="TableStyleMedium2", showRowStripes=True, showFirstColumn=False,
-            )
-            hoja.add_table(tabla)
-            hoja.freeze_panes = "A2"
-        else:
-            # Si está vacío, solo poner negrita en el encabezado
-            for cell in hoja[1]:
-                cell.font = Font(bold=True)
-
-    hoja_datos = workbook.create_sheet("Datos")
-    hoja_datos.append(["Documento", "Fecha", "Categoria", "Campo", "Valor"])
-    for documento, fecha, categoria, campo, valor in (detalle or []):
-        hoja_datos.append([documento, fecha.replace(tzinfo=None), categoria, campo, valor])
-    hoja_datos.column_dimensions["A"].width = 30
-    hoja_datos.column_dimensions["B"].width = 18
-    hoja_datos.column_dimensions["C"].width = 14
-    hoja_datos.column_dimensions["D"].width = 16
-    hoja_datos.column_dimensions["E"].width = 32
-    if detalle:
-        tabla = Table(displayName="TablaDatos", ref=f"A1:E{hoja_datos.max_row}")
-        tabla.tableStyleInfo = TableStyleInfo(
-            name="TableStyleMedium2", showRowStripes=True, showFirstColumn=False,
-        )
-        hoja_datos.add_table(tabla)
-        hoja_datos.freeze_panes = "A2"
-        nota = hoja_datos.cell(row=hoja_datos.max_row + 2, column=1)
-        nota.value = (
-            "Para una tabla dinamica: Insertar > Tabla dinamica, usando este rango como origen."
-        )
-        nota.font = Font(italic=True, size=9)
-    return workbook
+from export_stats import (
+    build_stats_workbook,
+    STATS_SHEET_NAMES,
+    STATS_ENTITY_STYLE,
+    _excel_style_sheet_header,
+    _excel_add_title,
+    _excel_style_data_rows,
+    _excel_create_nna_sheet,
+)
 
 
 def preprocess_for_ocr(image):
@@ -2408,7 +2345,16 @@ def estadisticas_excel():
         flash("No se pudo conectar a la base de datos.", "error")
         return redirect(url_for("estadisticas"))
 
-    workbook = build_stats_workbook(filas, detalle)
+    dias = request.args.get("dias", type=int)
+    agrupacion = request.args.get("agrupacion")
+    try:
+        stats = db.get_stats(dias=dias, agrupacion=agrupacion)
+    except Exception:
+        # La exportación histórica sigue funcionando aunque el bloque de KPIs
+        # no pueda consultarse en una instalación con esquema antiguo.
+        stats = None
+    periodo = f"Últimos {dias} días" if dias else "Histórico completo"
+    workbook = build_stats_workbook(filas, detalle, stats=stats, periodo=periodo)
     buffer = io.BytesIO()
     workbook.save(buffer)
     buffer.seek(0)

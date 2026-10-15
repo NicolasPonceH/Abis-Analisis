@@ -489,7 +489,8 @@
         event.preventDefault();
         form.dataset.transitioning = '1';
         sessionStorage.setItem('siad_show_splash', '1');
-        form.submit();
+        document.body.classList.add('siad-login-leaving');
+        window.setTimeout(function () { form.submit(); }, 260);
       });
     })();
   </script>

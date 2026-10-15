@@ -3,23 +3,6 @@
 
 {% block content %}
 
-<style>
-  .historial-table thead th { position: sticky; top: 67px; z-index: 20; }
-  .historial-row { position: relative; background: linear-gradient(90deg, rgba(255,255,255,.98), rgba(248,250,252,.78)); }
-  .historial-row:nth-child(even) { background: linear-gradient(90deg, rgba(248,250,252,.92), rgba(255,255,255,.98)); }
-  .historial-row::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 3px; background: transparent; transition: background .2s ease, width .2s ease; }
-  .historial-row:hover::before { width: 5px; background: #2b5fae; }
-  .historial-row:hover { box-shadow: inset 0 1px 0 rgba(43,95,174,.08), inset 0 -1px 0 rgba(43,95,174,.08); }
-  .history-kpi { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid rgba(191,219,254,.35); border-radius: 999px; padding: .36rem .7rem; color: #dbeafe; background: rgba(255,255,255,.09); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-  .history-kpi strong { color: #fff; font-size: 12px; }
-  .history-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-top: .65rem; }
-  .history-legend span { display: inline-flex; align-items: center; gap: .28rem; color: rgba(219,234,254,.82); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
-  .history-legend i { width: 7px; height: 7px; border-radius: 999px; display: inline-block; }
-  .history-legend .blue { background: #60a5fa; } .history-legend .red { background: #f87171; }
-  .history-legend .amber { background: #fbbf24; } .history-legend .purple { background: #c084fc; }
-  .history-legend .green { background: #34d399; }
-  @media (max-width: 900px) { .historial-table thead th { top: 0; } }
-</style>
 
 {% if db_error %}
   <div class="bg-red-50 dark:bg-red-950/80 text-red-700 dark:text-red-300 rounded-2xl px-6 py-4 text-sm flex items-center gap-3 mb-6 border border-red-200 dark:border-red-800 max-w-[1720px] mx-auto w-full mt-6 shadow-md">
@@ -152,22 +135,11 @@
         <div>
           <h2 class="text-xl font-black text-white leading-tight">Documentos Procesados</h2>
           <p class="text-xs text-blue-100 font-bold mt-0.5">Listado maestro de expedientes e informes periciales indexados</p>
-          <div class="history-legend" aria-label="Leyenda de entidades">
-            <span><i class="blue"></i>Vehículos</span>
-            <span><i class="red"></i>Armas</span>
-            <span><i class="amber"></i>Sustancias</span>
-            <span><i class="purple"></i>Personas</span>
-            <span><i class="green"></i>Víctimas</span>
-          </div>
         </div>
       </div>
 
       <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-        <div class="hidden lg:flex items-center gap-2">
-          <span class="history-kpi"><span class="material-symbols-outlined text-[14px] text-[#ffd100]">database</span><strong>{{ total_count if total_count is defined else registros|length }}</strong> registros</span>
-          <span class="history-kpi"><span class="material-symbols-outlined text-[14px] text-emerald-300">verified</span>Datos indexados</span>
-        </div>
-        <span class="text-blue-100 text-xs hidden xl:inline-block font-extrabold italic">Selecciona las casillas para exportar en lote</span>
+        <span class="text-blue-100 text-xs hidden lg:inline-block font-extrabold italic">Selecciona las casillas para exportar en lote</span>
         <button type="submit" class="w-full sm:w-auto bg-[#ffd100] hover:bg-[#ffe566] text-[#00234c] text-xs font-black uppercase tracking-wider px-6 py-3 rounded-2xl shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 border-b-2 border-amber-600" onclick="
           var checkboxes = document.querySelectorAll('.doc-checkbox:checked');
           if(checkboxes.length === 0) {
@@ -183,7 +155,7 @@
     </div>
 
     <div class="overflow-x-auto">
-      <table class="historial-table w-full text-left border-collapse min-w-[1100px]">
+      <table class="w-full text-left border-collapse min-w-[1100px]">
         <thead>
           <tr class="bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200/90 dark:border-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest shadow-sm">
             <th class="px-4 py-4 w-12 text-center">
@@ -203,7 +175,7 @@
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
           {% for r in registros %}
-            <tr class="historial-row group cursor-pointer transition-all duration-200 {{ get_user_row_classes(r.usuario_username) }} hover:bg-blue-50/50 dark:hover:bg-slate-800/70" data-url="{{ url_for('historial_detalle', documento_id=r.id) }}" onclick="window.location.href=this.getAttribute('data-url');">
+            <tr class="group cursor-pointer transition-all duration-200 {{ get_user_row_classes(r.usuario_username) }} hover:bg-blue-50/50 dark:hover:bg-slate-800/70 relative border-l-4 hover:border-l-blue-600" data-url="{{ url_for('historial_detalle', documento_id=r.id) }}" onclick="window.location.href=this.getAttribute('data-url');">
               
               <!-- CHECKBOX -->
               <td class="px-4 py-5 align-middle text-center" onclick="event.stopPropagation();">
