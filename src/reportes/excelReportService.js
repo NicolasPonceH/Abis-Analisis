@@ -310,42 +310,42 @@ function prepararDatosGraficos(workbook, data) {
         { name: "Total enrolados", values: (data.rendimientoCuarteles || []).slice(0, 8).map((item) => Number(item.total || 0)), color: "BFDBFE" },
         { name: "Sincronizados", values: (data.rendimientoCuarteles || []).slice(0, 8).map((item) => Number(item.sincronizados || 0)), color: "0F766E" },
       ],
-      anchor: { col: 1, row: 6, toCol: 7, toRow: 17 },
+      anchor: { col: 1, row: 10, toCol: 7, toRow: 21 },
     },
     {
       title: "Países de origen registrados",
       kind: "bar",
       categories: (data.nacionalidadesPrincipales || []).slice(0, 8).map((item) => item.nacionalidad || "Sin datos"),
       series: [{ name: "Enrolamientos", values: (data.nacionalidadesPrincipales || []).slice(0, 8).map((item) => Number(item.total || 0)), color: "2B5FAE" }],
-      anchor: { col: 8, row: 6, toCol: 14, toRow: 17 },
+      anchor: { col: 8, row: 10, toCol: 14, toRow: 21 },
     },
     {
       title: "Estado de sincronización",
       kind: "doughnut",
       categories: chartItems(sincronizacion, ["descripcion", "estado"]).map((item) => item.label),
       series: [{ name: "Registros", values: chartItems(sincronizacion, ["descripcion", "estado"]).map((item) => item.value), colors: ["0F766E", "C69214", "D92D20", "2B5FAE"] }],
-      anchor: { col: 1, row: 18, toCol: 7, toRow: 29 },
+      anchor: { col: 1, row: 23, toCol: 7, toRow: 34 },
     },
     {
       title: "Registro biométrico",
       kind: "doughnut",
       categories: chartItems(registro, ["descripcion", "estado"]).map((item) => item.label),
       series: [{ name: "Registros", values: chartItems(registro, ["descripcion", "estado"]).map((item) => item.value), colors: ["0F766E", "D92D20", "C69214", "2B5FAE"] }],
-      anchor: { col: 8, row: 18, toCol: 14, toRow: 29 },
+      anchor: { col: 8, row: 23, toCol: 14, toRow: 34 },
     },
     {
       title: "Perfil por rango de edad",
       kind: "column",
       categories: chartItems(perfil, ["tramo", "categoria", "descripcion"]).map((item) => item.label),
       series: [{ name: "Enrolamientos", values: chartItems(perfil, ["tramo", "categoria", "descripcion"]).map((item) => item.value), color: "7C3AED" }],
-      anchor: { col: 1, row: 30, toCol: 7, toRow: 41 },
+      anchor: { col: 1, row: 36, toCol: 7, toRow: 47 },
     },
     {
       title: coberturaEsEquipo ? "Equipos utilizados" : "Distribución por región",
       kind: "column",
       categories: chartItems(cobertura, coberturaEsEquipo ? ["dispositivo", "tipo"] : ["region", "nombre"]).map((item) => item.label),
       series: [{ name: coberturaEsEquipo ? "Procesamientos" : "Enrolamientos", values: chartItems(cobertura, coberturaEsEquipo ? ["dispositivo", "tipo"] : ["region", "nombre"]).map((item) => item.value), color: "C69214" }],
-      anchor: { col: 8, row: 30, toCol: 14, toRow: 41 },
+      anchor: { col: 8, row: 36, toCol: 14, toRow: 47 },
     },
   ];
 
@@ -504,8 +504,8 @@ async function generarReporteExcel(data, meta = {}) {
   // HOJA 1: RESUMEN EJECUTIVO & ANALÍTICA
   // ============================================================================
   const ws1 = workbook.addWorksheet("Resumen Ejecutivo ABIS", {
-    views: [{ showGridLines: true }],
-    properties: { defaultRowHeight: 20 },
+    views: [{ showGridLines: false }],
+    properties: { defaultRowHeight: 20, tabColor: { argb: "FF0B2A5B" } },
   });
 
   // Estilos base
@@ -573,6 +573,28 @@ async function generarReporteExcel(data, meta = {}) {
   ws1.getCell("E7").font = { name: "Segoe UI", bold: true, color: { argb: "FF1E293B" } };
   ws1.getCell("F7").value = "Sistema Analítico ABIS | PDI";
   ws1.getCell("F7").font = { name: "Segoe UI", color: { argb: "FF059669" } };
+
+  [["B6", "D7"], ["E6", "G7"]].forEach(([from, to]) => {
+    const start = ws1.getCell(from);
+    const end = ws1.getCell(to);
+    for (let row = start.row; row <= end.row; row += 1) {
+      for (let col = start.col; col <= end.col; col += 1) {
+        const cell = ws1.getCell(row, col);
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: row === start.row || row === end.row ? "FFF1F5F9" : "FFF8FAFC" } };
+        cell.border = borderThin;
+      }
+    }
+  });
+  ws1.mergeCells("C6:D6");
+  ws1.mergeCells("F6:G6");
+  ws1.mergeCells("C7:D7");
+  ws1.mergeCells("F7:G7");
+  ["B6", "B7", "E6", "E7"].forEach((address) => {
+    ws1.getCell(address).alignment = { vertical: "middle" };
+  });
+  ["C6", "C7", "F6", "F7"].forEach((address) => {
+    ws1.getCell(address).alignment = { vertical: "middle", wrapText: true };
+  });
 
   // 3. SCORECARD DE KPIs (Fila 9 a 11)
   const kpis = [
@@ -890,7 +912,7 @@ async function generarReporteExcel(data, meta = {}) {
   // HOJA VISUAL: GRÁFICOS EJECUTIVOS
   // ============================================================================
   const wsVisual = workbook.addWorksheet("Resumen Visual", {
-    views: [{ showGridLines: false }],
+    views: [{ showGridLines: false, state: "frozen", ySplit: 6 }],
     properties: { defaultRowHeight: 20, tabColor: { argb: "FF0B2A5B" } },
     headerFooter: {
       oddFooter: "&CInforme generado por Sistema Analítico ABIS | PDI",
@@ -898,7 +920,7 @@ async function generarReporteExcel(data, meta = {}) {
   });
   wsVisual.orderNo = 1;
   ws1.orderNo = 2;
-  wsVisual.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 1, paperSize: 9 };
+  wsVisual.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 2, paperSize: 9 };
   for (let col = 1; col <= 15; col += 1) wsVisual.getColumn(col).width = 13;
   wsVisual.getColumn(1).width = 3;
 
@@ -932,13 +954,67 @@ async function generarReporteExcel(data, meta = {}) {
   wsVisual.getCell("B6").font = { name: "Segoe UI", size: 10, color: { argb: "FF475569" }, italic: true };
   wsVisual.getCell("B6").alignment = { horizontal: "left", vertical: "middle" };
 
+  const visualKpis = [
+    ["TOTAL ENROLAMIENTOS", totalEnrolados, "Registros procesados", "FF0B2A5B", "FFEAF1F7"],
+    ["SINCRONIZADOS", `${exec.tasaSincronizacion || 100}%`, "Envío correcto a PDI", "FF0F766E", "FFE8F7F1"],
+    ["REGISTROS VÁLIDOS", `${exec.tasaRegistroBiometrico || 100}%`, "Captura biométrica", "FF2563A8", "FFEAF3FB"],
+    ["PARA REVISAR", `${exec.tasaError || 0}%`, "Con observaciones", "FFB42318", "FFFFF0ED"],
+  ];
+  const visualKpiColumns = [["B", "D"], ["E", "G"], ["H", "J"], ["K", "M"]];
+  visualKpis.forEach(([title, value, subtitle, color, background], index) => {
+    const [fromCol, toCol] = visualKpiColumns[index];
+    [7, 8, 9].forEach((row) => wsVisual.mergeCells(`${fromCol}${row}:${toCol}${row}`));
+    const titleCell = wsVisual.getCell(`${fromCol}7`);
+    const valueCell = wsVisual.getCell(`${fromCol}8`);
+    const subtitleCell = wsVisual.getCell(`${fromCol}9`);
+    titleCell.value = title;
+    valueCell.value = value;
+    subtitleCell.value = subtitle;
+    [titleCell, valueCell, subtitleCell].forEach((cell) => {
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: background } };
+      cell.border = {
+        top: { style: "thin", color: { argb: color } },
+        bottom: { style: "thin", color: { argb: color } },
+        left: { style: "thin", color: { argb: color } },
+        right: { style: "thin", color: { argb: color } },
+      };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+    });
+    titleCell.font = { name: "Segoe UI", size: 8, bold: true, color: { argb: color } };
+    valueCell.font = { name: "Segoe UI", size: 18, bold: true, color: { argb: color } };
+    subtitleCell.font = { name: "Segoe UI", size: 8, italic: true, color: { argb: "FF64748B" } };
+  });
+  wsVisual.getRow(7).height = 20;
+  wsVisual.getRow(8).height = 31;
+  wsVisual.getRow(9).height = 19;
+
+  const visualPanels = [
+    [11, 22, 2, 8], [11, 22, 9, 15],
+    [24, 35, 2, 8], [24, 35, 9, 15],
+    [37, 48, 2, 8], [37, 48, 9, 15],
+  ];
+  visualPanels.forEach(([fromRow, toRow, fromCol, toCol]) => {
+    for (let row = fromRow; row <= toRow; row += 1) {
+      for (let col = fromCol; col <= toCol; col += 1) {
+        const cell = wsVisual.getCell(row, col);
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } };
+        cell.border = {
+          top: row === fromRow ? { style: "medium", color: { argb: "FFD5E1EC" } } : undefined,
+          bottom: row === toRow ? { style: "medium", color: { argb: "FFD5E1EC" } } : undefined,
+          left: col === fromCol ? { style: "medium", color: { argb: "FFD5E1EC" } } : undefined,
+          right: col === toCol ? { style: "medium", color: { argb: "FFD5E1EC" } } : undefined,
+        };
+      }
+    }
+  });
+
   // Los seis gráficos se incorporan como objetos nativos de Excel después de escribir el libro.
 
-  wsVisual.mergeCells("I44:O44");
-  wsVisual.getCell("I44").value = "INDICADORES DEL PERÍODO";
-  wsVisual.getCell("I44").font = { name: "Segoe UI", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
-  wsVisual.getCell("I44").fill = fillNavy;
-  wsVisual.getCell("I44").alignment = { horizontal: "center", vertical: "middle" };
+  wsVisual.mergeCells("I51:O51");
+  wsVisual.getCell("I51").value = "INDICADORES DEL PERÍODO";
+  wsVisual.getCell("I51").font = { name: "Segoe UI", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+  wsVisual.getCell("I51").fill = fillNavy;
+  wsVisual.getCell("I51").alignment = { horizontal: "center", vertical: "middle" };
   const visualRows = [
     ["Total de enrolamientos", totalEnrolados, "FF0B2A5B"],
     ["Sincronizados", `${exec.tasaSincronizacion || 100}%`, "FF0F766E"],
@@ -947,7 +1023,7 @@ async function generarReporteExcel(data, meta = {}) {
     ["Puestos o cuarteles", (data.rendimientoCuarteles || []).length, "FF64748B"],
   ];
   visualRows.forEach(([label, value, color], index) => {
-    const row = 45 + index;
+    const row = 52 + index;
     wsVisual.mergeCells(`I${row}:M${row}`);
     wsVisual.getCell(`I${row}`).value = label;
     wsVisual.getCell(`I${row}`).font = { name: "Segoe UI", size: 10, color: { argb: "FF334155" } };
@@ -958,10 +1034,10 @@ async function generarReporteExcel(data, meta = {}) {
     wsVisual.getCell(`N${row}`).alignment = { horizontal: "right", vertical: "middle" };
     ["I", "J", "K", "L", "M", "N", "O"].forEach((col) => { wsVisual.getCell(`${col}${row}`).border = borderThin; });
   });
-  wsVisual.mergeCells("B51:O52");
-  wsVisual.getCell("B51").value = "Nota: este resumen está orientado a lectura ejecutiva. El detalle por unidad se encuentra en la hoja siguiente.";
-  wsVisual.getCell("B51").font = { name: "Segoe UI", size: 10, color: { argb: "FF64748B" }, italic: true };
-  wsVisual.getCell("B51").alignment = { wrapText: true, vertical: "top" };
+  wsVisual.mergeCells("B58:O59");
+  wsVisual.getCell("B58").value = "Nota: este resumen está orientado a lectura ejecutiva. El detalle por unidad se encuentra en la hoja siguiente.";
+  wsVisual.getCell("B58").font = { name: "Segoe UI", size: 10, color: { argb: "FF64748B" }, italic: true };
+  wsVisual.getCell("B58").alignment = { wrapText: true, vertical: "top" };
 
   // ============================================================================
   // HOJA 2: MATRIZ COMPLETA DE CUARTELES
@@ -969,6 +1045,7 @@ async function generarReporteExcel(data, meta = {}) {
 
   const ws2 = workbook.addWorksheet("Detalle por Cuartel", {
     views: [{ state: "frozen", ySplit: 4, showGridLines: false }],
+    properties: { tabColor: { argb: "FFD4AF37" } },
     headerFooter: {
       oddFooter: "&CInforme generado por Sistema Analítico ABIS | PDI",
     },
@@ -1063,6 +1140,8 @@ async function generarReporteExcel(data, meta = {}) {
   ws2.getColumn(4).width = 20;
   ws2.getColumn(5).width = 20;
   ws2.getColumn(6).width = 16;
+  ws2.autoFilter = { from: "A4", to: `F${Math.max(4, r2 - 1)}` };
+  ws2.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
 
   // Generar Buffer binario .xlsx
   const workbookBuffer = await workbook.xlsx.writeBuffer();
