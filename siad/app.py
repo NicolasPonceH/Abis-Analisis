@@ -368,7 +368,7 @@ def join_or_placeholder(values):
     return ", ".join(values) if values else "No identificado"
 
 
-def contar_menores_edad(personas):
+def contar_menores_edad_legacy(personas):
     """Cuenta personas de 0 a 17 años a partir del texto normalizado de la entidad.
 
     La extracción actual conserva la edad junto al nombre (por ejemplo, ``17 años``),
@@ -382,6 +382,27 @@ def contar_menores_edad(personas):
         elif re.search(r"\bmenor(?:es)?\s+de\s+edad\b|\bNNA\b", texto, re.IGNORECASE):
             total += 1
     return total
+
+
+def _texto_es_menor_edad(texto):
+    """Clasifica una menciÃ³n individual de persona como menor de edad."""
+    texto = str(texto or "").strip()
+    normalizado = texto.casefold()
+    if "menor de edad" in normalizado or "nna" in normalizado:
+        return True
+    if "año" not in normalizado and "ano" not in normalizado:
+        return False
+    return any(0 <= int(numero) <= 17 for numero in re.findall("[0-9]+", texto))
+
+
+def listar_menores_edad(personas):
+    """Devuelve el detalle de personas clasificadas como menores (0 a 17)."""
+    return [str(persona).strip() for persona in (personas or []) if _texto_es_menor_edad(persona)]
+
+
+def contar_menores_edad(personas):
+    """Cuenta las personas clasificadas como menores de edad."""
+    return len(listar_menores_edad(personas))
 
 
 def build_docx_context(filename, summary_text, entities_data):
@@ -441,6 +462,8 @@ def build_docx_context(filename, summary_text, entities_data):
     ruts_lista = personas.get("ruts", []).copy()
     detenidos_menores = contar_menores_edad(detenidos_lista)
     victimas_menores = contar_menores_edad(victimas_lista)
+    detenidos_menores_lista = listar_menores_edad(detenidos_lista)
+    victimas_menores_lista = listar_menores_edad(victimas_lista)
     
     if detenidos_lista:
         ctx["Detenidos"] = "\n".join(detenidos_lista)
@@ -456,6 +479,8 @@ def build_docx_context(filename, summary_text, entities_data):
 
     ctx["Detenidos_Menores"] = str(detenidos_menores)
     ctx["Victimas_Menores"] = str(victimas_menores)
+    ctx["Detenidos_Menores_Detalle"] = "\n".join(detenidos_menores_lista) if detenidos_menores_lista else "No identificado"
+    ctx["Victimas_Menores_Detalle"] = "\n".join(victimas_menores_lista) if victimas_menores_lista else "No identificada"
     
     tiene_vehiculos = bool(vehiculos.get("marcas") or vehiculos.get("modelos") or vehiculos.get("colores") or vehiculos.get("anios") or vehiculos.get("patentes"))
     tiene_armas = bool(armas.get("marcas") or armas.get("modelos") or armas.get("tipos") or armas.get("calibres") or armas.get("series"))
