@@ -340,8 +340,9 @@ select.form-control {
 }
 
 .kpi-card {
-  background: var(--bg-surface);
+  background: linear-gradient(135deg, var(--kpi-wash, rgba(59, 130, 246, 0.08)) 0%, rgba(255, 255, 255, 0.78) 48%, var(--kpi-wash-strong, rgba(59, 130, 246, 0.12)) 100%);
   border: 1px solid var(--border-subtle);
+  border-left: 5px solid var(--kpi-accent, var(--pdi-navy));
   border-radius: var(--radius-lg);
   min-height: 158px;
   padding: 18px 20px 16px;
@@ -364,8 +365,8 @@ select.form-control {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  height: 5px;
+  bottom: 0;
+  width: 5px;
   background: var(--kpi-accent, var(--pdi-navy));
   box-shadow: 0 0 14px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 35%, transparent);
   z-index: 2;
@@ -374,12 +375,13 @@ select.form-control {
 .kpi-card::after {
   content: "";
   position: absolute;
-  width: 150px;
-  height: 150px;
-  right: -62px;
-  top: -76px;
+  width: 185px;
+  height: 185px;
+  right: -72px;
+  bottom: -90px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 9%, transparent);
+  background: radial-gradient(circle, var(--kpi-wash-strong, rgba(59, 130, 246, 0.16)) 0%, transparent 70%);
+  filter: blur(3px);
   pointer-events: none;
   z-index: -1;
 }
@@ -387,7 +389,10 @@ select.form-control {
 /* Tarjeta 1: Total Enrolamientos (Azul Marino PDI) */
 .kpi-card.blue {
   --kpi-accent: var(--pdi-navy);
-  background: linear-gradient(180deg, #f0f5fa 0%, #f9fbfd 100%);
+  --kpi-wash: rgba(59, 130, 246, 0.08);
+  --kpi-wash-strong: rgba(59, 130, 246, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #0b3d70, #00234c);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #d2e1ee;
 }
 .kpi-card.blue:hover {
@@ -406,7 +411,10 @@ select.form-control {
 /* Tarjeta 2: Sincronizados con PDI (Verde Éxito) */
 .kpi-card.success {
   --kpi-accent: var(--status-success);
-  background: linear-gradient(180deg, #edfdf5 0%, #f7fdf9 100%);
+  --kpi-wash: rgba(16, 185, 129, 0.08);
+  --kpi-wash-strong: rgba(16, 185, 129, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #059669, #047857);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #a7f3d0;
 }
 .kpi-card.success:hover {
@@ -425,7 +433,10 @@ select.form-control {
 /* Tarjeta 3: Registro Biométrico ABIS (Azul / Cyan Info) */
 .kpi-card.info {
   --kpi-accent: var(--status-info);
-  background: linear-gradient(180deg, #f0f9ff 0%, #f8fcff 100%);
+  --kpi-wash: rgba(14, 165, 233, 0.08);
+  --kpi-wash-strong: rgba(14, 165, 233, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #0284c7, #075985);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #bae6fd;
 }
 .kpi-card.info:hover {
@@ -444,7 +455,10 @@ select.form-control {
 /* Tarjeta 4: Inconsistencias / Errores (Rojo Alerta) */
 .kpi-card.danger {
   --kpi-accent: var(--status-danger);
-  background: linear-gradient(180deg, #fef2f2 0%, #fffafa 100%);
+  --kpi-wash: rgba(239, 68, 68, 0.08);
+  --kpi-wash-strong: rgba(239, 68, 68, 0.15);
+  --kpi-icon-bg: linear-gradient(135deg, #dc2626, #991b1b);
+  background: linear-gradient(135deg, var(--kpi-wash) 0%, rgba(255, 255, 255, 0.8) 48%, var(--kpi-wash-strong) 100%);
   border-color: #fecaca;
 }
 .kpi-card.danger:hover {
@@ -472,6 +486,7 @@ select.form-control {
 .kpi-title {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   min-width: 0;
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -479,16 +494,51 @@ select.form-control {
   text-transform: uppercase;
   letter-spacing: 0.55px;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
-.kpi-title .svg-icon {
-  width: 27px;
-  height: 27px;
-  flex: 0 0 27px;
-  padding: 6px;
+.kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   border-radius: 9px;
-  background: color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 12%, transparent);
+  color: #ffffff;
+  background: var(--kpi-icon-bg, var(--kpi-accent, var(--pdi-navy)));
+  box-shadow: 0 7px 14px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 24%, transparent), 0 0 0 3px color-mix(in srgb, var(--kpi-accent, var(--pdi-navy)) 11%, transparent);
   box-sizing: border-box;
+}
+
+.kpi-icon .svg-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2.25;
+}
+
+.kpi-watermark {
+  position: absolute;
+  right: -16px;
+  bottom: -24px;
+  z-index: 0;
+  color: var(--kpi-accent, var(--pdi-navy));
+  opacity: 0.075;
+  pointer-events: none;
+  transform: rotate(-8deg);
+}
+
+.kpi-watermark .svg-icon {
+  width: 104px;
+  height: 104px;
+  stroke-width: 1.4;
+}
+
+.kpi-card > :not(.kpi-watermark) {
+  position: relative;
+  z-index: 1;
 }
 
 .kpi-pill {
