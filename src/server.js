@@ -280,7 +280,10 @@ function apiRequireAuth(req, res, next) {
 app.use("/api", apiRequireAuth);
 
 app.get("/login", (req, res) => {
-  res.render("login", { error: null });
+  const error = req.query.motivo === "inactividad"
+    ? "Tu sesiÃ³n se cerrÃ³ por inactividad. Ingresa nuevamente para continuar."
+    : null;
+  res.render("login", { error, success: null });
 });
 
 app.post("/login", async (req, res) => {
@@ -372,7 +375,10 @@ const clearAuthCookie = (res) => {
 
 app.get("/logout", (req, res) => {
   clearAuthCookie(res);
-  res.redirect("/login");
+  const destino = req.query.motivo === "inactividad"
+    ? "/login?motivo=inactividad"
+    : "/login";
+  res.redirect(destino);
 });
 
 app.post("/logout", (req, res) => {
