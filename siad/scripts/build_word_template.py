@@ -32,10 +32,21 @@ if not LOGO_PATH.is_file():
 if not LOGO_PATH.is_file():
     LOGO_PATH = BASE_DIR / "static" / "img" / "pdi-logo.jpg"
 
-COLOR_PDI_NAVY = RGBColor(0, 51, 102)      # #003366
-COLOR_TEXT_MAIN = RGBColor(34, 34, 34)     # #222222
-COLOR_MUTED = RGBColor(100, 100, 100)      # #646464
+COLOR_PDI_NAVY = RGBColor(11, 42, 91)      # #0B2A5B
+COLOR_PDI_GOLD = RGBColor(198, 146, 20)    # #C69214
+COLOR_TEXT_MAIN = RGBColor(31, 41, 55)     # #1F2937
+COLOR_MUTED = RGBColor(100, 116, 139)     # #64748B
 DEFAULT_FONT = "Arial"
+
+ENTITY_COLORS = {
+    "vehiculos": ("2B5FAE", "EAF2FF", RGBColor(43, 95, 174)),
+    "armas": ("D92D20", "FDECEC", RGBColor(217, 45, 32)),
+    "drogas": ("C69214", "FFF7DF", RGBColor(160, 112, 0)),
+    "personas": ("7C3AED", "F3E8FF", RGBColor(124, 58, 237)),
+    "victimas": ("0F766E", "E7F8F4", RGBColor(15, 118, 110)),
+    "nna_victimas": ("0891B2", "E6F7FB", RGBColor(8, 145, 178)),
+    "nna_detenidos": ("EA580C", "FFF0E7", RGBColor(234, 88, 12)),
+}
 
 
 def set_cell_margins(cell, top=70, bottom=70, left=120, right=120):
@@ -116,28 +127,45 @@ def add_apa_styled_run(paragraph, text, bold=False, italic=False, size_pt=11, co
     return run
 
 
-def create_entity_recuadro(doc, rows_data):
+def create_entity_recuadro(doc, title, rows_data, accent="2B5FAE", tint="EAF2FF", label_color=None):
     """Crea una tabla con recuadro (borde perimetral y fondo suave) para una categoría de entidad."""
-    table = doc.add_table(rows=len(rows_data), cols=2)
+    title_key = str(title).lower()
+    if "veh" in title_key:
+        accent, tint, label_color = ENTITY_COLORS["vehiculos"]
+    elif "arma" in title_key:
+        accent, tint, label_color = ENTITY_COLORS["armas"]
+    elif "sust" in title_key:
+        accent, tint, label_color = ENTITY_COLORS["drogas"]
+    elif "persona" in title_key:
+        accent, tint, label_color = ENTITY_COLORS["personas"]
+    table = doc.add_table(rows=len(rows_data) + 1, cols=2)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
-    apply_recuadro_borders(table, border_color="003366", inner_color="E2E8F0")
+    apply_recuadro_borders(table, border_color=accent, inner_color="D7DEE9")
+
+    header = table.rows[0].cells[0].merge(table.rows[0].cells[1])
+    set_cell_margins(header, top=95, bottom=95, left=140, right=140)
+    set_cell_shading(header, accent)
+    p_header = header.paragraphs[0]
+    p_header.paragraph_format.space_before = Pt(1)
+    p_header.paragraph_format.space_after = Pt(1)
+    add_apa_styled_run(p_header, title.upper(), bold=True, size_pt=10.5, color=RGBColor(255, 255, 255), font_name=DEFAULT_FONT)
 
     col_widths = [Cm(5.0), Cm(11.0)]
 
     for row_idx, (campo, valor_tag) in enumerate(rows_data):
-        row = table.rows[row_idx]
+        row = table.rows[row_idx + 1]
         
         # Celda Campo (Izquierda)
         cell_0 = row.cells[0]
         cell_0.width = col_widths[0]
         set_cell_margins(cell_0, top=70, bottom=70, left=120, right=120)
-        set_cell_shading(cell_0, "F8FAFC")
+        set_cell_shading(cell_0, tint)
         p0 = cell_0.paragraphs[0]
         p0.paragraph_format.space_before = Pt(2)
         p0.paragraph_format.space_after = Pt(2)
         p0.paragraph_format.line_spacing = 1.15
-        add_apa_styled_run(p0, campo, bold=True, size_pt=10.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+        add_apa_styled_run(p0, campo, bold=True, size_pt=10.5, color=label_color or COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
         # Celda Valor (Derecha)
         cell_1 = row.cells[1]
@@ -150,7 +178,37 @@ def create_entity_recuadro(doc, rows_data):
         p1.paragraph_format.line_spacing = 1.15
         add_apa_styled_run(p1, valor_tag, bold=False, size_pt=10.5, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    doc.add_paragraph().paragraph_format.space_after = Pt(7)
+
+
+def create_nna_cards(doc):
+    """Tarjetas de indicadores N.N.A. para hacer visibles ambos contadores."""
+    table = doc.add_table(rows=1, cols=2)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+    apply_recuadro_borders(table, border_color="CBD5E1", inner_color="FFFFFF")
+    cards = [
+        ("V\u00cdCTIMAS MENORES DE EDAD (N.N.A.)", "{{ Victimas_Menores }}", "0891B2", "E6F7FB"),
+        ("DETENIDOS MENORES DE EDAD (N.N.A.)", "{{ Detenidos_Menores }}", "EA580C", "FFF0E7"),
+    ]
+    for idx, (label, value, accent, tint) in enumerate(cards):
+        cell = table.cell(0, idx)
+        cell.width = Cm(8.0)
+        set_cell_margins(cell, top=120, bottom=120, left=150, right=150)
+        set_cell_shading(cell, tint)
+        p_label = cell.paragraphs[0]
+        p_label.paragraph_format.space_before = Pt(1)
+        p_label.paragraph_format.space_after = Pt(3)
+        add_apa_styled_run(p_label, label, bold=True, size_pt=8.5, color=RGBColor.from_string(accent), font_name=DEFAULT_FONT)
+        p_value = cell.add_paragraph()
+        p_value.paragraph_format.space_before = Pt(0)
+        p_value.paragraph_format.space_after = Pt(1)
+        add_apa_styled_run(p_value, value, bold=True, size_pt=20, color=RGBColor.from_string(accent), font_name=DEFAULT_FONT)
+        p_caption = cell.add_paragraph()
+        p_caption.paragraph_format.space_before = Pt(0)
+        p_caption.paragraph_format.space_after = Pt(1)
+        add_apa_styled_run(p_caption, "Personas detectadas en el documento", size_pt=8.5, color=COLOR_MUTED, font_name=DEFAULT_FONT)
+    doc.add_paragraph().paragraph_format.space_after = Pt(7)
 
 
 def build():
@@ -225,6 +283,12 @@ def build():
     p_title.paragraph_format.space_after = Pt(14)
     p_title.paragraph_format.line_spacing = 1.15
     add_apa_styled_run(p_title, "INFORME DE ANÁLISIS DOCUMENTAL", bold=True, size_pt=14, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+
+    p_rule = doc.add_paragraph()
+    p_rule.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_rule.paragraph_format.space_before = Pt(0)
+    p_rule.paragraph_format.space_after = Pt(10)
+    add_apa_styled_run(p_rule, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", bold=True, size_pt=7.5, color=COLOR_PDI_GOLD, font_name=DEFAULT_FONT)
 
     # 2. Tabla de Metadatos del Documento (Recuadro sutil)
     meta_table = doc.add_table(rows=2, cols=2)
@@ -310,6 +374,13 @@ def build():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(16)
 
+    p_nna = doc.add_paragraph()
+    p_nna.paragraph_format.space_before = Pt(5)
+    p_nna.paragraph_format.space_after = Pt(5)
+    p_nna.paragraph_format.keep_with_next = True
+    add_apa_styled_run(p_nna, "INDICADORES DE NIÑOS, NIÑAS Y ADOLESCENTES", bold=True, size_pt=10.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+    create_nna_cards(doc)
+
     doc.add_paragraph("{%p if tiene_entidades %}")
     # 4. Sección Entidades Identificadas
     p_h2 = doc.add_paragraph()
@@ -328,7 +399,7 @@ def build():
     p_sub_veh.paragraph_format.keep_with_next = True
     add_apa_styled_run(p_sub_veh, "2.1 Vehículos Detectados", bold=True, size_pt=11.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-    create_entity_recuadro(doc, [
+    create_entity_recuadro(doc, "Vehículos detectados", [
         ("Marcas:", "{{ Marcas }}"),
         ("Modelos:", "{{ Modelos }}"),
         ("Colores:", "{{ Colores }}"),
@@ -346,7 +417,7 @@ def build():
     p_sub_arm.paragraph_format.keep_with_next = True
     add_apa_styled_run(p_sub_arm, "2.2 Armas de Fuego Detectadas", bold=True, size_pt=11.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-    create_entity_recuadro(doc, [
+    create_entity_recuadro(doc, "Armas de fuego detectadas", [
         ("Marcas:", "{{ Marcas_Arma }}"),
         ("Modelos:", "{{ Modelos_Arma }}"),
         ("Tipo de Arma:", "{{ Tipo }}"),
@@ -364,7 +435,7 @@ def build():
     p_sub_dro.paragraph_format.keep_with_next = True
     add_apa_styled_run(p_sub_dro, "2.3 Sustancias Ilícitas Detectadas", bold=True, size_pt=11.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-    create_entity_recuadro(doc, [
+    create_entity_recuadro(doc, "Sustancias ilícitas detectadas", [
         ("Sustancias:", "{{ Sustancias }}"),
         ("Medidas / Pesajes:", "{{ Medidas_pesajes }}"),
     ])
@@ -379,11 +450,13 @@ def build():
     p_sub_per.paragraph_format.keep_with_next = True
     add_apa_styled_run(p_sub_per, "2.4 Personas Involucradas", bold=True, size_pt=11.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-    create_entity_recuadro(doc, [
+    create_entity_recuadro(doc, "Personas involucradas y N.N.A.", [
         ("Detenidos / Imputados:", "{{ Detenidos }}"),
         ("Víctimas Identificadas:", "{{ Victimas }}"),
         ("Detenidos menores de edad:", "{{ Detenidos_Menores }}"),
         ("Víctimas menores de edad:", "{{ Victimas_Menores }}"),
+        ("Detalle detenidos menores:", "{{ Detenidos_Menores_Detalle }}"),
+        ("Detalle víctimas menores:", "{{ Victimas_Menores_Detalle }}"),
     ])
     doc.add_paragraph("{%p endif %}")
 
