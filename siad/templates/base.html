@@ -140,8 +140,12 @@
   padding: 0 !important;
   box-sizing: border-box !important;
   z-index: 2147483647 !important;
-  background: #001430 !important;
-  background: radial-gradient(circle at center, #002855 0%, #001430 65%, #000814 100%) !important;
+  background-color: #020b18 !important;
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(0, 114, 255, 0.22) 0%, rgba(0, 36, 80, 0.45) 40%, rgba(2, 10, 22, 0.98) 85%),
+    linear-gradient(rgba(0, 195, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 195, 255, 0.04) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 40px 40px, 40px 40px !important;
   display: none !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -155,16 +159,16 @@
 html.siad-splash-active #pdi-splash-overlay {
   display: flex !important;
   opacity: 1 !important;
-  animation: pdiOverlayFadeOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  animation: pdiOverlayFadeOut 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
 }
 
 @keyframes pdiOverlayFadeOut {
-  0%, 65% {
+  0%, 75% {
     opacity: 1;
     visibility: visible;
     pointer-events: all;
   }
-  85% {
+  90% {
     opacity: 0.85;
     visibility: visible;
     pointer-events: none;
@@ -176,6 +180,160 @@ html.siad-splash-active #pdi-splash-overlay {
   }
 }
 
+/* Background animated optic grid & scanning ambient flare */
+#pdi-splash-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 209, 0, 0.05) 0%, transparent 65%);
+  animation: pdiAmbientPulse 4s ease-in-out infinite alternate;
+}
+
+/* El contenido se revela detrás de la cortina para evitar el "corte" al terminar
+   la carga. La animación sólo existe mientras el splash está activo. */
+html.siad-splash-active #page-header,
+html.siad-splash-active main.app-container,
+html.siad-splash-active body > footer {
+  animation: siadPageReveal 0.82s 1.78s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes siadPageReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Emblema institucional parcial: queda "asomado" desde el borde izquierdo
+   para darle profundidad a la pantalla sin competir con el módulo central. */
+.siad-edge-shield {
+  position: absolute;
+  z-index: 1;
+  left: -184px;
+  top: 50%;
+  width: 380px;
+  height: 480px;
+  transform: translateY(-50%) rotate(-7deg);
+  clip-path: polygon(50% 0%, 88% 14%, 88% 58%, 77% 78%, 50% 100%, 23% 78%, 12% 58%, 12% 14%);
+  background:
+    radial-gradient(circle at 68% 30%, rgba(0, 210, 255, 0.32), transparent 34%),
+    linear-gradient(145deg, rgba(0, 90, 175, 0.95), rgba(1, 20, 51, 0.98) 68%);
+  filter: drop-shadow(0 0 28px rgba(0, 121, 255, 0.3));
+  opacity: 0.72;
+}
+
+.siad-edge-shield::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  clip-path: inherit;
+  border: 1px solid rgba(255, 209, 0, 0.56);
+  background:
+    repeating-conic-gradient(from 12deg, rgba(0, 210, 255, 0.15) 0 2deg, transparent 2deg 12deg),
+    radial-gradient(circle at 68% 30%, transparent 0 22%, rgba(0, 210, 255, 0.14) 22.5% 23%, transparent 23.5%);
+  opacity: 0.72;
+}
+
+.siad-edge-shield::after {
+  content: 'PDI  //  SIAD';
+  position: absolute;
+  right: 42px;
+  bottom: 94px;
+  color: rgba(255, 209, 0, 0.76);
+  font: 800 10px/1 'Inter', sans-serif;
+  letter-spacing: 0.22em;
+  transform: rotate(7deg);
+  white-space: nowrap;
+}
+
+.siad-edge-shield img {
+  position: absolute;
+  width: 214px;
+  height: auto;
+  right: 12px;
+  top: 142px;
+  opacity: 0.28;
+  filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(0, 210, 255, 0.65));
+  transform: rotate(7deg);
+}
+
+.siad-edge-shield-seal {
+  position: absolute;
+  right: 76px;
+  top: 74px;
+  width: 82px;
+  height: 82px;
+  border: 1px solid rgba(255, 209, 0, 0.7);
+  border-radius: 50%;
+  color: #ffd100;
+  display: grid;
+  place-items: center;
+  font: 900 21px/1 'Inter', sans-serif;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 12px rgba(255, 209, 0, 0.7);
+  box-shadow: 0 0 0 7px rgba(255, 209, 0, 0.07), 0 0 24px rgba(255, 209, 0, 0.2);
+  transform: rotate(7deg);
+}
+
+.siad-edge-shield-seal::after {
+  content: 'FORENSE';
+  position: absolute;
+  bottom: -18px;
+  font-size: 7px;
+  letter-spacing: 0.2em;
+  color: rgba(200, 226, 255, 0.7);
+}
+
+.siad-splash-rail {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 11px;
+  transform: translateY(-50%);
+  color: rgba(162, 205, 255, 0.55);
+  font: 700 9px/1 'Inter', monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+.siad-splash-rail::before,
+.siad-splash-rail::after {
+  content: '';
+  width: 1px;
+  height: 82px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 210, 255, 0.65), transparent);
+}
+
+.siad-splash-crosshair {
+  position: absolute;
+  z-index: 0;
+  width: min(72vw, 760px);
+  height: min(72vw, 760px);
+  border: 1px solid rgba(0, 210, 255, 0.08);
+  border-radius: 50%;
+  box-shadow: 0 0 0 36px rgba(0, 135, 255, 0.025), 0 0 0 72px rgba(0, 135, 255, 0.018);
+  pointer-events: none;
+}
+
+@keyframes siadEmblemBreath {
+  0%, 100% { opacity: 0.58; transform: translateY(-50%) rotate(-7deg) scale(0.99); }
+  50% { opacity: 0.82; transform: translateY(-50%) rotate(-7deg) scale(1.015); }
+}
+
+html.siad-splash-active .siad-edge-shield {
+  animation: siadEmblemBreath 3.4s ease-in-out infinite;
+}
+
+@keyframes pdiAmbientPulse {
+  0% { opacity: 0.5; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Central Forensic HUD Card */
 .pdi-splash-box {
   animation: none !important;
   display: flex !important;
@@ -183,31 +341,46 @@ html.siad-splash-active #pdi-splash-overlay {
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  padding: 2rem !important;
-  max-width: 90vw !important;
+  padding: 2.25rem 2.75rem !important;
+  max-width: 580px !important;
+  width: 92% !important;
   box-sizing: border-box !important;
   margin: auto !important;
+  position: relative !important;
+  background: rgba(3, 19, 44, 0.78) !important;
+  border: 1px solid rgba(0, 195, 255, 0.3) !important;
+  border-radius: 24px !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.75),
+    0 0 50px rgba(0, 102, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 24px rgba(0, 140, 255, 0.1) !important;
+  overflow: hidden !important;
 }
 
 html.siad-splash-active .pdi-splash-box {
-  animation: pdiBoxScaleOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  animation: pdiBoxScaleOut 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
 }
 
 @keyframes pdiBoxScaleOut {
   0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.92);
+    transform: translateY(24px) scale(0.93);
+    filter: blur(8px);
   }
-  15% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  65% {
+  14% {
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: blur(0px);
   }
-  85% {
+  75% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+  92% {
     opacity: 0.8;
     transform: scale(1.02);
     filter: blur(1px);
@@ -219,85 +392,359 @@ html.siad-splash-active .pdi-splash-box {
   }
 }
 
-@keyframes pdiShieldPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.45), 0 0 60px rgba(0, 40, 85, 0.8); }
-  50% { transform: scale(1.04); box-shadow: 0 0 45px rgba(255, 215, 0, 0.8), 0 0 90px rgba(0, 100, 200, 0.6); }
+/* Forensic 4-corner brackets for HUD */
+.siad-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  z-index: 3;
+}
+.siad-c-tl { top: 10px; left: 10px; border-top: 2px solid #00d2ff; border-left: 2px solid #00d2ff; }
+.siad-c-tr { top: 10px; right: 10px; border-top: 2px solid #00d2ff; border-right: 2px solid #00d2ff; }
+.siad-c-bl { bottom: 10px; left: 10px; border-bottom: 2px solid #ffd100; border-left: 2px solid #ffd100; }
+.siad-c-br { bottom: 10px; right: 10px; border-bottom: 2px solid #ffd100; border-right: 2px solid #ffd100; }
+
+@media (max-width: 640px) {
+  .siad-edge-shield { left: -264px; opacity: 0.48; }
+  .siad-splash-rail, .siad-splash-crosshair { display: none; }
+  .pdi-splash-box {
+    padding: 1.75rem 1.25rem !important;
+    width: 95% !important;
+    border-radius: 18px !important;
+  }
+  .pdi-splash-sisdoc {
+    font-size: 36px !important;
+  }
+  .pdi-splash-title {
+    font-size: 9.5px !important;
+    letter-spacing: 0.18em !important;
+  }
+  .siad-telemetry-strip {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
 }
 
-@keyframes pdiBarFill {
-  0% { width: 0%; }
-  100% { width: 100%; }
+/* Forensic Laser Scan Line running through the HUD card */
+.siad-hud-laser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 210, 255, 0.8) 50%, transparent 100%);
+  box-shadow: 0 0 12px #00d2ff, 0 0 24px #0070ea;
+  pointer-events: none;
+  animation: siadLaserSweep 2.2s ease-in-out infinite;
+  z-index: 2;
 }
 
+@keyframes siadLaserSweep {
+  0% { top: 0%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Institutional Badge Container with Optical Scanner Aperture */
 .pdi-badge-frame {
   position: relative;
-  padding: 4px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #FFD700 0%, #B8860B 50%, #FFD700 100%);
-  animation: pdiShieldPulse 2.4s infinite ease-in-out;
-  margin-bottom: 1.5rem;
-}
-.pdi-badge-inner {
-  background: #002855;
-  border-radius: 16px;
-  padding: 16px 24px;
+  width: 82px;
+  height: 82px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 1.15rem;
 }
-.pdi-splash-title {
-  color: #FFD700;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.3em;
+
+/* Rotating optical calibration ring */
+.pdi-badge-frame::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(0, 210, 255, 0.45);
+  animation: pdiRingSpin 14s linear infinite;
+  pointer-events: none;
+}
+
+/* Subtle outer glow pulse */
+.pdi-badge-frame::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 150, 255, 0.25) 0%, transparent 70%);
+  animation: pdiGlowPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pdiRingSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pdiGlowPulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+}
+
+.pdi-badge-inner {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(145deg, #021a3b 0%, #001228 100%);
+  border: 1.5px solid rgba(255, 209, 0, 0.7);
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(0, 114, 255, 0.35),
+    inset 0 0 12px rgba(255, 209, 0, 0.15);
+}
+
+.pdi-badge-inner img {
+  height: 50px;
+  width: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  display: block;
+}
+
+/* Top Institutional Pill Tag */
+.siad-splash-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 168, 255, 0.1);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #70d8ff;
   text-transform: uppercase;
-  margin-bottom: 6px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  margin-bottom: 0.85rem;
 }
+
+.siad-splash-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 8px #00e676;
+  animation: siadDotBlink 1.4s infinite;
+}
+
+@keyframes siadDotBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+/* Institution Name */
+.pdi-splash-title {
+  color: #FFD100;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 14px rgba(255, 209, 0, 0.3);
+}
+
+/* SIAD Hero Title */
+.siad-hero-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 2px 0 4px 0;
+}
+
 .pdi-splash-sisdoc {
   color: #FFFFFF;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 36px;
+  font-size: 44px;
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin: 0;
-  line-height: 1.1;
-  text-shadow: 0 4px 14px rgba(0,0,0,0.8);
+  line-height: 1;
+  background: linear-gradient(180deg, #FFFFFF 25%, #D4E5FF 70%, #76A9FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 16px rgba(0, 114, 255, 0.45));
 }
-.pdi-splash-sub {
-  color: #AAC7FD;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+
+.siad-version-chip {
+  background: linear-gradient(135deg, rgba(255, 209, 0, 0.15) 0%, rgba(255, 209, 0, 0.05) 100%);
+  border: 1px solid rgba(255, 209, 0, 0.4);
+  color: #FFD100;
+  font-family: 'Inter', monospace, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-top: 6px;
 }
+
+/* Subtitle */
+.pdi-splash-sub {
+  color: #A5C8FF;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  margin-bottom: 0.85rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+}
+
+/* Feature Capabilities Pills */
+.siad-capabilities-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.siad-cap-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #C0D6F5;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* HUD Progress Bar Section */
+.siad-progress-section {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.siad-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-family: 'Inter', monospace, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.siad-progress-phase {
+  color: #00d2ff;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.siad-progress-pct {
+  color: #FFD100;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 .pdi-bar-container {
-  width: 240px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.15);
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 168, 255, 0.2);
   border-radius: 999px;
-  margin-top: 1.75rem;
   overflow: hidden;
   position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
 }
+
 .pdi-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #FFD700, #FFF9C4, #FFD700);
+  width: 0%;
+  background: linear-gradient(90deg, #0070ea 0%, #00d2ff 60%, #FFD100 100%);
   border-radius: 999px;
-  box-shadow: 0 0 14px #FFD700;
-  animation: none;
+  box-shadow: 0 0 14px #00d2ff, 0 0 8px #FFD100;
+  position: relative;
+  transition: width 0.15s ease-out;
 }
-html.siad-splash-active .pdi-bar-fill { animation: pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+html.siad-splash-active .pdi-bar-fill {
+  animation: pdiBarFill 1.8s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes pdiBarFill {
+  0% { width: 4%; }
+  35% { width: 38%; }
+  65% { width: 72%; }
+  100% { width: 100%; }
+}
+
+/* Trailing laser dot on the progress bar */
+.pdi-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffffff, 0 0 16px #00d2ff;
+}
+
+/* Dynamic status log text */
 .pdi-splash-loading-text {
-  color: rgba(255, 255, 255, 0.45);
-  font-family: monospace;
+  color: rgba(220, 235, 255, 0.7);
+  font-family: 'Inter', monospace, system-ui, sans-serif;
   font-size: 11px;
-  letter-spacing: 0.25em;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+  text-align: center;
+  min-height: 16px;
+  transition: opacity 0.2s ease;
+}
+
+/* Bottom Telemetry Strip */
+.siad-telemetry-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  width: 100%;
+}
+
+.siad-tel-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
-  margin-top: 10px;
+}
+
+.siad-tel-val {
+  color: rgba(0, 210, 255, 0.75);
+  font-weight: 700;
 }
 </style>
 
@@ -438,26 +885,80 @@ html.siad-splash-active .pdi-bar-fill { animation: pdiBarFill 1.5s cubic-bezier(
 
 <!-- Pantalla de carga propia de SIAD: sólo se activa al ingresar al módulo. -->
 <div id="pdi-splash-overlay">
+  <div class="siad-splash-crosshair" aria-hidden="true"></div>
+  <div class="siad-edge-shield" aria-hidden="true">
+    <div class="siad-edge-shield-seal">PDI</div>
+    <img src="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}" alt="">
+  </div>
+  <div class="siad-splash-rail" aria-hidden="true">
+    <span>secure module</span>
+    <span>OCR / NER / FORENSIC</span>
+    <span>SIAD-05</span>
+  </div>
   <div class="pdi-splash-box">
-    <!-- Emblema con halo dorado pulsante -->
+    <!-- Esquinas HUD de precisión forense -->
+    <span class="siad-corner siad-c-tl"></span>
+    <span class="siad-corner siad-c-tr"></span>
+    <span class="siad-corner siad-c-bl"></span>
+    <span class="siad-corner siad-c-br"></span>
+
+    <!-- Laser de escaneo forense OCR animado -->
+    <div class="siad-hud-laser"></div>
+
+    <!-- Píldora superior institucional -->
+    <div class="siad-splash-pill">
+      <span class="siad-splash-pill-dot"></span>
+      <span>PDI · INTELIGENCIA FORENSE & OCR</span>
+    </div>
+
+    <!-- Emblema con halo óptico y retícula de calibración -->
     <div class="pdi-badge-frame">
       <div class="pdi-badge-inner">
-        <img src="{{ url_for('static', filename='img/pdi-logo.jpg') }}" alt="PDI" style="height: 68px; width: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: block;">
+        <img src="{{ url_for('static', filename='img/pdi-logo.jpg') }}" alt="PDI" style="height: 50px; width: auto; border-radius: 6px; display: block;">
       </div>
     </div>
+
     <!-- Tipografía Institucional Oficial -->
     <div class="pdi-splash-title">Policía de Investigaciones de Chile</div>
-    <h1 class="pdi-splash-sisdoc">SIAD</h1>
-    <div class="pdi-splash-sub">Sistema de Análisis Documental y OCR</div>
-    <!-- Barra de progreso dorada animada -->
-    <div class="pdi-bar-container">
-      <div id="pdi-splash-bar" class="pdi-bar-fill"></div>
+
+    <!-- Título SIAD Hero -->
+    <div class="siad-hero-wrap">
+      <h1 class="pdi-splash-sisdoc">SIAD</h1>
+      <span class="siad-version-chip">OCR v5.0</span>
     </div>
-    <div class="pdi-splash-loading-text">Iniciando sistema institucional...</div>
+
+    <div class="pdi-splash-sub">Sistema de Análisis Documental y OCR</div>
+
+    <!-- Micro-badges de tecnología forense -->
+    <div class="siad-capabilities-row">
+      <span class="siad-cap-tag">📄 OCR Multi-Capa</span>
+      <span class="siad-cap-tag">🧠 Entidades NER</span>
+      <span class="siad-cap-tag">🔒 Peritaje Forense</span>
+    </div>
+
+    <!-- Consola de Progreso HUD -->
+    <div class="siad-progress-section">
+      <div class="siad-progress-header">
+        <span id="pdi-splash-phase" class="siad-progress-phase">CALIBRANDO SENSOR</span>
+        <span id="pdi-splash-pct" class="siad-progress-pct">0%</span>
+      </div>
+
+      <div class="pdi-bar-container">
+        <div id="pdi-splash-bar" class="pdi-bar-fill"></div>
+      </div>
+
+      <div id="pdi-splash-status" class="pdi-splash-loading-text">Iniciando motor de análisis documental...</div>
+    </div>
+
+    <!-- Banda de Telemetría Inferior -->
+    <div class="siad-telemetry-strip">
+      <div class="siad-tel-item"><span>MOTOR:</span> <span class="siad-tel-val">TESSERACT 5</span></div>
+      <div class="siad-tel-item"><span>MODELO:</span> <span class="siad-tel-val">NLP FORENSE</span></div>
+      <div class="siad-tel-item"><span>MODO:</span> <span class="siad-tel-val">AIR-GAPPED</span></div>
+    </div>
   </div>
 </div>
-
-<!-- 1. Header de Navegación Institucional PDI -->
+    <!-- 1. Header de Navegación Institucional PDI -->
 <header id="page-header" class="header-institutional fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100] h-[67.33px] flex items-center">
 <div class="h-full w-full px-3 lg:px-6 flex items-center justify-between">
 <div class="flex items-center gap-2 -ml-1">
@@ -639,10 +1140,13 @@ html.siad-splash-active .pdi-bar-fill { animation: pdiBarFill 1.5s cubic-bezier(
     }
   });
 
-  // Reproducción bajo demanda para pruebas
+    // Reproducción bajo demanda para pruebas
   window.triggerPdiSplash = function () {
     var overlay = document.getElementById('pdi-splash-overlay');
     var bar = document.getElementById('pdi-splash-bar');
+    var pctEl = document.getElementById('pdi-splash-pct');
+    var phaseEl = document.getElementById('pdi-splash-phase');
+    var statusEl = document.getElementById('pdi-splash-status');
     if (!overlay) return;
 
     root.classList.add('siad-splash-active');
@@ -653,13 +1157,42 @@ html.siad-splash-active .pdi-bar-fill { animation: pdiBarFill 1.5s cubic-bezier(
     if (box) {
       box.style.animation = 'none';
       box.offsetHeight;
-      box.style.animation = 'pdiBoxScaleOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+      box.style.animation = 'pdiBoxScaleOut 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
     }
     overlay.offsetHeight;
     if (bar) bar.offsetHeight;
 
-    overlay.style.animation = 'pdiOverlayFadeOut 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
-    if (bar) bar.style.animation = 'pdiBarFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+    overlay.style.animation = 'pdiOverlayFadeOut 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+    if (bar) bar.style.animation = 'pdiBarFill 1.8s cubic-bezier(0.2, 0.8, 0.3, 1) forwards';
+
+    // Animación de telemetría y porcentaje sincronizado
+    var startTime = performance.now();
+    var duration = 1900;
+    var steps = [
+      { at: 0, phase: 'CALIBRANDO SENSOR', msg: 'Calibrando sensor óptico y motor OCR...' },
+      { at: 28, phase: 'REDES NEURONALES', msg: 'Cargando modelos NLP de extracción de entidades...' },
+      { at: 65, phase: 'AUDITORÍA FORENSE', msg: 'Verificando protocolos y firmas criptográficas...' },
+      { at: 90, phase: 'AUTORIZADO', msg: 'Módulo forense verificado. Desplegando interfaz...' }
+    ];
+
+    function updateProgress(now) {
+      var elapsed = now - startTime;
+      var progress = Math.min(1, elapsed / duration);
+      var pct = Math.floor(progress * 100);
+      if (pctEl) pctEl.textContent = pct + '%';
+
+      var currentStep = steps[0];
+      for (var i = 0; i < steps.length; i++) {
+        if (pct >= steps[i].at) currentStep = steps[i];
+      }
+      if (phaseEl && phaseEl.textContent !== currentStep.phase) phaseEl.textContent = currentStep.phase;
+      if (statusEl && statusEl.textContent !== currentStep.msg) statusEl.textContent = currentStep.msg;
+
+      if (progress < 1 && root.classList.contains('siad-splash-active')) {
+        requestAnimationFrame(updateProgress);
+      }
+    }
+    requestAnimationFrame(updateProgress);
 
     setTimeout(function () {
       root.classList.remove('siad-splash-active');
@@ -667,7 +1200,7 @@ html.siad-splash-active .pdi-bar-fill { animation: pdiBarFill 1.5s cubic-bezier(
       overlay.style.removeProperty('animation');
       if (box) box.style.removeProperty('animation');
       if (bar) bar.style.removeProperty('animation');
-    }, 2450);
+    }, 2550);
   };
 
   if (root.classList.contains('siad-splash-active')) {

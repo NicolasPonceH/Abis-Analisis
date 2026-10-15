@@ -401,7 +401,9 @@ def get_stats(dias=None, agrupacion=None):
             top_marcas_armas = top_valores("entidades_armas", "marca")
             top_sustancias = top_valores("entidades_drogas", "sustancia")
             top_nacionalidades = top_valores("entidades_personas", "nombre", extra_where="AND (nombre NOT LIKE '(Víctima)%%' AND nombre NOT LIKE '(Cómplice)%%')")
-            top_victimas = top_valores("entidades_personas", "SUBSTRING(nombre FROM 11)", extra_where="AND nombre LIKE '(Víctima)%%'")
+            top_victimas = top_valores("entidades_personas", "SUBSTRING(nombre FROM 11)", extra_where="AND nombre LIKE '(Víctima)%%'")
+            top_victimas_menores = top_valores("entidades_personas", "SUBSTRING(nombre FROM 11)", extra_where=f"AND nombre LIKE '(Víctima)%%' AND {menor_edad_sql}")
+            top_detenidos_menores = top_valores("entidades_personas", "nombre", extra_where=f"AND (nombre NOT LIKE '(Víctima)%%' AND nombre NOT LIKE '(Cómplice)%%') AND {menor_edad_sql}")
 
             cur.execute(
                 f"SELECT fecha_procesamiento::date AS dia, COUNT(*) FROM documentos "
@@ -447,7 +449,9 @@ def get_stats(dias=None, agrupacion=None):
                     (SELECT COUNT(*) FROM entidades_armas ea JOIN documentos d ON ea.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as armas,
                     (SELECT COUNT(*) FROM entidades_drogas ed JOIN documentos d ON ed.documento_id = d.id WHERE date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as drogas,
                     (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE (ep.nombre NOT LIKE '(Víctima)%' OR ep.nombre IS NULL) AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as personas,
-                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre LIKE '(Víctima)%' AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as victimas
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre LIKE '(Víctima)%' AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as victimas,
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre LIKE '(Víctima)%' AND {menor_edad_sql.replace('nombre', 'ep.nombre')} AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as victimas_menores,
+                    (SELECT COUNT(*) FROM entidades_personas ep JOIN documentos d ON ep.documento_id = d.id WHERE ep.nombre NOT LIKE '(Víctima)%' AND ep.nombre NOT LIKE '(Cómplice)%' AND {menor_edad_sql.replace('nombre', 'ep.nombre')} AND date_trunc('{date_trunc_str}', d.fecha_procesamiento) = s.p_date) as detenidos_menores
                 FROM series s
                 ORDER BY s.p_date;
             """
@@ -458,7 +462,7 @@ def get_stats(dias=None, agrupacion=None):
             meses_es = {"01": "Ene", "02": "Feb", "03": "Mar", "04": "Abr", "05": "May", "06": "Jun", 
                         "07": "Jul", "08": "Ago", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dic"}
             
-            for orig_date, v, a, d, p, vic in tendencias_raw:
+            for orig_date, v, a, d, p, vic, vic_menores, det_menores in tendencias_raw:
                 if agrupacion == "dia":
                     label_final = orig_date.strftime("%d/%m")
                 elif agrupacion == "semana":
@@ -474,7 +478,9 @@ def get_stats(dias=None, agrupacion=None):
                     "armas": a,
                     "drogas": d,
                     "personas": p,
-                    "victimas": vic
+                    "victimas": vic,
+                    "victimas_menores": vic_menores,
+                    "detenidos_menores": det_menores
                 })
 
     return {
@@ -484,7 +490,9 @@ def get_stats(dias=None, agrupacion=None):
         "top_marcas_armas": top_marcas_armas,
         "top_sustancias": top_sustancias,
         "top_nacionalidades": top_nacionalidades,
-        "top_victimas": top_victimas,
+        "top_victimas": top_victimas,
+        "top_victimas_menores": top_victimas_menores,
+        "top_detenidos_menores": top_detenidos_menores,
         "documentos_por_dia": documentos_por_dia,
         "tendencias": tendencias,
     }

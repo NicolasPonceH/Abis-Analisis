@@ -1057,19 +1057,9 @@
                           <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Sintético (Max 6 Líneas)</span>
                         </div>
                       </div>
-                      <div class="flex items-center gap-2 mr-9">
-                        <button type="button" 
-                                onclick="window.corregirOrtografiaEnEditor({{ loop.index0 }}, 'a', event)" 
-                                class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-400/40 rounded-lg text-xs font-black transition-all shadow-sm active:scale-95 cursor-pointer z-10" 
-                                title="Corregir errores de ortografía y OCR automáticamente">
-                          <span class="material-symbols-outlined text-[16px] text-amber-600">auto_fix_high</span>
-                          <span>⚡ Corregir Ortografía</span>
-                        </button>
-                      </div>
                     </div>
                     
                     <!-- Banner Dinámico de Auditoría Ortográfica -->
-                    <div id="spell_banner_{{ loop.index0 }}_a" class="mb-3"></div>
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_a" id="texto_{{ loop.index0 }}_a_input">
                     <div class="editor-wrapper mt-auto">
@@ -1098,19 +1088,9 @@
                           <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Relato Fluido (Max 12 Líneas)</span>
                         </div>
                       </div>
-                      <div class="flex items-center gap-2 mr-9">
-                        <button type="button" 
-                                onclick="window.corregirOrtografiaEnEditor({{ loop.index0 }}, 'b', event)" 
-                                class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-400/40 rounded-lg text-xs font-black transition-all shadow-sm active:scale-95 cursor-pointer z-10" 
-                                title="Corregir errores de ortografía y OCR automáticamente">
-                          <span class="material-symbols-outlined text-[16px] text-amber-600">auto_fix_high</span>
-                          <span>⚡ Corregir Ortografía</span>
-                        </button>
-                      </div>
                     </div>
                     
                     <!-- Banner Dinámico de Auditoría Ortográfica -->
-                    <div id="spell_banner_{{ loop.index0 }}_b" class="mb-3"></div>
                     
                     <input type="hidden" name="texto_{{ loop.index0 }}_b" id="texto_{{ loop.index0 }}_b_input">
                     <div class="editor-wrapper mt-auto">
@@ -1688,15 +1668,6 @@
       { pattern: /\bse logro\b/gi, replacement: 'se logró' }
     ];
 
-    function preserveCase(match, replacement) {
-      if (!match) return replacement;
-      if (match === match.toUpperCase()) return replacement.toUpperCase();
-      if (match.charAt(0) === match.charAt(0).toUpperCase()) {
-        return replacement.charAt(0).toUpperCase() + replacement.slice(1);
-      }
-      return replacement.toLowerCase();
-    }
-
     // Auditoría ortográfica y de OCR en tiempo real
     window.auditarOrtografia = function(quill, index, optLetter) {
       const banner = document.getElementById('spell_banner_' + index + '_' + optLetter);
@@ -1732,34 +1703,25 @@
                 <div class="mt-0.5">Palabras dudosas o con falta: <strong class="text-red-600 dark:text-red-400 font-bold underline">${previewList}${extraCount}</strong></div>
               </div>
             </div>
-            <button type="button" 
-                    onclick="window.corregirOrtografiaEnEditor(${index}, '${optLetter}', event)"
-                    class="flex-shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg transition transform active:scale-95 cursor-pointer">
-              <span class="material-symbols-outlined text-[15px]">auto_fix_high</span>
-              <span>⚡ Corregir Ahora</span>
-            </button>
           </div>
         `;
       } else {
         banner.innerHTML = `
-          <div class="flex items-center justify-between gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 rounded-xl text-xs text-emerald-800 dark:text-emerald-200">
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 rounded-xl text-xs text-emerald-800 dark:text-emerald-200">
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">verified</span>
               <span class="font-bold text-emerald-900 dark:text-emerald-100">Ortografía auditada:</span>
               <span class="text-emerald-700 dark:text-emerald-300 font-medium">Sin faltas ni errores de OCR detectados en esta versión.</span>
             </div>
-            <button type="button" 
-                    onclick="window.corregirOrtografiaEnEditor(${index}, '${optLetter}', event)"
-                    class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 text-[11px] font-bold flex items-center gap-0.5 hover:underline cursor-pointer">
-              <span class="material-symbols-outlined text-[13px]">refresh</span> Re-auditar
-            </button>
           </div>
         `;
       }
     };
 
-    // Auto-corrector con un clic en Quill
+    // Compatibilidad heredada: ya no existe corrección manual desde la interfaz.
     window.corregirOrtografiaEnEditor = function(index, optLetter, event) {
+      // La corrección manual fue retirada de la interfaz; la auditoría queda sólo informativa.
+      return;
       if (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -1870,18 +1832,9 @@
         window.quillInstances.push({ a: quillA, b: quillB });
 
         // Auditoría en tiempo real con cada pulsación o cambio
-        quillA.on('text-change', () => {
-            window.auditarOrtografia(quillA, index, 'a');
-        });
-        quillB.on('text-change', () => {
-            window.auditarOrtografia(quillB, index, 'b');
-        });
-
         setTimeout(() => {
             window.highlightIntelligence(quillA);
             window.highlightIntelligence(quillB);
-            window.auditarOrtografia(quillA, index, 'a');
-            window.auditarOrtografia(quillB, index, 'b');
         }, 300);
     });
 

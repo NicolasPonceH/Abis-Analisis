@@ -1094,6 +1094,13 @@ def login():
     # (redirigido desde require_login), pero por el campo oculto del formulario en un POST --
     # incluida la re-renderizacion tras una clave incorrecta, para no perder el destino original.
     next_url = request.values.get("next", "")
+    # Cuando SIAD está detrás del proxy de ABIS, Flask recibe el destino interno
+    # (/historial), pero el navegador necesita el prefijo público (/analisis).
+    # Sin esta normalización, el login termina en localhost:3000/historial y ABIS
+    # responde "Cannot GET /historial".
+    script_root = (request.script_root or "").rstrip("/")
+    if script_root and next_url.startswith("/") and not next_url.startswith(script_root + "/"):
+        next_url = script_root + next_url
     if request.method == "POST":
         username = request.form.get("username", "")
         password = request.form.get("password", "")
@@ -2096,6 +2103,9 @@ def historial_detalle(documento_id):
 def estadisticas():
     dias = request.args.get("dias", type=int)
     agrupacion = request.args.get("agrupacion")
+    filtro_menores = request.args.get("menores", "todos")
+    if filtro_menores not in {"todos", "victimas", "detenidos"}:
+        filtro_menores = "todos"
     try:
         stats = db.get_stats(dias=dias, agrupacion=agrupacion)
         db_error = None
@@ -2103,7 +2113,8 @@ def estadisticas():
         stats = None
         db_error = "No se pudo conectar a la base de datos."
     return render_template(
-        "estadisticas.html", stats=stats, db_error=db_error, active_page="estadisticas", dias_actuales=dias, agrupacion_actual=agrupacion
+        "estadisticas.html", stats=stats, db_error=db_error, active_page="estadisticas", dias_actuales=dias,
+        agrupacion_actual=agrupacion, filtro_menores=filtro_menores
     )
 
 
