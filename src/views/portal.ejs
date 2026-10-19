@@ -152,25 +152,42 @@
     .header-clock {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      padding: 6px 14px;
-      border-radius: 999px;
+      gap: 10px;
+      background: rgba(0, 16, 36, 0.85);
+      border: 1.5px solid rgba(255, 209, 0, 0.45);
+      padding: 8px 18px;
+      border-radius: 12px;
       font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
       color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 209, 0, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    #liveClockSantiago {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #FFFFFF;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
     }
 
     .clock-live-indicator {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: #10B981;
-      box-shadow: 0 0 10px #10B981;
+      box-shadow: 0 0 12px #10B981;
       animation: pulseLive 2s infinite;
+    }
+
+    .clock-tz-tag {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--pdi-gold);
+      letter-spacing: 0.08em;
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      padding-left: 8px;
+      margin-left: 2px;
     }
 
     @keyframes pulseLive {
@@ -839,10 +856,10 @@
           <i class="fa-solid fa-shield-halved" style="color: var(--pdi-gold);"></i>
           <span>Portal de Acceso Operativo</span>
         </div>
-        <div class="header-clock">
+        <div class="header-clock" title="Hora Oficial de Santiago de Chile">
           <span class="clock-live-indicator"></span>
           <span id="liveClockSantiago">--:--:--</span>
-          <span style="color: #64748B; font-size: 11px;">SCL</span>
+          <span class="clock-tz-tag">SCL</span>
         </div>
       </div>
     </header>
