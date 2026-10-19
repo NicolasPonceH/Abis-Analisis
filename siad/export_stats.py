@@ -27,6 +27,10 @@ C_BORDER_GRAY = "E2E8F0"
 C_BG_LIGHT = "F8FAFC"
 C_BG_ZEBRA = "F1F5F9"
 
+# AVISO DE PRIVACIDAD / CONTROL DE VERSIONES (PULL):
+# Se eliminaron definitivamente las hojas nominales 'persona' ("Personas") y 'victima' ("Víctimas").
+# Todas las identidades (nombres, RUTs, teléfonos) ahora están cifradas con AES-256-GCM en BD.
+# NO volver a incorporar hojas con nombres de víctimas o imputados.
 STATS_SHEET_NAMES = {
     "vehiculo": "Vehiculos",
     "arma": "Armas",
@@ -661,7 +665,17 @@ def build_stats_workbook(filas, detalle=None, stats=None, periodo="Histórico co
         _excel_create_trends_sheet(workbook, stats, periodo=periodo)
 
     # =========================================================================
-    # HOJA NNA (si stats está disponible)
+    # AVISO PARA COMPAÑEROS AL HACER PULL / CONTROL DE CAMBIOS:
+    # 1. Se eliminaron las hojas nominales de 'Personas' y 'Víctimas'.
+    # 2. La hoja 'NNA' a continuación solo consolida métricas numéricas globales (sin nombres).
+    # 3. En la hoja 'Datos' (en bruto) se omiten expresamente 'persona', 'victima' y 'personas'
+    #    para evitar filtrar texto cifrado o nombres sensibles en tablas dinámicas.
+    # Si tienes código local que genere listados o tablas con nombres de personas,
+    # debes ELIMINARLO para respetar la política de cifrado de identidades.
+    # =========================================================================
+
+    # =========================================================================
+    # HOJA NNA (si stats está disponible) - Solo indicadores numéricos agregados
     # =========================================================================
     if stats is not None:
         _excel_create_nna_sheet(workbook, stats)
@@ -677,6 +691,7 @@ def build_stats_workbook(filas, detalle=None, stats=None, periodo="Histórico co
     hoja_datos.append(["Documento", "Fecha", "Categoria", "Campo", "Valor"])
 
     for documento, fecha, cat, campo, valor in (detalle or []):
+        # FILTRO CRÍTICO DE SEGURIDAD: Nunca incluir entidades de personas en el export
         if cat in ("persona", "victima", "personas"):
             continue
         f_val = fecha.replace(tzinfo=None) if hasattr(fecha, "replace") else fecha
