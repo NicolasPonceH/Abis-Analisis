@@ -159,7 +159,9 @@ CREATE TABLE IF NOT EXISTS entidades_personas (
     documento_id BIGINT NOT NULL REFERENCES documentos(id) ON DELETE CASCADE,
     nombre TEXT,
     rut TEXT,
-    telefono TEXT
+    telefono TEXT,
+    tipo_persona VARCHAR(30) DEFAULT 'imputado',
+    es_menor BOOLEAN DEFAULT FALSE
 );
 
 CREATE INDEX IF NOT EXISTS idx_vehiculos_doc ON entidades_vehiculos(documento_id);

@@ -31,8 +31,6 @@ STATS_SHEET_NAMES = {
     "vehiculo": "Vehiculos",
     "arma": "Armas",
     "droga": "Drogas",
-    "persona": "Personas",
-    "victima": "Victimas",
 }
 
 STATS_ENTITY_STYLE = {
@@ -518,7 +516,7 @@ def build_stats_workbook(filas, detalle=None, stats=None, periodo="Histórico co
     th1.alignment = Alignment(horizontal="left", vertical="center")
 
     resumen.merge_cells(start_row=top_header_row, start_column=5, end_row=top_header_row, end_column=8)
-    th2 = resumen.cell(row=top_header_row, column=5, value="SUJETOS IMPUTADOS Y VÍCTIMAS RELEVANTES")
+    th2 = resumen.cell(row=top_header_row, column=5, value="HALLAZGOS DESTACADOS: PARQUE VEHICULAR")
     th2.font = Font(name="Segoe UI", size=10, bold=True, color=C_NAVY_DARK)
     th2.alignment = Alignment(horizontal="left", vertical="center")
     resumen.row_dimensions[top_header_row].height = 20
@@ -531,7 +529,7 @@ def build_stats_workbook(filas, detalle=None, stats=None, periodo="Histórico co
         cell.alignment = Alignment(horizontal="center", vertical="center")
         cell.border = _excel_header_border()
 
-    for c_idx, text in [(5, "Nombre / Sujeto Identificado"), (6, "Calidad"), (7, "Menciones"), (8, "Estado")]:
+    for c_idx, text in [(5, "Marca / Tipo Vehículo"), (6, "Categoría"), (7, "Registros"), (8, "Estado")]:
         cell = resumen.cell(row=sub_head_row, column=c_idx, value=text)
         cell.fill = PatternFill("solid", fgColor=C_NAVY_MED)
         cell.font = Font(name="Segoe UI", size=8.5, bold=True, color="FFFFFF")
@@ -549,21 +547,15 @@ def build_stats_workbook(filas, detalle=None, stats=None, periodo="Histórico co
     if not left_items:
         left_items = [("Sin registros de sustancias", "General", 0, "N/A")]
 
-    top_imputados = (stats or {}).get("top_nacionalidades", [])[:4]
-    top_vic = (stats or {}).get("top_victimas", [])[:2]
+    top_vehiculos = (stats or {}).get("top_marcas_vehiculos", [])[:5]
     right_items = []
-    for p in top_imputados:
-        name_clean = p.get("nombre", "")
-        if len(name_clean) > 30:
-            name_clean = name_clean[:28] + "..."
-        right_items.append((name_clean, "Imputado", p.get("count", 0), "Identificado"))
-    for v in top_vic:
+    for v in top_vehiculos:
         name_clean = v.get("nombre", "")
         if len(name_clean) > 30:
             name_clean = name_clean[:28] + "..."
-        right_items.append((name_clean, "Víctima", v.get("count", 0), "Protección"))
+        right_items.append((name_clean, "Vehículo", v.get("count", 0), "Control Vehicular"))
     if not right_items:
-        right_items = [("Sin registros de personas", "General", 0, "N/A")]
+        right_items = [("Sin registros de vehículos", "General", 0, "N/A")]
 
     max_sub_rows = max(len(left_items), len(right_items))
     for r_i in range(max_sub_rows):
@@ -685,6 +677,8 @@ def build_stats_workbook(filas, detalle=None, stats=None, periodo="Histórico co
     hoja_datos.append(["Documento", "Fecha", "Categoria", "Campo", "Valor"])
 
     for documento, fecha, cat, campo, valor in (detalle or []):
+        if cat in ("persona", "victima", "personas"):
+            continue
         f_val = fecha.replace(tzinfo=None) if hasattr(fecha, "replace") else fecha
         hoja_datos.append([documento, f_val, cat, campo, valor])
 
