@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#001226">
+  <meta name="theme-color" content="#000F20">
   <title>Portal de Acceso a Plataformas Operativas | PDI Chile</title>
   <link rel="icon" type="image/png" href="/assets/logo-pdi.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,15 +14,14 @@
   <style>
     :root {
       --pdi-gold: #FFD100;
-      --pdi-gold-light: #FFE033;
+      --pdi-gold-light: #FFE566;
       --pdi-gold-dark: #C69214;
       --pdi-blue: #0077FE;
-      --pdi-blue-light: #4DA8FF;
+      --pdi-blue-light: #60A5FA;
       --pdi-blue-dark: #004FA8;
-      --navy-950: #010A14;
-      --navy-900: #021224;
-      --navy-850: #041B33;
-      --navy-800: #082647;
+      --navy-950: #010814;
+      --navy-900: #021024;
+      --navy-850: #041833;
       --white: #FFFFFF;
       --text-muted: #94A3B8;
     }
@@ -43,7 +42,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Contenedor Principal en Pantalla Completa */
+    /* Contenedor Principal */
     .portal-wrapper {
       position: relative;
       width: 100%;
@@ -51,6 +50,7 @@
       display: flex;
       flex-direction: column;
       isolation: isolate;
+      overflow: hidden;
     }
 
     /* =========================================================
@@ -66,7 +66,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(180deg, rgba(1, 10, 20, 0.92) 0%, rgba(1, 10, 20, 0.4) 70%, transparent 100%);
+      background: linear-gradient(180deg, rgba(1, 8, 20, 0.95) 0%, rgba(1, 8, 20, 0.5) 75%, transparent 100%);
       pointer-events: none;
     }
 
@@ -82,23 +82,23 @@
     }
 
     .header-crest {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       background: rgba(255, 255, 255, 0.08);
       border: 1.5px solid rgba(255, 209, 0, 0.45);
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
       transition: all 0.3s ease;
     }
 
     .header-brand:hover .header-crest {
       border-color: var(--pdi-gold);
-      box-shadow: 0 0 20px rgba(255, 209, 0, 0.4);
+      box-shadow: 0 0 20px rgba(255, 209, 0, 0.45);
       transform: scale(1.05);
     }
 
@@ -115,14 +115,16 @@
       text-transform: uppercase;
       color: #FFFFFF;
       line-height: 1.2;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     }
 
     .header-titles p {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--pdi-gold);
+      text-shadow: 0 0 10px rgba(255, 209, 0, 0.3);
     }
 
     .header-meta {
@@ -135,13 +137,13 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       padding: 6px 14px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #E2E8F0;
       backdrop-filter: blur(10px);
@@ -151,8 +153,8 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       padding: 6px 14px;
       border-radius: 999px;
       font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
@@ -177,7 +179,7 @@
     }
 
     /* =========================================================
-       SPLIT-SCREEN 50/50: CONTENEDOR DE DOS MITADES
+       SPLIT-SCREEN 50/50 CON EXPANSIÓN DINÁMICA MEJORADA
        ========================================================= */
     .split-layout {
       flex: 1;
@@ -187,9 +189,6 @@
       position: relative;
     }
 
-    /* =========================================================
-       SECCIÓN IZQUIERDA: SISTEMA ABIS (DORADO / BIOMETRÍA)
-       ========================================================= */
     .split-panel {
       flex: 1;
       height: 100%;
@@ -203,14 +202,51 @@
       color: inherit;
       overflow: hidden;
       cursor: pointer;
-      transition: flex 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-                  filter 0.4s ease;
+      /* Transición de expansión elástica y fluida */
+      transition: flex 0.65s cubic-bezier(0.25, 1, 0.35, 1),
+                  filter 0.45s ease;
     }
 
-    /* Panel ABIS */
+    /* Expansión dinámica al pasar el cursor: el panel activo crece de 50% a ~64% */
+    .split-layout:hover .split-panel {
+      flex: 0.72;
+      filter: brightness(0.65) saturate(0.75);
+    }
+
+    .split-layout .split-panel:hover {
+      flex: 1.28;
+      filter: brightness(1.08) saturate(1.15);
+    }
+
+    /* =========================================================
+       FONDOS FOTOGRÁFICOS Y ATMÓSFERA PROFUNDA
+       ========================================================= */
+    .panel-photo-bg {
+      position: absolute;
+      inset: -20px;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.22;
+      z-index: 0;
+      pointer-events: none;
+      transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1),
+                  opacity 0.6s ease;
+    }
+
+    .split-panel:hover .panel-photo-bg {
+      transform: scale(1.08);
+      opacity: 0.34;
+    }
+
+    /* Panel ABIS: Textura pericial dorada */
     .panel-abis {
-      background: radial-gradient(circle at 30% 50%, rgba(255, 209, 0, 0.14) 0%, rgba(4, 25, 48, 0.95) 50%, #010B16 100%);
-      border-right: 1px solid rgba(255, 209, 0, 0.25);
+      background: radial-gradient(circle at 35% 50%, rgba(255, 209, 0, 0.16) 0%, rgba(3, 20, 42, 0.94) 55%, #010812 100%);
+      border-right: 1px solid rgba(255, 209, 0, 0.28);
+    }
+
+    .panel-abis .panel-photo-bg {
+      background-image: url('https://res.cloudinary.com/dirgawanf/image/upload/v1791467374/fondo_login_abis_uagfhe.png');
+      filter: sepia(0.5) hue-rotate(5deg) contrast(1.1);
     }
 
     .panel-abis::before {
@@ -218,17 +254,22 @@
       position: absolute;
       inset: 0;
       background-image: 
-        linear-gradient(rgba(255, 209, 0, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 209, 0, 0.035) 1px, transparent 1px);
-      background-size: 48px 48px;
+        linear-gradient(rgba(255, 209, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 0, 0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
       pointer-events: none;
       z-index: 1;
     }
 
-    /* Panel SIAD */
+    /* Panel SIAD: Textura de monitores periciales */
     .panel-siad {
-      background: radial-gradient(circle at 70% 50%, rgba(0, 119, 254, 0.16) 0%, rgba(2, 20, 42, 0.95) 50%, #010B16 100%);
-      border-left: 1px solid rgba(0, 119, 254, 0.25);
+      background: radial-gradient(circle at 65% 50%, rgba(0, 119, 254, 0.18) 0%, rgba(1, 16, 38, 0.94) 55%, #010812 100%);
+      border-left: 1px solid rgba(0, 119, 254, 0.28);
+    }
+
+    .panel-siad .panel-photo-bg {
+      background-image: url('https://res.cloudinary.com/dirgawanf/image/upload/v1791467374/fondo_login_abis_uagfhe.png');
+      filter: hue-rotate(185deg) saturate(1.4) contrast(1.1);
     }
 
     .panel-siad::before {
@@ -236,237 +277,304 @@
       position: absolute;
       inset: 0;
       background-image: 
-        linear-gradient(rgba(0, 119, 254, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 119, 254, 0.035) 1px, transparent 1px);
-      background-size: 48px 48px;
+        linear-gradient(rgba(0, 119, 254, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 119, 254, 0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
       pointer-events: none;
       z-index: 1;
     }
 
-    /* Efecto de Expansión Interactiva 50/50 */
-    .split-layout:hover .split-panel {
-      flex: 0.88;
-      filter: brightness(0.75);
-    }
-
-    .split-layout .split-panel:hover {
-      flex: 1.12;
-      filter: brightness(1.05);
-    }
-
-    /* Resplandores de Fondo Animados */
-    .panel-glow-orbit {
+    /* Resplandores Aurales en el Centro de cada Panel */
+    .panel-glow-aura {
       position: absolute;
-      width: 520px;
-      height: 520px;
+      width: 580px;
+      height: 580px;
       border-radius: 50%;
       pointer-events: none;
       z-index: 1;
-      opacity: 0.6;
-      transition: all 0.6s ease;
-    }
-
-    .glow-abis {
-      background: radial-gradient(circle, rgba(255, 209, 0, 0.25) 0%, transparent 65%);
-      filter: blur(60px);
+      opacity: 0.65;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .glow-siad {
-      background: radial-gradient(circle, rgba(0, 119, 254, 0.28) 0%, transparent 65%);
-      filter: blur(60px);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    .aura-abis {
+      background: radial-gradient(circle, rgba(255, 209, 0, 0.28) 0%, transparent 65%);
+      filter: blur(70px);
     }
 
-    .split-panel:hover .panel-glow-orbit {
+    .aura-siad {
+      background: radial-gradient(circle, rgba(0, 119, 254, 0.32) 0%, transparent 65%);
+      filter: blur(70px);
+    }
+
+    .split-panel:hover .panel-glow-aura {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1.18);
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    /* Partículas Flotantes Decorativas */
+    .particle-dust {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.5;
+      animation: floatDust 6s ease-in-out infinite;
+    }
+
+    @keyframes floatDust {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+      50% { transform: translateY(-40px) scale(1.4); opacity: 0.8; }
     }
 
     /* =========================================================
-       CONTENIDO INTERNO DE CADA PANEL (IMPACTANTE Y LEGIBLE)
+       CONTENIDO INTERNO DE CADA PANEL
        ========================================================= */
     .panel-content {
       position: relative;
       z-index: 10;
-      max-width: 500px;
+      max-width: 520px;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .split-panel:hover .panel-content {
-      transform: translateY(-6px);
+      transform: translateY(-8px);
     }
 
-    /* Ícono / Emblema Animado con Escáner Láser */
-    .visual-scanner-container {
+    /* =========================================================
+       EMBLEMA HOLOGRÁFICO CON ANILLO CYBERNETICO Y ESCÁNER LÁSER
+       ========================================================= */
+    .hologram-hud-wrapper {
       position: relative;
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       margin-bottom: 28px;
-      border-radius: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-      transition: all 0.4s ease;
-      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .scanner-box-abis {
-      background: linear-gradient(135deg, rgba(255, 209, 0, 0.18) 0%, rgba(255, 209, 0, 0.05) 100%);
-      border: 2px solid rgba(255, 209, 0, 0.5);
+    .split-panel:hover .hologram-hud-wrapper {
+      transform: scale(1.12);
+    }
+
+    /* Anillo exterior rotatorio cyber */
+    .hud-rotating-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      pointer-events: none;
+      transition: all 0.5s ease;
+      animation: ringSpin 20s linear infinite;
+    }
+
+    .ring-abis {
+      border: 2px dashed rgba(255, 209, 0, 0.45);
+      box-shadow: 0 0 20px rgba(255, 209, 0, 0.2);
+    }
+
+    .ring-siad {
+      border: 2px dashed rgba(0, 119, 254, 0.45);
+      box-shadow: 0 0 20px rgba(0, 119, 254, 0.2);
+    }
+
+    .split-panel.panel-abis:hover .ring-abis {
+      border-color: var(--pdi-gold);
+      box-shadow: 0 0 35px rgba(255, 209, 0, 0.5);
+      animation-duration: 8s;
+    }
+
+    .split-panel.panel-siad:hover .ring-siad {
+      border-color: #60A5FA;
+      box-shadow: 0 0 35px rgba(0, 119, 254, 0.5);
+      animation-duration: 8s;
+    }
+
+    @keyframes ringSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Caja de cristal interna con escáner */
+    .hud-scanner-core {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      transition: all 0.35s ease;
+    }
+
+    .core-abis {
+      background: linear-gradient(135deg, rgba(255, 209, 0, 0.22) 0%, rgba(255, 209, 0, 0.05) 100%);
+      border: 2px solid rgba(255, 209, 0, 0.6);
       color: var(--pdi-gold);
     }
 
-    .scanner-box-siad {
-      background: linear-gradient(135deg, rgba(0, 119, 254, 0.2) 0%, rgba(0, 119, 254, 0.05) 100%);
-      border: 2px solid rgba(0, 119, 254, 0.5);
+    .core-siad {
+      background: linear-gradient(135deg, rgba(0, 119, 254, 0.24) 0%, rgba(0, 119, 254, 0.05) 100%);
+      border: 2px solid rgba(0, 119, 254, 0.6);
       color: #60A5FA;
     }
 
-    .split-panel:hover .visual-scanner-container {
-      transform: scale(1.1) rotate(2deg);
+    .split-panel.panel-abis:hover .core-abis {
+      box-shadow: 0 0 40px rgba(255, 209, 0, 0.55);
+      border-color: #FFE566;
     }
 
-    .panel-abis:hover .visual-scanner-container {
-      box-shadow: 0 0 35px rgba(255, 209, 0, 0.45);
-      border-color: var(--pdi-gold);
+    .split-panel.panel-siad:hover .core-siad {
+      box-shadow: 0 0 40px rgba(0, 119, 254, 0.55);
+      border-color: #93C5FD;
     }
 
-    .panel-siad:hover .visual-scanner-container {
-      box-shadow: 0 0 35px rgba(0, 119, 254, 0.45);
-      border-color: #60A5FA;
-    }
-
-    .visual-scanner-container .material-symbols-outlined {
-      font-size: 64px;
+    .hud-scanner-core .material-symbols-outlined {
+      font-size: 60px;
       position: relative;
       z-index: 2;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
     }
 
-    /* Línea de Escaneo Láser Animada */
-    .laser-beam {
+    /* Haz de escaneo láser en tiempo real */
+    .hud-laser-line {
       position: absolute;
       left: 0;
       right: 0;
       height: 3px;
       pointer-events: none;
       z-index: 3;
-      opacity: 0.85;
-      animation: scanLaser 2.4s ease-in-out infinite;
+      opacity: 0.9;
+      animation: scanSweep 2.2s ease-in-out infinite;
     }
 
-    .laser-abis {
+    .laser-gold {
       background: linear-gradient(90deg, transparent, #FFD100, #FFFFFF, #FFD100, transparent);
-      box-shadow: 0 0 14px #FFD100;
+      box-shadow: 0 0 16px #FFD100, 0 0 6px #FFFFFF;
     }
 
-    .laser-siad {
+    .laser-blue {
       background: linear-gradient(90deg, transparent, #0077FE, #FFFFFF, #0077FE, transparent);
-      box-shadow: 0 0 14px #0077FE;
+      box-shadow: 0 0 16px #0077FE, 0 0 6px #FFFFFF;
     }
 
-    @keyframes scanLaser {
-      0% { top: 8%; opacity: 0; }
+    @keyframes scanSweep {
+      0% { top: 6%; opacity: 0; }
       15% { opacity: 1; }
       85% { opacity: 1; }
-      100% { top: 90%; opacity: 0; }
+      100% { top: 92%; opacity: 0; }
     }
 
-    /* Píldora / Categoría Superior */
+    /* Píldora de Categoría */
     .system-category-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 18px;
+      padding: 7px 20px;
       border-radius: 999px;
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       margin-bottom: 16px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
     }
 
     .pill-abis {
-      background: rgba(255, 209, 0, 0.12);
-      border: 1px solid rgba(255, 209, 0, 0.4);
+      background: rgba(255, 209, 0, 0.14);
+      border: 1px solid rgba(255, 209, 0, 0.45);
       color: var(--pdi-gold);
     }
 
     .pill-siad {
-      background: rgba(0, 119, 254, 0.12);
-      border: 1px solid rgba(0, 119, 254, 0.4);
+      background: rgba(0, 119, 254, 0.14);
+      border: 1px solid rgba(0, 119, 254, 0.45);
       color: #93C5FD;
     }
 
-    /* Título Monumental del Sistema */
+    .split-panel:hover .system-category-pill {
+      transform: scale(1.05);
+    }
+
+    /* =========================================================
+       TÍTULOS MONUMENTALES CON REFLEJO METÁLICO
+       ========================================================= */
     .system-title-hero {
-      font-size: 58px;
+      font-size: 64px;
       font-weight: 900;
       line-height: 1;
       letter-spacing: -0.03em;
-      margin-bottom: 10px;
-      color: #FFFFFF;
-      text-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
+      text-shadow: 0 6px 30px rgba(0, 0, 0, 0.85);
     }
 
-    .title-accent-abis {
-      color: var(--pdi-gold);
-      text-shadow: 0 0 30px rgba(255, 209, 0, 0.5);
+    /* Texto Metálico Dorado Pulido para ABIS */
+    .title-metal-abis {
+      background: linear-gradient(135deg, #FFFFFF 0%, #FFE566 40%, #FFD100 70%, #D49B00 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 25px rgba(255, 209, 0, 0.45));
     }
 
-    .title-accent-siad {
-      color: #60A5FA;
-      text-shadow: 0 0 30px rgba(0, 119, 254, 0.5);
+    /* Texto Metálico Azul Cian para SIAD */
+    .title-metal-siad {
+      background: linear-gradient(135deg, #FFFFFF 0%, #BAE6FD 40%, #38BDF8 70%, #0077FE 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 25px rgba(0, 119, 254, 0.5));
     }
 
     .system-tag {
       font-size: 13px;
-      font-weight: 700;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #E2E8F0;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #F8FAFC;
       padding: 4px 10px;
       border-radius: 8px;
       letter-spacing: 0.05em;
     }
 
-    /* Subtítulo Principal de Alta Claridad */
     .system-subtitle-hero {
-      font-size: 21px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
       color: #FFFFFF;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       line-height: 1.35;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
     }
 
-    /* Breve Descripción Operativa (Sin viñetas de catálogo) */
     .system-desc-hero {
       font-size: 16px;
       color: #CBD5E1;
       line-height: 1.6;
       font-weight: 400;
-      margin-bottom: 34px;
+      margin-bottom: 36px;
       max-width: 440px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     }
 
     /* =========================================================
-       BOTONES GIGANTES DE ENTRADA DIRECTA (64PX)
+       BOTONES GIGANTES DE ENTRADA CON PULSO Y SHIMMER
        ========================================================= */
     .btn-action-hero {
       position: relative;
@@ -476,21 +584,21 @@
       justify-content: center;
       gap: 16px;
       width: 100%;
-      max-width: 400px;
-      min-height: 64px;
-      padding: 18px 32px;
-      border-radius: 18px;
+      max-width: 410px;
+      min-height: 66px;
+      padding: 18px 34px;
+      border-radius: 20px;
       text-decoration: none;
       font-size: 18px;
       font-weight: 900;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
 
-    /* Destello Shimmer en Hover */
+    /* Ráfaga de Brillo Shimmer */
     .btn-action-hero::before {
       content: '';
       position: absolute;
@@ -498,7 +606,7 @@
       left: -120%;
       width: 80%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
       transform: skewX(-20deg);
       pointer-events: none;
     }
@@ -516,9 +624,9 @@
     }
 
     .split-panel.panel-abis:hover .btn-abis {
-      background: linear-gradient(135deg, #FFE033 0%, #FFD100 100%);
-      box-shadow: 0 14px 35px rgba(255, 209, 0, 0.5);
-      transform: translateY(-3px) scale(1.02);
+      background: linear-gradient(135deg, #FFE566 0%, #FFD100 100%);
+      box-shadow: 0 16px 45px rgba(255, 209, 0, 0.65), 0 0 25px rgba(255, 209, 0, 0.4);
+      transform: translateY(-4px) scale(1.03);
       color: #000E20;
     }
 
@@ -531,8 +639,8 @@
 
     .split-panel.panel-siad:hover .btn-siad {
       background: linear-gradient(135deg, #248BFF 0%, #006BE8 100%);
-      box-shadow: 0 14px 35px rgba(0, 119, 254, 0.5);
-      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 16px 45px rgba(0, 119, 254, 0.65), 0 0 25px rgba(0, 119, 254, 0.4);
+      transform: translateY(-4px) scale(1.03);
       color: #FFFFFF;
     }
 
@@ -542,26 +650,25 @@
     }
 
     .split-panel:hover .btn-arrow-icon {
-      transform: translateX(6px);
+      transform: translateX(8px);
     }
 
-    /* Indicador de Sesión Activa */
     .session-badge-active {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       font-size: 13px;
       color: #86EFAC;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      padding: 6px 16px;
       border-radius: 999px;
       margin-bottom: 16px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
     }
 
     /* =========================================================
-       DIVISOR CENTRAL INSTITUCIONAL (CON INSIGNIA PDI)
+       DIVISOR CENTRAL INSTITUCIONAL CON ESCUDO OFICIAL PDI
        ========================================================= */
     .center-divider {
       position: absolute;
@@ -573,35 +680,46 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1),
+                  box-shadow 0.4s ease;
     }
 
-    .center-badge {
-      width: 72px;
-      height: 72px;
-      background: rgba(2, 18, 38, 0.95);
+    .center-shield-circle {
+      width: 76px;
+      height: 76px;
+      background: rgba(2, 16, 36, 0.96);
       border: 2px solid var(--pdi-gold);
       border-radius: 50%;
+      padding: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 209, 0, 0.3);
-      backdrop-filter: blur(12px);
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 209, 0, 0.35);
+      backdrop-filter: blur(14px);
       transition: all 0.4s ease;
-      animation: pulseCenter 4s ease-in-out infinite;
+      animation: centerBreathing 4s ease-in-out infinite;
     }
 
-    @keyframes pulseCenter {
-      0%, 100% { box-shadow: 0 0 25px rgba(0,0,0,0.9), 0 0 15px rgba(255, 209, 0, 0.2); }
-      50% { box-shadow: 0 0 40px rgba(0,0,0,0.9), 0 0 25px rgba(255, 209, 0, 0.45); }
+    .center-shield-circle img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
     }
 
-    .center-badge span {
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 0.1em;
-      color: var(--pdi-gold);
-      text-transform: uppercase;
+    @keyframes centerBreathing {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(0,0,0,0.95), 0 0 15px rgba(255, 209, 0, 0.25);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 45px rgba(0,0,0,0.95), 0 0 30px rgba(255, 209, 0, 0.5);
+        transform: scale(1.05);
+      }
+    }
+
+    /* Inclinación interactiva de la insignia central */
+    .split-layout:hover .center-divider {
+      transform: translate(-50%, -50%) scale(1.08);
     }
 
     /* =========================================================
@@ -617,7 +735,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(0deg, rgba(1, 10, 20, 0.92) 0%, rgba(1, 10, 20, 0.4) 70%, transparent 100%);
+      background: linear-gradient(0deg, rgba(1, 8, 20, 0.95) 0%, rgba(1, 8, 20, 0.5) 75%, transparent 100%);
       pointer-events: none;
       font-size: 12.5px;
       color: var(--text-muted);
@@ -658,11 +776,11 @@
       }
       .split-panel {
         padding: 90px 24px 60px;
-        min-height: 520px;
+        min-height: 540px;
       }
       .panel-abis {
         border-right: none;
-        border-bottom: 1px solid rgba(255, 209, 0, 0.25);
+        border-bottom: 1px solid rgba(255, 209, 0, 0.28);
       }
       .panel-siad {
         border-left: none;
@@ -676,19 +794,19 @@
       }
       .header-bar {
         position: relative;
-        background: rgba(1, 10, 20, 0.95);
+        background: rgba(1, 8, 20, 0.98);
         padding: 14px 20px;
       }
       .footer-bar {
         position: relative;
-        background: rgba(1, 10, 20, 0.95);
+        background: rgba(1, 8, 20, 0.98);
         flex-direction: column;
         gap: 8px;
         text-align: center;
         padding: 16px;
       }
       .system-title-hero {
-        font-size: 44px;
+        font-size: 48px;
       }
     }
   </style>
@@ -722,19 +840,28 @@
       </div>
     </header>
 
-    <!-- Split-Screen 50/50: ABIS vs SIAD -->
+    <!-- Split-Screen 50/50 Dinámico: ABIS vs SIAD -->
     <main class="split-layout">
 
       <!-- =========================================================
            PANEL IZQUIERDO: SISTEMA ABIS (DORADO / BIOMETRÍA)
            ========================================================= -->
       <a href="<%= (typeof user !== 'undefined' && user) ? '/abis' : '/login' %>" class="split-panel panel-abis" id="link-panel-abis">
-        <div class="panel-glow-orbit glow-abis"></div>
+        <!-- Foto de fondo y auras -->
+        <div class="panel-photo-bg"></div>
+        <div class="panel-glow-aura aura-abis"></div>
+        <div class="particle-dust" style="top: 25%; left: 30%; background: #FFD100; animation-delay: 0s;"></div>
+        <div class="particle-dust" style="top: 70%; left: 20%; background: #FFE033; animation-delay: 2.5s;"></div>
+        <div class="particle-dust" style="top: 45%; left: 75%; background: #FFFFFF; animation-delay: 1.2s;"></div>
 
         <div class="panel-content">
-          <div class="visual-scanner-container scanner-box-abis">
-            <div class="laser-beam laser-abis"></div>
-            <span class="material-symbols-outlined">fingerprint</span>
+          <!-- Emblema HUD Holográfico con Anillo Cyber y Láser -->
+          <div class="hologram-hud-wrapper">
+            <div class="hud-rotating-ring ring-abis"></div>
+            <div class="hud-scanner-core core-abis">
+              <div class="hud-laser-line laser-gold"></div>
+              <span class="material-symbols-outlined">fingerprint</span>
+            </div>
           </div>
 
           <div class="system-category-pill pill-abis">
@@ -743,7 +870,7 @@
           </div>
 
           <div class="system-title-hero">
-            <span class="title-accent-abis">ABIS</span>
+            <span class="title-metal-abis">ABIS</span>
             <span class="system-tag">v0.1.0</span>
           </div>
 
@@ -771,10 +898,10 @@
         </div>
       </a>
 
-      <!-- Insignia Central "VS / O" -->
+      <!-- Insignia Central con Escudo Oficial PDI -->
       <div class="center-divider">
-        <div class="center-badge">
-          <span>PDI</span>
+        <div class="center-shield-circle">
+          <img src="/assets/logo-pdi.png" alt="PDI">
         </div>
       </div>
 
@@ -782,12 +909,21 @@
            PANEL DERECHO: SISTEMA SIAD (AZUL / ANÁLISIS DOCUMENTAL)
            ========================================================= -->
       <a href="/analisis/login" class="split-panel panel-siad" id="link-panel-siad">
-        <div class="panel-glow-orbit glow-siad"></div>
+        <!-- Foto de fondo y auras -->
+        <div class="panel-photo-bg"></div>
+        <div class="panel-glow-aura aura-siad"></div>
+        <div class="particle-dust" style="top: 30%; right: 25%; background: #60A5FA; animation-delay: 0.8s;"></div>
+        <div class="particle-dust" style="top: 65%; right: 35%; background: #0077FE; animation-delay: 3.1s;"></div>
+        <div class="particle-dust" style="top: 40%; right: 70%; background: #FFFFFF; animation-delay: 1.8s;"></div>
 
         <div class="panel-content">
-          <div class="visual-scanner-container scanner-box-siad">
-            <div class="laser-beam laser-siad"></div>
-            <span class="material-symbols-outlined">document_scanner</span>
+          <!-- Emblema HUD Holográfico con Anillo Cyber y Láser -->
+          <div class="hologram-hud-wrapper">
+            <div class="hud-rotating-ring ring-siad"></div>
+            <div class="hud-scanner-core core-siad">
+              <div class="hud-laser-line laser-blue"></div>
+              <span class="material-symbols-outlined">document_scanner</span>
+            </div>
           </div>
 
           <div class="system-category-pill pill-siad">
@@ -796,7 +932,7 @@
           </div>
 
           <div class="system-title-hero">
-            <span class="title-accent-siad">SIAD</span>
+            <span class="title-metal-siad">SIAD</span>
             <span class="system-tag">v2.4.0</span>
           </div>
 
