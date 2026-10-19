@@ -3,32 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#001733">
-  <title>Portal de Acceso - Selección de Plataforma | PDI Chile</title>
+  <meta name="theme-color" content="#001226">
+  <title>Portal de Acceso a Plataformas Operativas | PDI Chile</title>
   <link rel="icon" type="image/png" href="/assets/logo-pdi.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
+
   <style>
     :root {
-      --pdi-navy: #00234C;
-      --pdi-navy-dark: #001226;
-      --pdi-navy-light: #0A366D;
       --pdi-gold: #FFD100;
+      --pdi-gold-light: #FFE033;
       --pdi-gold-dark: #C69214;
-      --pdi-gold-light: #FFE566;
-      --pdi-blue: #0056B8;
-      --pdi-blue-light: #389BFF;
-      --pdi-blue-hover: #006CE8;
-      
-      --text-main: #0F172A;
-      --text-muted: #334155;
-      --text-light: #64748B;
-      
-      --card-bg: #FFFFFF;
-      --font-scale: 1.05;
+      --pdi-blue: #0077FE;
+      --pdi-blue-light: #4DA8FF;
+      --pdi-blue-dark: #004FA8;
+      --navy-950: #010A14;
+      --navy-900: #021224;
+      --navy-850: #041B33;
+      --navy-800: #082647;
+      --white: #FFFFFF;
+      --text-muted: #94A3B8;
     }
 
     * {
@@ -38,138 +34,44 @@
     }
 
     html, body {
-      min-height: 100%;
-    }
-
-    body {
-      min-height: 100vh;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      font-size: calc(16px * var(--font-scale));
-      line-height: 1.5;
-      position: relative;
-      overflow-x: hidden;
-      background-color: var(--pdi-navy-dark);
+      background-color: var(--navy-950);
+      color: var(--white);
       -webkit-font-smoothing: antialiased;
     }
 
-    /* =========================================================
-       FONDO ATMOSFÉRICO IDÉNTICO A LOS LOGIN (IMAGEN + GRADIENTE + ORBITAS)
-       ========================================================= */
-    .portal-background {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(135deg, rgba(1, 15, 32, 0.94) 0%, rgba(2, 24, 51, 0.86) 35%, rgba(0, 18, 38, 0.95) 100%),
-        url('https://res.cloudinary.com/dirgawanf/image/upload/v1791467374/fondo_login_abis_uagfhe.png') center center / cover no-repeat;
-      overflow: hidden;
-    }
-
-    /* Malla sutil pericial */
-    .portal-background::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-      background-size: 54px 54px;
-      opacity: 0.5;
-    }
-
-    /* Órbita animada idéntica a login.ejs */
-    .ambient-orbit {
-      position: absolute;
-      right: -15vw;
-      bottom: -25vw;
-      width: 60vw;
-      height: 60vw;
-      border: 1px solid rgba(255, 209, 0, 0.16);
-      border-radius: 50%;
-      box-shadow: 0 0 0 36px rgba(255, 209, 0, 0.03), 0 0 0 80px rgba(255, 209, 0, 0.015);
-      pointer-events: none;
-      animation: ambientOrbit 28s linear infinite;
-    }
-
-    .ambient-orbit-left {
-      position: absolute;
-      left: -20vw;
-      top: -15vw;
-      width: 55vw;
-      height: 55vw;
-      border: 1px solid rgba(0, 119, 254, 0.15);
-      border-radius: 50%;
-      box-shadow: 0 0 0 40px rgba(0, 119, 254, 0.025);
-      pointer-events: none;
-      animation: ambientOrbitReverse 34s linear infinite;
-    }
-
-    @keyframes ambientOrbit {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes ambientOrbitReverse {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-
-    /* Resplandores difusos */
-    .ambient-glow-abis {
-      position: absolute;
-      top: 25%;
-      left: 15%;
-      width: 480px;
-      height: 480px;
-      background: radial-gradient(circle, rgba(255, 209, 0, 0.12) 0%, transparent 70%);
-      filter: blur(80px);
-      pointer-events: none;
-      animation: pulseGlow 7s ease-in-out infinite alternate;
-    }
-
-    .ambient-glow-siad {
-      position: absolute;
-      bottom: 20%;
-      right: 15%;
-      width: 520px;
-      height: 520px;
-      background: radial-gradient(circle, rgba(0, 119, 254, 0.14) 0%, transparent 70%);
-      filter: blur(90px);
-      pointer-events: none;
-      animation: pulseGlow 8s ease-in-out infinite alternate-reverse;
-    }
-
-    @keyframes pulseGlow {
-      0% { opacity: 0.6; transform: scale(0.95); }
-      100% { opacity: 1; transform: scale(1.08); }
-    }
-
-    /* =========================================================
-       BARRA INSTITUCIONAL SUPERIOR (HEADER)
-       ========================================================= */
-    .top-header {
+    /* Contenedor Principal en Pantalla Completa */
+    .portal-wrapper {
       position: relative;
-      z-index: 10;
-      background: rgba(0, 24, 53, 0.88);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 3px solid var(--pdi-gold);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      isolation: isolate;
     }
 
-    .top-header-inner {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 14px 28px;
+    /* =========================================================
+       CABECERA INSTITUCIONAL MINIMALISTA Y ELEGANTE
+       ========================================================= */
+    .header-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding: 18px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
+      background: linear-gradient(180deg, rgba(1, 10, 20, 0.92) 0%, rgba(1, 10, 20, 0.4) 70%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .header-bar > * {
+      pointer-events: auto;
     }
 
     .header-brand {
@@ -177,867 +79,758 @@
       align-items: center;
       gap: 16px;
       text-decoration: none;
-      transition: transform 0.2s ease;
     }
 
-    .header-brand:hover {
-      transform: translateY(-1px);
-    }
-
-    .header-logo-box {
-      width: 52px;
-      height: 52px;
-      background: #FFFFFF;
-      border-radius: 12px;
-      padding: 5px;
+    .header-crest {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 209, 0, 0.45);
+      border-radius: 14px;
+      padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-      border: 2px solid var(--pdi-gold);
-      flex-shrink: 0;
-      transition: box-shadow 0.25s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
     }
 
-    .header-brand:hover .header-logo-box {
-      box-shadow: 0 0 16px rgba(255, 209, 0, 0.5);
+    .header-brand:hover .header-crest {
+      border-color: var(--pdi-gold);
+      box-shadow: 0 0 20px rgba(255, 209, 0, 0.4);
+      transform: scale(1.05);
     }
 
-    .header-logo-box img {
+    .header-crest img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
     }
 
-    .header-brand-text h1 {
-      font-size: 17px;
+    .header-titles h1 {
+      font-size: 15px;
       font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       color: #FFFFFF;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
       line-height: 1.2;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
-    .header-brand-text p {
-      font-size: 12px;
+    .header-titles p {
+      font-size: 11.5px;
       font-weight: 700;
-      color: var(--pdi-gold);
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: var(--pdi-gold);
     }
 
-    /* Herramientas de Accesibilidad */
-    .header-accessibility-tools {
+    .header-meta {
       display: flex;
       align-items: center;
       gap: 14px;
     }
 
-    .font-size-control {
+    .header-badge-tag {
       display: inline-flex;
       align-items: center;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 10px;
-      padding: 3px 5px;
-      gap: 4px;
-    }
-
-    .font-size-label {
-      color: #E2E8F0;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 0 6px;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .btn-font-size {
-      background: rgba(255, 255, 255, 0.9);
-      color: var(--pdi-navy);
-      border: none;
-      border-radius: 6px;
-      padding: 6px 11px;
-      font-weight: 900;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-width: 32px;
-    }
-
-    .btn-font-size:hover {
-      background: var(--pdi-gold);
-      transform: translateY(-1px);
-    }
-
-    .btn-font-size.active {
-      background: var(--pdi-gold);
-      color: #00142B;
-      box-shadow: 0 0 10px rgba(255, 209, 0, 0.55);
+      color: #E2E8F0;
+      backdrop-filter: blur(10px);
     }
 
     .header-clock {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #FFFFFF;
-      padding: 7px 14px;
-      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 14px;
+      border-radius: 999px;
       font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.05em;
+      color: #FFFFFF;
     }
 
-    .clock-dot {
+    .clock-live-indicator {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: #10B981;
-      box-shadow: 0 0 8px #10B981;
-      animation: clockPulse 2s infinite;
+      box-shadow: 0 0 10px #10B981;
+      animation: pulseLive 2s infinite;
     }
 
-    @keyframes clockPulse {
+    @keyframes pulseLive {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
     /* =========================================================
-       CONTENIDO PRINCIPAL
+       SPLIT-SCREEN 50/50: CONTENEDOR DE DOS MITADES
        ========================================================= */
-    .portal-container {
+    .split-layout {
+      flex: 1;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* =========================================================
+       SECCIÓN IZQUIERDA: SISTEMA ABIS (DORADO / BIOMETRÍA)
+       ========================================================= */
+    .split-panel {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 100px 60px 80px;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      cursor: pointer;
+      transition: flex 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 0.4s ease;
+    }
+
+    /* Panel ABIS */
+    .panel-abis {
+      background: radial-gradient(circle at 30% 50%, rgba(255, 209, 0, 0.14) 0%, rgba(4, 25, 48, 0.95) 50%, #010B16 100%);
+      border-right: 1px solid rgba(255, 209, 0, 0.25);
+    }
+
+    .panel-abis::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 209, 0, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 0, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Panel SIAD */
+    .panel-siad {
+      background: radial-gradient(circle at 70% 50%, rgba(0, 119, 254, 0.16) 0%, rgba(2, 20, 42, 0.95) 50%, #010B16 100%);
+      border-left: 1px solid rgba(0, 119, 254, 0.25);
+    }
+
+    .panel-siad::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0, 119, 254, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 119, 254, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Efecto de Expansión Interactiva 50/50 */
+    .split-layout:hover .split-panel {
+      flex: 0.88;
+      filter: brightness(0.75);
+    }
+
+    .split-layout .split-panel:hover {
+      flex: 1.12;
+      filter: brightness(1.05);
+    }
+
+    /* Resplandores de Fondo Animados */
+    .panel-glow-orbit {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+      transition: all 0.6s ease;
+    }
+
+    .glow-abis {
+      background: radial-gradient(circle, rgba(255, 209, 0, 0.25) 0%, transparent 65%);
+      filter: blur(60px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .glow-siad {
+      background: radial-gradient(circle, rgba(0, 119, 254, 0.28) 0%, transparent 65%);
+      filter: blur(60px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .split-panel:hover .panel-glow-orbit {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.18);
+    }
+
+    /* =========================================================
+       CONTENIDO INTERNO DE CADA PANEL (IMPACTANTE Y LEGIBLE)
+       ========================================================= */
+    .panel-content {
       position: relative;
       z-index: 10;
-      flex: 1;
-      max-width: 1280px;
+      max-width: 500px;
       width: 100%;
-      margin: 0 auto;
-      padding: 42px 24px 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-    }
-
-    /* Encabezado Principal */
-    .portal-banner {
       text-align: center;
-      margin-bottom: 38px;
-      max-width: 920px;
-      animation: bannerFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @keyframes bannerFadeIn {
-      from { opacity: 0; transform: translateY(-16px); }
-      to { opacity: 1; transform: translateY(0); }
+    .split-panel:hover .panel-content {
+      transform: translateY(-6px);
     }
 
-    .portal-kicker {
+    /* Ícono / Emblema Animado con Escáner Láser */
+    .visual-scanner-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 28px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      transition: all 0.4s ease;
+      overflow: hidden;
+    }
+
+    .scanner-box-abis {
+      background: linear-gradient(135deg, rgba(255, 209, 0, 0.18) 0%, rgba(255, 209, 0, 0.05) 100%);
+      border: 2px solid rgba(255, 209, 0, 0.5);
+      color: var(--pdi-gold);
+    }
+
+    .scanner-box-siad {
+      background: linear-gradient(135deg, rgba(0, 119, 254, 0.2) 0%, rgba(0, 119, 254, 0.05) 100%);
+      border: 2px solid rgba(0, 119, 254, 0.5);
+      color: #60A5FA;
+    }
+
+    .split-panel:hover .visual-scanner-container {
+      transform: scale(1.1) rotate(2deg);
+    }
+
+    .panel-abis:hover .visual-scanner-container {
+      box-shadow: 0 0 35px rgba(255, 209, 0, 0.45);
+      border-color: var(--pdi-gold);
+    }
+
+    .panel-siad:hover .visual-scanner-container {
+      box-shadow: 0 0 35px rgba(0, 119, 254, 0.45);
+      border-color: #60A5FA;
+    }
+
+    .visual-scanner-container .material-symbols-outlined {
+      font-size: 64px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Línea de Escaneo Láser Animada */
+    .laser-beam {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0.85;
+      animation: scanLaser 2.4s ease-in-out infinite;
+    }
+
+    .laser-abis {
+      background: linear-gradient(90deg, transparent, #FFD100, #FFFFFF, #FFD100, transparent);
+      box-shadow: 0 0 14px #FFD100;
+    }
+
+    .laser-siad {
+      background: linear-gradient(90deg, transparent, #0077FE, #FFFFFF, #0077FE, transparent);
+      box-shadow: 0 0 14px #0077FE;
+    }
+
+    @keyframes scanLaser {
+      0% { top: 8%; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 90%; opacity: 0; }
+    }
+
+    /* Píldora / Categoría Superior */
+    .system-category-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255, 209, 0, 0.15);
-      color: var(--pdi-gold);
-      border: 1px solid rgba(255, 209, 0, 0.45);
+      padding: 6px 18px;
       border-radius: 999px;
-      padding: 7px 20px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      box-shadow: 0 0 20px rgba(255, 209, 0, 0.2);
       margin-bottom: 16px;
       backdrop-filter: blur(8px);
-      animation: badgePulse 3s ease-in-out infinite;
     }
 
-    @keyframes badgePulse {
-      0%, 100% { box-shadow: 0 0 15px rgba(255, 209, 0, 0.2); }
-      50% { box-shadow: 0 0 28px rgba(255, 209, 0, 0.45); }
-    }
-
-    .portal-main-title {
-      font-size: calc(36px * var(--font-scale));
-      font-weight: 900;
-      color: #FFFFFF;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      margin-bottom: 12px;
-      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
-    }
-
-    .portal-main-title .highlight-gold {
+    .pill-abis {
+      background: rgba(255, 209, 0, 0.12);
+      border: 1px solid rgba(255, 209, 0, 0.4);
       color: var(--pdi-gold);
-      text-shadow: 0 0 25px rgba(255, 209, 0, 0.4);
     }
 
-    .portal-instructions {
-      font-size: calc(18px * var(--font-scale));
+    .pill-siad {
+      background: rgba(0, 119, 254, 0.12);
+      border: 1px solid rgba(0, 119, 254, 0.4);
+      color: #93C5FD;
+    }
+
+    /* Título Monumental del Sistema */
+    .system-title-hero {
+      font-size: 58px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+      color: #FFFFFF;
+      text-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-accent-abis {
+      color: var(--pdi-gold);
+      text-shadow: 0 0 30px rgba(255, 209, 0, 0.5);
+    }
+
+    .title-accent-siad {
+      color: #60A5FA;
+      text-shadow: 0 0 30px rgba(0, 119, 254, 0.5);
+    }
+
+    .system-tag {
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #E2E8F0;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Subtítulo Principal de Alta Claridad */
+    .system-subtitle-hero {
+      font-size: 21px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 18px;
+      line-height: 1.35;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Breve Descripción Operativa (Sin viñetas de catálogo) */
+    .system-desc-hero {
+      font-size: 16px;
       color: #CBD5E1;
       line-height: 1.6;
-      font-weight: 500;
-      max-width: 800px;
-      margin: 0 auto;
+      font-weight: 400;
+      margin-bottom: 34px;
+      max-width: 440px;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
     }
 
-    /* Alerta de Sesión */
-    .user-session-alert {
-      background: rgba(255, 255, 255, 0.95);
-      border: 2px solid #60A5FA;
-      color: #1E3A8A;
-      border-radius: 14px;
-      padding: 12px 24px;
-      margin-bottom: 28px;
+    /* =========================================================
+       BOTONES GIGANTES DE ENTRADA DIRECTA (64PX)
+       ========================================================= */
+    .btn-action-hero {
+      position: relative;
+      overflow: hidden;
       display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-size: calc(15px * var(--font-scale));
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-      animation: alertIn 0.5s ease-out;
-    }
-
-    @keyframes alertIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    /* =========================================================
-       GRILLA DE TARJETAS (ESTILO LOGIN: BLANCO PURO + SOMBRA SUAVE + ANIMACIÓN)
-       ========================================================= */
-    .systems-selector-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 36px;
-      width: 100%;
-      max-width: 1160px;
-      margin-bottom: 36px;
-    }
-
-    /* Tarjetas de Selección con Animación CardIn y Efecto Hover Atractivo */
-    .system-selection-card {
-      background: #FFFFFF;
-      border-radius: 24px;
-      padding: 42px 38px 38px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 28px 70px rgba(0, 10, 26, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* Barra decorativa superior animada idéntica a login.ejs */
-    .system-selection-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      transition: height 0.25s ease;
-    }
-
-    .system-selection-card:hover::before {
-      height: 8px;
-    }
-
-    /* Tarjeta ABIS */
-    .card-theme-abis {
-      animation: cardIn 0.8s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    .card-theme-abis::before {
-      background: linear-gradient(90deg, #FFD100 0%, #E5B800 100%);
-    }
-    .card-theme-abis:hover {
-      transform: translateY(-8px) scale(1.012);
-      box-shadow: 0 36px 90px rgba(0, 0, 0, 0.65), 0 0 35px rgba(255, 209, 0, 0.3);
-    }
-
-    /* Tarjeta SIAD */
-    .card-theme-siad {
-      animation: cardIn 0.8s 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    .card-theme-siad::before {
-      background: linear-gradient(90deg, #0077FE 0%, #004FA8 100%);
-    }
-    .card-theme-siad:hover {
-      transform: translateY(-8px) scale(1.012);
-      box-shadow: 0 36px 90px rgba(0, 0, 0, 0.65), 0 0 35px rgba(0, 119, 254, 0.3);
-    }
-
-    @keyframes cardIn {
-      from {
-        opacity: 0;
-        transform: translateY(32px) scale(0.96);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    /* Encabezado de la Tarjeta */
-    .card-header-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .card-icon-container {
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-      transition: all 0.3s ease;
-    }
-
-    .system-selection-card:hover .card-icon-container {
-      transform: scale(1.08) rotate(-2deg);
-    }
-
-    .icon-abis-box {
-      background: linear-gradient(135deg, #FFF9E6 0%, #FFE98A 100%);
-      color: #855800;
-      border: 2px solid #FFD100;
-    }
-
-    .icon-siad-box {
-      background: linear-gradient(135deg, #EBF4FF 0%, #CCE1FF 100%);
-      color: #004B99;
-      border: 2px solid #70ACFF;
-    }
-
-    .card-icon-container .material-symbols-outlined {
-      font-size: 46px;
-    }
-
-    .card-title-block {
-      flex: 1;
-    }
-
-    .badge-category {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 4px 12px;
-      border-radius: 8px;
-      margin-bottom: 6px;
-    }
-
-    .badge-cat-abis {
-      background: #FEF9C3;
-      color: #854D0E;
-      border: 1px solid #FDE047;
-    }
-
-    .badge-cat-siad {
-      background: #DBEAFE;
-      color: #1E40AF;
-      border: 1px solid #BFDBFE;
-    }
-
-    .system-title-text {
-      font-size: calc(32px * var(--font-scale));
-      font-weight: 900;
-      color: var(--pdi-navy);
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .version-tag {
-      font-size: 13px;
-      font-weight: 800;
-      background: #F1F5F9;
-      color: #475569;
-      padding: 3px 9px;
-      border-radius: 6px;
-      border: 1px solid #CBD5E1;
-    }
-
-    .system-subtitle-text {
-      font-size: calc(16px * var(--font-scale));
-      font-weight: 700;
-      color: var(--pdi-navy-light);
-      margin-top: 4px;
-    }
-
-    /* Contenido y Viñetas */
-    .card-body-content {
-      margin-bottom: 34px;
-    }
-
-    .card-description-paragraph {
-      font-size: calc(16px * var(--font-scale));
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 24px;
-      font-weight: 500;
-    }
-
-    .features-list-title {
-      font-size: calc(14px * var(--font-scale));
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--pdi-navy);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .system-features-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: calc(15px * var(--font-scale));
-      color: var(--text-main);
-      line-height: 1.45;
-      font-weight: 600;
-    }
-
-    .feature-check {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .check-abis {
-      background: #FEF08A;
-      color: #854D0E;
-    }
-
-    .check-siad {
-      background: #BFDBFE;
-      color: #1E40AF;
-    }
-
-    .feature-check i {
-      font-size: 12px;
-    }
-
-    /* =========================================================
-       BOTONES DE ACCESO CON ANIMACIÓN SHIMMER Y ALTO IMPACTO
-       ========================================================= */
-    .card-action-container {
-      margin-top: auto;
-    }
-
-    .btn-system-portal {
-      position: relative;
-      overflow: hidden;
-      display: flex;
       align-items: center;
       justify-content: center;
       gap: 16px;
       width: 100%;
+      max-width: 400px;
       min-height: 64px;
-      padding: 16px 28px;
-      border-radius: 16px;
+      padding: 18px 32px;
+      border-radius: 18px;
       text-decoration: none;
-      font-size: calc(18px * var(--font-scale));
+      font-size: 18px;
       font-weight: 900;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      border: 2px solid transparent;
-      text-align: center;
     }
 
-    /* Destello (Shimmer) animado al pasar el mouse */
-    .btn-system-portal::before {
+    /* Destello Shimmer en Hover */
+    .btn-action-hero::before {
       content: '';
       position: absolute;
       top: 0;
       left: -120%;
       width: 80%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
       transform: skewX(-20deg);
       pointer-events: none;
-      transition: none;
     }
 
-    .btn-system-portal:hover::before {
+    .split-panel:hover .btn-action-hero::before {
       left: 140%;
       transition: all 0.75s ease-in-out;
     }
 
     /* Botón ABIS */
-    .btn-portal-abis {
-      background: linear-gradient(180deg, #FFD826 0%, #F5BE00 100%);
-      color: #00234C;
-      border-color: #E6B200;
+    .btn-abis {
+      background: linear-gradient(135deg, #FFD100 0%, #E5B800 100%);
+      color: #001733;
+      border: 2px solid #FFE566;
     }
 
-    .btn-portal-abis:hover {
-      background: linear-gradient(180deg, #FFE566 0%, #FFD100 100%);
-      box-shadow: 0 12px 28px rgba(255, 209, 0, 0.5);
-      transform: translateY(-3px);
-      color: #001733;
+    .split-panel.panel-abis:hover .btn-abis {
+      background: linear-gradient(135deg, #FFE033 0%, #FFD100 100%);
+      box-shadow: 0 14px 35px rgba(255, 209, 0, 0.5);
+      transform: translateY(-3px) scale(1.02);
+      color: #000E20;
     }
 
     /* Botón SIAD */
-    .btn-portal-siad {
-      background: linear-gradient(180deg, #006CE8 0%, #004FA8 100%);
+    .btn-siad {
+      background: linear-gradient(135deg, #0077FE 0%, #0056B8 100%);
       color: #FFFFFF;
-      border-color: #004494;
+      border: 2px solid #66B2FF;
     }
 
-    .btn-portal-siad:hover {
-      background: linear-gradient(180deg, #248BFF 0%, #0060CE 100%);
-      box-shadow: 0 12px 28px rgba(0, 108, 232, 0.5);
-      transform: translateY(-3px);
+    .split-panel.panel-siad:hover .btn-siad {
+      background: linear-gradient(135deg, #248BFF 0%, #006BE8 100%);
+      box-shadow: 0 14px 35px rgba(0, 119, 254, 0.5);
+      transform: translateY(-3px) scale(1.02);
       color: #FFFFFF;
     }
 
-    .btn-system-portal .btn-arrow-icon {
+    .btn-arrow-icon {
       font-size: 22px;
       transition: transform 0.25s ease;
     }
 
-    .btn-system-portal:hover .btn-arrow-icon {
-      transform: translateX(8px);
+    .split-panel:hover .btn-arrow-icon {
+      transform: translateX(6px);
+    }
+
+    /* Indicador de Sesión Activa */
+    .session-badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #86EFAC;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(8px);
     }
 
     /* =========================================================
-       AVISO DE PRIVACIDAD / SEGURIDAD
+       DIVISOR CENTRAL INSTITUCIONAL (CON INSIGNIA PDI)
        ========================================================= */
-    .security-notice-box {
-      width: 100%;
-      max-width: 1160px;
-      background: rgba(255, 255, 255, 0.96);
-      border-radius: 16px;
-      padding: 20px 28px;
+    .center-divider {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 30;
+      pointer-events: none;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-      border-left: 6px solid var(--pdi-gold);
-      animation: cardIn 0.8s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+      gap: 16px;
     }
 
-    .security-icon-circle {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: #FEF3C7;
-      border: 2px solid #FDE68A;
-      color: #92400E;
+    .center-badge {
+      width: 72px;
+      height: 72px;
+      background: rgba(2, 18, 38, 0.95);
+      border: 2px solid var(--pdi-gold);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 209, 0, 0.3);
+      backdrop-filter: blur(12px);
+      transition: all 0.4s ease;
+      animation: pulseCenter 4s ease-in-out infinite;
     }
 
-    .security-icon-circle i {
-      font-size: 22px;
+    @keyframes pulseCenter {
+      0%, 100% { box-shadow: 0 0 25px rgba(0,0,0,0.9), 0 0 15px rgba(255, 209, 0, 0.2); }
+      50% { box-shadow: 0 0 40px rgba(0,0,0,0.9), 0 0 25px rgba(255, 209, 0, 0.45); }
     }
 
-    .security-notice-text h4 {
-      font-size: calc(15px * var(--font-scale));
-      font-weight: 800;
-      color: var(--pdi-navy);
-      margin-bottom: 3px;
-    }
-
-    .security-notice-text p {
-      font-size: calc(14px * var(--font-scale));
-      color: var(--text-muted);
-      line-height: 1.45;
+    .center-badge span {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: var(--pdi-gold);
+      text-transform: uppercase;
     }
 
     /* =========================================================
-       PIE INSTITUCIONAL
+       PIE INSTITUCIONAL INFERIOR
        ========================================================= */
-    .portal-site-footer {
-      position: relative;
-      z-index: 10;
-      background: rgba(0, 16, 36, 0.95);
-      color: #CBD5E1;
-      border-top: 3px solid var(--pdi-gold);
-      padding: 26px 24px;
-      text-align: center;
-      margin-top: auto;
+    .footer-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding: 14px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(0deg, rgba(1, 10, 20, 0.92) 0%, rgba(1, 10, 20, 0.4) 70%, transparent 100%);
+      pointer-events: none;
+      font-size: 12.5px;
+      color: var(--text-muted);
     }
 
-    .footer-inner-content {
-      max-width: 1160px;
-      margin: 0 auto;
+    .footer-bar > * {
+      pointer-events: auto;
     }
 
-    .footer-copyright {
-      font-size: calc(14px * var(--font-scale));
-      font-weight: 700;
-      color: #FFFFFF;
-      margin-bottom: 6px;
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .footer-legal-text {
-      font-size: calc(13px * var(--font-scale));
-      color: #94A3B8;
-      line-height: 1.6;
+    .footer-left i {
+      color: var(--pdi-gold);
     }
 
-    /* Responsive */
+    .footer-right {
+      color: #64748B;
+    }
+
+    /* =========================================================
+       RESPONSIVE DESIGN (PANTALLAS MÓVILES / VERTICALES)
+       ========================================================= */
     @media (max-width: 960px) {
-      .systems-selector-grid {
-        grid-template-columns: 1fr;
-        gap: 28px;
+      html, body {
+        overflow-y: auto;
+        height: auto;
       }
-      .top-header-inner {
+      .portal-wrapper {
+        height: auto;
+        min-height: 100vh;
+      }
+      .split-layout {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 14px;
       }
-      .header-accessibility-tools {
-        width: 100%;
-        justify-content: space-between;
+      .split-panel {
+        padding: 90px 24px 60px;
+        min-height: 520px;
+      }
+      .panel-abis {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 209, 0, 0.25);
+      }
+      .panel-siad {
+        border-left: none;
+      }
+      .split-layout:hover .split-panel {
+        flex: 1;
+        filter: brightness(1);
+      }
+      .center-divider {
+        display: none;
+      }
+      .header-bar {
+        position: relative;
+        background: rgba(1, 10, 20, 0.95);
+        padding: 14px 20px;
+      }
+      .footer-bar {
+        position: relative;
+        background: rgba(1, 10, 20, 0.95);
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+        padding: 16px;
+      }
+      .system-title-hero {
+        font-size: 44px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Fondo animado atmosférico estilo Login -->
-  <div class="portal-background">
-    <div class="ambient-orbit"></div>
-    <div class="ambient-orbit-left"></div>
-    <div class="ambient-glow-abis"></div>
-    <div class="ambient-glow-siad"></div>
-  </div>
+  <div class="portal-wrapper">
 
-  <!-- Barra Superior Institucional -->
-  <header class="top-header">
-    <div class="top-header-inner">
-      <div class="header-brand">
-        <div class="header-logo-box">
+    <!-- Barra Superior Institucional -->
+    <header class="header-bar">
+      <a href="/" class="header-brand">
+        <div class="header-crest">
           <img src="/assets/logo-pdi.png" alt="Escudo PDI">
         </div>
-        <div class="header-brand-text">
+        <div class="header-titles">
           <h1>Policía de Investigaciones de Chile</h1>
           <p>Jefatura Nacional de Inteligencia Policial · JENAPOL</p>
         </div>
-      </div>
+      </a>
 
-      <!-- Barra de accesibilidad para personas adultas / jefaturas -->
-      <div class="header-accessibility-tools">
-        <div class="font-size-control">
-          <span class="font-size-label"><i class="fa-solid fa-text-height"></i> Texto:</span>
-          <button type="button" class="btn-font-size" onclick="setFontScale(0.95)" title="Texto normal" id="btn-scale-sm">A</button>
-          <button type="button" class="btn-font-size active" onclick="setFontScale(1.1)" title="Texto mediano" id="btn-scale-md">A+</button>
-          <button type="button" class="btn-font-size" onclick="setFontScale(1.25)" title="Texto grande" id="btn-scale-lg">A++</button>
+      <div class="header-meta">
+        <div class="header-badge-tag">
+          <i class="fa-solid fa-shield-halved" style="color: var(--pdi-gold);"></i>
+          <span>Portal de Acceso Operativo</span>
         </div>
-
         <div class="header-clock">
-          <span class="clock-dot"></span>
-          <span id="relojChile">--:--:--</span>
-          <span style="color: #94A3B8; font-size: 11px;">SCL</span>
+          <span class="clock-live-indicator"></span>
+          <span id="liveClockSantiago">--:--:--</span>
+          <span style="color: #64748B; font-size: 11px;">SCL</span>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Contenido Central del Portal -->
-  <main class="portal-container">
+    <!-- Split-Screen 50/50: ABIS vs SIAD -->
+    <main class="split-layout">
 
-    <!-- Mensaje Central -->
-    <div class="portal-banner">
-      <div class="portal-kicker">
-        <i class="fa-solid fa-shield-halved"></i>
-        <span>Portal Único de Acceso Operativo</span>
-      </div>
-      <h2 class="portal-main-title">¿A qué sistema desea <span class="highlight-gold">ingresar?</span></h2>
-      <p class="portal-instructions">
-        Haga clic en la plataforma que corresponda a sus funciones periciales o investigativas para iniciar sesión y ser redirigido directamente a su panel de trabajo.
-      </p>
-    </div>
+      <!-- =========================================================
+           PANEL IZQUIERDO: SISTEMA ABIS (DORADO / BIOMETRÍA)
+           ========================================================= -->
+      <a href="<%= (typeof user !== 'undefined' && user) ? '/abis' : '/login' %>" class="split-panel panel-abis" id="link-panel-abis">
+        <div class="panel-glow-orbit glow-abis"></div>
 
-    <% if (typeof user !== 'undefined' && user) { %>
-      <div class="user-session-alert">
-        <i class="fa-solid fa-circle-check" style="font-size: 22px; color: #2563EB;"></i>
-        <span>Usted cuenta con una sesión activa en este equipo como <strong><%= user.username %></strong> (<%= user.rol %>).</span>
-      </div>
-    <% } %>
-
-    <!-- Grilla de Tarjetas: Blanco Nítido + Animación + Efecto Hover -->
-    <div class="systems-selector-grid">
-
-      <!-- TARJETA 1: SISTEMA ABIS -->
-      <section class="system-selection-card card-theme-abis" id="card-abis">
-        <div>
-          <div class="card-header-row">
-            <div class="card-icon-container icon-abis-box">
-              <span class="material-symbols-outlined">fingerprint</span>
-            </div>
-            <div class="card-title-block">
-              <span class="badge-category badge-cat-abis">Identificación Biométrica</span>
-              <div class="system-title-text">
-                <span>ABIS</span>
-                <span class="version-tag">v0.1.0</span>
-              </div>
-              <div class="system-subtitle-text">Control de Enrolamiento Biométrico</div>
-            </div>
+        <div class="panel-content">
+          <div class="visual-scanner-container scanner-box-abis">
+            <div class="laser-beam laser-abis"></div>
+            <span class="material-symbols-outlined">fingerprint</span>
           </div>
 
-          <div class="card-body-content">
-            <p class="card-description-paragraph">
-              Plataforma institucional para auditoría pericial, reportería automatizada de extranjeros, monitoreo de flujos migratorios y control biométrico nacional.
-            </p>
-
-            <div class="features-list-title">
-              <i class="fa-solid fa-list-check" style="color: var(--pdi-gold-dark);"></i>
-              <span>Módulos Principales:</span>
-            </div>
-            <ul class="system-features-list">
-              <li class="feature-item">
-                <span class="feature-check check-abis"><i class="fa-solid fa-check"></i></span>
-                <span>Auditoría de enrolamientos diarios, semanales y mensuales.</span>
-              </li>
-              <li class="feature-item">
-                <span class="feature-check check-abis"><i class="fa-solid fa-check"></i></span>
-                <span>Gráficos de flujo migratorio y tendencias históricas.</span>
-              </li>
-              <li class="feature-item">
-                <span class="feature-check check-abis"><i class="fa-solid fa-check"></i></span>
-                <span>Generación de minutas e informes en Word (.docx) y Excel (.xlsx).</span>
-              </li>
-            </ul>
+          <div class="system-category-pill pill-abis">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span>Biometría y Enrolamiento</span>
           </div>
-        </div>
 
-        <div class="card-action-container">
+          <div class="system-title-hero">
+            <span class="title-accent-abis">ABIS</span>
+            <span class="system-tag">v0.1.0</span>
+          </div>
+
+          <h2 class="system-subtitle-hero">Sistema Automatizado de Identificación Biométrica</h2>
+
+          <p class="system-desc-hero">
+            Auditoría de enrolamientos biométricos, reportería ejecutiva de ciudadanos extranjeros y estadísticas históricas periciales.
+          </p>
+
           <% if (typeof user !== 'undefined' && user) { %>
-            <a href="/abis" class="btn-system-portal btn-portal-abis" id="btn-ingreso-abis">
+            <div class="session-badge-active">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Sesión activa: <strong><%= user.username %></strong></span>
+            </div>
+            <div class="btn-action-hero btn-abis">
               <span>Ingresar al Panel ABIS</span>
               <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
-            </a>
+            </div>
           <% } else { %>
-            <a href="/login" class="btn-system-portal btn-portal-abis" id="btn-ingreso-abis">
+            <div class="btn-action-hero btn-abis">
               <span>Ingresar a Sistema ABIS</span>
               <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
-            </a>
+            </div>
           <% } %>
         </div>
-      </section>
+      </a>
 
-      <!-- TARJETA 2: SISTEMA SIAD -->
-      <section class="system-selection-card card-theme-siad" id="card-siad">
-        <div>
-          <div class="card-header-row">
-            <div class="card-icon-container icon-siad-box">
-              <span class="material-symbols-outlined">document_scanner</span>
-            </div>
-            <div class="card-title-block">
-              <span class="badge-category badge-cat-siad">Análisis Pericial Documental</span>
-              <div class="system-title-text">
-                <span>SIAD</span>
-                <span class="version-tag">v2.4.0</span>
-              </div>
-              <div class="system-subtitle-text">Análisis Inteligente de Partes Policiales</div>
-            </div>
-          </div>
-
-          <div class="card-body-content">
-            <p class="card-description-paragraph">
-              Procesamiento forense mediante OCR inteligente para partes policiales, correlación de evidencias, armas, sustancias y estadísticas periciales protegidas.
-            </p>
-
-            <div class="features-list-title">
-              <i class="fa-solid fa-list-check" style="color: var(--pdi-blue);"></i>
-              <span>Módulos Principales:</span>
-            </div>
-            <ul class="system-features-list">
-              <li class="feature-item">
-                <span class="feature-check check-siad"><i class="fa-solid fa-check"></i></span>
-                <span>Digitalización y análisis OCR de partes policiales en PDF.</span>
-              </li>
-              <li class="feature-item">
-                <span class="feature-check check-siad"><i class="fa-solid fa-check"></i></span>
-                <span>Cruce de imputados, armas, municiones, drogas y vehículos.</span>
-              </li>
-              <li class="feature-item">
-                <span class="feature-check check-siad"><i class="fa-solid fa-check"></i></span>
-                <span>Tablero estadístico pericial con datos protegidos bajo norma de cifrado.</span>
-              </li>
-            </ul>
-          </div>
+      <!-- Insignia Central "VS / O" -->
+      <div class="center-divider">
+        <div class="center-badge">
+          <span>PDI</span>
         </div>
+      </div>
 
-        <div class="card-action-container">
-          <a href="/analisis/login" class="btn-system-portal btn-portal-siad" id="btn-ingreso-siad">
+      <!-- =========================================================
+           PANEL DERECHO: SISTEMA SIAD (AZUL / ANÁLISIS DOCUMENTAL)
+           ========================================================= -->
+      <a href="/analisis/login" class="split-panel panel-siad" id="link-panel-siad">
+        <div class="panel-glow-orbit glow-siad"></div>
+
+        <div class="panel-content">
+          <div class="visual-scanner-container scanner-box-siad">
+            <div class="laser-beam laser-siad"></div>
+            <span class="material-symbols-outlined">document_scanner</span>
+          </div>
+
+          <div class="system-category-pill pill-siad">
+            <i class="fa-solid fa-file-shield"></i>
+            <span>Análisis Documental y Forense</span>
+          </div>
+
+          <div class="system-title-hero">
+            <span class="title-accent-siad">SIAD</span>
+            <span class="system-tag">v2.4.0</span>
+          </div>
+
+          <h2 class="system-subtitle-hero">Sistema Inteligente de Análisis Documental</h2>
+
+          <p class="system-desc-hero">
+            Procesamiento inteligente mediante OCR pericial para partes policiales, detección de evidencias y tableros estadísticos con datos protegidos.
+          </p>
+
+          <div class="btn-action-hero btn-siad">
             <span>Ingresar a Sistema SIAD</span>
             <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
-          </a>
+          </div>
         </div>
-      </section>
+      </a>
 
-    </div>
+    </main>
 
-    <!-- Aviso de Seguridad Institucional -->
-    <div class="security-notice-box">
-      <div class="security-icon-circle">
-        <i class="fa-solid fa-shield-halved"></i>
+    <!-- Barra Inferior Institucional -->
+    <footer class="footer-bar">
+      <div class="footer-left">
+        <i class="fa-solid fa-lock"></i>
+        <span>Acceso exclusivo para personal autorizado de la Policía de Investigaciones de Chile · Ley N° 19.628 / Ley N° 20.084</span>
       </div>
-      <div class="security-notice-text">
-        <h4>Uso Oficial Restringido y Protección de Datos</h4>
-        <p>
-          Este sistema es de uso exclusivo para funcionarios autorizados de la Policía de Investigaciones de Chile. 
-          Todas las consultas y accesos quedan registrados en la bitácora de auditoría institucional conforme a la Ley N° 19.628 y Ley N° 20.084.
-        </p>
+      <div class="footer-right">
+        <span>Departamento de Tecnologías de la Información &copy; 2026 JENAPOL</span>
       </div>
-    </div>
+    </footer>
 
-  </main>
+  </div>
 
-  <!-- Pie Institucional -->
-  <footer class="portal-site-footer">
-    <div class="footer-inner-content">
-      <p class="footer-copyright">
-        Policía de Investigaciones de Chile · Jefatura Nacional de Inteligencia Policial (JENAPOL)
-      </p>
-      <p class="footer-legal-text">
-        Departamento de Tecnologías de la Información y Telecomunicaciones · Sistema de Monitoreo y Análisis Forense &copy; 2026.
-      </p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
   <script>
-    // Reloj Oficial Santiago de Chile
-    function updateChileClock() {
+    // Reloj Santiago de Chile en Vivo
+    function updateSantiagoClock() {
       const now = new Date();
       const options = { 
         timeZone: 'America/Santiago', 
@@ -1047,32 +840,11 @@
         hour12: false 
       };
       const timeStr = new Intl.DateTimeFormat('es-CL', options).format(now);
-      const clockEl = document.getElementById('relojChile');
+      const clockEl = document.getElementById('liveClockSantiago');
       if (clockEl) clockEl.textContent = timeStr;
     }
-    setInterval(updateChileClock, 1000);
-    updateChileClock();
-
-    // Control de Tamaño de Texto para Personal Mayor / Jefaturas
-    function setFontScale(scale) {
-      document.documentElement.style.setProperty('--font-scale', scale);
-      localStorage.setItem('pdi_portal_font_scale', scale);
-      
-      document.querySelectorAll('.btn-font-size').forEach(b => b.classList.remove('active'));
-      if (scale < 1.05) document.getElementById('btn-scale-sm')?.classList.add('active');
-      else if (scale < 1.2) document.getElementById('btn-scale-md')?.classList.add('active');
-      else document.getElementById('btn-scale-lg')?.classList.add('active');
-    }
-
-    // Inicializar
-    (function initAccessibility() {
-      const savedScale = localStorage.getItem('pdi_portal_font_scale');
-      if (savedScale) {
-        setFontScale(parseFloat(savedScale));
-      } else {
-        setFontScale(1.1);
-      }
-    })();
+    setInterval(updateSantiagoClock, 1000);
+    updateSantiagoClock();
   </script>
 </body>
 </html>
