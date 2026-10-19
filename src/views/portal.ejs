@@ -668,15 +668,18 @@
     }
 
     /* =========================================================
-       DIVISOR CENTRAL INSTITUCIONAL CON ESCUDO OFICIAL PDI
+       DIVISOR CENTRAL INSTITUCIONAL CON ESCUDO OFICIAL PDI (INERTE / NO CLICABLE)
        ========================================================= */
     .center-divider {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 30;
-      pointer-events: none;
+      z-index: 40;
+      pointer-events: auto;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -696,6 +699,8 @@
       justify-content: center;
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 209, 0, 0.35);
       backdrop-filter: blur(14px);
+      pointer-events: auto;
+      cursor: default;
       transition: all 0.4s ease;
       animation: centerBreathing 4s ease-in-out infinite;
     }
@@ -704,6 +709,8 @@
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
+      pointer-events: none;
+      user-select: none;
     }
 
     @keyframes centerBreathing {
@@ -898,10 +905,10 @@
         </div>
       </a>
 
-      <!-- Insignia Central con Escudo Oficial PDI -->
-      <div class="center-divider">
-        <div class="center-shield-circle">
-          <img src="/assets/logo-pdi.png" alt="PDI">
+      <!-- Insignia Central con Escudo Oficial PDI (Completamente inerte, no interactivo) -->
+      <div class="center-divider" id="center-shield-divider" onclick="event.preventDefault(); event.stopPropagation(); return false;" title="Policía de Investigaciones de Chile">
+        <div class="center-shield-circle" onclick="event.preventDefault(); event.stopPropagation(); return false;">
+          <img src="/assets/logo-pdi.png" alt="PDI" draggable="false" style="pointer-events: none; user-select: none;">
         </div>
       </div>
 
@@ -981,6 +988,19 @@
     }
     setInterval(updateSantiagoClock, 1000);
     updateSantiagoClock();
+
+    // Inmunizar el Escudo Central PDI para que no dispare enlaces ni navegación
+    const centerShield = document.getElementById('center-shield-divider');
+    if (centerShield) {
+      ['click', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'touchstart'].forEach(evt => {
+        centerShield.addEventListener(evt, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          return false;
+        }, { passive: false });
+      });
+    }
   </script>
 </body>
 </html>
