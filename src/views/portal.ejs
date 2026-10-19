@@ -922,7 +922,7 @@
       <!-- =========================================================
            PANEL DERECHO: SISTEMA SIAD (AZUL / ANÁLISIS DOCUMENTAL)
            ========================================================= -->
-      <a href="/analisis/login" class="split-panel panel-siad" id="link-panel-siad">
+      <a href="<%= (typeof user !== 'undefined' && user) ? '/analisis/' : '/analisis/login' %>" class="split-panel panel-siad" id="link-panel-siad">
         <!-- Foto de fondo y auras -->
         <div class="panel-photo-bg"></div>
         <div class="panel-glow-aura aura-siad"></div>
@@ -956,10 +956,21 @@
             Procesamiento inteligente mediante OCR pericial para partes policiales, detección de evidencias y tableros estadísticos con datos protegidos.
           </p>
 
-          <div class="btn-action-hero btn-siad">
-            <span>Ingresar a Sistema SIAD</span>
-            <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
-          </div>
+          <% if (typeof user !== 'undefined' && user) { %>
+            <div class="session-badge-active">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Sesión activa: <strong><%= user.username %></strong></span>
+            </div>
+            <div class="btn-action-hero btn-siad">
+              <span>Ingresar al Panel SIAD</span>
+              <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
+            </div>
+          <% } else { %>
+            <div class="btn-action-hero btn-siad">
+              <span>Ingresar a Sistema SIAD</span>
+              <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
+            </div>
+          <% } %>
         </div>
       </a>
 

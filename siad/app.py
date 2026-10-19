@@ -1042,9 +1042,34 @@ def summarize_text(raw_text, limit_sentences=3):
 
 @app.before_request
 def require_login():
-    print("COOKIES RECIBIDAS:", request.cookies, flush=True)
+    # 1. Si no hay sesión en Flask, intentar autenticación automática (SSO) con abis_auth
+    if not session.get("user_id"):
+        abis_token = request.cookies.get("abis_auth")
+        if abis_token:
+            try:
+                secret_key = os.getenv("SECRET_KEY", "abis_siad_jwt_session_secret_key_2026_local")
+                payload = jwt.decode(abis_token, secret_key, algorithms=["HS256"])
+                username = payload.get("username")
+                if username:
+                    user = db.get_user_by_username(username)
+                    if user:
+                        session.permanent = True
+                        session["user_id"] = user["id"]
+                        session["username"] = user["username"]
+                        session["rol"] = user.get("rol", "usuario")
+                        session["nombre_completo"] = user.get("nombre_completo")
+            except Exception as e:
+                pass
+
+    # 2. Rutas exentas de autenticación
     if request.endpoint is None or request.endpoint in LOGIN_EXEMPT_ENDPOINTS:
+        # Si ya está autenticado e intenta acceder a la pantalla de login, redirigir directo al dashboard
+        if request.endpoint == "login" and session.get("user_id"):
+            dest = (request.script_root or "").rstrip("/")
+            return redirect(dest + "/" if dest else url_for("index"))
         return None
+
+    # 3. Si no hay sesión válida, redirigir a login
     if not session.get("user_id"):
         return redirect(url_for("login", next=request.path))
     return None
@@ -1052,14 +1077,12 @@ def require_login():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # request.values (no solo request.args): "next" llega por query string en el primer GET
-    # (redirigido desde require_login), pero por el campo oculto del formulario en un POST --
-    # incluida la re-renderizacion tras una clave incorrecta, para no perder el destino original.
+    # Si ya cuenta con sesión activa, no mostrar login: entrar directo al sistema
+    if session.get("user_id"):
+        dest = (request.script_root or "").rstrip("/")
+        return redirect(dest + "/" if dest else url_for("index"))
+
     next_url = request.values.get("next", "")
-    # Cuando SIAD está detrás del proxy de ABIS, Flask recibe el destino interno
-    # (/historial), pero el navegador necesita el prefijo público (/analisis).
-    # Sin esta normalización, el login termina en localhost:3000/historial y ABIS
-    # responde "Cannot GET /historial".
     script_root = (request.script_root or "").rstrip("/")
     if script_root and next_url.startswith("/") and not next_url.startswith(script_root + "/"):
         next_url = script_root + next_url
@@ -1077,7 +1100,19 @@ def login():
                 db.update_last_login(username)
                 if not next_url or next_url == "/":
                     next_url = url_for("index")
-                return redirect(next_url)
+
+                # Generar cookie abis_auth para SSO bi-direccional hacia ABIS
+                secret_key = os.getenv("SECRET_KEY", "abis_siad_jwt_session_secret_key_2026_local")
+                token_payload = {
+                    "userId": user["id"],
+                    "username": user["username"],
+                    "rol": user.get("rol", "usuario"),
+                    "exp": datetime.utcnow() + timedelta(days=7)
+                }
+                abis_jwt = jwt.encode(token_payload, secret_key, algorithm="HS256")
+                resp = redirect(next_url)
+                resp.set_cookie("abis_auth", abis_jwt, path="/", httponly=True, samesite="Lax")
+                return resp
         except Exception:
             pass
         flash("Credenciales incorrectas.")
@@ -1148,9 +1183,11 @@ def forgot_password():
 def logout():
     motivo = request.args.get("motivo")
     session.clear()
-    if motivo == "inactividad":
-        flash("Tu sesión ha sido bloqueada por inactividad. Por favor, ingresa nuevamente por tu seguridad.", "warning")
-    return redirect(url_for("login"))
+    dest = url_for("login", motivo="inactividad") if motivo == "inactividad" else "/"
+    resp = redirect(dest)
+    resp.set_cookie("abis_auth", "", expires=0, path="/")
+    resp.set_cookie("siad_session", "", expires=0, path="/")
+    return resp
 
 
 @app.route("/")

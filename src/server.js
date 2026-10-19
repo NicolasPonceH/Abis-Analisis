@@ -281,6 +281,14 @@ function apiRequireAuth(req, res, next) {
 app.use("/api", apiRequireAuth);
 
 app.get("/login", (req, res) => {
+  const token = req.cookies.abis_auth;
+  if (token) {
+    try {
+      jwt.verify(token, JWT_SECRET);
+      const nextTarget = req.query.next || "/abis";
+      return res.redirect(nextTarget);
+    } catch (_) {}
+  }
   const error = req.query.motivo === "inactividad"
     ? "Tu sesión se cerró por inactividad. Ingresa nuevamente para continuar."
     : null;
@@ -372,6 +380,9 @@ const clearAuthCookie = (res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+    path: "/",
+  });
+  res.clearCookie("siad_session", {
     path: "/",
   });
 };
