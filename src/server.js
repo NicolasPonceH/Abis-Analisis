@@ -195,7 +195,8 @@ if (!JWT_SECRET) {
 
 function requireAuth(req, res, next) {
   const token = req.cookies.abis_auth;
-  if (!token) return res.redirect("/login");
+  const nextTarget = req.originalUrl || "/abis";
+  if (!token) return res.redirect("/login?next=" + encodeURIComponent(nextTarget));
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     if (payload && payload.username && payload.username.toLowerCase() === "admin") {
@@ -204,7 +205,7 @@ function requireAuth(req, res, next) {
     req.user = payload;
     next();
   } catch (err) {
-    res.redirect("/login");
+    res.redirect("/login?next=" + encodeURIComponent(nextTarget));
   }
 }
 
@@ -281,9 +282,10 @@ app.use("/api", apiRequireAuth);
 
 app.get("/login", (req, res) => {
   const error = req.query.motivo === "inactividad"
-    ? "Tu sesiÃ³n se cerrÃ³ por inactividad. Ingresa nuevamente para continuar."
+    ? "Tu sesión se cerró por inactividad. Ingresa nuevamente para continuar."
     : null;
-  res.render("login", { error, success: null });
+  const next = req.query.next || "/abis";
+  res.render("login", { error, success: null, next });
 });
 
 app.post("/login", async (req, res) => {
@@ -322,7 +324,8 @@ app.post("/login", async (req, res) => {
           sameSite: "lax",
           path: "/",
         });
-        return res.redirect("/");
+        const nextUrl = req.body.next || req.query.next || "/abis";
+        return res.redirect(nextUrl);
       }
     }
     return res.render("login", { error: "Contraseña incorrecta." });
@@ -377,7 +380,7 @@ app.get("/logout", (req, res) => {
   clearAuthCookie(res);
   const destino = req.query.motivo === "inactividad"
     ? "/login?motivo=inactividad"
-    : "/login";
+    : "/";
   res.redirect(destino);
 });
 
@@ -386,7 +389,24 @@ app.post("/logout", (req, res) => {
   res.status(204).end();
 });
 
-app.get("/", requireAuth, (req, res) => {
+// Portal de Selección de Plataformas (Pantalla Inicial)
+app.get("/", (req, res) => {
+  let user = null;
+  const token = req.cookies.abis_auth;
+  if (token) {
+    try {
+      const payload = jwt.verify(token, JWT_SECRET);
+      if (payload && payload.username && payload.username.toLowerCase() === "admin") {
+        payload.rol = "admin";
+      }
+      user = payload;
+    } catch (_) {}
+  }
+  res.render("portal", { user });
+});
+
+// Panel Principal ABIS (Protegido)
+app.get("/abis", requireAuth, (req, res) => {
   res.render("index", { user: req.user });
 });
 

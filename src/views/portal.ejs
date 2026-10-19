@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#021326">
+  <title>Portal de Acceso - Selección de Plataforma | PDI Chile</title>
+  <link rel="icon" type="image/png" href="/assets/logo-pdi.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <style>
+    :root {
+      --navy-950: #021020;
+      --navy-900: #041933;
+      --navy-850: #072244;
+      --navy-800: #0a2d59;
+      --navy-700: #0e3d77;
+      --gold-500: #FFD100;
+      --gold-400: #FFE033;
+      --gold-600: #D4AD00;
+      --blue-500: #0077FE;
+      --blue-400: #389BFF;
+      --emerald-500: #10B981;
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --border-gold-glass: rgba(255, 209, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at 50% 10%, #06264d 0%, var(--navy-950) 65%, #010810 100%);
+      color: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fondo dinámico y rejilla pericial sutil */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow-1 {
+      position: fixed;
+      top: -150px;
+      left: 15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 119, 254, 0.18) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -150px;
+      right: 15%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(255, 209, 0, 0.10) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Barra Superior Institucional */
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      border-bottom: 1px solid var(--border-glass);
+      background: rgba(2, 16, 32, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 14px 28px;
+    }
+
+    .top-bar-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-pdi {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+    }
+
+    .logo-container {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 209, 0, 0.35);
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-text h2 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gold-500);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .clock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10, 45, 89, 0.5);
+      border: 1px solid var(--border-glass);
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #E2E8F0;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald-500);
+      box-shadow: 0 0 8px var(--emerald-500);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* Contenido Principal */
+    .portal-main {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      max-width: 1240px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Encabezado del Portal */
+    .portal-header {
+      text-align: center;
+      margin-bottom: 44px;
+      max-width: 780px;
+    }
+
+    .portal-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 209, 0, 0.10);
+      border: 1px solid rgba(255, 209, 0, 0.35);
+      color: var(--gold-500);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      box-shadow: 0 0 20px rgba(255, 209, 0, 0.15);
+    }
+
+    .portal-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      color: #FFFFFF;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    .portal-title .highlight {
+      background: linear-gradient(135deg, #FFFFFF 30%, var(--gold-500) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .portal-subtitle {
+      font-size: clamp(14px, 1.8vw, 16px);
+      color: #94A3B8;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    /* Grilla de Sistemas */
+    .systems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 32px;
+      width: 100%;
+      max-width: 1040px;
+    }
+
+    /* Tarjetas de Selección de Sistema */
+    .system-card {
+      position: relative;
+      background: linear-gradient(145deg, rgba(8, 30, 58, 0.85) 0%, rgba(4, 20, 42, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 28px;
+      padding: 38px 32px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .system-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: transparent;
+      transition: all 0.3s ease;
+    }
+
+    .system-card.card-abis:hover {
+      border-color: rgba(255, 209, 0, 0.5);
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 209, 0, 0.2);
+    }
+    .system-card.card-abis::before {
+      background: linear-gradient(90deg, #FFD100, #FFA500);
+    }
+
+    .system-card.card-siad:hover {
+      border-color: rgba(0, 119, 254, 0.6);
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 119, 254, 0.25);
+    }
+    .system-card.card-siad::before {
+      background: linear-gradient(90deg, #0077FE, #00D2FF);
+    }
+
+    /* Contenido de la Tarjeta */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .card-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .system-card:hover .card-icon-box {
+      transform: scale(1.08) rotate(2deg);
+    }
+
+    .icon-box-abis {
+      background: linear-gradient(135deg, rgba(255, 209, 0, 0.2) 0%, rgba(255, 165, 0, 0.1) 100%);
+      border: 1px solid rgba(255, 209, 0, 0.4);
+      color: var(--gold-500);
+      box-shadow: 0 8px 24px rgba(255, 209, 0, 0.15);
+    }
+
+    .icon-box-siad {
+      background: linear-gradient(135deg, rgba(0, 119, 254, 0.2) 0%, rgba(0, 210, 255, 0.1) 100%);
+      border: 1px solid rgba(0, 119, 254, 0.4);
+      color: #389BFF;
+      box-shadow: 0 8px 24px rgba(0, 119, 254, 0.2);
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .badge-abis {
+      background: rgba(255, 209, 0, 0.12);
+      color: var(--gold-500);
+      border: 1px solid rgba(255, 209, 0, 0.3);
+    }
+
+    .badge-siad {
+      background: rgba(0, 119, 254, 0.12);
+      color: #60A5FA;
+      border: 1px solid rgba(0, 119, 254, 0.3);
+    }
+
+    .card-title-group {
+      margin-bottom: 14px;
+    }
+
+    .card-system-name {
+      font-size: 28px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-system-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #CBD5E1;
+      letter-spacing: 0.05em;
+    }
+
+    .card-system-sub {
+      font-size: 14px;
+      font-weight: 600;
+      color: #E2E8F0;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 13.5px;
+      color: #94A3B8;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Lista de capacidades clave */
+    .card-features {
+      list-style: none;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-features li {
+      font-size: 12.5px;
+      color: #CBD5E1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-features li .check-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .check-abis {
+      background: rgba(255, 209, 0, 0.18);
+      color: var(--gold-500);
+    }
+
+    .check-siad {
+      background: rgba(0, 119, 254, 0.2);
+      color: #389BFF;
+    }
+
+    /* Botones de Entrada */
+    .btn-system-access {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 16px 22px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-access-abis {
+      background: linear-gradient(135deg, #FFD100 0%, #E5B800 100%);
+      color: #021326;
+      border: 1px solid #FFE566;
+    }
+    .btn-access-abis:hover {
+      background: linear-gradient(135deg, #FFE033 0%, #FFD100 100%);
+      box-shadow: 0 10px 28px rgba(255, 209, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-access-siad {
+      background: linear-gradient(135deg, #0077FE 0%, #0056B8 100%);
+      color: #FFFFFF;
+      border: 1px solid #4DA8FF;
+    }
+    .btn-access-siad:hover {
+      background: linear-gradient(135deg, #248BFF 0%, #0077FE 100%);
+      box-shadow: 0 10px 28px rgba(0, 119, 254, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .btn-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s ease;
+    }
+
+    .btn-system-access:hover .btn-arrow {
+      transform: translateX(4px);
+    }
+
+    /* Estado de Sesión Activa */
+    .session-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #94A3B8;
+      margin-bottom: 12px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .session-badge-active {
+      color: var(--emerald-500);
+      font-weight: 700;
+    }
+
+    /* Pie Institucional */
+    .portal-footer {
+      position: relative;
+      z-index: 10;
+      margin-top: 30px;
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid var(--border-glass);
+      width: 100%;
+      max-width: 1040px;
+    }
+
+    .footer-badges {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #64748B;
+      font-weight: 600;
+    }
+
+    .footer-item span.icon {
+      color: var(--gold-500);
+    }
+
+    .footer-copy {
+      font-size: 11px;
+      color: #475569;
+    }
+
+    @media (max-width: 768px) {
+      .portal-header {
+        margin-bottom: 30px;
+      }
+      .systems-grid {
+        grid-template-columns: 1fr;
+      }
+      .system-card {
+        padding: 28px 24px 24px;
+      }
+      .top-bar {
+        padding: 12px 18px;
+      }
+      .clock-badge {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Barra Superior -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="brand-pdi">
+        <div class="logo-container">
+          <img src="/assets/logo-pdi.png" alt="Logo PDI">
+        </div>
+        <div class="brand-text">
+          <h2>Policía de Investigaciones de Chile</h2>
+          <span>Portal de Acceso a Plataformas Operativas</span>
+        </div>
+      </div>
+
+      <div class="clock-badge">
+        <span class="status-dot"></span>
+        <span id="relojSantiago">--:--:--</span>
+        <span style="color: #64748B;">| SCL</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Central: Selector de Sistemas -->
+  <main class="portal-main">
+    <div class="portal-header">
+      <div class="portal-pill">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Acceso Operativo Seguro</span>
+      </div>
+      <h1 class="portal-title">¿A qué sistema desea <span class="highlight">ingresar?</span></h1>
+      <p class="portal-subtitle">Seleccione la plataforma institucional correspondiente a sus funciones periciales para iniciar sesión e ingresar directamente al subsistema.</p>
+    </div>
+
+    <!-- Grilla de Selección: ABIS vs SIAD -->
+    <div class="systems-grid">
+      
+      <!-- Opción 1: SISTEMA ABIS -->
+      <section class="system-card card-abis" id="card-abis">
+        <div>
+          <div class="card-top">
+            <div class="card-icon-box icon-box-abis">
+              <span class="material-symbols-outlined" style="font-size: 34px;">fingerprint</span>
+            </div>
+            <span class="card-badge badge-abis">Biometría y Enrolamiento</span>
+          </div>
+
+          <div class="card-title-group">
+            <div class="card-system-name">
+              <span>ABIS</span>
+              <span class="card-system-tag">v0.1.0</span>
+            </div>
+            <div class="card-system-sub">Sistema Automatizado de Identificación Biométrica</div>
+          </div>
+
+          <p class="card-desc">Plataforma central para auditoría pericial, reportería automatizada de enrolamientos, estadísticas históricas de extranjeros y control biométrico institucional.</p>
+
+          <ul class="card-features">
+            <li>
+              <span class="check-icon check-abis"><i class="fa-solid fa-check"></i></span>
+              <span>Auditoría diaria y semanal de enrolamiento biométrico</span>
+            </li>
+            <li>
+              <span class="check-icon check-abis"><i class="fa-solid fa-check"></i></span>
+              <span>Métricas de flujo, tendencias y comparación de períodos</span>
+            </li>
+            <li>
+              <span class="check-icon check-abis"><i class="fa-solid fa-check"></i></span>
+              <span>Generación de informes ejecutivos en Word (.docx) y Excel (.xlsx)</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <% if (typeof user !== 'undefined' && user) { %>
+            <div class="session-indicator">
+              <span class="status-dot"></span>
+              <span>Sesión activa como <strong class="session-badge-active"><%= user.username %></strong> (<%= user.rol %>)</span>
+            </div>
+            <a href="/abis" class="btn-system-access btn-access-abis" id="btn-portal-abis">
+              <span>Ingresar al Panel ABIS</span>
+              <span class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+          <% } else { %>
+            <a href="/login" class="btn-system-access btn-access-abis" id="btn-portal-abis">
+              <span>Ingresar a Sistema ABIS</span>
+              <span class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+          <% } %>
+        </div>
+      </section>
+
+      <!-- Opción 2: SISTEMA SIAD -->
+      <section class="system-card card-siad" id="card-siad">
+        <div>
+          <div class="card-top">
+            <div class="card-icon-box icon-box-siad">
+              <span class="material-symbols-outlined" style="font-size: 34px;">document_scanner</span>
+            </div>
+            <span class="card-badge badge-siad">Análisis Documental y Forense</span>
+          </div>
+
+          <div class="card-title-group">
+            <div class="card-system-name">
+              <span>SIAD</span>
+              <span class="card-system-tag">v2.4.0</span>
+            </div>
+            <div class="card-system-sub">Sistema Inteligente de Análisis Documental</div>
+          </div>
+
+          <p class="card-desc">Procesamiento inteligente con OCR forense para partes policiales, detección automática de evidencias, cruce de expedientes y analítica con datos protegidos.</p>
+
+          <ul class="card-features">
+            <li>
+              <span class="check-icon check-siad"><i class="fa-solid fa-check"></i></span>
+              <span>Extracción OCR y normalización pericial de partes policiales</span>
+            </li>
+            <li>
+              <span class="check-icon check-siad"><i class="fa-solid fa-check"></i></span>
+              <span>Correlación forense de armamento, drogas, patentes e imputados</span>
+            </li>
+            <li>
+              <span class="check-icon check-siad"><i class="fa-solid fa-check"></i></span>
+              <span>Tablero estadístico institucional con cifrado de identidades (AES-256)</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <a href="/analisis/login" class="btn-system-access btn-access-siad" id="btn-portal-siad">
+            <span>Ingresar a Sistema SIAD</span>
+            <span class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Pie del Portal -->
+    <footer class="portal-footer">
+      <div class="footer-badges">
+        <div class="footer-item">
+          <span class="icon material-symbols-outlined" style="font-size: 15px;">lock</span>
+          <span>Cifrado NIST AES-256-GCM en Reposo</span>
+        </div>
+        <div class="footer-item">
+          <span class="icon material-symbols-outlined" style="font-size: 15px;">verified_user</span>
+          <span>Control de Acceso y Auditoría JWT</span>
+        </div>
+        <div class="footer-item">
+          <span class="icon material-symbols-outlined" style="font-size: 15px;">policy</span>
+          <span>Protección de Identidades Ley 19.628 / 20.084</span>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 Policía de Investigaciones de Chile · Jefatura Nacional de Inteligencia Policial (JENAPOL). Plataforma de Uso Restringido y Confidencial.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Reloj en tiempo real
+    function updateClock() {
+      const now = new Date();
+      const options = { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+      const timeStr = new Intl.DateTimeFormat('es-CL', options).format(now);
+      const el = document.getElementById('relojSantiago');
+      if (el) el.textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>

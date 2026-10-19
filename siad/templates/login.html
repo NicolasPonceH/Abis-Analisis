@@ -433,12 +433,15 @@
 
     <!-- Formulario -->
     <form class="card" method="post" action="{{ url_for('login') }}">
+      <a href="/" style="display: inline-flex; align-items: center; gap: 8px; color: #64748B; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; margin-bottom: 18px; padding: 7px 14px; border-radius: 10px; background: #F1F5F9; border: 1px solid #E2E8F0; width: fit-content; transition: all 0.2s;" onmouseover="this.style.color='#062B57'; this.style.borderColor='#CBD5E1'; this.style.background='#E2E8F0';" onmouseout="this.style.color='#64748B'; this.style.borderColor='#E2E8F0'; this.style.background='#F1F5F9';">
+        ← Cambiar de Sistema
+      </a>
       <div class="logo-wrap">
         <div class="logo-badge">
           <img src="{{ url_for('static', filename='img/pdi-logo-transparent.png') }}" alt="PDI" style="filter: brightness(0) invert(1);">
         </div>
-        <h1>SIAD</h1>
-        <p class="subtitle" style="font-size: 14px; color: #475569; margin-top: 4px; line-height: 1.45;"><strong>¡Bienvenido!</strong> Ingresa tus credenciales para acceder al sistema.</p>
+        <h1>Acceso a Sistema SIAD</h1>
+        <p class="subtitle" style="font-size: 14px; color: #475569; margin-top: 4px; line-height: 1.45;"><strong>Módulo Pericial</strong> · Ingresa tus credenciales para acceder al análisis documental.</p>
       </div>
 
       {% with messages = get_flashed_messages() %}
