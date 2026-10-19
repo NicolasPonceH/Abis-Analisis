@@ -380,9 +380,7 @@ def get_stats(dias=None, agrupacion=None):
                 entidades_filter = "WHERE documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 ent_params = [int(dias)]
 
-            # Las edades de detenidos y víctimas se conservan dentro del texto de la
-            # entidad (p. ej. "Juan Pérez, 15 años"). Esta expresión cubre 0-17 años
-            # y las etiquetas institucionales explícitas para documentos sin ed            if dias:
+                # Clasificación mediante campos nativos tipo_persona y es_menor
                 imputados_filter = "WHERE (tipo_persona != 'victima' OR tipo_persona IS NULL) AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 victimas_filter = "WHERE tipo_persona = 'victima' AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
                 detenidos_menores_filter = "WHERE tipo_persona != 'victima' AND es_menor = TRUE AND documento_id IN (SELECT id FROM documentos WHERE fecha_procesamiento >= CURRENT_DATE - INTERVAL '%s days')"
