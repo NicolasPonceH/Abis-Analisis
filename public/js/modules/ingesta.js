@@ -1,6 +1,6 @@
 import { state } from '../core/state.js';
 import { escapeHtml } from '../core/utils.js';
-import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
+import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js?v=28';
 import { loadMetrics } from './panel-ejecutivo.js';
 import { loadTrendData } from './tendencias.js?v=20261014-2';
 import { cargarBitacoraAuditoria } from './auditoria.js';

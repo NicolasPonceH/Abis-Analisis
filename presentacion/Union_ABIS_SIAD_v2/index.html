@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unión de Sistemas ABIS & SIAD — Policía de Investigaciones de Chile</title>
+
+  <!-- Fuentes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Iconos FontAwesome 6.5.2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+
+  <!-- Estilos Personalizados Modernos e Institucionales -->
+  <link rel="stylesheet" href="styles.css?v=20261021">
+</head>
+
+<body>
+
+  <!-- Contador Flotante Centrado en la Parte Superior -->
+  <header class="pres-header">
+    <span class="presentation-location" id="slideLocation">Portada</span>
+    <div class="header-center">
+      <div class="slide-indicator">
+        <span id="currentSlideNum">1</span>
+        <span class="divider">/</span>
+        <span id="totalSlidesNum">12</span>
+      </div>
+    </div>
+    <button type="button" class="fullscreen-btn" id="fullscreenBtn" title="Pantalla completa" aria-label="Activar pantalla completa"><i class="fa-solid fa-expand" aria-hidden="true"></i></button>
+  </header>
+
+  <!-- Botones de Navegación Flotantes Laterales -->
+  <button class="floating-nav-btn prev-btn" id="prevSlideBtn" title="Slide Anterior (Flecha Izquierda)" aria-label="Anterior">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+  <button class="floating-nav-btn next-btn" id="nextSlideBtn" title="Siguiente Slide (Flecha Derecha)" aria-label="Siguiente">
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+
+  <!-- Fondo Dinámico con Elementos Flotantes y Auras Ambientales -->
+  <div class="ambient-background" aria-hidden="true">
+    <!-- Esferas luminosas difuminadas -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="ambient-orb orb-4"></div>
+
+    <!-- Iconos flotantes decorativos 3D con giro continuo -->
+    <i class="thanks-floating-icon icon-1 fa-solid fa-fingerprint"></i>
+    <i class="thanks-floating-icon icon-2 fa-solid fa-brain"></i>
+    <i class="thanks-floating-icon icon-3 fa-solid fa-database"></i>
+    <i class="thanks-floating-icon icon-4 fa-solid fa-shield-halved"></i>
+    <i class="thanks-floating-icon icon-5 fa-solid fa-file-shield"></i>
+    <i class="thanks-floating-icon icon-6 fa-solid fa-diagram-project"></i>
+
+    <!-- Partículas e insignias tecnológicas flotantes -->
+    <div class="floating-particle p-code-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </svg>
+      <span>ABIS + SIAD v2.0</span>
+    </div>
+
+    <div class="floating-particle p-data-1">
+      <span class="pulse-node gold"></span>
+      <span>PostgreSQL: Abis_OCR</span>
+    </div>
+
+    <div class="floating-particle p-shape-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+      </svg>
+      <span>Portal ABIS / SIAD</span>
+    </div>
+
+    <div class="floating-particle p-node-1">
+      <span class="pulse-node blue"></span>
+      <span>OCR &amp; NLP Activo</span>
+    </div>
+
+    <div class="floating-particle p-node-2">
+      <span class="pulse-node green"></span>
+      <span>Estado: Integrado OK</span>
+    </div>
+
+    <!-- Malla de perspectiva 3D de fondo -->
+    <div class="ambient-grid-pattern"></div>
+  </div>
+
+  <!-- Contenedor Principal Reveal.js -->
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ===================================================================
+           SLIDE 1: PORTADA HERO (TEXTO AL MEDIO)
+           =================================================================== -->
+      <section data-title="Portada">
+        <div class="slide-content cover-layout">
+          <div style="margin-bottom: 18px;">
+            <img src="./assets/logo-pdi.png" alt="Logo PDI"
+              style="width: 125px; filter: brightness(0) invert(1) drop-shadow(0 10px 20px rgba(0,0,0,0.6)); border-radius: 10px;">
+          </div>
+
+          <div class="cover-badge">
+            <span class="badge-tag">INTEGRACIÓN ESTRATÉGICA INSTITUCIONAL</span>
+            <span class="badge-ver">PDI CHILE</span>
+          </div>
+
+          <h1 class="cover-title">
+            Unión de Sistemas <br>
+            <span class="gradient-text">ABIS &amp; SIAD</span>
+          </h1>
+
+          <p class="cover-desc">
+            Consolidación del ecosistema de <strong>Enrolamiento Biométrico</strong> y el <strong>Sistema de Análisis Documental con OCR e Inteligencia Artificial</strong> bajo un núcleo unificado en PostgreSQL y autenticación institucional compartida.
+          </p>
+          <button type="button" class="cover-cta" id="startPresBtn">Explorar la plataforma <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 2: CONTEXTO DE LOS SISTEMAS (SRS Y DOCUMENTOS TÉCNICOS)
+           =================================================================== -->
+      <section data-title="Contexto de los Sistemas">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-book-open"></i> CONTEXTO Y PROPÓSITO ORIGINAL</div>
+            <h2 class="slide-heading">¿Qué Hace Cada Sistema?</h2>
+            <p class="slide-lead">Definición de requerimientos técnicos y funcionales según las especificaciones originales del proyecto.</p>
+          </div>
+
+          <div class="grid-2-col">
+            <!-- Tarjeta ABIS -->
+            <div class="glass-box blue-border">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #0B5ED7; font-size: 1.4rem; border: 1px solid #bfdbfe;">
+                    <i class="fa-solid fa-fingerprint"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #001F44;">Sistema ABIS</h3>
+                    <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #0B5ED7; font-weight: 700;">IDENTIFICACIÓN BIOMÉTRICA</span>
+                  </div>
+                </div>
+                <span class="domain-abis table-domain-tag">+95.000 Registros</span>
+              </div>
+
+              <ul class="clean-list">
+                <li>
+                  <span class="icon-check-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div><strong>Motor ETL de Enrolamientos:</strong> Ingesta automatizada de archivos Excel diarios, extrayendo data cruda y resolviendo inconsistencias regionales y cuarteles.</div>
+                </li>
+                <li>
+                  <span class="icon-check-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div><strong>Modelo Relacional 3NF:</strong> Normalización estricta de nacionalidades, cuarteles, unidades, géneros y auto-aprendizaje de catálogo de profesiones.</div>
+                </li>
+                <li>
+                  <span class="icon-check-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div><strong>Métricas PDI &amp; Telegram Bot:</strong> Monitoreo de sincronizados vs pendientes/errores y envío automatizado de reportes estadísticos a jefaturas.</div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Tarjeta SIAD -->
+            <div class="glass-box gold-border">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 44px; height: 44px; border-radius: 12px; background: #fffbeb; display: flex; align-items: center; justify-content: center; color: #d97706; font-size: 1.4rem; border: 1px solid #fde68a;">
+                    <i class="fa-solid fa-brain"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #001F44;">Sistema SIAD</h3>
+                    <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #d97706; font-weight: 700;">ANÁLISIS DOCUMENTAL &amp; OCR</span>
+                  </div>
+                </div>
+                <span class="domain-siad table-domain-tag">IA &amp; Entidades</span>
+              </div>
+
+              <ul class="clean-list">
+                <li>
+                  <span class="icon-check-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div><strong>Motor OCR &amp; Extracción Digital:</strong> Reconocimiento de texto incrustado en partes policiales escaneados y documentos PDF mediante Tesseract y PyMuPDF.</div>
+                </li>
+                <li>
+                  <span class="icon-check-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div><strong>Resumen por IA &amp; Extracción Forense:</strong> Detección y cuantificación estructurada de <strong>vehículos</strong> (patentes PPU), <strong>armas</strong> (calibres, series) y <strong>drogas</strong> (pesajes).</div>
+                </li>
+                <li>
+                  <span class="icon-check-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div><strong>Exportación Word (.docx):</strong> Generación automática de oficios policiales editables y persistencia auditable en base de datos PostgreSQL.</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 3: ARQUITECTURA DE UNIFICACIÓN (ECOSISTEMA INTEGRADO)
+           =================================================================== -->
+      <section data-title="Arquitectura de Unificación">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-network-wired"></i> ARQUITECTURA INTEGRADA</div>
+            <h2 class="slide-heading">Fusión de Ecosistemas</h2>
+            <p class="slide-lead">Consolidación de dos plataformas independientes en una suite de alta disponibilidad, eliminando silos de datos.</p>
+          </div>
+
+          <div class="grid-3-col" style="margin-bottom: 24px;">
+            <div class="glass-box">
+              <div style="color: #0B5ED7; font-size: 1.8rem; margin-bottom: 10px;"><i class="fa-solid fa-file-import"></i></div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #001F44; margin-bottom: 8px;">1. Ingesta Continua</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.5;">
+                Recepción continua de enrolamientos biométricos (planillas Excel y Oracle).
+              </p>
+            </div>
+
+            <div class="glass-box gold-border">
+              <div style="color: #d97706; font-size: 1.8rem; margin-bottom: 10px;"><i class="fa-solid fa-microchip"></i></div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #001F44; margin-bottom: 8px;">2. Procesamiento &amp; IA</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.5;">
+                Normalización ETL en Node.js combinada con el motor Python de OCR (Tesseract), NLP y modelos de inteligencia para clasificación de evidencias.
+              </p>
+            </div>
+
+            <div class="glass-box">
+              <div style="color: #059669; font-size: 1.8rem; margin-bottom: 10px;"><i class="fa-solid fa-server"></i></div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #001F44; margin-bottom: 8px;">3. Núcleo Común</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.5;">
+                Persistencia centralizada en la base de datos PostgreSQL <strong>Abis_OCR</strong>, compartiendo esquema de autenticación, bitácora y auditoría criptográfica.
+              </p>
+            </div>
+          </div>
+
+          <!-- Diagrama Visual de Flujo de Arquitectura -->
+          <div class="glass-box" style="padding: 18px 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 16px; text-align: center;">
+              
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 16px; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; color: #1e40af;">
+                  <i class="fa-solid fa-id-card"></i> Datos Biométricos
+                </span>
+                <span style="font-size: 0.78rem; color: #64748b; font-weight: 600;">Enrolamientos PDI</span>
+              </div>
+
+              <div style="color: #0B5ED7; font-size: 1.5rem;"><i class="fa-solid fa-arrow-right"></i></div>
+
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span style="background: #fffbeb; border: 2px solid #f59e0b; padding: 10px 20px; border-radius: 10px; font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #92400e; box-shadow: 0 4px 14px rgba(245,158,11,0.2);">
+                  <i class="fa-solid fa-database"></i> PostgreSQL [Abis_OCR]
+                </span>
+                <span style="font-family: var(--font-mono); font-size: 0.78rem; color: #059669; font-weight: 700;">Auth &amp; Tablas Maestras Compartidas</span>
+              </div>
+
+              <div style="color: #0B5ED7; font-size: 1.5rem;"><i class="fa-solid fa-arrow-left"></i></div>
+
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span style="background: #faf5ff; border: 1px solid #e9d5ff; padding: 8px 16px; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; color: #7e22ce;">
+                  <i class="fa-solid fa-file-pdf"></i> Evidencias Documentales
+                </span>
+                <span style="font-size: 0.78rem; color: #64748b; font-weight: 600;">OCR / Armas / Autos / Drogas</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 4: UNIFICACIÓN DE BASE DE DATOS POSTGRESQL (Abis_OCR)
+           =================================================================== -->
+      <section data-title="Base de Datos Unificada">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-database"></i> PERSISTENCIA RELACIONAL ROBUSTA</div>
+            <h2 class="slide-heading">Unificación de Base de Datos PostgreSQL</h2>
+            <p class="slide-lead">Consolidación en la base de datos <strong>Abis_OCR</strong>: integridad referencial, esquema 3NF y modelo extensible.</p>
+          </div>
+
+          <div class="schema-container">
+            <!-- Columna Izquierda: Esquema Estructurado por Dominios -->
+            <div class="schema-tables-grid">
+              <!-- Dominio Auth Compartido -->
+              <div class="table-card" style="border-left: 4px solid #10b981;">
+                <div class="table-header">
+                  <span class="table-name"><i class="fa-solid fa-users-gear" style="color: #10b981;"></i> public.usuarios</span>
+                  <span class="table-domain-tag domain-auth">AUTENTICACIÓN COMPARTIDA</span>
+                </div>
+                <div class="table-cols">
+                  <strong>id</strong> (PK, BigInt) | <strong>username</strong> (UNIQUE) | <strong>password_hash</strong> (Bcrypt) | <strong>rol</strong> (admin / operador) | ultimo_ingreso | creado_en
+                </div>
+              </div>
+
+              <!-- Dominio ABIS -->
+              <div class="table-card" style="border-left: 4px solid #38bdf8;">
+                <div class="table-header">
+                  <span class="table-name"><i class="fa-solid fa-fingerprint" style="color: #38bdf8;"></i> Módulo ABIS (Biometría &amp; Control)</span>
+                  <span class="table-domain-tag domain-abis">ESQUEMA ABIS</span>
+                </div>
+                <div class="table-cols">
+                  • <strong>registro_enrolamiento:</strong> id_registro (PK), fecha_enrolamiento, cuartel, unidad, nacionalidad, género, profesión.<br>
+                  • <strong>Catálogos Maestros:</strong> cuartel, unidad, region, nacionalidad, profesion, estado_proceso, equipo.<br>
+                  • <strong>Auditoría &amp; Notificaciones:</strong> registro_auditoria_cifrada, scheduler_config, destinatarios_telegram.
+                </div>
+              </div>
+
+              <!-- Dominio SIAD -->
+              <div class="table-card" style="border-left: 4px solid var(--pdi-gold);">
+                <div class="table-header">
+                  <span class="table-name"><i class="fa-solid fa-file-contract" style="color: var(--pdi-gold);"></i> Módulo SIAD (OCR &amp; Documental)</span>
+                  <span class="table-domain-tag domain-siad">ESQUEMA SIAD</span>
+                </div>
+                <div class="table-cols">
+                  • <strong>documentos:</strong> id (PK), nombre_archivo, texto_original, resumen, fecha_procesamiento, usuario_username (FK).<br>
+                  • <strong>Entidades Detectadas:</strong> entidades_armas (calibre, serie), entidades_vehiculos (patente PPU, marca), entidades_drogas (sustancia, pesaje), entidades_personas.
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Captura / Evidencia Visual de Base de Datos -->
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="evidence-card" data-img="./assets/BaseOCR.png" data-caption="Base de Datos Unificada PostgreSQL: Abis_OCR (Query &amp; Ecosistema ABIS + SIAD)">
+                <div class="evidence-img-box" style="aspect-ratio: 16/9;">
+                  <img src="./assets/BaseOCR.png" alt="Base de Datos Unificada PostgreSQL Abis_OCR">
+                </div>
+                <div class="evidence-tag">
+                  <span><i class="fa-solid fa-database"></i> PostgreSQL: Base de Datos Abis_OCR</span>
+                  <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #0B5ED7;"><i class="fa-solid fa-magnifying-glass-plus"></i> Clic para Zoom</span>
+                </div>
+              </div>
+
+              <div class="glass-box" style="padding: 18px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <i class="fa-solid fa-circle-check" style="color: #059669; font-size: 1.25rem;"></i>
+                  <span style="font-family: var(--font-heading); font-weight: 800; font-size: 1.05rem; color: #001F44;">Beneficios de la Base Unificada</span>
+                </div>
+                <p style="font-size: 0.95rem; color: #334155; line-height: 1.55;">
+                  Respaldos centralizados en un único archivo <code>.sql</code>, eliminación de duplicidad de servidores PostgreSQL, y preparación inmediata para cruces entre enrolados e identidades documentales.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Protección de datos: evidencia directa y trazabilidad documental -->
+      <section data-title="Datos personales cifrados" data-chapter="Seguridad">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-shield-halved"></i> PROTECCIÓN EN POSTGRESQL</div>
+            <h2 class="slide-heading">Datos personales cifrados</h2>
+            <p class="slide-lead">La consulta directa de <code>entidades_personas</code> muestra los valores protegidos que almacena el sistema.</p>
+          </div>
+          <div class="security-showcase">
+            <figure class="evidence-card security-evidence" data-img="./assets/base ash 1.jpg" data-caption="Consulta de entidades_personas: nombre, RUT y teléfono contienen valores cifrados cuando existe información.">
+              <div class="capture-heading"><span><i class="fa-solid fa-database"></i> Consulta directa en PostgreSQL</span><span>01 / CIFRADO</span></div>
+              <div class="evidence-img-box"><img src="./assets/base ash 1.jpg" alt="Consulta SQL de entidades_personas con nombres y RUT cifrados, y teléfonos cifrados o nulos"></div>
+              <figcaption class="capture-caption"><i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar consulta y resultados</figcaption>
+            </figure>
+            <div class="security-explanation">
+              <span class="security-label">CIFRADO DE CAMPOS</span>
+              <h3>AES-256-GCM</h3>
+              <p>El sistema cifra los datos personales antes de almacenarlos.</p>
+              <dl class="security-facts">
+                <div><dt>Nombre, RUT y teléfono</dt><dd>Los valores presentes aparecen como cadenas cifradas. Los campos sin información conservan su valor nulo.</dd></div>
+                <div><dt>Lectura desde la aplicación</dt><dd>La aplicación utiliza la clave configurada para recuperar la información en sus flujos autorizados.</dd></div>
+              </dl>
+              <div class="security-note"><i class="fa-solid fa-lock"></i><span>La captura evidencia el cifrado de estos campos, no de todas las columnas de la base.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Trazabilidad documental" data-chapter="Seguridad">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-link"></i> CONTEXTO DEL REGISTRO</div>
+            <h2 class="slide-heading">Cada registro conserva su origen</h2>
+            <p class="slide-lead">El cifrado de la identidad convive con la relación entre la persona y el documento que la contiene.</p>
+          </div>
+          <div class="trace-showcase">
+            <div class="trace-explanation">
+              <span class="security-label">RELACIÓN DOCUMENTAL</span>
+              <h3>Persona y documento<br>siguen vinculados</h3>
+              <p>La consulta une <code>entidades_personas</code> con <code>documentos</code> mediante <code>documento_id</code>.</p>
+              <dl class="trace-facts">
+                <div><dt>Clasificación</dt><dd>Tipo de persona e indicador de minoría de edad.</dd></div>
+                <div><dt>Documento de origen</dt><dd>Nombre del archivo asociado a cada registro.</dd></div>
+                <div><dt>Responsable y fecha</dt><dd>Usuario que realizó la carga y fecha de procesamiento.</dd></div>
+              </dl>
+              <p class="trace-conclusion">La consulta muestra metadatos de trazabilidad sin seleccionar nombre, RUT ni teléfono.</p>
+            </div>
+            <figure class="evidence-card security-evidence trace-evidence" data-img="./assets/base ash 2.jpg" data-caption="Relación entre entidades_personas y documentos: clasificación, archivo de origen, fecha de procesamiento y usuario de carga.">
+              <div class="capture-heading"><span><i class="fa-solid fa-file-shield"></i> Relación persona / documento</span><span>02 / ORIGEN</span></div>
+              <div class="evidence-img-box"><img src="./assets/base ash 2.jpg" alt="Consulta SQL que relaciona personas con archivo, fecha y usuario de carga mediante documento_id"></div>
+              <figcaption class="capture-caption"><i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar relaciones y resultados</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- Acceso actual: el portal permite elegir el sistema antes de ingresar -->
+      <section data-title="Portal de acceso ABIS / SIAD" data-chapter="Acceso">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-door-open"></i> ACCESO A LAS PLATAFORMAS</div>
+            <h2 class="slide-heading">Una entrada, dos sistemas</h2>
+            <p class="slide-lead">Al abrir la plataforma aparece directamente el portal para escoger entre ABIS y SIAD.</p>
+          </div>
+          <div class="portal-showcase">
+            <figure class="evidence-card portal-evidence" data-img="./assets/portal-unificado.png" data-caption="Portal actual de acceso: selector de ABIS para identificación biométrica y SIAD para análisis documental.">
+              <div class="capture-heading"><span><i class="fa-solid fa-layer-group"></i> Portal unificado</span><span>VISTA ACTUAL</span></div>
+              <div class="evidence-img-box"><img src="./assets/portal-unificado.png" alt="Pantalla actual que permite elegir Sistema ABIS o Sistema SIAD con sus animaciones de tablet y escáner"></div>
+              <figcaption class="capture-caption"><i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar el portal de selección</figcaption>
+            </figure>
+            <div class="portal-explanation">
+              <ol class="access-steps">
+                <li><span class="access-step-number">01</span><div><h3>Elegir el sistema</h3><p>ABIS para enrolamiento biométrico. SIAD para análisis documental con OCR e IA.</p></div></li>
+                <li><span class="access-step-number">02</span><div><h3>Validar el acceso</h3><p>Si no hay una sesión vigente, se solicita el inicio de sesión al ingresar al sistema elegido.</p></div></li>
+                <li><span class="access-step-number">03</span><div><h3>Continuar trabajando</h3><p>Con la sesión activa, el portal identifica al usuario y permite continuar hacia su plataforma.</p></div></li>
+              </ol>
+              <div class="access-foundation"><i class="fa-solid fa-users-gear"></i><div><strong>Autenticación compartida</strong><p>ABIS reutiliza el motor de SIAD y la tabla de usuarios. Se mantienen las credenciales y los roles de administrador y operador.</p></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Diagnóstico del indicador de inconsistencias y evidencia del panel -->
+      <section data-title="Corrección del conteo de errores" data-chapter="ABIS">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-triangle-exclamation"></i> CONTROL DE CALIDAD EN ABIS</div>
+            <h2 class="slide-heading">Por qué no se contabilizaban los errores</h2>
+            <p class="slide-lead">El indicador revisaba solo la sincronización y omitía otros estados de error del registro.</p>
+          </div>
+          <div class="security-showcase error-showcase">
+            <figure class="evidence-card security-evidence error-evidence" data-img="./assets/abisconerror.png" data-caption="Panel ABIS con inconsistencias visibles. Captura completa aportada para mostrar el resultado del cambio en el conteo.">
+              <div class="capture-heading"><span><i class="fa-solid fa-chart-column"></i> Panel ABIS con inconsistencias</span><span>CONTEO ACTUALIZADO</span></div>
+              <div class="evidence-img-box"><img src="./assets/abisconerror.png" alt="Panel ejecutivo ABIS que muestra 2.402 inconsistencias y su distribución por cuartel"></div>
+              <figcaption class="capture-caption"><i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar captura completa con zoom</figcaption>
+            </figure>
+            <div class="security-explanation">
+              <dl class="security-facts error-facts">
+                <div><dt>La causa identificada</dt><dd>El panel buscaba «ERROR» únicamente en el estado de sincronización. Los errores de registro biométrico y del estado general quedaban fuera del cálculo.</dd></div>
+                <div><dt>Por qué aparecía cero</dt><dd>Un registro podía estar sincronizado y tener un error en el Excel. Si la sincronización estaba correcta, el indicador mostraba «Sin Incidentes».</dd></div>
+                <div><dt>Qué cambió en el conteo</dt><dd>Ahora contempla errores de registro, sincronización y estado general. Además, suma las filas rechazadas durante la ingesta.</dd></div>
+              </dl>
+              <p class="security-note"><i class="fa-solid fa-circle-check"></i> Cada registro afectado cuenta una sola vez, aunque tenga varios estados de error.</p>
+            </div>
+          </div>
+          <aside class="notes">Causa confirmada al comparar el cambio e3ac156: el panel antes obtenía errObj solo de data.sincronizacion. El reporte actual calcula total_inconsistencias mediante condiciones OR para registro, sincronización y estado general, y agrega filas_error de los lotes completados según la fecha de ingesta. La captura ilustra el panel actualizado, sin constituir una conciliación independiente de sus cifras.</aside>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 7: SISTEMA COMPLETO — MÓDULOS ABIS EN OPERACIÓN
+           =================================================================== -->
+      <section data-title="Módulos ABIS">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-desktop"></i> PLATAFORMA INTEGRAL</div>
+            <h2 class="slide-heading">Sistema ABIS: Módulos Operacionales</h2>
+            <p class="slide-lead">Control de enrolamiento biométrico, dashboards de mando, ingesta con cifrado AES-256 y administración de usuarios.</p>
+          </div>
+          <div class="grid-4-col">
+            <div class="evidence-card" data-img="./assets/02-abis-dashboard.png" data-caption="Dashboard Ejecutivo ABIS — Control Diario y Métricas PDI"><div class="evidence-img-box"><img src="./assets/02-abis-dashboard.png" alt="Dashboard ABIS"></div><div class="evidence-tag"><span><i class="fa-solid fa-chart-pie"></i> Dashboard Ejecutivo</span></div></div>
+            <div class="evidence-card" data-img="./assets/03-abis-ingesta.png" data-caption="Módulo de Ingesta ETL ABIS — Procesamiento y Cifrado AES-256"><div class="evidence-img-box"><img src="./assets/03-abis-ingesta.png" alt="Ingesta ABIS"></div><div class="evidence-tag"><span><i class="fa-solid fa-file-arrow-up"></i> Ingesta ETL Segura</span></div></div>
+            <div class="evidence-card" data-img="./assets/04-abis-tendencias.png" data-caption="Analítica de Tendencias — Evolución y Top Sociolaboral"><div class="evidence-img-box"><img src="./assets/04-abis-tendencias.png" alt="Tendencias ABIS"></div><div class="evidence-tag"><span><i class="fa-solid fa-arrow-trend-up"></i> Métricas &amp; Tendencias</span></div></div>
+            <div class="evidence-card" data-img="./assets/09-abis-ajustes-administracion.png" data-caption="Módulo de Ajustes — Gestión Unificada de Usuarios y Credenciales"><div class="evidence-img-box"><img src="./assets/09-abis-ajustes-administracion.png" alt="Usuarios ABIS"></div><div class="evidence-tag"><span><i class="fa-solid fa-user-shield"></i> Gestión de Usuarios</span></div></div>
+          </div>
+          <div style="margin-top: 18px; text-align: center;"><span style="font-family: var(--font-mono); font-size: 0.85rem; color: rgba(255,255,255,0.65); background: rgba(0,31,68,0.7); padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-circle-info" style="color: var(--pdi-gold);"></i> Haz clic en cualquiera de las capturas para ampliar en pantalla completa con zoom interactivo</span></div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 7: SISTEMA COMPLETO — MÓDULOS SIAD EN OPERACIÓN
+           =================================================================== -->
+      <section data-title="Módulos SIAD">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-file-magnifying-glass"></i> ANÁLISIS FORENSE DIGITAL</div>
+            <h2 class="slide-heading">Sistema SIAD: Módulos Documentales</h2>
+            <p class="slide-lead">Extracción óptica de texto (OCR), síntesis de relatos con Inteligencia Artificial, catálogo pericial y estadísticas.</p>
+          </div>
+
+          <div class="grid-4-col">
+            <!-- 1. Procesamiento OCR -->
+            <div class="evidence-card" data-img="./assets/11-siad-procesamiento.png" data-caption="Procesamiento OCR SIAD — Carga de Documentos y Extracción con IA">
+              <div class="evidence-img-box">
+                <img src="./assets/11-siad-procesamiento.png" alt="Procesamiento SIAD">
+              </div>
+              <div class="evidence-tag">
+                <span><i class="fa-solid fa-robot"></i> Motor OCR &amp; IA</span>
+              </div>
+            </div>
+
+            <!-- 2. Historial Documental -->
+            <div class="evidence-card" data-img="./assets/12-siad-historial.png" data-caption="Historial Documental SIAD — Registro Inmutable y Búsqueda de Casos">
+              <div class="evidence-img-box">
+                <img src="./assets/12-siad-historial.png" alt="Historial SIAD">
+              </div>
+              <div class="evidence-tag">
+                <span><i class="fa-solid fa-folder-open"></i> Historial Documental</span>
+              </div>
+            </div>
+
+            <!-- 3. Estadísticas Operativas -->
+            <div class="evidence-card" data-img="./assets/13-siad-estadisticas.png" data-caption="Estadísticas Forenses SIAD — Conteo de Armas, Vehículos y Drogas">
+              <div class="evidence-img-box">
+                <img src="./assets/13-siad-estadisticas.png" alt="Estadísticas SIAD">
+              </div>
+              <div class="evidence-tag">
+                <span><i class="fa-solid fa-chart-column"></i> Estadísticas Forenses</span>
+              </div>
+            </div>
+
+            <!-- 4. Administración SIAD -->
+            <div class="evidence-card" data-img="./assets/15-siad-administracion.png" data-caption="Administración SIAD — Parámetros del Motor y Seguridad">
+              <div class="evidence-img-box">
+                <img src="./assets/15-siad-administracion.png" alt="Administración SIAD">
+              </div>
+              <div class="evidence-tag">
+                <span><i class="fa-solid fa-sliders"></i> Panel de Configuración</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px; text-align: center;">
+            <span style="font-family: var(--font-mono); font-size: 0.85rem; color: rgba(255,255,255,0.65); background: rgba(0,31,68,0.7); padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1);">
+              <i class="fa-solid fa-circle-info" style="color: var(--pdi-gold);"></i> Haz clic en cualquiera de las capturas para ampliar en pantalla completa con zoom interactivo
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 8: BENEFICIOS ESTRATÉGICOS DE LA UNIÓN
+           =================================================================== -->
+      <section data-title="Beneficios Estratégicos">
+        <div class="slide-content">
+          <div class="slide-header">
+            <div class="slide-pretitle"><i class="fa-solid fa-trophy"></i> IMPACTO INSTITUCIONAL</div>
+            <h2 class="slide-heading">Beneficios de la Integración ABIS + SIAD</h2>
+            <p class="slide-lead">Optimizaciones operativas y de seguridad alcanzadas gracias a la consolidación de ambas soluciones.</p>
+          </div>
+
+          <div class="grid-4-col">
+            <!-- Beneficio 1 -->
+            <div class="glass-box">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; color: #059669; font-size: 1.5rem; margin-bottom: 14px; border: 1px solid #a7f3d0;">
+                <i class="fa-solid fa-database"></i>
+              </div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #001F44; margin-bottom: 8px;">1. Base Centralizada</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.55;">
+                Fin a la fragmentación de bases de datos. Todo el universo transaccional opera en una única instancia PostgreSQL de alto rendimiento.
+              </p>
+            </div>
+
+            <!-- Beneficio 2 -->
+            <div class="glass-box gold-border">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: #fffbeb; display: flex; align-items: center; justify-content: center; color: #d97706; font-size: 1.5rem; margin-bottom: 14px; border: 1px solid #fde68a;">
+                <i class="fa-solid fa-key"></i>
+              </div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #001F44; margin-bottom: 8px;">2. Acceso Unificado</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.55;">
+                Un portal inicial permite escoger ABIS o SIAD. Ambos sistemas mantienen credenciales y roles compartidos, con inicio de sesión cuando corresponde.
+              </p>
+            </div>
+
+            <!-- Beneficio 3 -->
+            <div class="glass-box">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #0B5ED7; font-size: 1.5rem; margin-bottom: 14px; border: 1px solid #bfdbfe;">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+              </div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #001F44; margin-bottom: 8px;">3. Inteligencia Cruzada</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.55;">
+                Capacidad de correlacionar perfiles enrolados biométricamente con personas o antecedentes extraídos mediante OCR en causas periciales.
+              </p>
+            </div>
+
+            <!-- Beneficio 4 -->
+            <div class="glass-box">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: #faf5ff; display: flex; align-items: center; justify-content: center; color: #7e22ce; font-size: 1.5rem; margin-bottom: 14px; border: 1px solid #e9d5ff;">
+                <i class="fa-solid fa-gauge-high"></i>
+              </div>
+              <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #001F44; margin-bottom: 8px;">4. Eficiencia de Costos</h3>
+              <p style="font-size: 0.95rem; color: #334155; line-height: 1.55;">
+                Reducción drástica en costos de mantenimiento, copias de seguridad unificadas y despliegue modular simplificado en infraestructura PDI.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SLIDE 9: CIERRE Y GRACIAS
+           =================================================================== -->
+      <section data-title="Cierre">
+        <div class="slide-content thanks-slide">
+          <i class="thanks-floating-icon icon-1 fa-solid fa-fingerprint"></i>
+          <i class="thanks-floating-icon icon-2 fa-solid fa-brain"></i>
+          <i class="thanks-floating-icon icon-3 fa-solid fa-database"></i>
+          <i class="thanks-floating-icon icon-4 fa-solid fa-shield-halved"></i>
+
+          <div class="thanks-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            PLATAFORMA UNIFICADA ABIS + SIAD
+          </div>
+
+          <div class="thanks-title">Gracias por su atención</div>
+          <div class="thanks-subtitle">Policía de Investigaciones de Chile · 2026</div>
+
+          <div class="thanks-logo">
+            <img src="./assets/logo-pdi.png" alt="Logo PDI"
+              style="height: 65px; filter: brightness(0) invert(1) drop-shadow(0 6px 20px rgba(0,0,0,0.5)); border-radius: 8px;">
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Navegación por secciones y visor de evidencia -->
+  <nav class="chapter-nav" id="chapterNav" aria-label="Ir a una diapositiva"></nav>
+
+  <div id="image-modal" role="dialog" aria-modal="true" aria-labelledby="modal-caption" aria-hidden="true" tabindex="-1">
+    <div class="image-modal-toolbar">
+      <span id="modal-caption">Captura ampliada</span>
+      <div class="image-modal-actions">
+        <button type="button" id="zoomOutBtn" aria-label="Reducir imagen">−</button>
+        <button type="button" id="zoomResetBtn" aria-label="Restablecer zoom">100%</button>
+        <button type="button" id="zoomInBtn" aria-label="Ampliar imagen">+</button>
+        <button type="button" id="closeImageBtn" aria-label="Cerrar imagen">×</button>
+      </div>
+    </div>
+    <img id="modal-img" alt="Captura ampliada" draggable="false">
+    <div class="modal-hint">Arrastra para mover · Rueda o botones para ampliar · Esc para cerrar</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.js"></script>
+  <script src="presentation.js?v=20261021"></script>
+</body>
+
+</html>

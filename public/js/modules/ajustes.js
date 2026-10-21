@@ -1,6 +1,56 @@
 import { state } from '../core/state.js?v=3';
 import { escapeHtml } from '../core/utils.js?v=3';
-import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
+import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js?v=29';
+
+let pendingRecipientDelete = null;
+
+function closeRecipientDeleteModal() {
+  const modal = document.getElementById("recipient-delete-modal");
+  if (!modal) return;
+  modal.hidden = true;
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("settings-modal-open");
+  pendingRecipientDelete = null;
+}
+
+function openRecipientDeleteModal(id, nombre, chatId) {
+  const modal = document.getElementById("recipient-delete-modal");
+  if (!modal) return;
+
+  pendingRecipientDelete = { id, nombre, chatId };
+  const nameEl = document.getElementById("recipient-delete-name");
+  const chatEl = document.getElementById("recipient-delete-chat");
+  if (nameEl) nameEl.textContent = nombre || "Destinatario sin nombre";
+  if (chatEl) chatEl.textContent = chatId || "ID no disponible";
+
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("settings-modal-open");
+  document.getElementById("recipient-delete-cancel")?.focus();
+}
+
+function confirmRecipientDelete() {
+  if (!pendingRecipientDelete) return;
+  const recipient = { ...pendingRecipientDelete };
+  closeRecipientDeleteModal();
+  promptAuthModal(recipient, "destinatario_eliminar");
+}
+
+function setupRecipientDeleteModal() {
+  const modal = document.getElementById("recipient-delete-modal");
+  if (!modal || modal.dataset.eventsBound === "true") return;
+  modal.dataset.eventsBound = "true";
+
+  document.getElementById("recipient-delete-close")?.addEventListener("click", closeRecipientDeleteModal);
+  document.getElementById("recipient-delete-cancel")?.addEventListener("click", closeRecipientDeleteModal);
+  document.getElementById("recipient-delete-confirm")?.addEventListener("click", confirmRecipientDelete);
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeRecipientDeleteModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.hidden) closeRecipientDeleteModal();
+  });
+}
 
 export var liveClockInterval = null;
 
@@ -316,6 +366,7 @@ export function renderScheduleHistory(history) {
 
 export function setupScheduleEvents() {
   setupAuthModalEvents();
+  setupRecipientDeleteModal();
   
   // Toggle Switch Habilitado
   const toggle = document.getElementById("schedule-enabled-toggle");
@@ -1095,8 +1146,5 @@ window.solicitarToggleDestinatario = function(id, nombre, chatId, estadoActual) 
 
 // Solicitar eliminación de destinatario
 window.solicitarEliminarDestinatario = function(id, nombre, chatId) {
-  if (!confirm(`¿Está seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
-    return;
-  }
-  promptAuthModal({ id, nombre, chatId }, "destinatario_eliminar");
+  openRecipientDeleteModal(id, nombre, chatId);
 };

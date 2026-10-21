@@ -14,7 +14,9 @@ export function promptAuthModal(file, actionType = "ingesta") {
   // La sesion ABIS ya fue autenticada en el acceso central. Las operaciones
   // usan ahora permisos de sesion y auditoria, sin pedir la misma clave otra vez.
   if (actionType !== "__legacy_modal__") {
-    const accionesDestructivas = ["ingesta_eliminar", "destinatario_eliminar"];
+    // Las eliminaciones ya se confirman con un modal visual propio de cada flujo.
+    // No encadenar un confirm() nativo del navegador después de esa confirmación.
+    const accionesDestructivas = ["ingesta_eliminar"];
     if (accionesDestructivas.includes(actionType) && !window.confirm("Esta accion eliminara datos del sistema. ¿Deseas continuar?")) {
       closeAuthModal();
       return;
