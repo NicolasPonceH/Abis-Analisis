@@ -162,7 +162,7 @@
   </div>
   <% if (typeof activeSec !== 'undefined' && activeSec === 'horarios') { %>
   <script type="module">
-    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=8';
+    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=9';
     const init = () => {
       setupScheduleEvents();
       loadScheduleSettings();
@@ -175,7 +175,7 @@
   </script>
   <% } %>
   <script type="module" src="/js/components/custom-selects.js?v=3"></script>
-  <script src="/js/session-guard.js?v=2"></script>
+  <script src="/js/session-guard.js?v=3"></script>
   <script>
     (() => {
       const container = document.querySelector('.ajustes-container');
