@@ -118,7 +118,9 @@ function formatearReporte(reporte, opciones = {}) {
   const regData = reporte.registro || [];
   const sincOK = sincData.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.total || 0;
   const regOK = regData.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO"))?.total || 0;
-  const errSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0;
+  const errTotal = exec.totalErrores !== undefined
+    ? exec.totalErrores
+    : (sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0);
   const pendSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("PENDIENTE"))?.total || 0;
 
   let texto = `🏛 <b>PDI - RESUMEN EJECUTIVO ABIS</b>\n`;
@@ -130,7 +132,7 @@ function formatearReporte(reporte, opciones = {}) {
   texto += `📊 <b>KPIs (SLA PDI)</b>\n`;
   texto += `• Sincronización: <b>${exec.tasaSincronizacion || 0}%</b> (${sincOK.toLocaleString("es-CL")}) — <b>${exec.estadoSLA || "Óptimo"}</b>\n`;
   texto += `• Registro Biométrico: <b>${exec.tasaRegistroBiometrico || 0}%</b> (${regOK.toLocaleString("es-CL")})\n`;
-  texto += `• Errores / Inconsistencias: <b>${exec.tasaError || 0}%</b> (${errSinc.toLocaleString("es-CL")})\n`;
+  texto += `• Errores / Inconsistencias: <b>${exec.tasaError || 0}%</b> (${errTotal.toLocaleString("es-CL")})\n`;
   if (pendSinc > 0) {
     texto += `• Pendientes: <b>${pendSinc.toLocaleString("es-CL")}</b>\n`;
   }
@@ -264,10 +266,14 @@ function formatearReporteExtenso(reporte, opciones = {}) {
   texto += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   // 1. Indicadores Clave SLA
+  const errTotalReporte = exec.totalErrores !== undefined
+    ? exec.totalErrores
+    : (sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0);
+
   texto += `📊 <b>INDICADORES CLAVE (SLA PDI)</b>\n`;
   texto += `• Sincronización PDI: <b>${exec.tasaSincronizacion || 0}%</b> (${sincOK.toLocaleString("es-CL")} casos) — <b>${exec.estadoSLA || "Óptimo"}</b>\n`;
   texto += `• Biometría ABIS: <b>${exec.tasaRegistroBiometrico || 0}%</b> (${regOK.toLocaleString("es-CL")} casos)\n`;
-  texto += `• Inconsistencias / Errores: <b>${exec.tasaError || 0}%</b> (${errSinc.toLocaleString("es-CL")} casos)\n`;
+  texto += `• Inconsistencias / Errores: <b>${exec.tasaError || 0}%</b> (${errTotalReporte.toLocaleString("es-CL")} casos)\n`;
   if (pendSinc > 0) {
     texto += `• Casos Pendientes: <b>${pendSinc.toLocaleString("es-CL")}</b> (${Math.round((pendSinc / total) * 1000) / 10}%)\n`;
   }

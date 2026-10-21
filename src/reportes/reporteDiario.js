@@ -36,6 +36,7 @@ async function obtenerReporteDiario(pool, fecha) {
     dispositivos,
     regiones,
     tramosEtarios,
+    errorSummary,
   ] = await Promise.all([
     pool.query(
       "SELECT descripcion, total FROM vw_resumen_estado_diario WHERE fecha_enrolamiento = $1 AND tipo_estado = 'SINCRONIZACION' ORDER BY total DESC",
@@ -86,8 +87,8 @@ async function obtenerReporteDiario(pool, fecha) {
               u.nombre_unidad AS unidad,
               count(*) AS total,
               count(*) FILTER (WHERE r.id_estado_sincronizacion = 1) AS sincronizados,
-              count(*) FILTER (WHERE r.id_estado_sincronizacion = 2) AS con_error,
-              count(*) FILTER (WHERE r.id_estado_sincronizacion = 3) AS pendientes
+              count(*) FILTER (WHERE r.id_estado_registro = 6 OR r.id_estado_general IN (9, 10) OR r.id_estado_sincronizacion = 3) AS con_error,
+              count(*) FILTER (WHERE r.id_estado_registro = 5 OR r.id_estado_sincronizacion = 2) AS pendientes
        FROM registro_enrolamiento r
        JOIN cuartel c ON c.id_cuartel = r.id_cuartel
        JOIN unidad u ON u.id_unidad = c.id_unidad
@@ -134,21 +135,74 @@ async function obtenerReporteDiario(pool, fecha) {
        ORDER BY min(COALESCE(r.edad_exacta, 999)) ASC`,
       [fecha]
     ),
+    pool.query(
+      `SELECT 
+         count(*) FILTER (WHERE id_estado_registro = 6)::int AS errores_registro,
+         count(*) FILTER (WHERE id_estado_sincronizacion = 3)::int AS errores_sincronizacion,
+         count(*) FILTER (WHERE id_estado_general IN (9,10))::int AS errores_general,
+         count(*) FILTER (WHERE id_estado_registro = 6 OR id_estado_sincronizacion = 3 OR id_estado_general IN (9,10))::int AS total_inconsistencias
+       FROM registro_enrolamiento
+       WHERE fecha_enrolamiento = $1`,
+      [fecha]
+    ),
   ]);
+
+  // Consultar errores de ingesta (filas rechazadas al importar) para esta fecha
+  let filasErrorIngesta = 0;
+  try {
+    const { rows: loteRows } = await pool.query(
+      `SELECT COALESCE(SUM(filas_error), 0)::int AS total_errores
+       FROM ingesta_lote
+       WHERE iniciado_en::date = $1::date AND estado = 'COMPLETADO'`,
+      [fecha]
+    );
+    filasErrorIngesta = loteRows[0]?.total_errores || 0;
+  } catch (_) { /* tabla puede no existir en entornos legacy */ }
 
   const sincData = conPorcentaje(sincronizacion.rows, total);
   const regData = conPorcentaje(registro.rows, total);
+
+  const errStats = errorSummary.rows[0] || {
+    errores_registro: 0,
+    errores_sincronizacion: 0,
+    errores_general: 0,
+    total_inconsistencias: 0,
+  };
+
+  const totalErrores = Number(errStats.total_inconsistencias || 0) + filasErrorIngesta;
+  const totalConIngesta = total + filasErrorIngesta;
+  const tasaError = totalConIngesta > 0 ? Math.round((totalErrores / totalConIngesta) * 1000) / 10 : 0;
+
+  // Si hay errores de ingesta que no están reflejados en sincData, agregar entrada sintética
+  if (filasErrorIngesta > 0) {
+    const existeError = sincData.find(s => s.descripcion.toUpperCase().includes("ERROR"));
+    if (existeError) {
+      existeError.total += filasErrorIngesta;
+      existeError.porcentaje = totalConIngesta > 0 ? Math.round((existeError.total / totalConIngesta) * 1000) / 10 : 0;
+    } else {
+      sincData.push({
+        descripcion: "ERROR",
+        total: filasErrorIngesta,
+        porcentaje: totalConIngesta > 0 ? Math.round((filasErrorIngesta / totalConIngesta) * 1000) / 10 : 0,
+      });
+    }
+  }
+
   const sincOK = sincData.find(s => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.porcentaje || 0;
   const regOK = regData.find(r => r.descripcion.toUpperCase().includes("REGISTRADO"))?.porcentaje || 0;
-  const errSinc = sincData.find(s => s.descripcion.toUpperCase().includes("ERROR"))?.porcentaje || 0;
   const menoresCount = Number(edad.rows.find(e => e.categoria.toUpperCase().includes("MENOR"))?.total || 0);
 
   const resumenEjecutivo = {
     tasaSincronizacion: sincOK,
     tasaRegistroBiometrico: regOK,
-    tasaError: errSinc,
+    tasaError,
+    totalErrores,
+    erroresRegistro: Number(errStats.errores_registro || 0),
+    erroresSincronizacion: Number(errStats.errores_sincronizacion || 0),
+    erroresGeneral: Number(errStats.errores_general || 0),
+    erroresIngesta: filasErrorIngesta,
     tasaMenoresNNA: total > 0 ? Math.round((menoresCount / total) * 1000) / 10 : 0,
-    estadoSLA: sincOK >= 95 ? "Óptimo" : sincOK >= 85 ? "Atención" : "Crítico",
+    estadoSLA: sincOK >= 95 && tasaError < 5 ? "Óptimo" : sincOK >= 85 ? "Atención" : "Crítico",
     cuartelLider: rendimientoCuarteles.rows[0] ? {
       nombre: rendimientoCuarteles.rows[0].cuartel,
       total: Number(rendimientoCuarteles.rows[0].total),
@@ -189,7 +243,7 @@ async function obtenerReporteDiario(pool, fecha) {
       sincronizados: Number(c.sincronizados),
       conError: Number(c.con_error),
       pendientes: Number(c.pendientes),
-      tasaExito: Number(c.total) > 0 ? Math.round((Number(c.sincronizados) / Number(c.total)) * 1000) / 10 : 0
+      tasaExito: Number(c.total) > 0 ? Math.max(0, Math.round(((Number(c.total) - Number(c.con_error)) / Number(c.total)) * 1000) / 10) : 0
     })),
   };
 }
