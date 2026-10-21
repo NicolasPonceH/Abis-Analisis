@@ -111,7 +111,7 @@ def es_menor_de_edad(texto: Optional[str]) -> bool:
     if not texto or not isinstance(texto, str):
         return False
     texto_norm = texto.lower()
-    if re.search(r"\b(?:menor(?:es)?(?:\s+de\s+edad)?|nna|lactante|infante|p[aá]rvulo|niñ[oa]s?|adolescentes?)\b", texto_norm):
+    if re.search(r"\b(?:menor(?:es)?(?:\s+de\s+edad)?|nna|lactante|infante|p[aá]rvulo|niñ[oa]s?|adolescentes?|rpa|ley\s*20\.?084|imputad[oa]s?\s+menor(?:es)?|detenid[oa]s?\s+menor(?:es)?|v[ií]ctimas?\s+menor(?:es)?)\b", texto_norm):
         return True
     # Busca 'X años' o 'X anos' con X entre 0 y 17 (evita falsos positivos con RUTs o identificadores)
     if re.search(r"(?<!\d)(?:0|[1-9]|1[0-7])\s*(?:años?|anos?)\b", texto_norm):
@@ -182,6 +182,15 @@ def censurar_identidad_persona(
 
     contexto_delito = f"{hecho or ''} {unidad or ''} {persona_str}"
     es_menor = es_menor_de_edad(persona_str)
+    if not es_menor and hecho:
+        hecho_lower = str(hecho).lower()
+        if tipo_persona in ["detenido", "imputado", "detenidos", "imputados"]:
+            if re.search(r"\b(?:rpa|responsabilidad\s+penal\s+adolescente|detenid[oa]s?\s+menor(?:es)?|imputad[oa]s?\s+menor(?:es)?)\b", hecho_lower):
+                es_menor = True
+        elif tipo_persona in ["victima", "victimas"]:
+            if re.search(r"\b(?:v[ií]ctimas?\s+menor(?:es)?|menor\s+de\s+edad|sustracci[oó]n\s+de\s+menores?|infanticidio)\b", hecho_lower):
+                es_menor = True
+
     es_sexual = es_delito_sexual(contexto_delito)
 
     if es_menor:

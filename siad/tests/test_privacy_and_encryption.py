@@ -150,3 +150,41 @@ def test_word_export_preserves_full_uncensored_names():
     assert "Masiel Anthonet ALEJO AREMBAY" in ctx["Victimas_Menores_Detalle"]
     assert "Renato Javier RAMIREZ MESÍAS" in ctx["Detenidos_Menores_Detalle"]
 
+
+def test_detenidos_y_victimas_menores_ambos_censurados():
+    """Valida exhaustivamente que tanto detenidos como víctimas menores sean censurados en la web."""
+    from security import censurar_identidad_persona
+
+    # 1. Víctima menor de edad (ej. 13 años)
+    vic = "Masiel Anthonet ALEJO AREMBAY, Boliviana, 13 años"
+    r_vic = censurar_identidad_persona(vic, hecho="HOMICIDIO", unidad="BH ARICA", tipo_persona="victima")
+    assert r_vic["es_censurado"] is True
+    assert r_vic["nombre_mostrado"] == "[IDENTIDAD RESERVADA - MENOR DE EDAD]"
+    assert "Masiel" not in r_vic["nombre_mostrado"]
+    assert "13 años" in r_vic["detalle_mostrado"]
+
+    # 2. Detenido menor de edad (ej. 16 años o imputado RPA)
+    det = "Cristóbal Ignacio TAPIA ROJAS, Chileno, 16 años"
+    r_det = censurar_identidad_persona(det, hecho="ROBO CON INTIMIDACION", unidad="BICRIM", tipo_persona="detenido")
+    assert r_det["es_censurado"] is True
+    assert r_det["nombre_mostrado"] == "[IDENTIDAD RESERVADA - MENOR DE EDAD]"
+    assert "Cristóbal" not in r_det["nombre_mostrado"]
+    assert "16 años" in r_det["detalle_mostrado"]
+
+    # 3. Detenido con mención RPA directa sin edad explícita
+    det_rpa = "Matías VALENZUELA, Imputado menor RPA"
+    r_rpa = censurar_identidad_persona(det_rpa, hecho="HURTO SIMPLE", unidad="BICRIM", tipo_persona="detenido")
+    assert r_rpa["es_censurado"] is True
+    assert r_rpa["nombre_mostrado"] == "[IDENTIDAD RESERVADA - MENOR DE EDAD]"
+
+    # 4. Detenido y víctima adultos no deben censurarse
+    det_adulto = "Rodrigo ESTEBAN, 34 años"
+    vic_adulta = "Andrea PEREZ, 42 años"
+    r_da = censurar_identidad_persona(det_adulto, hecho="LESIONES", tipo_persona="detenido")
+    r_va = censurar_identidad_persona(vic_adulta, hecho="LESIONES", tipo_persona="victima")
+    assert r_da["es_censurado"] is False
+    assert r_da["nombre_mostrado"] == "Rodrigo ESTEBAN"
+    assert r_va["es_censurado"] is False
+    assert r_va["nombre_mostrado"] == "Andrea PEREZ"
+
+
