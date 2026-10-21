@@ -181,13 +181,14 @@
           </div>
           <div class="flex flex-col gap-2">
             {% for e in personas %}
+              {% set info_p = e.valor | censurar_persona(registro.resumen if registro else '', '', e.campo) %}
               {% set es_coincidencia = highlight and e.valor|string|trim == highlight|string|trim %}
               <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 flex flex-col shadow-sm {{ 'ring-2 ring-purple-500 bg-purple-100 scale-[1.02] transition-transform shadow-md z-10 relative' if es_coincidencia else '' }}">
                 {% if es_coincidencia %}
                 <span class="absolute -top-2.5 -right-2 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white flex items-center gap-1 animate-pulse"><span class="material-symbols-outlined text-[10px]">warning</span> REPETIDO</span>
                 {% endif %}
                 <span class="text-[10px] font-bold text-purple-500 uppercase tracking-wider">{{ e.campo }}</span>
-                <span class="text-sm font-semibold text-purple-700">{{ e.valor }}</span>
+                <span class="text-sm font-semibold text-purple-700">{{ info_p.texto_completo }}</span>
               </div>
             {% else %}
               <div class="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-lg p-3 text-center">

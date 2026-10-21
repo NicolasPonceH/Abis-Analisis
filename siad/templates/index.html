@@ -1051,6 +1051,9 @@
                   </div>
                 </div>
 
+                {% set current_hecho = (doc_data.metadata.hecho or doc_data.metadata.delito or '') if doc_data and doc_data.metadata else '' %}
+                {% set current_unidad = (doc_data.metadata.unidad or '') if doc_data and doc_data.metadata else '' %}
+
                 <!-- Detenidos Identificados -->
                 <div>
                   <div class="flex items-center justify-between mb-2.5">
@@ -1062,15 +1065,22 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {% if doc_data and doc_data.personas and doc_data.personas.detenidos %}
                       {% for detenido in doc_data.personas.detenidos %}
+                      {% set info_det = detenido | censurar_persona(current_hecho, current_unidad, 'detenido') %}
                       <!-- Avatar Card Detenido -->
-                      <div class="flex items-center gap-2.5 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl">
-                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-500 dark:text-indigo-400 overflow-hidden shrink-0">
-                          <span class="material-symbols-outlined text-[20px]">person</span>
+                      <div class="flex items-center gap-2.5 {% if info_det.es_censurado %}bg-amber-50/50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-200 dark:ring-amber-900/40{% else %}bg-slate-50/80 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700{% endif %} border px-3 py-2 rounded-xl">
+                        <div class="w-8 h-8 rounded-full {% if info_det.es_censurado %}bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-700/60{% else %}bg-indigo-100 dark:bg-indigo-900/50 text-indigo-500 dark:text-indigo-400{% endif %} flex items-center justify-center overflow-hidden shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">{% if info_det.es_censurado %}lock{% else %}person{% endif %}</span>
                         </div>
-                        <div class="flex flex-col">
-                          {% set partes = detenido.split(',') %}
-                          <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(detenido) }}</span>
-                          <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Sin más datos' }}</span>
+                        <div class="flex flex-col min-w-0">
+                          {% if info_det.es_censurado %}
+                            <span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-800 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-900/40 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-700/60 tracking-tight leading-tight w-fit">
+                              <span class="material-symbols-outlined text-[13px] text-amber-600 dark:text-amber-400">shield_lock</span>
+                              {{ info_det.nombre_mostrado }}
+                            </span>
+                          {% else %}
+                            <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight truncate">{{ info_det.nombre_mostrado }}</span>
+                          {% endif %}
+                          <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight truncate">{{ info_det.detalle_mostrado }}</span>
                         </div>
                       </div>
                       {% endfor %}
@@ -1093,15 +1103,22 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {% if doc_data and doc_data.personas and doc_data.personas.victimas %}
                       {% for victima in doc_data.personas.victimas %}
+                      {% set info_vic = victima | censurar_persona(current_hecho, current_unidad, 'victima') %}
                       <!-- Avatar Card Víctima -->
-                      <div class="flex items-center gap-2.5 bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 px-3 py-2 rounded-xl">
-                        <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-500 dark:text-rose-400 overflow-hidden shrink-0">
-                          <span class="material-symbols-outlined text-[20px]">support_agent</span>
+                      <div class="flex items-center gap-2.5 {% if info_vic.es_censurado %}bg-rose-50/70 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/80 ring-1 ring-rose-200 dark:ring-rose-900/50{% else %}bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50{% endif %} border px-3 py-2 rounded-xl">
+                        <div class="w-8 h-8 rounded-full {% if info_vic.es_censurado %}bg-rose-200 dark:bg-rose-900/70 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-700{% else %}bg-rose-100 dark:bg-rose-900/50 text-rose-500 dark:text-rose-400{% endif %} flex items-center justify-center overflow-hidden shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">{% if info_vic.es_censurado %}shield_person{% else %}support_agent{% endif %}</span>
                         </div>
-                        <div class="flex flex-col">
-                          {% set partes = victima.split(',') %}
-                          <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ partes[0] | default(victima) }}</span>
-                          <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{{ partes[1:] | join(',') | trim if partes | length > 1 else 'Víctima identificada' }}</span>
+                        <div class="flex flex-col min-w-0">
+                          {% if info_vic.es_censurado %}
+                            <span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-800 dark:text-rose-200 bg-rose-100/90 dark:bg-rose-900/50 px-2 py-0.5 rounded border border-rose-300 dark:border-rose-700 tracking-tight leading-tight w-fit">
+                              <span class="material-symbols-outlined text-[13px] text-rose-600 dark:text-rose-400">lock</span>
+                              {{ info_vic.nombre_mostrado }}
+                            </span>
+                          {% else %}
+                            <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 leading-tight truncate">{{ info_vic.nombre_mostrado }}</span>
+                          {% endif %}
+                          <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight truncate">{{ info_vic.detalle_mostrado }}</span>
                         </div>
                       </div>
                       {% endfor %}
@@ -1351,8 +1368,10 @@
                   <span class="bg-white dark:bg-slate-900 border border-indigo-200 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">{{ p_count }} Datos</span>
                 </div>
                 <div class="space-y-3">
-                  {{ campo_valor('Detenidos / Imputados', doc_data.personas.detenidos, 'indigo') }}
-                  {{ campo_valor('Víctimas Identificadas', doc_data.personas.victimas, 'rose') }}
+                  {% set ent_hecho = (doc_data.metadata.hecho or doc_data.metadata.delito or '') if doc_data and doc_data.metadata else '' %}
+                  {% set ent_unidad = (doc_data.metadata.unidad or '') if doc_data and doc_data.metadata else '' %}
+                  {{ campo_valor('Detenidos / Imputados', doc_data.personas.detenidos | censurar_lista_personas(ent_hecho, ent_unidad, 'detenido'), 'indigo') }}
+                  {{ campo_valor('Víctimas Identificadas', doc_data.personas.victimas | censurar_lista_personas(ent_hecho, ent_unidad, 'victima'), 'rose') }}
                   {{ campo_valor('RUTs / Identificación (Ext)', doc_data.personas.ruts, 'indigo') }}
                   {{ campo_valor('Teléfonos', doc_data.personas.telefonos, 'indigo') }}
                   {{ campo_valor('Direcciones', doc_data.personas.direcciones, 'indigo') }}

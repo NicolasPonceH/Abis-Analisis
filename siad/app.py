@@ -49,6 +49,12 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env
 import db
 import entities
 from entities import extract_entities, highlight_entities_html, normalize_entities
+from security import (
+    censurar_identidad_persona,
+    censurar_lista_personas,
+    es_menor_de_edad,
+    es_delito_sexual,
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
@@ -77,6 +83,10 @@ class ReverseProxied(object):
         return self.app(environ, start_response)
 
 app = Flask(__name__)
+app.jinja_env.filters["censurar_persona"] = censurar_identidad_persona
+app.jinja_env.filters["censurar_lista_personas"] = censurar_lista_personas
+app.jinja_env.globals["censurar_persona"] = censurar_identidad_persona
+app.jinja_env.globals["censurar_lista_personas"] = censurar_lista_personas
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_AUTO_RELOAD"] = True
