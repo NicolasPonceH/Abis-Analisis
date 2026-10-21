@@ -92,9 +92,23 @@ export function startLiveClock() {
 
 export async function loadScheduleSettings() {
   try {
-    const res = await fetch("/api/settings/schedule");
+    // La recarga de ABIS puede ocurrir mientras la cookie JWT todavía se
+    // está restaurando. No cachear la respuesta evita reutilizar un 401.
+    const res = await fetch("/api/settings/schedule", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+
+    // La configuración de horarios es secundaria para el resto del panel.
+    // Si la sesión no está disponible durante el refresh, dejar que la vista
+    // termine de cargar sin interrumpir al usuario con un alert crítico.
+    if (res.status === 401 || res.status === 403) {
+      console.warn("Configuración de horarios omitida durante la recarga: sesión no disponible.");
+      return;
+    }
+
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "No se pudo cargar la configuración.");
+    if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo cargar la configuración.");
 
     state.scheduleConfig = data.config;
     state.currentScheduleTimes = Array.isArray(data.config.times) ? [...data.config.times] : ["08:30", "19:00"];
@@ -157,7 +171,8 @@ export async function loadScheduleSettings() {
 
   } catch (err) {
     console.error("Error al cargar ajustes de horario:", err);
-    alert("CRITICAL ERROR IN loadScheduleSettings: " + err.message);
+    // No bloquear la actualización general del panel por una sección
+    // auxiliar. Los controles quedan con sus valores actuales/default.
   }
 }
 

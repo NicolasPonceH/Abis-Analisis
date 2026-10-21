@@ -6,7 +6,7 @@ import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparaci
 import { setupDragAndDrop, initSpreadsheetIngest } from './modules/ingesta.js?v=28';
 import { loadTrendData, setupTrendControls } from './modules/tendencias.js?v=20261014-2';
 import { auditState, cargarBitacoraAuditoria } from './modules/auditoria.js';
-import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js?v=28';
+import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js?v=29';
 
 export function setupEventListeners() {
   // FunciÃ³n para activar pestaÃ±a basada en el hash o data-tab
