@@ -411,5 +411,52 @@
 
     </div>
 
+    <div id="recipient-delete-modal" class="settings-modal recipient-delete-modal" hidden aria-hidden="true">
+      <div class="settings-modal-card recipient-delete-card" role="dialog" aria-modal="true" aria-labelledby="recipient-delete-title" aria-describedby="recipient-delete-description">
+        <div class="recipient-delete-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v5M14 11v5" />
+          </svg>
+        </div>
+        <div class="settings-modal-header recipient-delete-header">
+          <div>
+            <span class="recipient-delete-eyebrow">Acción irreversible</span>
+            <h2 id="recipient-delete-title">Eliminar destinatario</h2>
+          </div>
+          <button type="button" class="settings-close-btn" id="recipient-delete-close" aria-label="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <p id="recipient-delete-description" class="recipient-delete-copy">
+          Se quitará este destinatario de los envíos automáticos de Telegram. Esta acción no se puede deshacer.
+        </p>
+
+        <div class="recipient-delete-identity">
+          <span class="recipient-delete-avatar" aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
+          <span class="recipient-delete-details">
+            <strong id="recipient-delete-name">Destinatario</strong>
+            <small>Chat ID: <span id="recipient-delete-chat">-</span></small>
+          </span>
+        </div>
+
+        <div class="recipient-delete-warning">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span>Los reportes dejarán de enviarse a este canal.</span>
+        </div>
+
+        <div class="recipient-delete-actions">
+          <button type="button" class="btn btn-secondary" id="recipient-delete-cancel">Cancelar</button>
+          <button type="button" class="recipient-delete-confirm" id="recipient-delete-confirm">
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+            Eliminar destinatario
+          </button>
+        </div>
+      </div>
+    </div>
+
 
 

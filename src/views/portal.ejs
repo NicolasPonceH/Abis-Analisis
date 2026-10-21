@@ -214,9 +214,7 @@
       position: absolute;
       inset: 0;
       z-index: 0;
-      background: url('https://res.cloudinary.com/dirgawanf/image/upload/v1791467374/fondo_login_abis_uagfhe.png') center / cover no-repeat;
-      opacity: 0.72;
-      filter: saturate(0.9) contrast(1.05);
+      background: #010814;
     }
 
     .split-layout::after {
@@ -262,7 +260,11 @@
        FONDOS FOTOGRÁFICOS Y ATMÓSFERA PROFUNDA
        ========================================================= */
     .panel-photo-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
       display: none;
+      pointer-events: none;
     }
 
     .panel-abis .panel-photo-bg {
@@ -270,33 +272,55 @@
       inset: 0;
       z-index: 0;
       display: block;
-      background: url('https://res.cloudinary.com/dirgawanf/image/upload/v1791467374/fondo_login_abis_uagfhe.png') center / cover no-repeat;
-      opacity: 0.25;
-      filter: sepia(0.45) saturate(1.2) contrast(1.05);
-      transform: scaleX(-1);
-      pointer-events: none;
+      background: url('https://res.cloudinary.com/dirgawanf/image/upload/v1792585920/fondo_login_abis_cut_u85g9u.png') center / cover no-repeat;
+      opacity: 0.78;
+      filter: saturate(1.08) contrast(1.05);
     }
 
     /* Panel ABIS: Textura pericial dorada */
     .panel-abis {
       background: radial-gradient(circle at 35% 50%, rgba(255, 209, 0, 0.16) 0%, rgba(3, 20, 42, 0.94) 55%, #010812 100%);
-      border-right: 1px solid rgba(255, 209, 0, 0.28);
+      border-right: none;
     }
 
     .panel-abis .panel-photo-bg {
-      background-image: url('https://res.cloudinary.com/dirgawanf/image/upload/v1792585920/fondo_login_abis_cut_u85g9u.png');
-      filter: sepia(0.5) hue-rotate(5deg) contrast(1.1);
+      background-position: center;
     }
 
     /* Panel SIAD: Textura de monitores periciales */
     .panel-siad {
       background: radial-gradient(circle at 65% 50%, rgba(0, 119, 254, 0.18) 0%, rgba(1, 16, 38, 0.94) 55%, #010812 100%);
-      border-left: 1px solid rgba(0, 119, 254, 0.28);
+      border-left: none;
     }
 
     .panel-siad .panel-photo-bg {
-      background-image: url('https://res.cloudinary.com/dirgawanf/image/upload/v1792585171/Laboratorio_futurista_de_digitalizaci%C3%B3n_documental_w6k4ah.png');
-      filter: hue-rotate(185deg) saturate(1.4) contrast(1.1);
+      display: block;
+      background: url('https://res.cloudinary.com/dirgawanf/image/upload/v1792599234/ash_siad_rugcng.png') center / cover no-repeat;
+      opacity: 0.78;
+      filter: saturate(1.08) contrast(1.05);
+    }
+
+    /* Fundido sobre las fotos: sigue la unión al expandirse cada panel.
+       El contenido (z-index: 10) permanece nítido y clicable. */
+    .split-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: clamp(100px, 14vw, 260px);
+      z-index: 1;
+      pointer-events: none;
+      background: #010814;
+    }
+
+    .panel-abis::before {
+      right: 0;
+      background: linear-gradient(to right, transparent, rgba(1, 8, 20, 0.3) 30%, rgba(1, 8, 20, 0.82) 70%, #010814 100%);
+    }
+
+    .panel-siad::before {
+      left: 0;
+      background: linear-gradient(to left, transparent, rgba(1, 8, 20, 0.3) 30%, rgba(1, 8, 20, 0.82) 70%, #010814 100%);
     }
     /* Resplandores Aurales en el Centro de cada Panel */
     .panel-glow-aura {
@@ -804,18 +828,70 @@
       transform: translateX(10px);
     }
 
-    .session-badge-active {
+    /* Sesión global: la identidad vive en la cabecera, fuera de los paneles */
+    .header-session {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      gap: 12px;
+      position: absolute;
+      top: 18px;
+      left: 36px;
+      padding: 7px 13px 7px 10px;
+      border-left: 3px solid #6EE7B7;
+      border-radius: 8px;
+      background: linear-gradient(90deg, rgba(16, 73, 75, 0.42), rgba(3, 20, 38, 0.18));
+      color: #D8E7F5;
+      text-align: left;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22), inset 0 0 16px rgba(110, 231, 183, 0.05);
+    }
+
+    .header-session-avatar {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 2px solid rgba(167, 243, 208, 0.78);
+      border-radius: 50%;
+      background: linear-gradient(145deg, rgba(36, 91, 92, 0.9), rgba(3, 27, 42, 0.96));
+      color: #A7F3D0;
+      font-size: 16px;
+      font-weight: 900;
+      box-shadow: 0 0 18px rgba(52, 211, 153, 0.2);
+    }
+
+    .header-session-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.1;
+    }
+
+    .header-session-label {
       color: #86EFAC;
-      background: rgba(16, 185, 129, 0.18);
-      border: 1px solid rgba(16, 185, 129, 0.45);
-      padding: 6px 16px;
-      border-radius: 999px;
-      margin-bottom: 16px;
-      backdrop-filter: blur(10px);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .header-session-name {
+      max-width: 145px;
+      overflow: hidden;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .header-session-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-left: 2px;
+      border-radius: 50%;
+      background: #6EE7B7;
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.9);
     }
 
     /* =========================================================
@@ -827,6 +903,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 40;
+      isolation: isolate;
       pointer-events: auto;
       cursor: default;
       user-select: none;
@@ -903,10 +980,26 @@
       }
       .panel-abis {
         border-right: none;
-        border-bottom: 1px solid rgba(255, 209, 0, 0.28);
+        border-bottom: none;
       }
       .panel-siad {
         border-left: none;
+      }
+      .split-panel::before {
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100px;
+      }
+      .panel-abis::before {
+        top: auto;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent, #010814);
+      }
+      .panel-siad::before {
+        top: 0;
+        bottom: auto;
+        background: linear-gradient(to top, transparent, #010814);
       }
       .split-layout:hover .split-panel {
         flex: 1;
@@ -918,6 +1011,7 @@
       .access-prompt {
         position: static;
         transform: none;
+        margin-left: 58px;
         margin-right: auto;
         font-size: 14px;
         white-space: normal;
@@ -926,6 +1020,24 @@
         position: relative;
         background: rgba(1, 8, 20, 0.98);
         padding: 14px 20px;
+      }
+      .header-meta {
+        gap: 8px;
+      }
+      .header-session {
+        top: 14px;
+        left: 20px;
+        padding: 5px 8px 5px 6px;
+      }
+      .header-session-copy {
+        display: none;
+      }
+      .header-clock {
+        min-width: 0;
+        padding: 10px 12px;
+      }
+      #liveClockSantiago {
+        font-size: 18px;
       }
       .system-title-hero {
         font-size: 48px;
@@ -946,6 +1058,15 @@
         <span>¿A qué sistema desea ingresar?</span>
       </div>
       <div class="header-meta">
+        <% if (typeof user !== 'undefined' && user) { %>
+          <div class="header-session" aria-label="Sesión activa">
+            <div class="header-session-avatar" aria-hidden="true"><%= String(user.username || '?').charAt(0).toUpperCase() %></div>
+            <div class="header-session-copy">
+              <span class="header-session-label"><span class="header-session-dot"></span> Sesión activa</span>
+              <span class="header-session-name"><%= user.username %></span>
+            </div>
+          </div>
+        <% } %>
         <div class="header-clock" title="Hora Oficial de Santiago de Chile">
           <span id="liveClockSantiago">--:--:--</span>
           <span class="clock-tz-tag">SCL</span>
@@ -983,10 +1104,6 @@
           </p>
 
           <% if (typeof user !== 'undefined' && user) { %>
-            <div class="session-badge-active">
-              <i class="fa-solid fa-circle-check"></i>
-              <span>Sesión activa: <strong><%= user.username %></strong></span>
-            </div>
             <div class="btn-action-hero btn-abis">
               <span>Ingresar al Panel ABIS</span>
               <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
@@ -1034,10 +1151,6 @@
           </p>
 
           <% if (typeof user !== 'undefined' && user) { %>
-            <div class="session-badge-active">
-              <i class="fa-solid fa-circle-check"></i>
-              <span>Sesión activa: <strong><%= user.username %></strong></span>
-            </div>
             <div class="btn-action-hero btn-siad">
               <span>Ingresar al Panel SIAD</span>
               <i class="fa-solid fa-arrow-right btn-arrow-icon"></i>
