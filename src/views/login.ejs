@@ -678,33 +678,32 @@
       z-index: 1000;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       background: #FFD100;
-      border: 1.5px solid #FFD100;
+      border: 2px solid #FFD100;
       border-radius: 999px;
-      padding: 10px 20px;
+      padding: 13px 26px;
       color: #00234C;
       text-decoration: none;
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 13.5px;
-      font-weight: 800;
+      font-size: 15px;
+      font-weight: 900;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      transition: all 0.25s ease;
+      box-shadow: 0 8px 24px rgba(255, 209, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.45);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-top-back-abis i {
+      font-size: 16px;
       color: #00234C;
       transition: transform 0.2s ease;
     }
     .btn-top-back-abis:hover {
-      background: #E5BC00;
-      border-color: #E5BC00;
-      box-shadow: 0 10px 28px rgba(255, 209, 0, 0.4);
-      transform: translateY(-2px);
-      color: #00234C;
+      background: #FFE033;
+      border-color: #FFE033;
+      box-shadow: 0 12px 30px rgba(255, 209, 0, 0.6), 0 6px 18px rgba(0, 0, 0, 0.5);
+      transform: translateY(-2px) scale(1.02);
+      color: #001A3A;
     }
     .btn-top-back-abis:hover i {
       transform: translateX(-4px);
@@ -712,7 +711,7 @@
 
     /* Botón de regreso dentro de la tarjeta */
     @media (max-width: 720px) {
-      .btn-top-back-abis { top: 12px; left: 14px; font-size: 12px; padding: 8px 14px; }
+      .btn-top-back-abis { top: 12px; left: 14px; font-size: 13px; padding: 10px 18px; }
     }
 
     @media (prefers-reduced-motion: reduce) {

@@ -390,33 +390,34 @@
     z-index: 1000;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(0, 24, 53, 0.88);
-    border: 1.5px solid rgba(255, 209, 0, 0.5);
+    gap: 12px;
+    background: #FFD100;
+    border: 2px solid #FFD100;
     border-radius: 999px;
-    padding: 10px 20px;
-    color: #FFFFFF;
+    padding: 13px 26px;
+    color: #00234C;
     text-decoration: none;
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 13.5px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 900;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px rgba(255, 209, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.45);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .btn-top-back svg {
-    color: #FFD100;
+    width: 22px;
+    height: 22px;
+    color: #00234C;
+    stroke-width: 3;
     transition: transform 0.2s ease;
   }
   .btn-top-back:hover {
-    background: rgba(0, 36, 78, 0.98);
-    border-color: #FFD100;
-    box-shadow: 0 10px 28px rgba(255, 209, 0, 0.4);
-    transform: translateY(-2px);
-    color: #FFFFFF;
+    background: #FFE033;
+    border-color: #FFE033;
+    box-shadow: 0 12px 30px rgba(255, 209, 0, 0.6), 0 6px 18px rgba(0, 0, 0, 0.5);
+    transform: translateY(-2px) scale(1.02);
+    color: #001A3A;
   }
   .btn-top-back:hover svg {
     transform: translateX(-4px);
@@ -428,7 +429,7 @@
     .brand-col { align-items: center; text-align: center; }
     .brand-title { font-size: 36px; }
     .card { max-width: 100%; }
-    .btn-top-back { top: 12px; left: 14px; font-size: 12px; padding: 8px 14px; }
+    .btn-top-back { top: 12px; left: 14px; font-size: 13px; padding: 10px 18px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .warning-banner, .warning-inner, .warning-icon-anim, .card, .bg-photo { animation: none; }
@@ -441,7 +442,7 @@
 
   <!-- Botón de regreso al Portal de Selección -->
   <a href="/" class="btn-top-back" title="Volver al Portal de Selección de Sistemas">
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
       <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
     </svg>
     <span>Volver a Elegir Sistema</span>
