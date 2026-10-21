@@ -11,6 +11,34 @@ export function promptAuthModal(file, actionType = "ingesta") {
   pendingAuthFile = file;
   pendingAuthAction = actionType;
 
+  // La sesion ABIS ya fue autenticada en el acceso central. Las operaciones
+  // usan ahora permisos de sesion y auditoria, sin pedir la misma clave otra vez.
+  if (actionType !== "__legacy_modal__") {
+    const accionesDestructivas = ["ingesta_eliminar", "destinatario_eliminar"];
+    if (accionesDestructivas.includes(actionType) && !window.confirm("Esta accion eliminara datos del sistema. ¿Deseas continuar?")) {
+      closeAuthModal();
+      return;
+    }
+
+    const ejecutar = actionType === "programacion"
+      ? executeSaveScheduleAuthorized(file, "")
+      : actionType === "destinatario_agregar"
+        ? executeAgregarDestinatarioAuthorized(file, "")
+        : actionType === "destinatario_toggle"
+          ? executeToggleDestinatarioAuthorized(file, "")
+          : actionType === "destinatario_eliminar"
+            ? executeEliminarDestinatarioAuthorized(file, "")
+            : actionType === "sheet_ingest"
+              ? executeSheetIngestAuthorized(file, "")
+              : actionType === "ingesta_eliminar"
+                ? executeDeleteIngestAuthorized(file, "")
+                : handleFileUpload(file, "");
+    Promise.resolve(ejecutar).catch((error) => {
+      window.alert(error?.message || "No se pudo completar la operacion.");
+    });
+    return;
+  }
+
   const modal = document.getElementById("modal-auth-ingesta");
   const titleEl = document.getElementById("modal-title-text");
   const subtitleEl = document.getElementById("modal-subtitle-text");

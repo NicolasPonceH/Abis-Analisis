@@ -160,66 +160,40 @@
       gap: 14px;
     }
 
-    .header-badge-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #E2E8F0;
-      backdrop-filter: blur(10px);
-    }
-
     .header-clock {
+      position: relative;
+      z-index: 2;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(0, 16, 36, 0.85);
-      border: 1.5px solid rgba(255, 209, 0, 0.45);
-      padding: 8px 18px;
-      border-radius: 12px;
+      gap: 14px;
+      min-width: 238px;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(24, 47, 82, 0.98), rgba(1, 12, 30, 0.98));
+      border: 2px solid #FFD100;
+      padding: 13px 22px;
+      border-radius: 18px;
       font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
       color: #FFFFFF;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 209, 0, 0.06);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.58), 0 0 30px rgba(255, 209, 0, 0.34), inset 0 0 22px rgba(255, 209, 0, 0.12);
       backdrop-filter: blur(12px);
     }
 
     #liveClockSantiago {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
       color: #FFFFFF;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-    }
-
-    .clock-live-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #10B981;
-      box-shadow: 0 0 12px #10B981;
-      animation: pulseLive 2s infinite;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.65), 0 0 22px rgba(255, 209, 0, 0.38);
     }
 
     .clock-tz-tag {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--pdi-gold);
-      letter-spacing: 0.08em;
-      border-left: 1px solid rgba(255, 255, 255, 0.2);
-      padding-left: 8px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #FFD100;
+      letter-spacing: 0.14em;
+      border-left: 1px solid rgba(255, 209, 0, 0.45);
+      padding-left: 10px;
       margin-left: 2px;
-    }
-
-    @keyframes pulseLive {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
     /* =========================================================
@@ -305,34 +279,25 @@
 
     /* Panel ABIS: Textura pericial dorada */
     .panel-abis {
-      background: transparent;
-      border-right: 1px solid rgba(198, 146, 20, 0.42);
+      background: radial-gradient(circle at 35% 50%, rgba(255, 209, 0, 0.16) 0%, rgba(3, 20, 42, 0.94) 55%, #010812 100%);
+      border-right: 1px solid rgba(255, 209, 0, 0.28);
     }
 
-    .panel-abis::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: transparent;
-      pointer-events: none;
-      z-index: 1;
+    .panel-abis .panel-photo-bg {
+      background-image: url('https://res.cloudinary.com/dirgawanf/image/upload/v1792585920/fondo_login_abis_cut_u85g9u.png');
+      filter: sepia(0.5) hue-rotate(5deg) contrast(1.1);
     }
 
     /* Panel SIAD: Textura de monitores periciales */
     .panel-siad {
-      background: transparent;
-      border-left: 1px solid rgba(0, 119, 254, 0.42);
+      background: radial-gradient(circle at 65% 50%, rgba(0, 119, 254, 0.18) 0%, rgba(1, 16, 38, 0.94) 55%, #010812 100%);
+      border-left: 1px solid rgba(0, 119, 254, 0.28);
     }
 
-    .panel-siad::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: transparent;
-      pointer-events: none;
-      z-index: 1;
+    .panel-siad .panel-photo-bg {
+      background-image: url('https://res.cloudinary.com/dirgawanf/image/upload/v1792585171/Laboratorio_futurista_de_digitalizaci%C3%B3n_documental_w6k4ah.png');
+      filter: hue-rotate(185deg) saturate(1.4) contrast(1.1);
     }
-
     /* Resplandores Aurales en el Centro de cada Panel */
     .panel-glow-aura {
       position: absolute;
@@ -427,20 +392,9 @@
       animation: ringSpin 20s linear infinite;
     }
 
-    .ring-abis {
-      border: 2px dashed rgba(255, 209, 0, 0.45);
-      box-shadow: 0 0 20px rgba(255, 209, 0, 0.2);
-    }
-
     .ring-siad {
       border: 2px dashed rgba(0, 119, 254, 0.45);
       box-shadow: 0 0 20px rgba(0, 119, 254, 0.2);
-    }
-
-    .split-panel.panel-abis:hover .ring-abis {
-      border-color: var(--pdi-gold);
-      box-shadow: 0 0 35px rgba(255, 209, 0, 0.5);
-      animation-duration: 8s;
     }
 
     .split-panel.panel-siad:hover .ring-siad {
@@ -469,21 +423,10 @@
       transition: all 0.35s ease;
     }
 
-    .core-abis {
-      background: linear-gradient(135deg, rgba(255, 209, 0, 0.22) 0%, rgba(255, 209, 0, 0.05) 100%);
-      border: 2px solid rgba(255, 209, 0, 0.6);
-      color: var(--pdi-gold);
-    }
-
     .core-siad {
       background: linear-gradient(135deg, rgba(0, 119, 254, 0.24) 0%, rgba(0, 119, 254, 0.05) 100%);
       border: 2px solid rgba(0, 119, 254, 0.6);
       color: #60A5FA;
-    }
-
-    .split-panel.panel-abis:hover .core-abis {
-      box-shadow: 0 0 40px rgba(255, 209, 0, 0.55);
-      border-color: #FFE566;
     }
 
     .split-panel.panel-siad:hover .core-siad {
@@ -527,38 +470,192 @@
       100% { top: 92%; opacity: 0; }
     }
 
-    /* Píldora de Categoría */
-    .system-category-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 20px;
+    .abis-core {
+      position: relative;
+      width: 260px;
+      height: 174px;
+      margin-bottom: 28px;
+      display: grid;
+      place-items: center;
+      border: 7px solid #263650;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #52647f 0%, #1f2d46 18%, #111b2d 54%, #2b3b58 100%);
+      box-shadow: inset 5px 5px 0 rgba(151, 176, 207, 0.22), inset -8px -8px 0 rgba(0, 0, 0, 0.4), 0 0 30px rgba(56, 170, 221, 0.3), 0 0 75px rgba(45, 171, 242, 0.25), 0 17px 0 #101a2b;
+      transform: rotateX(12deg) rotateY(-18deg) translateZ(20px);
+      transform-style: preserve-3d;
+      animation: portalCoreFloat 5.5s ease-in-out infinite;
+      transition: filter 0.4s ease;
+    }
+
+    .split-panel.panel-abis:hover .abis-core {
+      filter: brightness(1.12);
+    }
+
+    .abis-core::before {
+      position: absolute;
+      content: '';
+      top: 5%;
+      left: 7%;
+      width: 86%;
+      height: 8px;
       border-radius: 999px;
-      font-size: 13px;
+      background: linear-gradient(90deg, #667997, #1a263b 25%, #111a2a 70%, #7486a1);
+      box-shadow: 0 65px 0 rgba(15, 24, 39, 0.9), 0 66px 0 rgba(99, 121, 151, 0.3);
+      transform: translateZ(12px);
+    }
+
+    .abis-core::after {
+      position: absolute;
+      right: -5%;
+      top: 18%;
+      width: 10px;
+      height: 58%;
+      content: '';
+      border: 1px solid rgba(143, 169, 199, 0.48);
+      border-radius: 6px;
+      background: repeating-linear-gradient(180deg, #0e1728 0 8px, #74849d 9px 11px, #1d2a42 12px 18px);
+      box-shadow: 3px 0 0 rgba(0,0,0,0.32);
+      transform: translateZ(15px);
+    }
+
+    .abis-core .tablet-screen {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      width: 90%;
+      height: 82%;
+      place-items: center;
+      overflow: hidden;
+      border: 3px solid #0b1321;
+      border-radius: 7px;
+      background: radial-gradient(circle at 62% 25%, rgba(93, 190, 236, 0.42), transparent 35%), linear-gradient(145deg, rgba(18, 73, 116, 0.92), rgba(3, 20, 43, 0.98));
+      box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.34), inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 18px rgba(53, 184, 239, 0.28);
+      transform: translateZ(22px);
+    }
+
+    .abis-core .tablet-screen::before {
+      position: absolute;
+      inset: 9%;
+      content: '';
+      border: 1px solid rgba(163, 231, 255, 0.17);
+      border-radius: 3px;
+      background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(139, 218, 255, 0.07) 8px, transparent 9px);
+      animation: portalTabletScreenGrid 8s linear infinite;
+    }
+
+    .abis-core .tablet-screen::after {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      content: '';
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(48, 255, 151, 0.62), rgba(5, 103, 67, 0.88));
+      mix-blend-mode: screen;
+      opacity: 0;
+      animation: portalTabletScreenCycle 8s steps(1, end) infinite;
+    }
+
+    .abis-core .tablet-scan-line {
+      position: absolute;
+      top: -12%;
+      left: 5%;
+      z-index: 2;
+      width: 90%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, #8cf5ff 18%, #6dffb6 50%, #8cf5ff 82%, transparent);
+      box-shadow: 0 0 8px #8cf5ff, 0 0 22px rgba(109, 255, 182, 0.8);
+      opacity: 0;
+      animation: portalTabletFullScan 8s linear infinite;
+    }
+
+    .abis-core .tablet-brand {
+      position: relative;
+      z-index: 2;
+      display: inline-block;
+      color: #fff;
+      font-size: 21px;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      text-shadow: 0 3px 15px rgba(0,0,0,0.38), 0 0 18px rgba(130, 220, 255, 0.35);
       text-transform: uppercase;
-      margin-bottom: 16px;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
+      transform: translateZ(25px);
+      animation: portalTabletBrandCycle 8s steps(1, end) infinite;
     }
 
-    .pill-abis {
-      background: rgba(255, 209, 0, 0.14);
-      border: 1px solid rgba(255, 209, 0, 0.45);
-      color: var(--pdi-gold);
+    .abis-core .tablet-brand-text {
+      display: inline-block;
+      background: linear-gradient(90deg, #fff 0%, #fff 38%, #82f1ff 50%, #fff 62%, #fff 100%);
+      background-size: 240% 100%;
+      background-position: 220% 0;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: portalTabletWordScan 8s linear infinite;
     }
 
-    .pill-siad {
-      background: rgba(0, 119, 254, 0.14);
-      border: 1px solid rgba(0, 119, 254, 0.45);
-      color: #93C5FD;
+    .abis-core .tablet-brand::before {
+      position: absolute;
+      top: -55%;
+      bottom: -55%;
+      left: -12%;
+      width: 2px;
+      content: '';
+      background: #8cf5ff;
+      box-shadow: 0 0 7px #8cf5ff, 0 0 18px rgba(77, 223, 255, 0.82);
+      opacity: 0;
+      pointer-events: none;
+      animation: portalTabletScanBeam 8s linear infinite;
     }
 
-    .split-panel:hover .system-category-pill {
-      transform: scale(1.05);
+    .abis-core .tablet-brand::after {
+      position: absolute;
+      inset: 0;
+      content: attr(data-text);
+      color: #6dffb6;
+      opacity: 0;
+      pointer-events: none;
+      text-shadow: 2px 0 #6dffb6, -2px 0 #30e7ff;
+      animation: portalTabletBrandGlitch 8s steps(1, end) infinite;
     }
 
+    .abis-core .tablet-enrolled {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      max-width: 100%;
+      padding: 10%;
+      color: #6dffb6;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+      opacity: 0;
+      text-shadow: 0 0 8px rgba(75, 255, 169, 0.72), 0 0 22px rgba(75, 255, 169, 0.42);
+      text-transform: uppercase;
+      transform: translateZ(30px);
+      animation: portalTabletEnrolledCycle 8s steps(1, end) infinite, portalEnrolledGlitch 3.2s steps(1, end) infinite;
+    }
+
+    @keyframes portalCoreFloat {
+      0%, 100% { transform: rotateX(12deg) rotateY(-18deg) translate3d(0, 8px, 20px); }
+      50% { transform: rotateX(-10deg) rotateY(16deg) translate3d(0, -10px, 34px); }
+    }
+
+    @keyframes portalTabletBrandCycle { 0%, 42% { opacity: 1; } 45%, 49% { opacity: 0.2; } 53%, 100% { opacity: 0; } }
+    @keyframes portalTabletWordScan { 0% { background-position: 220% 0; } 38% { background-position: -20% 0; } 53%, 100% { background-position: -20% 0; } }
+    @keyframes portalTabletScanBeam { 0%, 4% { left: -12%; opacity: 0; } 8% { opacity: 1; } 42% { left: 112%; opacity: 1; } 48%, 100% { left: 112%; opacity: 0; } }
+    @keyframes portalTabletFullScan { 0%, 5% { top: -12%; opacity: 0; } 9% { opacity: 0.95; } 42% { top: 112%; opacity: 0.95; } 49%, 100% { top: 112%; opacity: 0; } }
+    @keyframes portalTabletScreenGrid { 0%, 4% { opacity: 0.18; background-position: 0 0; } 10% { opacity: 0.42; } 42% { opacity: 0.68; background-position: 0 26px; } 49%, 100% { opacity: 0.18; background-position: 0 26px; } }
+    @keyframes portalTabletBrandGlitch { 0%, 42% { opacity: 0; clip-path: inset(0 0 0 0); transform: translate(0); } 44% { opacity: 0.95; clip-path: inset(12% 0 62% 0); transform: translate(-3px, 1px); } 46% { opacity: 0.85; clip-path: inset(56% 0 18% 0); transform: translate(3px, -1px); } 48% { opacity: 0.7; clip-path: inset(28% 0 42% 0); transform: translate(-1px, 0); } 51%, 100% { opacity: 0; clip-path: inset(0 0 0 0); transform: translate(0); } }
+    @keyframes portalTabletEnrolledCycle { 0%, 50% { opacity: 0; } 54%, 100% { opacity: 1; } }
+    @keyframes portalEnrolledGlitch { 0%, 84%, 100% { transform: translateZ(30px); clip-path: inset(0 0 0 0); } 86% { transform: translate3d(-2px, 1px, 30px); clip-path: inset(12% 0 62% 0); } 88% { transform: translate3d(2px, -1px, 30px); clip-path: inset(56% 0 18% 0); } 90% { transform: translate3d(-1px, 0, 30px); clip-path: inset(28% 0 42% 0); } 92% { transform: translateZ(30px); clip-path: inset(0 0 0 0); }
+    }
+
+    /* Píldora de Categoría */
     /* =========================================================
        TÍTULOS MONUMENTALES CON REFLEJO METÁLICO
        ========================================================= */
@@ -606,17 +703,6 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 0 25px rgba(0, 119, 254, 0.5));
-    }
-
-    .system-tag {
-      font-size: 13px;
-      font-weight: 800;
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #F8FAFC;
-      padding: 4px 10px;
-      border-radius: 8px;
-      letter-spacing: 0.05em;
     }
 
     .system-subtitle-hero {
@@ -748,46 +834,36 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: left 0.65s cubic-bezier(0.25, 1, 0.35, 1),
-                  transform 0.6s cubic-bezier(0.2, 1, 0.3, 1),
+      transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1),
                   box-shadow 0.4s ease;
     }
 
     .center-shield-circle {
-      width: 76px;
-      height: 76px;
-      background: rgba(2, 16, 36, 0.96);
-      border: 2px solid var(--pdi-gold);
+      position: relative;
+      z-index: 1;
+      width: 92px;
+      height: 92px;
+      background: linear-gradient(145deg, rgba(21, 48, 82, 0.98), rgba(1, 12, 28, 0.98));
+      border: 3px solid var(--pdi-gold);
       border-radius: 50%;
-      padding: 12px;
+      padding: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 209, 0, 0.35);
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), 0 0 28px rgba(255, 209, 0, 0.62), inset 0 0 18px rgba(255, 209, 0, 0.12);
       backdrop-filter: blur(14px);
       pointer-events: auto;
       cursor: default;
       transition: all 0.4s ease;
-      animation: centerBreathing 4s ease-in-out infinite;
     }
 
     .center-shield-circle img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
+      filter: brightness(0) saturate(100%) invert(81%) sepia(99%) saturate(1471%) hue-rotate(359deg) brightness(104%) contrast(104%) drop-shadow(0 0 7px rgba(255, 209, 0, 0.72));
       pointer-events: none;
       user-select: none;
-    }
-
-    @keyframes centerBreathing {
-      0%, 100% {
-        box-shadow: 0 0 30px rgba(0,0,0,0.95), 0 0 15px rgba(255, 209, 0, 0.25);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 0 45px rgba(0,0,0,0.95), 0 0 30px rgba(255, 209, 0, 0.5);
-        transform: scale(1.05);
-      }
     }
 
     /* Inclinación interactiva de la insignia central */
@@ -796,50 +872,16 @@
     }
 
     .split-layout:has(.panel-abis:hover) .center-divider {
-      left: 64%;
+      transform: translate(calc(-50% + 14vw), -50%) scale(1.08);
     }
 
     .split-layout:has(.panel-siad:hover) .center-divider {
-      left: 36%;
+      transform: translate(calc(-50% - 14vw), -50%) scale(1.08);
     }
 
     /* =========================================================
        PIE INSTITUCIONAL INFERIOR
        ========================================================= */
-    .footer-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      padding: 14px 36px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(0deg, rgba(1, 8, 20, 0.95) 0%, rgba(1, 8, 20, 0.5) 75%, transparent 100%);
-      pointer-events: none;
-      font-size: 12.5px;
-      color: var(--text-muted);
-    }
-
-    .footer-bar > * {
-      pointer-events: auto;
-    }
-
-    .footer-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .footer-left i {
-      color: var(--pdi-gold);
-    }
-
-    .footer-right {
-      color: #64748B;
-    }
-
     /* =========================================================
        RESPONSIVE DESIGN (PANTALLAS MÓVILES / VERTICALES)
        ========================================================= */
@@ -885,19 +927,13 @@
         background: rgba(1, 8, 20, 0.98);
         padding: 14px 20px;
       }
-      .footer-bar {
-        position: relative;
-        background: rgba(1, 8, 20, 0.98);
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
-        padding: 16px;
-      }
       .system-title-hero {
         font-size: 48px;
       }
     }
   </style>
+  <link rel="stylesheet" href="/css/document-scanner-scene.css?v=1">
+  <link rel="stylesheet" href="/css/device-scenes.css?v=1">
 </head>
 <body>
 
@@ -910,12 +946,7 @@
         <span>¿A qué sistema desea ingresar?</span>
       </div>
       <div class="header-meta">
-        <div class="header-badge-tag">
-          <i class="fa-solid fa-shield-halved" style="color: var(--pdi-gold);"></i>
-          <span>Portal de Acceso Operativo</span>
-        </div>
         <div class="header-clock" title="Hora Oficial de Santiago de Chile">
-          <span class="clock-live-indicator"></span>
           <span id="liveClockSantiago">--:--:--</span>
           <span class="clock-tz-tag">SCL</span>
         </div>
@@ -937,18 +968,8 @@
         <div class="particle-dust" style="top: 45%; left: 75%; background: #FFFFFF; animation-delay: 1.2s;"></div>
 
         <div class="panel-content">
-          <!-- Emblema HUD Holográfico con Anillo Cyber y Láser -->
-          <div class="hologram-hud-wrapper">
-            <div class="hud-rotating-ring ring-abis"></div>
-            <div class="hud-scanner-core core-abis">
-              <div class="hud-laser-line laser-gold"></div>
-              <span class="material-symbols-outlined">fingerprint</span>
-            </div>
-          </div>
-
-          <div class="system-category-pill pill-abis">
-            <i class="fa-solid fa-fingerprint"></i>
-            <span>Biometría y Enrolamiento</span>
+          <div class="portal-device portal-device--abis">
+            <%- include("partials/biometric-tablet") %>
           </div>
 
           <div class="system-title-hero">
@@ -998,18 +1019,8 @@
         <div class="particle-dust" style="top: 40%; right: 70%; background: #FFFFFF; animation-delay: 1.8s;"></div>
 
         <div class="panel-content">
-          <!-- Emblema HUD Holográfico con Anillo Cyber y Láser -->
-          <div class="hologram-hud-wrapper">
-            <div class="hud-rotating-ring ring-siad"></div>
-            <div class="hud-scanner-core core-siad">
-              <div class="hud-laser-line laser-blue"></div>
-              <span class="material-symbols-outlined">document_scanner</span>
-            </div>
-          </div>
-
-          <div class="system-category-pill pill-siad">
-            <i class="fa-solid fa-file-shield"></i>
-            <span>Análisis Documental y Forense</span>
+          <div class="portal-device portal-device--siad" aria-hidden="true">
+            <%- include("partials/document-scanner") %>
           </div>
 
           <div class="system-title-hero">
@@ -1041,17 +1052,6 @@
       </a>
 
     </main>
-
-    <!-- Barra Inferior Institucional -->
-    <footer class="footer-bar">
-      <div class="footer-left">
-        <i class="fa-solid fa-lock"></i>
-        <span>Acceso exclusivo para personal autorizado de la Policía de Investigaciones de Chile · Ley N° 19.628 / Ley N° 20.084</span>
-      </div>
-      <div class="footer-right">
-        <span>Departamento de Tecnologías de la Información &copy; 2026 JENAPOL</span>
-      </div>
-    </footer>
 
   </div>
 

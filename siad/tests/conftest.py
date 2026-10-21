@@ -26,7 +26,9 @@ def reset_test_database():
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DROP TABLE IF EXISTS entidades")
-            cur.execute("DROP TABLE IF EXISTS documentos")
+            # El esquema actual separa las entidades en tablas dependientes de documentos.
+            # CASCADE solo afecta la base de pruebas y permite recrear todo el esquema desde cero.
+            cur.execute("DROP TABLE IF EXISTS documentos CASCADE")
         conn.commit()
     db.init_schema()
     yield

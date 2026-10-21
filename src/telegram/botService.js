@@ -422,7 +422,7 @@ async function manejarComandoReporte({ token, chatId, pool, args }) {
       return telegramClient.enviarMensaje({
         token,
         chatId,
-        texto: `[ALERTA] Formato de fecha invÃ¡lido. Usa <code>YYYY-MM-DD</code> (ej: <code>/reporte 2026-10-09 2026-10-12</code>).`,
+        texto: `[ALERTA] Formato de fecha inválido. Usa <code>YYYY-MM-DD</code> (ej: <code>/reporte 2026-10-09 2026-10-12</code>).`,
       });
     }
     if (desde > hasta) {

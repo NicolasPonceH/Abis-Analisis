@@ -50,6 +50,7 @@ async function obtenerReporteRango(pool, desde, hasta) {
     dispositivos,
     regiones,
     tramosEtarios,
+    errorSummary,
   ] = await Promise.all([
     pool.query(
       `SELECT ep.descripcion, count(*) AS total
@@ -136,8 +137,8 @@ async function obtenerReporteRango(pool, desde, hasta) {
               u.nombre_unidad AS unidad,
               count(*) AS total,
               count(*) FILTER (WHERE r.id_estado_sincronizacion = 1) AS sincronizados,
-              count(*) FILTER (WHERE r.id_estado_sincronizacion = 2) AS con_error,
-              count(*) FILTER (WHERE r.id_estado_sincronizacion = 3) AS pendientes
+              count(*) FILTER (WHERE r.id_estado_registro = 6 OR r.id_estado_general IN (9, 10) OR r.id_estado_sincronizacion = 3) AS con_error,
+              count(*) FILTER (WHERE r.id_estado_registro = 5 OR r.id_estado_sincronizacion = 2) AS pendientes
        FROM registro_enrolamiento r
        JOIN cuartel c ON c.id_cuartel = r.id_cuartel
        JOIN unidad u ON u.id_unidad = c.id_unidad
@@ -184,21 +185,74 @@ async function obtenerReporteRango(pool, desde, hasta) {
        ORDER BY min(COALESCE(r.edad_exacta, 999)) ASC`,
       [desde, hasta]
     ),
+    pool.query(
+      `SELECT 
+         count(*) FILTER (WHERE id_estado_registro = 6)::int AS errores_registro,
+         count(*) FILTER (WHERE id_estado_sincronizacion = 3)::int AS errores_sincronizacion,
+         count(*) FILTER (WHERE id_estado_general IN (9,10))::int AS errores_general,
+         count(*) FILTER (WHERE id_estado_registro = 6 OR id_estado_sincronizacion = 3 OR id_estado_general IN (9,10))::int AS total_inconsistencias
+       FROM registro_enrolamiento
+       WHERE fecha_enrolamiento >= $1 AND fecha_enrolamiento <= $2`,
+      [desde, hasta]
+    ),
   ]);
+
+  // Consultar errores de ingesta (filas rechazadas al importar) en el rango
+  let filasErrorIngesta = 0;
+  try {
+    const { rows: loteRows } = await pool.query(
+      `SELECT COALESCE(SUM(filas_error), 0)::int AS total_errores
+       FROM ingesta_lote
+       WHERE iniciado_en::date >= $1::date AND iniciado_en::date <= $2::date AND estado = 'COMPLETADO'`,
+      [desde, hasta]
+    );
+    filasErrorIngesta = loteRows[0]?.total_errores || 0;
+  } catch (_) { /* tabla puede no existir en entornos legacy */ }
 
   const sincData = conPorcentaje(sincronizacion.rows, total);
   const regData = conPorcentaje(registro.rows, total);
+
+  const errStats = errorSummary.rows[0] || {
+    errores_registro: 0,
+    errores_sincronizacion: 0,
+    errores_general: 0,
+    total_inconsistencias: 0,
+  };
+
+  const totalErrores = Number(errStats.total_inconsistencias || 0) + filasErrorIngesta;
+  const totalConIngesta = total + filasErrorIngesta;
+  const tasaError = totalConIngesta > 0 ? Math.round((totalErrores / totalConIngesta) * 1000) / 10 : 0;
+
+  // Si hay errores de ingesta que no están reflejados en sincData, agregar entrada sintética
+  if (filasErrorIngesta > 0) {
+    const existeError = sincData.find(s => s.descripcion.toUpperCase().includes("ERROR"));
+    if (existeError) {
+      existeError.total += filasErrorIngesta;
+      existeError.porcentaje = totalConIngesta > 0 ? Math.round((existeError.total / totalConIngesta) * 1000) / 10 : 0;
+    } else {
+      sincData.push({
+        descripcion: "ERROR",
+        total: filasErrorIngesta,
+        porcentaje: totalConIngesta > 0 ? Math.round((filasErrorIngesta / totalConIngesta) * 1000) / 10 : 0,
+      });
+    }
+  }
+
   const sincOK = sincData.find(s => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.porcentaje || 0;
   const regOK = regData.find(r => r.descripcion.toUpperCase().includes("REGISTRADO"))?.porcentaje || 0;
-  const errSinc = sincData.find(s => s.descripcion.toUpperCase().includes("ERROR"))?.porcentaje || 0;
   const menoresCount = Number(edad.rows.find(e => e.categoria.toUpperCase().includes("MENOR"))?.total || 0);
 
   const resumenEjecutivo = {
     tasaSincronizacion: sincOK,
     tasaRegistroBiometrico: regOK,
-    tasaError: errSinc,
+    tasaError,
+    totalErrores,
+    erroresRegistro: Number(errStats.errores_registro || 0),
+    erroresSincronizacion: Number(errStats.errores_sincronizacion || 0),
+    erroresGeneral: Number(errStats.errores_general || 0),
+    erroresIngesta: filasErrorIngesta,
     tasaMenoresNNA: total > 0 ? Math.round((menoresCount / total) * 1000) / 10 : 0,
-    estadoSLA: sincOK >= 95 ? "Óptimo" : sincOK >= 85 ? "Atención" : "Crítico",
+    estadoSLA: sincOK >= 95 && tasaError < 5 ? "Óptimo" : sincOK >= 85 ? "Atención" : "Crítico",
     cuartelLider: rendimientoCuarteles.rows[0] ? {
       nombre: rendimientoCuarteles.rows[0].cuartel,
       total: Number(rendimientoCuarteles.rows[0].total),
@@ -241,7 +295,7 @@ async function obtenerReporteRango(pool, desde, hasta) {
       sincronizados: Number(c.sincronizados),
       conError: Number(c.con_error),
       pendientes: Number(c.pendientes),
-      tasaExito: Number(c.total) > 0 ? Math.round((Number(c.sincronizados) / Number(c.total)) * 1000) / 10 : 0
+      tasaExito: Number(c.total) > 0 ? Math.max(0, Math.round(((Number(c.total) - Number(c.con_error)) / Number(c.total)) * 1000) / 10) : 0
     })),
   };
 }
@@ -255,8 +309,8 @@ async function obtenerTendenciaHistorica(pool) {
     `SELECT to_char(fecha_enrolamiento, 'YYYY-MM-DD') AS fecha,
             count(*) AS total,
             count(*) FILTER (WHERE id_estado_sincronizacion = 1) AS sincronizados,
-            count(*) FILTER (WHERE id_estado_sincronizacion = 2) AS con_error,
-            count(*) FILTER (WHERE id_estado_sincronizacion = 3) AS pendientes
+            count(*) FILTER (WHERE id_estado_registro = 6 OR id_estado_general IN (9, 10) OR id_estado_sincronizacion = 3) AS con_error,
+            count(*) FILTER (WHERE id_estado_registro = 5 OR id_estado_sincronizacion = 2) AS pendientes
      FROM registro_enrolamiento
      GROUP BY fecha_enrolamiento
      ORDER BY fecha_enrolamiento ASC`
@@ -308,7 +362,9 @@ async function obtenerComparacionPeriodos(pool, tipo) {
     SELECT 
       count(*)::int AS total,
       count(*) FILTER (WHERE id_estado_sincronizacion = 1)::int AS sincronizados,
-      count(*) FILTER (WHERE ep_reg.descripcion IN ('ERROR', 'CON_ERROR') OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))::int AS errores,
+      count(*) FILTER (WHERE id_estado_sincronizacion = 3
+                         OR ep_reg.descripcion IN ('ERROR', 'CON_ERROR')
+                         OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))::int AS errores,
       min(fecha_enrolamiento) AS desde,
       max(fecha_enrolamiento) AS hasta
     FROM registro_enrolamiento r

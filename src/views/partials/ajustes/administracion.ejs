@@ -87,11 +87,11 @@
               <% dbUsers.forEach(u => { %>
                 <tr style="border-bottom: 1px solid var(--bg-surface-hover); transition: background 0.1s;" onmouseover="this.style.background='var(--bg-surface-subtle)'" onmouseout="this.style.background='transparent'">
                   <td style="padding: 16px 24px; font-weight: 700; color: var(--text-primary);">
-                    <i class="fa-solid <%= u.rol === 'admin' ? 'fa-user-shield' : 'fa-user' %>" style="color: <%= u.rol === 'admin' ? '#0284c7' : '#94a3b8' %>; margin-right: 12px;"></i>
+                    <i class="fa-solid <%= u.rol === 'admin' ? 'fa-user-shield admin-user-icon-admin' : 'fa-user admin-user-icon-operador' %>" style="margin-right: 12px;"></i>
                     <%= u.username %>
                   </td>
                   <td style="padding: 16px 24px;" id="td-rol-<%= u.id %>">
-                    <span style="background: <%= u.rol === 'admin' ? '#eff6ff' : 'var(--bg-surface-hover)' %>; color: <%= u.rol === 'admin' ? '#1e40af' : '#475569' %>; border: 1px solid <%= u.rol === 'admin' ? '#bfdbfe' : 'var(--border-subtle)' %>; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <span class="<%= u.rol === 'admin' ? 'admin-role-badge-admin' : 'admin-role-badge-operador' %>" style="padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
                       <%= u.rol === 'operador' ? 'Operador' : 'Admin' %>
                     </span>
                   </td>
@@ -105,13 +105,13 @@
                   </td>
                   <td style="padding: 16px 24px; text-align: right;">
                     <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                      <button type="button" onclick="openRoleModal(<%= u.id %>, '<%= u.rol %>')" style="background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">
+                      <button type="button" data-id="<%= u.id %>" data-role="<%= u.rol %>" onclick="openRoleModal(this.dataset.id, this.dataset.role)" style="background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">
                         <i class="fa-solid fa-pen" style="color: var(--text-muted);"></i> Rol
                       </button>
-                      <button type="button" data-username="<%= u.username %>" onclick="openPasswordModal(<%= u.id %>, this)" style="background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ecfdf5'">
+                      <button type="button" data-id="<%= u.id %>" data-username="<%= u.username %>" onclick="openPasswordModal(this.dataset.id, this)" style="background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ecfdf5'">
                         <i class="fa-solid fa-key" style="color: #16a34a;"></i> Clave
                       </button>
-                      <button type="button" data-username="<%= u.username %>" onclick="eliminarUsuarioAdmin(<%= u.id %>, this)" style="background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'" title="Eliminar usuario">
+                      <button type="button" data-id="<%= u.id %>" data-username="<%= u.username %>" onclick="eliminarUsuarioAdmin(this.dataset.id, this)" style="background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'" title="Eliminar usuario">
                         <i class="fa-solid fa-trash" style="color: #e11d48;"></i> Eliminar
                       </button>
                     </div>
@@ -128,6 +128,19 @@
 
     <!-- Modals de Acción (Ocultos por defecto) -->
     <style>
+      .admin-user-icon-admin { color: #0284c7; }
+      .admin-user-icon-operador { color: #94a3b8; }
+      .admin-role-badge-admin {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+      .admin-role-badge-operador {
+        background: var(--bg-surface-hover);
+        color: #475569;
+        border: 1px solid var(--border-subtle);
+      }
+
       @keyframes adminModalBackdropIn {
         from { opacity: 0; }
         to { opacity: 1; }

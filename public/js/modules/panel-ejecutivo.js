@@ -174,7 +174,6 @@ export function renderKPIs(data) {
 
   // Sincronización PDI
   const sincObj = data.sincronizacion?.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO")) || { total: 0, porcentaje: 0 };
-  const errObj = data.sincronizacion?.find((s) => s.descripcion.toUpperCase().includes("ERROR")) || { total: 0, porcentaje: 0 };
   
   animateValue("kpi-sincronizados", sincObj.total);
   const sincPct = document.getElementById("kpi-sinc-pct");
@@ -189,27 +188,63 @@ export function renderKPIs(data) {
 
   // Registro Biométrico
   const regObj = data.registro?.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO")) || { total: 0, porcentaje: 0 };
+  const regErrObj = data.registro?.find((r) => r.descripcion.toUpperCase().includes("ERROR")) || { total: 0, porcentaje: 0 };
   animateValue("kpi-registrados", regObj.total);
   const regPct = document.getElementById("kpi-reg-pct");
   const regBar = document.getElementById("kpi-reg-bar");
-  if (regPct) regPct.textContent = `${regObj.porcentaje}% del total procesado`;
+  if (regPct) {
+    if (regErrObj.total > 0) {
+      regPct.textContent = `${regObj.porcentaje}% éxito · ${regErrObj.total.toLocaleString("es-CL")} con error`;
+    } else {
+      regPct.textContent = `${regObj.porcentaje}% del total procesado`;
+    }
+  }
   if (regBar) regBar.style.width = `${Math.min(regObj.porcentaje, 100)}%`;
 
-  // Errores / Inconsistencias
-  animateValue("kpi-errores", errObj.total);
+  // Errores / Inconsistencias (Card 4)
+  const exec = data.resumenEjecutivo || {};
+  const totalInconsistencias = exec.totalErrores !== undefined
+    ? exec.totalErrores
+    : ((regErrObj.total || 0) + (exec.erroresIngesta || 0));
+  const tasaError = exec.tasaError !== undefined
+    ? exec.tasaError
+    : (total > 0 ? Math.round((totalInconsistencias / total) * 1000) / 10 : 0);
+
+  animateValue("kpi-errores", totalInconsistencias);
   const errPct = document.getElementById("kpi-err-pct");
   const errBar = document.getElementById("kpi-err-bar");
-  if (errPct) errPct.textContent = `${errObj.porcentaje}% del total procesado`;
-  if (errBar) errBar.style.width = `${Math.min(errObj.porcentaje, 100)}%`;
+  if (errPct) {
+    const errReg = exec.erroresRegistro !== undefined ? exec.erroresRegistro : regErrObj.total;
+    const errIng = exec.erroresIngesta || 0;
+    if (errReg > 0 && errIng > 0) {
+      errPct.textContent = `${tasaError}% (${errReg.toLocaleString("es-CL")} reg. / ${errIng.toLocaleString("es-CL")} ingesta)`;
+    } else if (errReg > 0) {
+      errPct.textContent = `${tasaError}% (${errReg.toLocaleString("es-CL")} errores de registro)`;
+    } else if (errIng > 0) {
+      errPct.textContent = `${tasaError}% (${errIng.toLocaleString("es-CL")} filas rechazadas)`;
+    } else {
+      errPct.textContent = `${tasaError}% del total procesado`;
+    }
+  }
+  if (errBar) errBar.style.width = `${Math.min(tasaError, 100)}%`;
   
   const errTag = document.getElementById("kpi-err-tag");
   if (errTag) {
-    errTag.textContent = errObj.total === 0 ? "Sin Incidentes" : `${errObj.total} Casos`;
+    if (totalInconsistencias === 0) {
+      errTag.textContent = "Sin Incidentes";
+      errTag.style.background = "";
+      errTag.style.color = "";
+    } else {
+      errTag.textContent = `${totalInconsistencias.toLocaleString("es-CL")} Casos`;
+      errTag.style.background = "rgba(239, 68, 68, 0.15)";
+      errTag.style.color = "#dc2626";
+    }
   }
 }
 
 export function updateChartBadges(data) {
   const total = Number(data.total) || 0;
+  const exec = data.resumenEjecutivo || {};
 
   // 1. Cuarteles
   const badgeCuarteles = document.getElementById("badge-chart-cuarteles");
@@ -232,9 +267,9 @@ export function updateChartBadges(data) {
   if (badgeSinc) {
     const sincList = data.sincronizacion || [];
     const sincOk = sincList.find(s => String(s.descripcion).toUpperCase().includes("SINCRONIZADO"))?.total || 0;
-    const errOk = sincList.find(s => String(s.descripcion).toUpperCase().includes("ERROR"))?.total || 0;
+    const errTotal = exec.totalErrores !== undefined ? exec.totalErrores : (sincList.find(s => String(s.descripcion).toUpperCase().includes("ERROR"))?.total || 0);
     const pct = total > 0 ? ((sincOk / total) * 100).toFixed(1) : "100";
-    badgeSinc.innerHTML = `<strong style="color:#059669;">${Number(sincOk).toLocaleString("es-CL")} OK</strong> &bull; <strong style="color:#dc2626;">${Number(errOk).toLocaleString("es-CL")} Error</strong> (${pct}% SLA)`;
+    badgeSinc.innerHTML = `<strong style="color:#059669;">${Number(sincOk).toLocaleString("es-CL")} OK</strong> &bull; <strong style="color:#dc2626;">${Number(errTotal).toLocaleString("es-CL")} Error</strong> (${pct}% SLA)`;
   }
 
   // 4. Demografía Cruzada

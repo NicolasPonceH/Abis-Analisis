@@ -1033,7 +1033,7 @@ window.probarDestinatarioIndividual = async function(id, nombre, btn) {
           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#dc2626;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           <span>Destinatario Pausado</span>
         </div>
-        No es posible enviar prueba a '${nombre}' porque estÃ¡ pausado. Debe activarlo primero.
+        No es posible enviar prueba a '${nombre}' porque está pausado. Debe activarlo primero.
       `;
       setTimeout(() => { feedback.style.display = "none"; }, 5000);
     }
@@ -1056,14 +1056,14 @@ window.probarDestinatarioIndividual = async function(id, nombre, btn) {
 
     if (typeof window.showTelegramPopup === "function") {
       const formattedDate = new Date().toLocaleDateString("es-CL", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      window.showTelegramPopup(`Se ha enviado la verificaciÃ³n exitosamente a ${nombre}.`, formattedDate);
+      window.showTelegramPopup(`Se ha enviado la verificación exitosamente a ${nombre}.`, formattedDate);
     } else if (feedback) {
       feedback.className = "crypto-feedback-box success";
       feedback.style.display = "block";
       feedback.innerHTML = `
         <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:var(--status-success); margin-bottom:4px;">
           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Mensaje de VerificaciÃ³n Enviado</span>
+          <span>Mensaje de Verificación Enviado</span>
         </div>
         ${data.mensaje}
       `;
@@ -1093,9 +1093,9 @@ window.solicitarToggleDestinatario = function(id, nombre, chatId, estadoActual) 
   promptAuthModal({ id, nombre, chatId, nuevoEstado }, "destinatario_toggle");
 };
 
-// Solicitar eliminaciÃ³n de destinatario
+// Solicitar eliminación de destinatario
 window.solicitarEliminarDestinatario = function(id, nombre, chatId) {
-  if (!confirm(`Â¿EstÃ¡ seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
+  if (!confirm(`¿Está seguro de eliminar al destinatario '${nombre}' (${chatId}) de la base de datos de Telegram?`)) {
     return;
   }
   promptAuthModal({ id, nombre, chatId }, "destinatario_eliminar");
