@@ -1,14 +1,17 @@
 """Genera la plantilla Word institucional bajo formato APA con tipografía Arial,
 logo PDI con fondo transparente y recuadros formales para cada categoría de entidad.
 
-Características de diseño:
-- Tipografía: Arial uniforme en todo el documento (14 pt título, 12 pt encabezados/cuerpo, 11 pt tablas, 8.5 pt pie).
+Diseño formal institucional unificado para Alto Mando:
+- Tipografía: Arial uniforme en todo el documento (14 pt título, 12 pt encabezados/cuerpo, 10.5 pt tablas, 8.5 pt pie).
 - Logo PDI sin fondo: Imagen PNG con transparencia alpha en la cabecera institucional.
-- Recuadros de Entidades: Cada grupo de entidades (Vehículos, Armas, Drogas) está delimitado
-  en un recuadro formal con borde exterior nítido y relleno interno ordenado.
+- Paleta sobria y ejecutiva: Azul Marino Institucional PDI (#0B2A5B), Gris Carbón (#1F2937),
+  Gris Pizarra (#64748B) y fondos sutiles (#F8FAFC). Se eliminaron completamente colores
+  informales (amarillos mostaza, morados, rojos encendidos, cian/naranja saturados) para
+  cumplir el estándar protocolar del Alto Mando.
+- Recuadros de Entidades: Diseño unificado en Azul Marino PDI (#0B2A5B) con división sutil.
+- Indicadores N.N.A.: Tarjetas métricas ejecutivas sobrias y formales.
 - Márgenes reglamentarios: 2.54 cm en laterales e inferior; 2.80 cm en superior.
 - Cabecera Institucional: Logotipo PDI y membrete anclados en section.header (1.0 cm de distancia).
-- Alineación: Texto del resumen alineado a la izquierda con interlineado 1.5.
 - Etiquetas Jinja2 limpias y unificadas para docxtpl.
 """
 
@@ -32,21 +35,17 @@ if not LOGO_PATH.is_file():
 if not LOGO_PATH.is_file():
     LOGO_PATH = BASE_DIR / "static" / "img" / "pdi-logo.jpg"
 
-COLOR_PDI_NAVY = RGBColor(11, 42, 91)      # #0B2A5B
-COLOR_PDI_GOLD = RGBColor(198, 146, 20)    # #C69214
-COLOR_TEXT_MAIN = RGBColor(31, 41, 55)     # #1F2937
-COLOR_MUTED = RGBColor(100, 116, 139)     # #64748B
+COLOR_PDI_NAVY = RGBColor(11, 42, 91)      # #0B2A5B - Azul Marino Institucional PDI
+COLOR_TEXT_MAIN = RGBColor(31, 41, 55)     # #1F2937 - Gris Carbón Formal
+COLOR_MUTED = RGBColor(100, 116, 139)     # #64748B - Gris Pizarra Medio
 DEFAULT_FONT = "Arial"
 
-ENTITY_COLORS = {
-    "vehiculos": ("2B5FAE", "EAF2FF", RGBColor(43, 95, 174)),
-    "armas": ("D92D20", "FDECEC", RGBColor(217, 45, 32)),
-    "drogas": ("C69214", "FFF7DF", RGBColor(160, 112, 0)),
-    "personas": ("7C3AED", "F3E8FF", RGBColor(124, 58, 237)),
-    "victimas": ("0F766E", "E7F8F4", RGBColor(15, 118, 110)),
-    "nna_victimas": ("0891B2", "E6F7FB", RGBColor(8, 145, 178)),
-    "nna_detenidos": ("EA580C", "FFF0E7", RGBColor(234, 88, 12)),
-}
+# Constantes de diseño formal ejecutivo PDI (Alto Mando)
+HEX_PDI_NAVY = "0B2A5B"
+HEX_BG_LABEL = "F8FAFC"
+HEX_BORDER_NAVY = "0B2A5B"
+HEX_BORDER_SUBTLE = "CBD5E1"
+HEX_BORDER_DIVIDER = "E2E8F0"
 
 
 def set_cell_margins(cell, top=70, bottom=70, left=120, right=120):
@@ -68,7 +67,7 @@ def set_cell_shading(cell, color_hex):
     tcPr.append(shd)
 
 
-def apply_recuadro_borders(table, border_color="003366", inner_color="E2E8F0"):
+def apply_recuadro_borders(table, border_color=HEX_BORDER_NAVY, inner_color=HEX_BORDER_DIVIDER):
     """Aplica formato de recuadro cerrado con borde exterior e interior horizontal."""
     tblPr = table._tbl.tblPr
     tblBorders = parse_xml(
@@ -84,8 +83,8 @@ def apply_recuadro_borders(table, border_color="003366", inner_color="E2E8F0"):
     tblPr.append(tblBorders)
 
 
-def apply_grid_borders(table, border_color="000000"):
-    """Aplica formato de tabla con bordes negros completos en todas las celdas."""
+def apply_grid_borders(table, border_color=HEX_BORDER_SUBTLE):
+    """Aplica formato de tabla con cuadrícula sobria y nítida en todas las celdas."""
     tblPr = table._tbl.tblPr
     tblBorders = parse_xml(
         f'<w:tblBorders {nsdecls("w")}>\n'
@@ -93,8 +92,8 @@ def apply_grid_borders(table, border_color="000000"):
         f'  <w:bottom w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>\n'
         f'  <w:left w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>\n'
         f'  <w:right w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>\n'
-        f'  <w:insideH w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>\n'
-        f'  <w:insideV w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>\n'
+        f'  <w:insideH w:val="single" w:sz="4" w:space="0" w:color="{border_color}"/>\n'
+        f'  <w:insideV w:val="single" w:sz="4" w:space="0" w:color="{border_color}"/>\n'
         f'</w:tblBorders>'
     )
     tblPr.append(tblBorders)
@@ -127,88 +126,89 @@ def add_apa_styled_run(paragraph, text, bold=False, italic=False, size_pt=11, co
     return run
 
 
-def create_entity_recuadro(doc, title, rows_data, accent="2B5FAE", tint="EAF2FF", label_color=None):
-    """Crea una tabla con recuadro (borde perimetral y fondo suave) para una categoría de entidad."""
-    title_key = str(title).lower()
-    if "veh" in title_key:
-        accent, tint, label_color = ENTITY_COLORS["vehiculos"]
-    elif "arma" in title_key:
-        accent, tint, label_color = ENTITY_COLORS["armas"]
-    elif "sust" in title_key:
-        accent, tint, label_color = ENTITY_COLORS["drogas"]
-    elif "persona" in title_key:
-        accent, tint, label_color = ENTITY_COLORS["personas"]
+def create_entity_recuadro(doc, title, rows_data):
+    """Crea una tabla con recuadro formal institucional unificado para una categoría de entidad.
+    
+    Diseño sobrio para Alto Mando: encabezado Azul Marino Institucional PDI uniforme,
+    columna de etiquetas en gris pizarra suave y texto formal sin colores informales.
+    """
     table = doc.add_table(rows=len(rows_data) + 1, cols=2)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
-    apply_recuadro_borders(table, border_color=accent, inner_color="D7DEE9")
+    apply_recuadro_borders(table, border_color=HEX_BORDER_NAVY, inner_color=HEX_BORDER_DIVIDER)
 
     header = table.rows[0].cells[0].merge(table.rows[0].cells[1])
-    set_cell_margins(header, top=95, bottom=95, left=140, right=140)
-    set_cell_shading(header, accent)
+    set_cell_margins(header, top=85, bottom=85, left=130, right=130)
+    set_cell_shading(header, HEX_PDI_NAVY)
     p_header = header.paragraphs[0]
     p_header.paragraph_format.space_before = Pt(1)
     p_header.paragraph_format.space_after = Pt(1)
-    add_apa_styled_run(p_header, title.upper(), bold=True, size_pt=10.5, color=RGBColor(255, 255, 255), font_name=DEFAULT_FONT)
+    add_apa_styled_run(p_header, title.upper(), bold=True, size_pt=10, color=RGBColor(255, 255, 255), font_name=DEFAULT_FONT)
 
     col_widths = [Cm(5.0), Cm(11.0)]
 
     for row_idx, (campo, valor_tag) in enumerate(rows_data):
         row = table.rows[row_idx + 1]
         
-        # Celda Campo (Izquierda)
+        # Celda Campo (Izquierda) - Fondo suave y texto sobrio en azul marino institucional
         cell_0 = row.cells[0]
         cell_0.width = col_widths[0]
-        set_cell_margins(cell_0, top=70, bottom=70, left=120, right=120)
-        set_cell_shading(cell_0, tint)
+        set_cell_margins(cell_0, top=65, bottom=65, left=110, right=110)
+        set_cell_shading(cell_0, HEX_BG_LABEL)
         p0 = cell_0.paragraphs[0]
         p0.paragraph_format.space_before = Pt(2)
         p0.paragraph_format.space_after = Pt(2)
         p0.paragraph_format.line_spacing = 1.15
-        add_apa_styled_run(p0, campo, bold=True, size_pt=10.5, color=label_color or COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+        add_apa_styled_run(p0, campo, bold=True, size_pt=10, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-        # Celda Valor (Derecha)
+        # Celda Valor (Derecha) - Fondo blanco y texto oscuro estándar
         cell_1 = row.cells[1]
         cell_1.width = col_widths[1]
-        set_cell_margins(cell_1, top=70, bottom=70, left=120, right=120)
+        set_cell_margins(cell_1, top=65, bottom=65, left=110, right=110)
         set_cell_shading(cell_1, "FFFFFF")
         p1 = cell_1.paragraphs[0]
         p1.paragraph_format.space_before = Pt(2)
         p1.paragraph_format.space_after = Pt(2)
         p1.paragraph_format.line_spacing = 1.15
-        add_apa_styled_run(p1, valor_tag, bold=False, size_pt=10.5, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
+        add_apa_styled_run(p1, valor_tag, bold=False, size_pt=10, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(7)
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
 
 def create_nna_cards(doc):
-    """Tarjetas de indicadores N.N.A. para hacer visibles ambos contadores."""
+    """Tarjetas ejecutivas de indicadores N.N.A. con diseño formal y sobrio para Alto Mando.
+    
+    Elimina colores saturados (cian, naranjo) y unifica con paleta institucional.
+    """
     table = doc.add_table(rows=1, cols=2)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
-    apply_recuadro_borders(table, border_color="CBD5E1", inner_color="FFFFFF")
+    apply_recuadro_borders(table, border_color=HEX_BORDER_SUBTLE, inner_color="FFFFFF")
     cards = [
-        ("V\u00cdCTIMAS MENORES DE EDAD (N.N.A.)", "{{ Victimas_Menores }}", "0891B2", "E6F7FB"),
-        ("DETENIDOS MENORES DE EDAD (N.N.A.)", "{{ Detenidos_Menores }}", "EA580C", "FFF0E7"),
+        ("VÍCTIMAS MENORES DE EDAD (N.N.A.)", "{{ Victimas_Menores }}"),
+        ("DETENIDOS MENORES DE EDAD (N.N.A.)", "{{ Detenidos_Menores }}"),
     ]
-    for idx, (label, value, accent, tint) in enumerate(cards):
+    for idx, (label, value) in enumerate(cards):
         cell = table.cell(0, idx)
         cell.width = Cm(8.0)
-        set_cell_margins(cell, top=120, bottom=120, left=150, right=150)
-        set_cell_shading(cell, tint)
+        set_cell_margins(cell, top=100, bottom=100, left=130, right=130)
+        set_cell_shading(cell, HEX_BG_LABEL)
+        
         p_label = cell.paragraphs[0]
         p_label.paragraph_format.space_before = Pt(1)
-        p_label.paragraph_format.space_after = Pt(3)
-        add_apa_styled_run(p_label, label, bold=True, size_pt=8.5, color=RGBColor.from_string(accent), font_name=DEFAULT_FONT)
+        p_label.paragraph_format.space_after = Pt(2)
+        add_apa_styled_run(p_label, label, bold=True, size_pt=8.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+        
         p_value = cell.add_paragraph()
         p_value.paragraph_format.space_before = Pt(0)
         p_value.paragraph_format.space_after = Pt(1)
-        add_apa_styled_run(p_value, value, bold=True, size_pt=20, color=RGBColor.from_string(accent), font_name=DEFAULT_FONT)
+        add_apa_styled_run(p_value, value, bold=True, size_pt=18, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+        
         p_caption = cell.add_paragraph()
         p_caption.paragraph_format.space_before = Pt(0)
         p_caption.paragraph_format.space_after = Pt(1)
         add_apa_styled_run(p_caption, "Personas detectadas en el documento", size_pt=8.5, color=COLOR_MUTED, font_name=DEFAULT_FONT)
-    doc.add_paragraph().paragraph_format.space_after = Pt(7)
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
 
 def build():
@@ -288,13 +288,13 @@ def build():
     p_rule.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_rule.paragraph_format.space_before = Pt(0)
     p_rule.paragraph_format.space_after = Pt(10)
-    add_apa_styled_run(p_rule, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", bold=True, size_pt=7.5, color=COLOR_PDI_GOLD, font_name=DEFAULT_FONT)
+    add_apa_styled_run(p_rule, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", bold=True, size_pt=7.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-    # 2. Tabla de Metadatos del Documento (Recuadro sutil)
+    # 2. Tabla de Metadatos del Documento (Recuadro formal sutil)
     meta_table = doc.add_table(rows=2, cols=2)
     meta_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     meta_table.autofit = False
-    apply_recuadro_borders(meta_table, border_color="CBD5E1", inner_color="F1F5F9")
+    apply_recuadro_borders(meta_table, border_color=HEX_BORDER_SUBTLE, inner_color=HEX_BORDER_DIVIDER)
 
     meta_rows = [
         ("Documento Analizado:", "{{ Nombre_Documento }}"),
@@ -307,18 +307,18 @@ def build():
         cell_v.width = Cm(11.2)
         set_cell_margins(cell_k, top=60, bottom=60, left=100, right=100)
         set_cell_margins(cell_v, top=60, bottom=60, left=100, right=100)
-        set_cell_shading(cell_k, "F8FAFC")
+        set_cell_shading(cell_k, HEX_BG_LABEL)
         set_cell_shading(cell_v, "FFFFFF")
         
         pk = cell_k.paragraphs[0]
         pk.paragraph_format.space_before = Pt(2)
         pk.paragraph_format.space_after = Pt(2)
-        add_apa_styled_run(pk, k, bold=True, size_pt=10.5, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
+        add_apa_styled_run(pk, k, bold=True, size_pt=10, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
         pv = cell_v.paragraphs[0]
         pv.paragraph_format.space_before = Pt(2)
         pv.paragraph_format.space_after = Pt(2)
-        add_apa_styled_run(pv, v, bold=False, size_pt=10.5, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
+        add_apa_styled_run(pv, v, bold=False, size_pt=10, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
 
     # 3. Sección Resumen de Diligencia
     p_h1 = doc.add_paragraph()
@@ -331,46 +331,43 @@ def build():
     ficha_table = doc.add_table(rows=8, cols=2)
     ficha_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     ficha_table.autofit = False
-    apply_grid_borders(ficha_table, border_color="000000")
+    apply_grid_borders(ficha_table, border_color=HEX_BORDER_SUBTLE)
 
     col_widths = [Cm(3.8), Cm(12.2)]
     
     rows_data = [
-        ("Fecha", "{{ Fecha_Hecho }}", True),
-        ("Unidad", "{{ Unidad }}", False),
-        ("Hecho", "{{ Hecho }}", False),
-        ("Detenido", "{{ Detenidos }}", False),
-        ("Víctima", "{{ Victimas }}", False),
-        ("Detenidos menores de edad", "{{ Detenidos_Menores }}", False),
-        ("Víctimas menores de edad", "{{ Victimas_Menores }}", False),
-        ("Resumen Diligencia", "{{ Resumen_Relato }}", False),
+        ("Fecha", "{{ Fecha_Hecho }}"),
+        ("Unidad", "{{ Unidad }}"),
+        ("Hecho", "{{ Hecho }}"),
+        ("Detenido", "{{ Detenidos }}"),
+        ("Víctima", "{{ Victimas }}"),
+        ("Detenidos menores de edad", "{{ Detenidos_Menores }}"),
+        ("Víctimas menores de edad", "{{ Victimas_Menores }}"),
+        ("Resumen Diligencia", "{{ Resumen_Relato }}"),
     ]
 
-    for row_idx, (campo, valor_tag, is_header) in enumerate(rows_data):
+    for row_idx, (campo, valor_tag) in enumerate(rows_data):
         row = ficha_table.rows[row_idx]
         
-        bg_color = "003366" if is_header else "FFFFFF"
-        text_color = RGBColor(255, 255, 255) if is_header else COLOR_TEXT_MAIN
-        
-        # Celda Campo
+        # Celda Campo (Izquierda) - Fondo suave y texto formal en Azul Marino Institucional
         cell_0 = row.cells[0]
         cell_0.width = col_widths[0]
-        set_cell_margins(cell_0, top=70, bottom=70, left=120, right=120)
-        set_cell_shading(cell_0, bg_color)
+        set_cell_margins(cell_0, top=65, bottom=65, left=110, right=110)
+        set_cell_shading(cell_0, HEX_BG_LABEL)
         p0 = cell_0.paragraphs[0]
         p0.paragraph_format.space_before = Pt(2)
         p0.paragraph_format.space_after = Pt(2)
-        add_apa_styled_run(p0, campo, bold=True, size_pt=10.5, color=text_color, font_name=DEFAULT_FONT)
+        add_apa_styled_run(p0, campo, bold=True, size_pt=10, color=COLOR_PDI_NAVY, font_name=DEFAULT_FONT)
 
-        # Celda Valor
+        # Celda Valor (Derecha) - Fondo blanco y texto oscuro estándar
         cell_1 = row.cells[1]
         cell_1.width = col_widths[1]
-        set_cell_margins(cell_1, top=70, bottom=70, left=120, right=120)
-        set_cell_shading(cell_1, bg_color)
+        set_cell_margins(cell_1, top=65, bottom=65, left=110, right=110)
+        set_cell_shading(cell_1, "FFFFFF")
         p1 = cell_1.paragraphs[0]
         p1.paragraph_format.space_before = Pt(2)
         p1.paragraph_format.space_after = Pt(2)
-        add_apa_styled_run(p1, valor_tag, bold=is_header, size_pt=10.5, color=text_color, font_name=DEFAULT_FONT)
+        add_apa_styled_run(p1, valor_tag, bold=False, size_pt=10, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
 
     doc.add_paragraph().paragraph_format.space_after = Pt(16)
 
@@ -466,8 +463,8 @@ def build():
     p_adv = doc.add_paragraph()
     p_adv.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p_adv.paragraph_format.space_before = Pt(12)
-    add_apa_styled_run(p_adv, "Advertencia: ", bold=True, size_pt=11, color=RGBColor(180, 0, 0), font_name=DEFAULT_FONT)
-    add_apa_styled_run(p_adv, "{{ advertencia_faltantes }}", bold=False, size_pt=11, color=COLOR_TEXT_MAIN, font_name=DEFAULT_FONT)
+    add_apa_styled_run(p_adv, "Nota: ", bold=True, italic=True, size_pt=10, color=COLOR_MUTED, font_name=DEFAULT_FONT)
+    add_apa_styled_run(p_adv, "{{ advertencia_faltantes }}", italic=True, size_pt=10, color=COLOR_MUTED, font_name=DEFAULT_FONT)
     doc.add_paragraph("{%p endif %}")
 
     # Guardar en ambas rutas
