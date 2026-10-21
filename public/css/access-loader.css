@@ -1,0 +1,111 @@
+.abis-access {
+  --access-accent: #f1d47c;
+  position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; height: 100dvh; max-height: none;
+  margin: 0; border: 0; padding: 36px 24px; overflow: auto; color: #edf3f8;
+  background: radial-gradient(ellipse at 50% 38%, #13374c 0, #071b2d 40%, #030d1b 78%);
+  font-family: Inter, system-ui, sans-serif;
+}
+.abis-access:not([open]) { display: none; }
+.abis-access[open] { display: grid; place-items: center; animation: access-reveal 350ms ease-out both; }
+.abis-access::backdrop { background: #030d1b; }
+body:has(.abis-access[open]) { overflow: hidden; }
+.abis-access__ambient { position: fixed; inset: 0; pointer-events: none; background: linear-gradient(#91c9e006 1px, transparent 1px), linear-gradient(90deg, #91c9e006 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, black, transparent 75%); }
+.abis-access__content { width: min(100%, 690px); position: relative; margin: auto; }
+.abis-access__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 8px 20px; border-bottom: 1px solid #accbdf1a; }
+.abis-access__brand { display: flex; align-items: center; gap: 14px; }
+.abis-access__brand img { width: 50px; height: 36px; object-fit: contain; filter: brightness(0) invert(1); }
+.abis-access__brand > span { border-left: 1px solid #ffffff26; padding-left: 14px; font-size: 18px; font-weight: 800; letter-spacing: .12em; }
+.abis-access__brand small { display: block; color: #90a9bd; font-size: 7px; letter-spacing: .14em; font-weight: 500; margin-top: 3px; }
+.abis-access__badge { display: flex; align-items: center; gap: 7px; border: 1px solid #f1d47c33; border-radius: 40px; padding: 8px 12px; color: var(--access-accent); font-size: 8px; font-weight: 600; letter-spacing: .1em; white-space: nowrap; }
+.abis-access__badge i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 9px currentColor; }
+.abis-access__stage { position: relative; display: grid; place-items: center; height: 340px; isolation: isolate; margin: 18px 0 6px; }
+.abis-access__stage::before { content: ''; position: absolute; inset: 12% 14%; background: radial-gradient(ellipse, #4eafc228, transparent 70%); filter: blur(20px); z-index: -1; }
+.abis-access__stage .biometric-device { width: min(100%, 520px); z-index: 1; }
+.abis-access__stage .biometric-device__tablet { transform: rotateX(6deg) rotateY(-8deg) rotateZ(-2deg); animation: access-tablet-enter 700ms cubic-bezier(.16,1,.3,1) both; transition: transform 700ms cubic-bezier(.16,1,.3,1), filter 700ms; }
+.abis-access__orbit { position: absolute; width: 82%; height: 64%; border: 1px solid #9dc8da17; border-radius: 50%; transform: rotate(-17deg); pointer-events: none; z-index: -1; }
+.abis-access__orbit--inner { width: 70%; height: 80%; border-style: dashed; border-color: #f1d47c19; transform: rotate(12deg); }
+.abis-access__corner { position: absolute; height: 17px; width: 17px; border: solid #f1d47c60; border-width: 1px 0 0 1px; }
+.abis-access__corner--tl { top: 20px; left: 24px; }
+.abis-access__corner--tr { top: 20px; right: 24px; rotate: 90deg; }
+.abis-access__corner--bl { bottom: 18px; left: 24px; rotate: -90deg; }
+.abis-access__corner--br { bottom: 18px; right: 24px; rotate: 180deg; }
+.abis-access__stage-label, .abis-access__stage-caption { position: absolute; left: 0; right: 0; text-align: center; font: 8px ui-monospace, monospace; color: #8ba5b8; letter-spacing: .22em; }
+.abis-access__stage-label { top: 15px; }
+.abis-access__stage-caption { bottom: 14px; font-size: 7px; color: #627d94; }
+.abis-access__message { text-align: center; padding: 10px 0 24px; }
+.abis-access__eyebrow { margin: 0 0 10px; color: var(--access-accent); font-size: 9px; font-weight: 700; letter-spacing: .2em; }
+.abis-access__message h2 { font-size: clamp(26px, 4vw, 38px); letter-spacing: -.045em; line-height: 1.2; margin: 0; font-weight: 700; }
+.abis-access__message #access-description { margin: 10px auto 0; max-width: 440px; font-size: 12px; line-height: 1.6; color: #a6bdce; min-height: 20px; }
+.abis-access__track { overflow: hidden; position: relative; height: 3px; border-radius: 4px; background: #ffffff12; }
+.abis-access__track > span { display: block; height: 100%; width: 34%; border-radius: inherit; background: linear-gradient(90deg, transparent, #ead28b 45%, #fff3c2); animation: access-wait 1800ms ease-in-out infinite; }
+.abis-access__steps { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0 0; padding: 0 10px; }
+.abis-access__steps li { display: flex; gap: 10px; align-items: center; color: #617d93; transition: color 350ms; }
+.abis-access__steps li > span { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border: 1px solid #7899b030; border-radius: 50%; font: 9px ui-monospace, monospace; }
+.abis-access__steps li > div { font-size: 11px; font-weight: 600; }
+.abis-access__steps small { display: block; margin-top: 4px; font-size: 9px; font-weight: 400; }
+.abis-access__steps li[aria-current], .abis-access__steps li[data-complete] { color: var(--access-accent); }
+.abis-access__steps li[aria-current] > span, .abis-access__steps li[data-complete] > span { border-color: currentColor; background: #f1d47c0a; }
+.abis-access__footer { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 34px; color: #6f8b9f; font-size: 9px; }
+.abis-access__footer svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.5; }
+.abis-access__seal { position: absolute; left: calc(50% + 148px); bottom: 48px; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; border: 1px solid #95eddc66; background: #153c3d; color: #a6ffe4; box-shadow: 0 0 0 6px #95eddc08, 0 8px 22px #0005; z-index: 2; opacity: 0; transform: scale(.7); transition: opacity 250ms, transform 400ms cubic-bezier(.16,1,.3,1); }
+.abis-access__seal svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.abis-access__error-icon { display: none; }
+.abis-access__return { display: block; margin: 22px auto 0; border: 1px solid #e1c48a70; border-radius: 9px; background: #f1d47c; color: #0b2035; padding: 13px 18px; font: 600 12px Inter, sans-serif; cursor: pointer; }
+.abis-access__return[hidden] { display: none; }
+.abis-access__return span { margin-left: 20px; }
+.abis-access__return:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.abis-access .biometric-device__matched, .abis-access .biometric-device__points { animation: none !important; opacity: 0; }
+.abis-access .biometric-device__reading { animation: none !important; opacity: 1; }
+.abis-access .biometric-device__scan { animation-duration: 3s; }
+.abis-access .biometric-device__ridge { animation: access-ridges 4.2s linear infinite; }
+.abis-access .biometric-device__progress { animation: access-screen-progress 2200ms ease-in-out infinite; }
+.abis-access[data-state="success"], .abis-access[data-state="leaving"] { --access-accent: #95edd3; }
+.abis-access:is([data-state="success"], [data-state="leaving"]) .biometric-device__tablet { animation: none; transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); filter: drop-shadow(0 12px 32px #74dfc522); }
+.abis-access:is([data-state="success"], [data-state="leaving"]) .biometric-device__ridge { animation: none; clip-path: none; opacity: 1; }
+.abis-access:is([data-state="success"], [data-state="leaving"]) .biometric-device__progress { animation: none; transform: none; }
+.abis-access:is([data-state="success"], [data-state="leaving"]) .biometric-device__matched { opacity: 1; }
+.abis-access:is([data-state="success"], [data-state="leaving"]) .biometric-device__scan, .abis-access:is([data-state="success"], [data-state="leaving"]) .biometric-device__reading { display: none; }
+.abis-access:is([data-state="success"], [data-state="leaving"]) .abis-access__track > span { animation: none; width: 100%; background: #95edd3; transition: width 450ms ease; }
+.abis-access:is([data-state="success"], [data-state="error"], [data-state="leaving"]) .abis-access__seal { opacity: 1; transform: scale(1); }
+.abis-access[data-state="error"] { --access-accent: #f3b19a; }
+.abis-access[data-state="error"] .abis-access__seal { border-color: #efb09880; background: #493030; color: #ffd6c5; }
+.abis-access[data-state="error"] .abis-access__check { display: none; }
+.abis-access[data-state="error"] .abis-access__error-icon { display: block; }
+.abis-access[data-state="error"] .biometric-device * { animation-play-state: paused; }
+.abis-access[data-state="error"] .biometric-device__tablet { animation: none; opacity: 1; }
+.abis-access[data-state="error"] .biometric-device__scan, .abis-access[data-state="error"] .biometric-device__reading { display: none; }
+.abis-access[data-state="error"] .abis-access__track > span { animation: none; background: #f3b19a; width: 100%; }
+.abis-access[data-state="leaving"] .abis-access__content { transform: translateY(-8px); opacity: .65; transition: opacity 300ms, transform 300ms; }
+@keyframes access-reveal { from { opacity: 0; } to { opacity: 1; } }
+@keyframes access-tablet-enter { from { opacity: 0; transform: translateY(20px) rotateX(12deg) rotateY(-14deg) rotateZ(-4deg); } to { opacity: 1; transform: rotateX(6deg) rotateY(-8deg) rotateZ(-2deg); } }
+@keyframes access-wait { 0% { transform: translateX(-100%); } 100% { transform: translateX(395%); } }
+@keyframes access-ridges { 0% { clip-path: inset(0 0 100% 0); } 58%, 86% { clip-path: inset(0); opacity: .9; } 100% { clip-path: inset(0); opacity: .3; } }
+@keyframes access-screen-progress { 0%, 100% { transform: scaleX(.18); opacity: .6; } 50% { transform: scaleX(.75); opacity: 1; } }
+@media (max-width: 600px) {
+  .abis-access { padding: 24px 20px; }
+  .abis-access__header { padding-inline: 0; gap: 10px; }
+  .abis-access__brand { gap: 9px; }
+  .abis-access__brand img { width: 34px; height: 29px; }
+  .abis-access__brand > span { font-size: 15px; padding-left: 9px; }
+  .abis-access__brand small { font-size: 5px; letter-spacing: .07em; }
+  .abis-access__badge { font-size: 6px; padding: 7px 9px; }
+  .abis-access__stage { height: clamp(210px, 62vw, 300px); margin-top: 14px; }
+  .abis-access__corner--tl, .abis-access__corner--bl { left: 0; }
+  .abis-access__corner--tr, .abis-access__corner--br { right: 0; }
+  .abis-access__stage-label { top: 4px; font-size: 6px; }
+  .abis-access__stage-caption { bottom: 5px; font-size: 5px; }
+  .abis-access__steps { gap: 7px; padding: 0; }
+  .abis-access__steps li { gap: 6px; align-items: flex-start; }
+  .abis-access__steps li > span { width: 22px; height: 22px; font-size: 8px; }
+  .abis-access__steps li > div { font-size: 9px; line-height: 1.4; }
+  .abis-access__steps small { font-size: 7px; line-height: 1.5; }
+  .abis-access__seal { width: 34px; height: 34px; left: auto; right: 25px; bottom: 36px; }
+  .abis-access__seal svg { width: 22px; height: 22px; }
+}
+@media (max-height: 740px) and (min-width: 601px) { .abis-access { padding-block: 18px; } .abis-access__stage { height: 260px; margin: 8px 0 0; } .abis-access__stage .biometric-device { max-width: 400px; } .abis-access__footer { margin-top: 20px; } }
+@media (prefers-reduced-motion: reduce) {
+  .abis-access, .abis-access *, .abis-access *::before, .abis-access *::after { animation: none !important; transition: none !important; }
+  .abis-access .biometric-device__ridge { clip-path: none; }
+  .abis-access .biometric-device__scan { display: none; }
+  .abis-access__track > span { width: 100%; opacity: .45; }
+}

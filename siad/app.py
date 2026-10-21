@@ -89,7 +89,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 # Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
 # cualquier instalacion que no sea localhost.
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password"}
+LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password", "logout"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
@@ -1042,13 +1042,13 @@ def summarize_text(raw_text, limit_sentences=3):
 
 @app.before_request
 def require_login():
-    # 1. Si no hay sesión en Flask, intentar autenticación automática (SSO) con abis_auth
+    # Autenticación automática mediante el token JWT compartido con ABIS (SSO).
     if not session.get("user_id"):
-        abis_token = request.cookies.get("abis_auth")
-        if abis_token:
+        auth_token = request.cookies.get("abis_auth")
+        secret_key = app.secret_key or os.getenv("SECRET_KEY")
+        if auth_token and secret_key:
             try:
-                secret_key = os.getenv("SECRET_KEY", "abis_siad_jwt_session_secret_key_2026_local")
-                payload = jwt.decode(abis_token, secret_key, algorithms=["HS256"])
+                payload = jwt.decode(auth_token, secret_key, algorithms=["HS256"])
                 username = payload.get("username")
                 if username:
                     user = db.get_user_by_username(username)
@@ -1056,12 +1056,12 @@ def require_login():
                         session.permanent = True
                         session["user_id"] = user["id"]
                         session["username"] = user["username"]
-                        session["rol"] = user.get("rol", "usuario")
+                        session["rol"] = user.get("rol") or payload.get("rol", "operador")
                         session["nombre_completo"] = user.get("nombre_completo")
-            except Exception as e:
+            except Exception:
                 pass
 
-    # 2. Rutas exentas de autenticación
+    # Rutas exentas de autenticación.
     if request.endpoint is None or request.endpoint in LOGIN_EXEMPT_ENDPOINTS:
         # Si ya está autenticado e intenta acceder a la pantalla de login, redirigir directo al dashboard
         if request.endpoint == "login" and session.get("user_id"):
@@ -1069,7 +1069,7 @@ def require_login():
             return redirect(dest + "/" if dest else url_for("index"))
         return None
 
-    # 3. Si no hay sesión válida, redirigir a login
+    # Si no hay sesión válida, redirigir a login.
     if not session.get("user_id"):
         return redirect(url_for("login", next=request.path))
     return None
@@ -1081,7 +1081,9 @@ def login():
     if session.get("user_id"):
         dest = (request.script_root or "").rstrip("/")
         return redirect(dest + "/" if dest else url_for("index"))
-
+    # request.values (no solo request.args): "next" llega por query string en el primer GET
+    # (redirigido desde require_login), pero por el campo oculto del formulario en un POST --
+    # incluida la re-renderizacion tras una clave incorrecta, para no perder el destino original.
     next_url = request.values.get("next", "")
     script_root = (request.script_root or "").rstrip("/")
     if script_root and next_url.startswith("/") and not next_url.startswith(script_root + "/"):
@@ -1183,10 +1185,12 @@ def forgot_password():
 def logout():
     motivo = request.args.get("motivo")
     session.clear()
+    if motivo == "inactividad":
+        flash("Tu sesión ha sido bloqueada por inactividad. Por favor, ingresa nuevamente por tu seguridad.", "warning")
     dest = url_for("login", motivo="inactividad") if motivo == "inactividad" else "/"
     resp = redirect(dest)
-    resp.set_cookie("abis_auth", "", expires=0, path="/")
-    resp.set_cookie("siad_session", "", expires=0, path="/")
+    resp.delete_cookie("abis_auth", path="/")
+    resp.delete_cookie("siad_session", path="/")
     return resp
 
 

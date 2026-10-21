@@ -34,9 +34,25 @@ function iniciarSIAD(envVars = {}) {
   });
   
   siadProcess.stderr.on('data', (data) => {
-    const msg = data.toString().trim();
-    if (msg && !msg.includes('WARNING: This is a development server')) {
-      console.error(`[SIAD ERROR] ${msg}`);
+    const lines = data.toString().split(/\r?\n/);
+    for (const rawLine of lines) {
+      const msg = rawLine.trim();
+      if (!msg || msg.includes('WARNING: This is a development server')) continue;
+
+      // Werkzeug envía los logs de peticiones HTTP a stderr por defecto:
+      const httpMatch = msg.match(/"\s+(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+.*?\s+HTTP\/\d\.\d"\s+(\d{3})/i);
+      if (httpMatch) {
+        const statusCode = parseInt(httpMatch[1], 10);
+        if (statusCode >= 400) {
+          console.error(`[SIAD ERROR] ${msg}`);
+        } else {
+          console.log(`[SIAD] ${msg}`);
+        }
+      } else if (/error|exception|traceback|fatal/i.test(msg)) {
+        console.error(`[SIAD ERROR] ${msg}`);
+      } else {
+        console.log(`[SIAD] ${msg}`);
+      }
     }
   });
   

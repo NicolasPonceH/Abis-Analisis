@@ -1,0 +1,58 @@
+<% const tabletId = typeof idPrefix === 'string' ? idPrefix : 'bt'; const isAccess = typeof accessMode !== 'undefined' && accessMode; %>
+<div class="biometric-device" aria-hidden="true">
+  <svg class="biometric-device__tablet" viewBox="0 0 600 390" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="<%= tabletId %>-metal" x1="80" y1="35" x2="480" y2="350" gradientUnits="userSpaceOnUse"><stop stop-color="#7e8b9d"/><stop offset=".18" stop-color="#374456"/><stop offset=".52" stop-color="#162333"/><stop offset=".86" stop-color="#45566b"/><stop offset="1" stop-color="#8292a4"/></linearGradient>
+      <linearGradient id="<%= tabletId %>-rubber" x1="70" y1="30" x2="110" y2="350" gradientUnits="userSpaceOnUse"><stop stop-color="#3d4652"/><stop offset=".45" stop-color="#101821"/><stop offset="1" stop-color="#293646"/></linearGradient>
+      <linearGradient id="<%= tabletId %>-screen" x1="140" y1="90" x2="440" y2="290" gradientUnits="userSpaceOnUse"><stop stop-color="#12344c"/><stop offset=".5" stop-color="#081c30"/><stop offset="1" stop-color="#102d40"/></linearGradient>
+      <linearGradient id="<%= tabletId %>-glare" x1="135" y1="80" x2="380" y2="290" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity=".15"/><stop offset=".6" stop-color="white" stop-opacity="0"/></linearGradient>
+      <linearGradient id="<%= tabletId %>-beam" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#76f6e7" stop-opacity="0"/><stop offset="1" stop-color="#76f6e7" stop-opacity=".25"/></linearGradient>
+      <pattern id="<%= tabletId %>-ribs" width="13" height="16" patternUnits="userSpaceOnUse"><path d="M2 0v16" stroke="#111d2b" stroke-width="6"/><path d="M6 0v16" stroke="#657183" stroke-width="2"/></pattern>
+      <pattern id="<%= tabletId %>-grid" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M14 0H0v14" stroke="#85dbec" stroke-opacity=".07"/></pattern>
+      <filter id="<%= tabletId %>-shadow" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="9"/></filter>
+      <path id="<%= tabletId %>-fingerprint" d="M176 165c2-23 21-40 45-40s43 17 45 40 M168 177c0-31 23-55 53-55s53 24 53 55 M180 180c0-25 17-44 41-44s41 19 41 44c0 21-5 39-13 53 M188 211c-3-10-5-20-5-31 0-22 16-37 38-37s34 15 34 37c0 25-8 47-19 60 M192 187v-7c0-17 12-29 29-29s27 12 27 29c0 23-7 45-20 61 M199 205c-2-8-3-16-3-25 0-14 11-22 25-22s20 9 20 22c0 24-8 45-20 59 M205 224c-6-13-9-25-9-39 M205 191v-11c0-9 7-15 16-15s12 6 12 15c0 21-6 40-16 53 M213 206c-3-9-4-17-4-26 0-7 5-10 12-10s8 5 8 10c0 19-4 34-11 47 M221 179c0 16-2 25-6 36 M173 191c1 14 4 26 10 37 M180 194c1 17 6 32 14 44 M263 201c-2 13-6 24-12 34"/>
+    </defs>
+    <ellipse cx="302" cy="360" rx="211" ry="12" fill="#000" opacity=".48" filter="url(#<%= tabletId %>-shadow)"/>
+    <g class="biometric-device__body">
+      <!-- El canto inferior y los protectores dan volumen a la carcasa. -->
+      <path d="M55 69 85 44H499L547 70V311L521 344H84L55 321Z" fill="#0a131f" stroke="#152130" stroke-width="3" transform="translate(0 9)"/>
+      <path d="M50 62 80 35H167L185 48H422L441 35H512L550 62V307L520 335H438L420 324H181L163 335H81L50 309Z" fill="url(#<%= tabletId %>-metal)" stroke="#7c8999" stroke-width="2"/>
+      <path d="M73 76 98 58H164L184 69H420L442 58H493L525 81V293L502 312H439L418 301H185L164 312H99L73 292Z" fill="#080f18" stroke="#141e2a" stroke-width="3"/>
+      <path d="M51 62 80 35H166L174 49 91 58 65 82 65 137 50 131Z M550 62 512 35H442L431 49 505 59 535 83 535 136 550 130Z M50 247 66 242 66 289 93 314 173 320 163 335H81L50 309Z M550 246 534 242 534 289 505 314 429 319 438 335H520L550 307Z" fill="url(#<%= tabletId %>-rubber)" stroke="#566170" stroke-width="2"/>
+      <path d="M187 48H418V64H187Z M186 304H417V321H186Z" fill="url(#<%= tabletId %>-ribs)"/>
+      <rect x="109" y="82" width="380" height="213" rx="10" fill="#02080e" stroke="#3c4c60" stroke-width="2"/>
+      <rect x="119" y="92" width="360" height="193" rx="4" fill="url(#<%= tabletId %>-screen)"/>
+      <rect x="119" y="92" width="360" height="193" rx="4" fill="url(#<%= tabletId %>-grid)"/>
+      <path d="M119 120H479" stroke="#9fceda" stroke-opacity=".2"/>
+      <text x="133" y="110" fill="#f5d77f" font-size="11" font-weight="800" letter-spacing="1.8">ABIS</text>
+      <text x="182" y="110" fill="#b7cedb" font-size="6.5" letter-spacing="1">IDENTIFICACIÓN BIOMÉTRICA</text>
+      <rect x="436" y="100" width="31" height="13" rx="3" fill="#a7c9dc" fill-opacity=".1" stroke="#7d98ac" stroke-opacity=".3"/>
+      <text x="442" y="109" fill="#b3c7d5" font-size="6"><%= isAccess ? 'ACCESO' : 'DEMO' %></text>
+      <path d="M155 150v-13h15 M272 137h15v13 M155 224v14h15 M272 238h15v-14" stroke="#d7bd76" stroke-width="1.5"/>
+      <use href="#<%= tabletId %>-fingerprint" stroke="#55748a" stroke-width="2.2" stroke-linecap="round"/>
+      <g class="biometric-device__ridge"><use href="#<%= tabletId %>-fingerprint" stroke="#8df6da" stroke-width="2.2" stroke-linecap="round"/></g>
+      <g class="biometric-device__scan"><rect x="153" y="128" width="136" height="24" fill="url(#<%= tabletId %>-beam)"/><path d="M153 152H289" stroke="#bafff2" stroke-width="1.8"/></g>
+      <g fill="#b4cbd8" font-family="Inter, sans-serif">
+        <text x="310" y="147" font-size="7" letter-spacing="1.2"><%= isAccess ? 'ACCESO INSTITUCIONAL' : 'CAPTURA DACTILAR' %></text>
+        <text x="310" y="165" fill="#f0f6fa" font-size="12" font-weight="700"><%= isAccess ? 'Sistema ABIS' : 'Índice derecho' %></text>
+        <text x="310" y="185" font-size="7"><%= isAccess ? 'VALIDACIÓN DE CREDENCIALES' : 'LECTURA DE CRESTAS' %></text>
+        <rect x="310" y="194" width="139" height="4" rx="2" fill="#527083" fill-opacity=".45"/>
+        <rect class="biometric-device__progress" x="310" y="194" width="139" height="4" rx="2" fill="#8df6da"/>
+        <path d="M310 213H449" stroke="#8caabd" stroke-opacity=".2"/>
+        <text x="310" y="230" font-size="7"><%= isAccess ? 'USUARIO · SESIÓN · PANEL' : 'PATRÓN · MINUCIAS · COTEJO' %></text>
+        <text x="310" y="245" fill="#718ea3" font-size="6"><%= isAccess ? 'PLATAFORMA INSTITUCIONAL' : 'SIMULACIÓN DE ENROLAMIENTO' %></text>
+      </g>
+      <g class="biometric-device__points" stroke="#f9d878" stroke-width="1.2"><circle cx="201" cy="160" r="4"/><circle cx="247" cy="193" r="4"/><circle cx="216" cy="224" r="4"/><path d="m204 157 13-13h19 M251 193h16 M212 227l-10 12"/></g>
+      <rect x="134" y="258" width="330" height="18" rx="4" fill="#8df6da" fill-opacity=".07"/>
+      <g class="biometric-device__reading"><circle cx="146" cy="267" r="2.5" fill="#edd17a"/><text x="155" y="270" fill="#e8d797" font-size="7.5" letter-spacing="1"><%= isAccess ? 'COMPROBANDO CREDENCIALES' : 'LEYENDO HUELLA DACTILAR' %></text></g>
+      <g class="biometric-device__matched"><circle cx="146" cy="267" r="3" fill="#8df6da"/><text x="155" y="270" fill="#8df6da" font-size="7.5" letter-spacing="1"><%= isAccess ? 'SESIÓN AUTORIZADA' : 'HUELLA RECONOCIDA' %></text><path d="m445 266 3 3 6-6" stroke="#8df6da" stroke-width="1.5"/></g>
+      <path d="M123 96H470L130 278H123Z" fill="url(#<%= tabletId %>-glare)" pointer-events="none"/>
+      <circle cx="299" cy="76" r="3.5" fill="#30485e" stroke="#62798d"/><circle cx="299" cy="76" r="1.5" fill="#7db3c5"/>
+      <circle cx="93" cy="182" r="3" fill="#83b8f0"/><circle cx="93" cy="195" r="2" fill="#50617a"/>
+      <g fill="#202f40" stroke="#526173"><rect x="501" y="134" width="14" height="22" rx="3"/><rect x="501" y="166" width="14" height="22" rx="3"/><rect x="501" y="198" width="14" height="22" rx="3"/></g>
+      <path d="M505 145h6 M508 142v6 M505 177h6 M505 207h6v5h-6Z" stroke="#8b9bad" stroke-width="1"/>
+      <g fill="#182333" stroke="#8c97a4" stroke-width="1.4"><circle cx="81" cy="80" r="3"/><circle cx="520" cy="80" r="3"/><circle cx="81" cy="290" r="3"/><circle cx="520" cy="290" r="3"/></g>
+      <text x="278" y="298" fill="#7a8c9f" font-size="5" letter-spacing="3">BIOMETRIC</text>
+    </g>
+  </svg>
+</div>

@@ -1,0 +1,33 @@
+<dialog id="abis-access" class="abis-access" aria-labelledby="access-title" aria-describedby="access-description" data-state="checking">
+  <div class="abis-access__ambient" aria-hidden="true"></div>
+  <div class="abis-access__content">
+    <header class="abis-access__header">
+      <div class="abis-access__brand"><img src="/assets/logo-pdi.png" alt="PDI"><span>ABIS<small>PLATAFORMA INSTITUCIONAL</small></span></div>
+    </header>
+
+    <div class="abis-access__stage" aria-hidden="true">
+      <div class="abis-access__orbit abis-access__orbit--outer"></div>
+      <div class="abis-access__orbit abis-access__orbit--inner"></div>
+      <span class="abis-access__corner abis-access__corner--tl"></span>
+      <span class="abis-access__corner abis-access__corner--tr"></span>
+      <span class="abis-access__corner abis-access__corner--bl"></span>
+      <span class="abis-access__corner abis-access__corner--br"></span>
+      <span class="abis-access__stage-label">IDENTIFICACIÓN / ABIS</span>
+      <%- include('biometric-tablet', { idPrefix: 'access-tablet', accessMode: true }) %>
+      <div class="abis-access__seal">
+        <svg class="abis-access__check" viewBox="0 0 32 32"><path d="m8 16 5 5 11-11"/></svg>
+        <svg class="abis-access__error-icon" viewBox="0 0 32 32"><path d="m10 10 12 12m0-12L10 22"/></svg>
+      </div>
+      <span class="abis-access__stage-caption">POLICÍA DE INVESTIGACIONES DE CHILE</span>
+    </div>
+
+    <div class="abis-access__message" role="status" aria-live="polite" aria-atomic="true">
+      <p class="abis-access__eyebrow" data-access-eyebrow>ACCESO A LA PLATAFORMA</p>
+      <h2 id="access-title">Verificando tu acceso</h2>
+      <p id="access-description">Estamos comprobando tus credenciales.</p>
+    </div>
+
+    <div class="abis-access__track" aria-hidden="true"><span></span></div>
+    <button class="abis-access__return" type="button" hidden>Volver a intentarlo <span aria-hidden="true">↗</span></button>
+  </div>
+</dialog>
