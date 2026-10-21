@@ -142,7 +142,7 @@
 
       <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between gap-2.5 overflow-y-auto custom-doc-scroll min-h-0">
         <!-- Paso 1: Ingesta (Azul / Sky) -->
-        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-blue-50/90 via-sky-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-blue-200/80 dark:border-blue-900/50 border-l-4 border-l-blue-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+        <div role="button" tabindex="0" onclick="openGuide('ingreso')" onkeydown="if (event.key === 'Enter' || event.key === ' ') openGuide('ingreso')" class="w-full text-left flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-blue-50/90 via-sky-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-blue-200/80 dark:border-blue-900/50 border-l-4 border-l-blue-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer">
           <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20 mt-0.5 border border-blue-400/30">1</span>
           <div>
             <div class="flex items-center gap-1.5">
@@ -154,7 +154,7 @@
         </div>
 
         <!-- Paso 2: IA & OCR (Índigo / Violeta) -->
-        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-purple-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-indigo-200/80 dark:border-indigo-900/50 border-l-4 border-l-indigo-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+        <div role="button" tabindex="0" onclick="openGuide('procesamiento')" onkeydown="if (event.key === 'Enter' || event.key === ' ') openGuide('procesamiento')" class="w-full text-left flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-purple-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-indigo-200/80 dark:border-indigo-900/50 border-l-4 border-l-indigo-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer">
           <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20 mt-0.5 border border-indigo-400/30">2</span>
           <div>
             <div class="flex items-center gap-1.5">
@@ -166,7 +166,7 @@
         </div>
 
         <!-- Paso 3: Inteligencia & Análisis (Ámbar / Oro Institucional) -->
-        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50/90 via-yellow-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-amber-200/80 dark:border-amber-900/50 border-l-4 border-l-amber-500 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+        <div role="button" tabindex="0" onclick="openGuide('consulta')" onkeydown="if (event.key === 'Enter' || event.key === ' ') openGuide('consulta')" class="w-full text-left flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50/90 via-yellow-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-amber-200/80 dark:border-amber-900/50 border-l-4 border-l-amber-500 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer">
           <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20 mt-0.5 border border-amber-300">3</span>
           <div>
             <div class="flex items-center gap-1.5">
@@ -178,7 +178,7 @@
         </div>
 
         <!-- Paso 4: Informes & Entrega (Esmeralda / Teal) -->
-        <div class="flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-emerald-200/80 dark:border-emerald-900/50 border-l-4 border-l-emerald-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all">
+        <div role="button" tabindex="0" onclick="openGuide('informes')" onkeydown="if (event.key === 'Enter' || event.key === ' ') openGuide('informes')" class="w-full text-left flex items-start gap-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border border-emerald-200/80 dark:border-emerald-900/50 border-l-4 border-l-emerald-600 shadow-xs hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer">
           <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20 mt-0.5 border border-emerald-400/30">4</span>
           <div>
             <div class="flex items-center gap-1.5">
@@ -375,6 +375,99 @@
       </div>
     </div>
   </div>
+
+    <dialog id="guideModal" class="p-0 w-[min(94vw,760px)] max-h-[90vh] rounded-3xl border-2 border-slate-200 shadow-2xl backdrop:bg-slate-950/70 backdrop:backdrop-blur-sm">
+      <div class="bg-white dark:bg-slate-900">
+        <div class="bg-gradient-to-r from-[#00234c] via-[#002d62] to-[#003875] border-b-4 border-[#ffd100] px-5 sm:px-7 py-4 flex items-center justify-between gap-4 text-white">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-[#ffd100] text-[#00234c] flex items-center justify-center"><span class="material-symbols-outlined">school</span></span>
+            <div><h3 id="guideModalTitle" class="font-black text-lg">Gu&iacute;a paso a paso</h3><p class="text-xs text-blue-100 font-bold">Demostraci&oacute;n visual del proceso</p></div>
+          </div>
+          <button type="button" onclick="closeGuide()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center" aria-label="Cerrar gu&iacute;a"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div id="guideTabs" class="hidden px-5 sm:px-7 pt-5 gap-2 border-b border-slate-200 dark:border-slate-700"></div>
+        <div id="guideModalBody" class="p-5 sm:p-7"></div>
+      </div>
+    </dialog>
+
+    <script>
+      const guideSteps = {
+        ingreso: {
+          title: '1. Ingresar documentos',
+          intro: 'Primero elija c&oacute;mo tiene la informaci&oacute;n: como archivo guardado en su computador o como texto que puede copiar y pegar.',
+          tabs: {
+            document: {
+              label: 'Subir documento', icon: 'upload_file', action: 'upload', actionLabel: 'Ir a subir documento',
+              tip: 'Use esta opci&oacute;n si tiene un PDF, Word, imagen o planilla guardada en el computador.',
+              steps: ['Busque el recuadro grande que dice "Haz clic o arrastra tus archivos aqu&iacute;".', 'Haga un clic dentro de ese recuadro. Se abrir&aacute; una ventana con los archivos de su computador.', 'Busque la carpeta donde guard&oacute; el parte o reporte. Haga un clic sobre el archivo y luego en "Abrir".', 'Espere hasta ver el nombre del archivo en la secci&oacute;n "Archivos listos para procesamiento".', 'Presione el bot&oacute;n amarillo "Iniciar procesamiento OCR" y espere hasta que el sistema termine. No cierre la p&aacute;gina durante este proceso.'],
+              visual: '<div class="rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50 p-5 text-center"><span class="material-symbols-outlined text-5xl text-blue-700">upload_file</span><p class="mt-2 font-black text-blue-950">Haz clic o arrastra tus archivos aqu&iacute;</p><div class="mt-3 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow"><span class="material-symbols-outlined text-red-500">picture_as_pdf</span> Parte_brigada.pdf</div></div>'
+            },
+            text: {
+              label: 'Pegar texto', icon: 'content_paste', action: 'text', actionLabel: 'Abrir ingreso de texto',
+              tip: 'Use esta opci&oacute;n si recibi&oacute; el reporte por correo, chat o ya tiene el texto abierto en otra ventana.',
+              steps: ['En la parte superior de la pantalla, presione el bot&oacute;n amarillo "Pegar texto directo".', 'Si conoce la brigada o unidad de origen, escr&iacute;bala en el campo "Subt&iacute;tulo o Unidad de Origen". Este dato es opcional.', 'Haga clic en el cuadro grande de texto.', 'Vuelva al mensaje original, seleccione el contenido, c&oacute;pielo y luego p&eacute;guelo en el cuadro grande.', 'Revise que el texto aparezca completo. Finalmente presione "Procesar texto directo".'],
+              visual: '<div class="rounded-2xl border-2 border-blue-300 bg-slate-50 p-4"><div class="mb-3 h-7 rounded-lg bg-blue-100"></div><div class="space-y-2 rounded-xl border-2 border-blue-200 bg-white p-3"><span class="block h-2 w-11/12 rounded bg-slate-200"></span><span class="block h-2 w-9/12 rounded bg-slate-200"></span><span class="block h-2 w-10/12 rounded bg-slate-200"></span></div><p class="mt-3 text-center text-xs font-black text-blue-900">Pegue aqu&iacute; el texto del reporte</p></div>'
+            }
+          }
+        },
+        procesamiento: { title: '2. Procesar con OCR y NER', intro: 'En este paso SIAD lee el documento por usted, obtiene su texto y busca nombres, fechas, lugares y otros datos importantes.', icon: 'document_scanner', color: 'indigo', tip: 'El procesamiento puede tardar unos minutos, dependiendo del tama&ntilde;o y cantidad de archivos.', steps: ['Despu&eacute;s de elegir un archivo, espere a que aparezca su nombre en la lista de archivos listos.', 'Presione una sola vez el bot&oacute;n amarillo "Iniciar procesamiento OCR".', 'Ver&aacute; una ventana con una barra de avance. Espere a que llegue al 100%.', 'Cuando termine, presione el bot&oacute;n para ir al Historial o abra el documento procesado.', 'Revise el resumen generado y los datos que el sistema encontr&oacute;. Si un dato no corresponde, revise el documento original.'] },
+        consulta: { title: '3. Consultar resultados', intro: 'El Historial permite volver a ver los reportes de las brigadas que ya fueron procesados.', icon: 'manage_search', color: 'amber', tip: 'No necesita procesar el mismo documento nuevamente para revisarlo.', steps: ['En el men&uacute; lateral, busque y presione "Historial".', 'Use el buscador para escribir el nombre de una brigada, una fecha o una palabra del reporte.', 'Presione el resultado que desea revisar.', 'Lea primero el resumen del sistema y luego revise los datos destacados.', 'Si necesita comparar reportes, vuelva al Historial y aplique los filtros disponibles.'] },
+        informes: { title: '4. Generar informes', intro: 'Puede transformar un reporte analizado en un documento de apoyo para su revisi&oacute;n o seguimiento.', icon: 'description', color: 'emerald', tip: 'Antes de descargar, confirme que el resumen corresponde al reporte de la brigada correcta.', steps: ['Abra desde el Historial el reporte que desea entregar.', 'Revise el resumen y los datos principales en pantalla.', 'Busque el bot&oacute;n de descarga o de generaci&oacute;n de informe.', 'Seleccione el formato solicitado, por ejemplo documento Word.', 'Espere la descarga y abra el archivo para comprobar que se guard&oacute; correctamente. Comp&aacute;rtalo solo por los canales autorizados.'] }
+      };
+
+      let activeGuide = null;
+      let activeGuideTab = 'document';
+
+      function openGuide(key) {
+        activeGuide = key;
+        activeGuideTab = 'document';
+        const modal = document.getElementById('guideModal');
+        if (modal && !modal.open) modal.showModal();
+        renderGuide();
+      }
+
+      function closeGuide() {
+        const modal = document.getElementById('guideModal');
+        if (modal && modal.open) modal.close();
+      }
+
+      function setGuideTab(tab) {
+        activeGuideTab = tab;
+        renderGuide();
+      }
+
+      function renderGuide() {
+        const guide = guideSteps[activeGuide];
+        if (!guide) return;
+        document.getElementById('guideModalTitle').textContent = guide.title;
+        const tabs = document.getElementById('guideTabs');
+        const body = document.getElementById('guideModalBody');
+
+        if (guide.tabs) {
+          const tab = guide.tabs[activeGuideTab];
+          tabs.className = 'px-5 sm:px-7 pt-5 flex gap-2 border-b border-slate-200 dark:border-slate-700';
+          tabs.innerHTML = Object.entries(guide.tabs).map(([key, item]) => `<button type="button" onclick="setGuideTab('${key}')" class="px-3 sm:px-4 py-3 text-xs sm:text-sm font-black border-b-4 ${key === activeGuideTab ? 'border-[#ffd100] text-[#00234c] dark:text-white' : 'border-transparent text-slate-500'}"><span class="material-symbols-outlined align-middle text-[18px] mr-1">${item.icon}</span>${item.label}</button>`).join('');
+          body.innerHTML = guideContent(guide.intro, tab.visual, tab.steps, tab.action, tab.actionLabel, tab.tip);
+        } else {
+          tabs.className = 'hidden';
+          const visualStyles = { indigo: 'background:#eef2ff;border-color:#c7d2fe;color:#4338ca', amber: 'background:#fffbeb;border-color:#fde68a;color:#b45309', emerald: 'background:#ecfdf5;border-color:#a7f3d0;color:#047857' };
+          const visual = `<div style="${visualStyles[guide.color]}" class="h-44 rounded-2xl border flex flex-col items-center justify-center"><span class="material-symbols-outlined text-6xl">${guide.icon}</span><span class="mt-2 text-sm font-black">Demostraci&oacute;n del paso</span></div>`;
+          body.innerHTML = guideContent(guide.intro, visual, guide.steps, null, null, guide.tip);
+        }
+      }
+
+      function guideContent(intro, visual, steps, action, actionLabel, tip) {
+        return `<p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">${intro}</p><div class="my-5">${visual}</div>${tip ? `<div class="mb-5 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950"><span class="material-symbols-outlined text-amber-600">tips_and_updates</span><span><strong>Cu&aacute;ndo usar esta opci&oacute;n:</strong> ${tip}</span></div>` : ''}<p class="mb-3 text-xs font-black uppercase tracking-wider text-slate-500">Siga estos pasos en orden</p><ol class="space-y-3">${steps.map((step, index) => `<li class="flex items-start gap-3"><span class="w-7 h-7 shrink-0 rounded-full bg-[#002d62] text-[#ffd100] text-xs font-black flex items-center justify-center">${index + 1}</span><span class="pt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">${step}</span></li>`).join('')}</ol>${action ? `<button type="button" onclick="guideAction('${action}')" class="mt-6 w-full rounded-xl bg-[#ffd100] hover:bg-[#ffe566] px-5 py-3.5 font-black text-[#00234c] shadow-md transition-colors"><span class="material-symbols-outlined align-middle mr-1">arrow_forward</span>${actionLabel}</button>` : ''}`;
+      }
+
+      function guideAction(action) {
+        closeGuide();
+        window.setTimeout(() => {
+          if (action === 'upload') document.getElementById('pdf-file-input')?.click();
+          if (action === 'text') document.getElementById('pasteModal')?.showModal();
+        }, 180);
+      }
+    </script>
 
     <script>
       (function syncGuiaOperativaHeight() {
