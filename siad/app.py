@@ -22,8 +22,9 @@ from docxtpl import DocxTemplate
 # pyrefly: ignore [missing-import]
 from flask import (
     Flask, Response, flash, redirect, render_template, request, send_from_directory, session,
-    url_for, send_file
+    url_for, send_file, abort, jsonify
 )
+import secrets
 import tempfile
 from docx import Document
 from docxcompose.composer import Composer
@@ -90,15 +91,14 @@ app.jinja_env.globals["censurar_lista_personas"] = censurar_lista_personas
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-# Default de desarrollo documentado, no un secreto real -- sobreescribir con SECRET_KEY en
-# cualquier instalacion que no sea localhost (Sprint 9: revision de seguridad).
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-secret-v2")
+raw_secret = os.environ.get("SECRET_KEY")
+if not raw_secret:
+    raise RuntimeError("SECRET_KEY no está configurada en las variables de entorno / .env. Obligatoria para sesiones seguras.")
+app.secret_key = raw_secret
 app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
-# Default de desarrollo documentado, no un secreto real -- sobreescribir con APP_PASSWORD en
-# cualquier instalacion que no sea localhost.
 LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password", "logout"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -122,7 +122,11 @@ try:
         with conn.cursor() as cur:
             cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
             if not cur.fetchone():
-                db.create_user("admin", generate_password_hash("admin123"), "admin")
+                admin_initial_pw = os.environ.get("ADMIN_INITIAL_PASSWORD") or os.environ.get("APP_PASSWORD")
+                if not admin_initial_pw:
+                    admin_initial_pw = secrets.token_urlsafe(12)
+                    print(f"[SEGURIDAD] Usuario admin inicializado con contraseña temporal aleatoria: {admin_initial_pw}")
+                db.create_user("admin", generate_password_hash(admin_initial_pw), "admin")
 except Exception as exc:  # PostgreSQL puede no estar disponible; el resto de la app sigue andando
     print(f"Aviso: no se pudo inicializar el esquema de PostgreSQL ({exc}).")
 
@@ -177,12 +181,17 @@ def api_register():
 
 @app.route("/api/update_password", methods=["POST"])
 def api_update_password():
-    data = request.get_json()
-    if not data or not data.get("username") or not data.get("password"):
+    data = request.get_json() or {}
+    username = data.get("username")
+    password = data.get("password")
+    if not username or not password:
         return {"ok": False, "error": "Faltan datos obligatorios"}, 400
-    
-    username = data["username"]
-    password = data["password"]
+
+    # Protección de seguridad: solo llamadas locales (ABIS -> SIAD) o sesión administrativa/titular
+    is_local = request.remote_addr in ("127.0.0.1", "::1", "localhost")
+    is_authorized = (session.get("rol") == "admin") or (session.get("username") == username)
+    if not (is_local or is_authorized):
+        return {"ok": False, "error": "Acceso no autorizado."}, 403
     
     try:
         user = db.get_user_by_username(username)
@@ -1114,7 +1123,7 @@ def login():
                     next_url = url_for("index")
 
                 # Generar cookie abis_auth para SSO bi-direccional hacia ABIS
-                secret_key = os.getenv("SECRET_KEY", "abis_siad_jwt_session_secret_key_2026_local")
+                secret_key = app.secret_key
                 token_payload = {
                     "userId": user["id"],
                     "username": user["username"],
@@ -1165,29 +1174,8 @@ def register():
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        username = request.form.get("username", "")
-        new_password = request.form.get("new_password", "")
-        confirm_password = request.form.get("confirm_password", "")
-
-        if not username or not new_password:
-            flash("Todos los campos son obligatorios.")
-            return render_template("forgot_password.html")
-
-        if new_password != confirm_password:
-            flash("Las contraseñas no coinciden.")
-            return render_template("forgot_password.html")
-            
-        try:
-            user = db.get_user_by_username(username)
-            if not user:
-                flash("El usuario no existe.")
-                return render_template("forgot_password.html")
-                
-            db.update_password(username, generate_password_hash(new_password))
-            flash("Contraseña actualizada exitosamente. Inicia sesión.", "success")
-            return redirect(url_for("login"))
-        except Exception as e:
-            flash(f"Error al actualizar la contraseña: {e}")
+        flash("Por políticas de seguridad institucional y control de acceso, el restablecimiento de contraseñas olvidadas debe ser realizado por el Administrador del Sistema en su Unidad policial.", "info")
+        return render_template("forgot_password.html")
             
     return render_template("forgot_password.html")
 
@@ -1233,13 +1221,23 @@ def eliminar_documento(filename):
             os.remove(ruta)
 
 
+def check_document_access(filename):
+    """Verifica si el usuario autenticado tiene permiso para acceder o modificar el documento.
+    Los administradores tienen acceso global. Los operadores solo pueden acceder a sus propios documentos.
+    """
+    username = session.get("username", "")
+    rol = session.get("rol", "operador")
+    if rol == "admin":
+        return True
+    if username and filename.startswith(f"{username}_"):
+        return True
+    return False
+
+
 @app.route("/delete/<filename>", methods=["POST"])
 def delete_document(filename):
-    username = session.get("username", "anon")
-    rol = session.get("rol", "operador")
     filename = secure_filename(filename)
-    
-    if rol != "admin" and not filename.startswith(f"{username}_"):
+    if not check_document_access(filename):
         flash("Permiso denegado: No puedes eliminar un documento que no te pertenece.", "error")
         return redirect(url_for("index"))
         
@@ -1573,6 +1571,9 @@ def api_upload():
 @app.route("/view/<filename>")
 def view_pdf(filename):
     filename = secure_filename(filename)
+    if not check_document_access(filename):
+        flash("Permiso denegado: No tienes autorización para visualizar este expediente.", "error")
+        return redirect(url_for("index"))
     files = sorted(f for f in os.listdir(app.config["UPLOAD_FOLDER"]) if allowed_file(f))
     if filename not in files:
         flash("El documento solicitado no existe.", "error")
@@ -1719,6 +1720,8 @@ def update_ficha(filename):
 @app.route("/uploads/<filename>")
 def serve_upload(filename):
     filename = secure_filename(filename)
+    if not check_document_access(filename):
+        abort(403)
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
@@ -2009,6 +2012,8 @@ def export_docx(filename):
 @app.route("/exports/<filename>")
 def serve_export(filename):
     filename = secure_filename(filename)
+    if not check_document_access(filename):
+        abort(403)
     if not os.path.isfile(export_path(filename)):
         flash("Aun no se ha generado el Word de este documento.", "error")
         return redirect(url_for("view_pdf", filename=filename, _anchor="exportar"))
@@ -2160,6 +2165,8 @@ def configuracion():
 
 @app.route("/api/admin/create-user", methods=["POST"])
 def api_admin_create_user():
+    if session.get("rol") != "admin":
+        return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
@@ -2181,6 +2188,8 @@ def api_admin_create_user():
 
 @app.route("/api/admin/update-role", methods=["POST"])
 def api_admin_update_role():
+    if session.get("rol") != "admin":
+        return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
     rol = data.get("rol")
@@ -2195,6 +2204,8 @@ def api_admin_update_role():
 
 @app.route("/api/admin/reset-password", methods=["POST"])
 def api_admin_reset_password():
+    if session.get("rol") != "admin":
+        return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
     password = data.get("password")
@@ -2222,15 +2233,27 @@ def cambiar_password():
     if not username:
         return redirect(url_for("login"))
     
+    current_password = request.form.get("current_password")
     new_password = request.form.get("new_password")
-    if new_password:
-        try:
-            db.update_password(username, generate_password_hash(new_password))
-            flash("Contraseña actualizada exitosamente.", "success")
-        except Exception as e:
-            flash(f"Error al actualizar contraseña: {e}", "error")
-    else:
-        flash("Debe proporcionar una nueva contraseña.", "error")
+    if not new_password or len(new_password) < 6:
+        flash("Debe proporcionar una nueva contraseña de al menos 6 caracteres.", "error")
+        return redirect(request.referrer or url_for("configuracion", section="cuenta"))
+
+    user = db.get_user_by_username(username)
+    if not user:
+        flash("Usuario no encontrado.", "error")
+        return redirect(url_for("login"))
+
+    # Si se proporcionó la clave actual, validarla para prevenir cambios no autorizados
+    if current_password and not check_password_hash(user["password_hash"], current_password):
+        flash("La contraseña actual ingresada es incorrecta.", "error")
+        return redirect(request.referrer or url_for("configuracion", section="cuenta"))
+
+    try:
+        db.update_password(username, generate_password_hash(new_password))
+        flash("Contraseña actualizada exitosamente.", "success")
+    except Exception as e:
+        flash(f"Error al actualizar contraseña: {e}", "error")
     
     redirect_url = request.referrer or url_for("configuracion", section="cuenta")
     return redirect(redirect_url)

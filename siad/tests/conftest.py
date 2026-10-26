@@ -41,6 +41,9 @@ def client():
     app_module.app.testing = True
     with app_module.app.test_client() as test_client:
         with test_client.session_transaction() as sess:
+            sess["user_id"] = 1
+            sess["username"] = "admin"
+            sess["rol"] = "admin"
             sess["autenticado"] = True
         yield test_client
 
