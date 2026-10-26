@@ -22,12 +22,15 @@ def get_connection():
     url = os.environ.get("DATABASE_URL")
     if url:
         return psycopg.connect(conninfo=url, connect_timeout=CONNECT_TIMEOUT)
+    password = os.environ.get("DB_PASSWORD")
+    if not password:
+        raise RuntimeError("DB_PASSWORD no está definida en las variables de entorno / .env")
     return psycopg.connect(
         host=os.environ.get("DB_HOST", "127.0.0.1"),
         port=os.environ.get("DB_PORT", "5433"),
         dbname=os.environ.get("DB_NAME", "Abis_OCR"),
         user=os.environ.get("DB_USER", "postgres"),
-        password=os.environ.get("DB_PASSWORD", "abis_dev_pw"),
+        password=password,
         connect_timeout=CONNECT_TIMEOUT,
     )
 

@@ -16,6 +16,8 @@ import sys
 import re
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 sys.path.insert(0, os.path.join(BASE_DIR, "siad"))
 
 import psycopg
@@ -23,7 +25,8 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-from security import cifrar_texto, descifrar_texto, es_texto_cifrado
+# pyrefly: ignore [missing-import]
+from security import cifrar_texto, descifrar_texto, es_texto_cifrado  # type: ignore
 
 MENOR_EDAD_REGEX = re.compile(
     r'(^|[^0-9])(0|[1-9]|1[0-7])\s*(años?|anos?)([^a-zA-Z]|$)|menor de edad|nna',
@@ -35,12 +38,15 @@ def get_connection():
     url = os.environ.get("DATABASE_URL")
     if url:
         return psycopg.connect(conninfo=url)
+    password = os.environ.get("DB_PASSWORD")
+    if not password:
+        raise RuntimeError("DB_PASSWORD no está definida en las variables de entorno / .env")
     return psycopg.connect(
         host=os.environ.get("DB_HOST", "127.0.0.1"),
         port=os.environ.get("DB_PORT", "5433"),
         dbname=os.environ.get("DB_NAME", "Abis_OCR"),
         user=os.environ.get("DB_USER", "postgres"),
-        password=os.environ.get("DB_PASSWORD", "abis_dev_pw"),
+        password=password,
     )
 
 
