@@ -1,6 +1,7 @@
-import { state } from '../core/state.js?v=3';
-import { escapeHtml } from '../core/utils.js?v=3';
-import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js?v=29';
+import { state } from '../core/state.js';
+import { escapeHtml } from '../core/utils.js';
+import { loadWeekSchedule, getWeekSchedule, renderWeekSchedule, setupWeekSchedule, scheduleSummary, showSchedulePopup } from './schedule-week.js';
+import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
 
 let pendingRecipientDelete = null;
 
@@ -139,6 +140,7 @@ export async function loadScheduleSettings() {
     document.querySelectorAll(".day-check").forEach((cb) => {
       cb.checked = activeDays.includes(Number(cb.value));
     });
+    loadWeekSchedule(data.config);
 
     // 5. Tipo de Reporte
     const reportTypeSelect = document.getElementById("schedule-report-type");
@@ -159,8 +161,7 @@ export async function loadScheduleSettings() {
 
     const freqSummary = document.getElementById("schedule-freq-summary");
     if (freqSummary) {
-      const timesCount = state.currentScheduleTimes.length;
-      freqSummary.textContent = `${timesCount} ${timesCount === 1 ? 'envío programado' : 'envíos programados'} al día`;
+      freqSummary.textContent = scheduleSummary(data.config);
     }
 
     // 7. Renderizar Historial de Despachos
@@ -177,6 +178,8 @@ export async function loadScheduleSettings() {
 }
 
 export function renderTimeChips(times) {
+  state.currentScheduleTimes = [...(times || [])].sort();
+  renderWeekSchedule();
   const container = document.getElementById("time-chips-container");
   if (!container) return;
 
@@ -208,55 +211,16 @@ export function renderTimeChips(times) {
       state.currentScheduleTimes = state.currentScheduleTimes.filter(t => t !== timeToRemove);
       renderTimeChips(state.currentScheduleTimes);
 
-      // 2. Mostrar el modal dinámico centrado
-      const overlay = document.createElement("div");
-      overlay.className = "toast-overlay";
-
-      const modal = document.createElement("div");
-      modal.className = "toast-modal";
-
-      modal.innerHTML = `
-        <div class="toast-icon-wrapper" style="background: rgba(220, 38, 38, 0.15);">
-          <svg class="icon-animate-cross" viewBox="0 0 24 24" style="stroke: #dc2626; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </div>
-        <h3 class="toast-title">Horario Removido</h3>
-        <p class="toast-text">
-          Recuerda hacer clic en el botón <strong class="toast-highlight">"Guardar Ajustes de Programación"</strong> al final de la página para que este cambio sea permanente.
-        </p>
-        <button id="btn-entendido" class="toast-btn" style="background: linear-gradient(to right, #ef4444, #dc2626); color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
-          Entendido
-        </button>
-      `;
-
-      overlay.appendChild(modal);
-      document.body.appendChild(overlay);
-
-      // Cerrar modal
-      const btnHover = modal.querySelector("#btn-entendido");
-      const closeModal = () => {
-        overlay.style.opacity = "0";
-        modal.style.transform = "scale(0.9)";
-        setTimeout(() => overlay.remove(), 300);
-      };
-
-      btnHover.addEventListener("click", closeModal);
-
-      // Animar entrada
-      requestAnimationFrame(() => {
-        overlay.style.opacity = "1";
-        modal.style.transform = "scale(1)";
+      // 2. Mostrar pop up estilo Telegram
+      showSchedulePopup({
+        title: "¡Horario Eliminado con Éxito!",
+        message: `Se eliminó el horario <strong>${timeToRemove} hrs</strong> de la programación general.`,
+        badgeText: 'Recuerda hacer clic en "Guardar Ajustes" para aplicar los cambios.',
+        type: 'remove',
       });
     });
   });
 
-  const freqSummary = document.getElementById("schedule-freq-summary");
-  if (freqSummary) {
-    const c = sorted.length;
-    freqSummary.textContent = `${c} ${c === 1 ? 'envío programado' : 'envíos programados'} al día`;
-  }
 }
 
 export function agregarHorario(newTime) {
@@ -268,45 +232,12 @@ export function agregarHorario(newTime) {
     state.currentScheduleTimes.push(newTime);
     renderTimeChips(state.currentScheduleTimes);
 
-    // Modal dinámico centrado
-    const overlay = document.createElement("div");
-    overlay.className = "toast-overlay";
-    overlay.style.backgroundColor = "rgba(16, 185, 129, 0.12)";
-
-    const modal = document.createElement("div");
-    modal.className = "toast-modal";
-
-    modal.innerHTML = `
-      <div class="toast-icon-wrapper" style="background: rgba(16, 185, 129, 0.15);">
-        <svg class="icon-animate-check" viewBox="0 0 24 24" style="stroke: #059669; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-      </div>
-      <h3 class="toast-title">Horario Agregado</h3>
-      <p class="toast-text">
-        Recuerda hacer clic en el botón <strong class="toast-highlight">"Guardar Ajustes de Programación"</strong> al final de la página para que este cambio sea permanente.
-      </p>
-      <button id="btn-entendido-add" class="toast-btn" style="background: linear-gradient(to right, #10b981, #059669); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-        Entendido
-      </button>
-    `;
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    const btnHover = modal.querySelector("#btn-entendido-add");
-    const closeModal = () => {
-      overlay.style.opacity = "0";
-      modal.style.transform = "scale(0.9)";
-      setTimeout(() => overlay.remove(), 300);
-    };
-
-    btnHover.addEventListener("click", closeModal);
-
-    requestAnimationFrame(() => {
-      overlay.style.opacity = "1";
-      modal.style.transform = "scale(1)";
+    // Pop up estilo Telegram
+    showSchedulePopup({
+      title: "¡Horario Agregado con Éxito!",
+      message: `Se añadió el horario <strong>${newTime} hrs</strong> a la programación general.`,
+      badgeText: 'Recuerda hacer clic en "Guardar Ajustes" para aplicar los cambios.',
+      type: 'add',
     });
   }
 }
@@ -380,6 +311,8 @@ export function renderScheduleHistory(history) {
 }
 
 export function setupScheduleEvents() {
+  setupWeekSchedule();
+  document.getElementById('schedule-enabled-toggle')?.addEventListener('change', renderWeekSchedule);
   setupAuthModalEvents();
   setupRecipientDeleteModal();
   
@@ -416,6 +349,7 @@ export function setupScheduleEvents() {
         const val = Number(cb.value);
         cb.checked = val >= 1 && val <= 5;
       });
+      renderWeekSchedule();
     });
   }
 
@@ -426,17 +360,19 @@ export function setupScheduleEvents() {
       document.querySelectorAll(".day-check").forEach((cb) => {
         cb.checked = true;
       });
+      renderWeekSchedule();
     });
   }
 
-  // Guardar Ajustes de Programación (Exige Clave Institucional Policial)
+  // Guardar la programación con la sesión autenticada.
   const btnSaveSchedule = document.getElementById("btn-save-schedule");
   const saveFeedback = document.getElementById("schedule-save-feedback");
   if (btnSaveSchedule) {
     btnSaveSchedule.onclick = () => {
       try {
+        if (!state.scheduleConfig) throw new Error('Espera a que se cargue la programación antes de guardar. Si no carga, actualiza la página.');
         const enabled = document.getElementById("schedule-enabled-toggle")?.checked ?? true;
-        const reportType = document.getElementById("schedule-report-type")?.value || "extenso";
+        const reportType = "extenso";
         const sendFourPhotosDaily = document.getElementById("schedule-four-photos-toggle")?.checked ?? true;
 
         const days = [];
@@ -444,11 +380,12 @@ export function setupScheduleEvents() {
           days.push(Number(cb.value));
         });
 
-        if (state.currentScheduleTimes.length === 0) {
-          throw new Error("Debes definir al menos un horario para la programación.");
+        const timesByDay = getWeekSchedule();
+        if (enabled && days.some(day => (timesByDay[day] ?? state.currentScheduleTimes).length === 0)) {
+          throw new Error("Añade al menos una hora a cada día activo o desmarca ese día.");
         }
 
-        if (days.length === 0) {
+        if (enabled && days.length === 0) {
           throw new Error("Debes seleccionar al menos un día de la semana para el despacho.");
         }
 
@@ -456,11 +393,12 @@ export function setupScheduleEvents() {
           enabled,
           times: [...state.currentScheduleTimes],
           days,
+          timesByDay,
           reportType,
           sendFourPhotosDaily,
         };
 
-        // Solicitar clave institucional mediante el modal de seguridad policial
+        // Reutilizar el flujo de guardado con la sesión actual.
         promptAuthModal(schedulePayload, "programacion");
 
       } catch (err) {
@@ -1034,6 +972,14 @@ export async function executeSaveScheduleAuthorized(scheduleData, clave) {
     // Autorización exitosa: cerrar modal
     closeAuthModal();
 
+    // Mostrar pop up estilo Telegram al guardar ajustes exitosamente
+    showSchedulePopup({
+      title: "¡Ajustes de Horario Guardados con Éxito!",
+      message: "Se guardaron y autorizaron los horarios de reporte institucional tanto de la semana como del fin de semana.",
+      badgeText: `Próximo Envío: ${data.next?.text || 'Horario oficial sincronizado'} (America/Santiago)`,
+      type: 'save',
+    });
+
     if (saveFeedback) {
       saveFeedback.className = "crypto-feedback-box success";
       saveFeedback.style.display = "block";
@@ -1042,9 +988,9 @@ export async function executeSaveScheduleAuthorized(scheduleData, clave) {
           <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:var(--status-success);"><polyline points="20 6 9 17 4 12"/></svg>
           <span>Ajustes Guardados y Autorizados Exitosamente</span>
         </div>
-        • Horarios activos: <strong>${data.config.times.join(", ")} hrs</strong><br>
+        • Programación: <strong>${scheduleSummary(data.config)}</strong><br>
         • Próxima ejecución: <strong>${data.next?.text || 'Calculando...'}</strong><br>
-        • Frecuencia: <strong>${data.config.times.length} despachos diarios programados</strong>
+        • Se respetan los horarios personalizados de cada día.
       `;
       setTimeout(() => {
         saveFeedback.style.display = "none";
@@ -1060,8 +1006,11 @@ export async function executeSaveScheduleAuthorized(scheduleData, clave) {
     // Actualizar frecuencia en el cuadro lateral
     const freqSummary = document.getElementById("schedule-freq-summary");
     if (freqSummary && data.config?.times) {
-      freqSummary.textContent = `${data.config.times.length} ${data.config.times.length === 1 ? 'envío' : 'envíos'} al día (${data.config.times.join(', ')} hrs)`;
+      freqSummary.textContent = scheduleSummary(data.config);
     }
+    state.scheduleConfig = data.config;
+    const weekFeedback = document.getElementById('schedule-week-feedback');
+    if (weekFeedback) weekFeedback.textContent = 'Programación guardada. Zona horaria: America/Santiago.';
 
     // Actualizar historial de envíos si la función existe
     if (typeof cargarHistorialDespachos === "function") {

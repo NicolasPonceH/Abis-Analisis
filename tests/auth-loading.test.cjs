@@ -1,10 +1,10 @@
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
 const { test } = require('node:test');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const { registerAuthRoutes } = require('../src/routes/auth');
 const { chromium } = require('playwright');
 
 // Exercise the actual login handler without starting the database, SIAD or Telegram.
@@ -12,22 +12,18 @@ function fixture() {
   const app = express();
   let attempts = 0;
   app.use(express.urlencoded({ extended: false }));
+  app.use(cookieParser());
   app.set('view engine', 'ejs');
   app.set('views', path.resolve(__dirname, '../src/views'));
   app.use(express.static(path.resolve(__dirname, '../public')));
-  app.get('/login', (req, res) => res.render('login', { error: null, success: null, next: '/abis' }));
   app.get('/', (req, res) => res.render('portal', { user: null }));
   app.get('/abis', (req, res) => res.send('<title>ABIS test</title><h1>Panel ABIS</h1>'));
-  const source = fs.readFileSync(path.resolve(__dirname, '../src/server.js'), 'utf8');
-  const start = source.indexOf('app.post("/login",');
-  const end = source.indexOf('app.get("/register",', start);
-  assert.ok(start >= 0 && end > start);
-  vm.runInNewContext(source.slice(start, end), {
-    app, jwt, JWT_SECRET: 'isolated-login-test-key',
-    process: { env: { NODE_ENV: 'test', SIAD_URL: 'http://siad.test' } },
+  registerAuthRoutes(app, {
     pool: { query: async () => ({ rows: [{ rol: 'operador' }] }) },
-    console,
-    fetch: async (url, options) => {
+    jwt,
+    secret: 'isolated-login-test-key',
+    env: { NODE_ENV: 'test', SIAD_URL: 'http://siad.test' },
+    fetchImpl: async (url, options) => {
       attempts++;
       const { username, password } = JSON.parse(options.body);
       if (username === 'unavailable') throw new Error('Simulated connection failure');
@@ -114,25 +110,34 @@ test('ABIS login response and loading screen', async t => {
       await page.waitForURL(origin + '/abis');
       assert.equal(attempts(), before + 1);
       assert.equal((await page.context().cookies()).find(cookie => cookie.name === 'abis_auth').httpOnly, true);
+      await page.context().clearCookies();
       await page.goBack();
       assert.equal(await page.locator('#form-login button[type=submit]').isDisabled(), false);
       assert.equal(await dialog.evaluate(el => el.open), false);
     });
-    await t.test('wrong password offers recovery without a success screen', async () => {
+    await t.test('wrong password scans, shows red unauthorized state, then returns to login', async () => {
       await credentials('operator', 'incorrect');
       await page.locator('#form-login button[type=submit]').click();
-      await page.waitForFunction(() => document.querySelector('#abis-access').dataset.state === 'error');
-      assert.match(await page.locator('#access-description').textContent(), /incorrectos/);
+      await page.waitForFunction(() => document.querySelector('#abis-access').dataset.state === 'checking');
+      assert.equal(await page.locator('#access-title').textContent(), 'Verificando tu acceso');
+      assert.equal(await page.locator('#form-login button[type=submit]').isDisabled(), true);
+      await page.waitForFunction(() => document.querySelector('#abis-access').dataset.state === 'denied');
+      assert.equal((await page.locator('#access-title').textContent()).trim(), 'Acceso no autorizado');
+      assert.match(await page.locator('#access-description').textContent(), /incorrectos.*Volviendo al inicio de sesión/);
       assert.equal(await dialog.locator('.biometric-device__matched').evaluate(el => getComputedStyle(el).opacity), '0');
       assert.equal(await dialog.locator('.biometric-device__tablet').evaluate(el => getComputedStyle(el).opacity), '1');
+      assert.equal(await dialog.locator('.biometric-device__denied').evaluate(el => getComputedStyle(el).display), 'block');
+      assert.equal(await dialog.locator('.biometric-device__screen').evaluate(el => getComputedStyle(el).fill), 'rgb(50, 19, 28)');
       await page.waitForTimeout(400);
       await screenshot('abis-loading-error');
-      await page.locator('.abis-access__return').click();
+      await page.waitForFunction(() => !document.querySelector('#abis-access').open, undefined, { timeout: 5000 });
       assert.equal(await dialog.evaluate(el => el.open), false);
-      assert.equal(await page.locator('#password').evaluate(el => el === document.activeElement), true);
+      assert.equal(await page.locator('#password').inputValue(), '');
+      assert.equal(await page.locator('#username').evaluate(el => el === document.activeElement), true);
       await page.locator('#password').fill('test-valid');
       await page.locator('#form-login button[type=submit]').click();
       await page.waitForURL(origin + '/abis');
+      await page.context().clearCookies();
     });
     await t.test('network errors release the form', async () => {
       await credentials('operator', 'test-valid');
@@ -180,6 +185,7 @@ test('ABIS login response and loading screen', async t => {
         assert.deepEqual(duplicates, []);
         await screenshot(`abis-loading-mobile-${width}`);
         await page.waitForURL(origin + '/abis');
+        await page.context().clearCookies();
       }
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await credentials('slow', 'test-valid');
@@ -187,6 +193,7 @@ test('ABIS login response and loading screen', async t => {
       assert.equal(await dialog.locator('.biometric-device__scan').evaluate(el => getComputedStyle(el).display), 'none');
       assert.equal(await dialog.locator('.abis-access__track > span').evaluate(el => getComputedStyle(el).animationName), 'none');
       await page.waitForURL(origin + '/abis');
+      await page.context().clearCookies();
       await page.goto(origin + '/');
       assert.equal(await page.locator('.biometric-device').count(), 1);
       assert.equal(await page.locator('.doc-scanner__scene').count(), 1);

@@ -1,4 +1,5 @@
 const { obtenerReporteRango } = require("./reporteRango");
+const { normalizarEstado } = require("./metricasComunes");
 
 /**
  * Consulta y estructura el estado de proceso para una fecha específica.
@@ -17,24 +18,24 @@ async function obtenerEstadosDia(pool, fecha) {
   const gen = { registrado: 0, error: 0, enCurso: 0, total: 0 };
 
   for (const row of res.rows) {
-    const desc = (row.descripcion || "").toUpperCase();
+    const desc = normalizarEstado(row.descripcion);
     const t = Number(row.total) || 0;
 
     if (row.tipo_estado === "SINCRONIZACION") {
-      if (desc.includes("SINCRONIZADO")) sinc.sincronizado += t;
-      else if (desc.includes("PENDIENTE")) sinc.pendiente += t;
-      else if (desc.includes("ERROR")) sinc.error += t;
+      if (desc === "SINCRONIZADO") sinc.sincronizado += t;
+      else if (desc === "PENDIENTE") sinc.pendiente += t;
+      else if (["ERROR", "CON_ERROR"].includes(desc)) sinc.error += t;
       sinc.total += t;
     } else if (row.tipo_estado === "REGISTRO") {
-      if (desc.includes("REGISTRADO")) reg.registrado += t;
-      else if (desc.includes("ERROR")) reg.error += t;
-      else if (desc.includes("NO REGISTRADO") || desc.includes("NO_REGISTRADO")) reg.noRegistrado += t;
-      else if (desc.includes("PENDIENTE")) reg.pendiente += t;
+      if (desc === "REGISTRADO") reg.registrado += t;
+      else if (["ERROR", "CON_ERROR"].includes(desc)) reg.error += t;
+      else if (desc === "NO_REGISTRADO") reg.noRegistrado += t;
+      else if (desc === "PENDIENTE") reg.pendiente += t;
       reg.total += t;
     } else if (row.tipo_estado === "GENERAL") {
-      if (desc.includes("REGISTRADO") || desc === "OK") gen.registrado += t;
-      else if (desc.includes("ERROR") || desc.includes("CON_ERROR")) gen.error += t;
-      else if (desc.includes("CURSO") || desc.includes("PENDIENTE")) gen.enCurso += t;
+      if (desc === "REGISTRADO" || desc === "OK") gen.registrado += t;
+      else if (["ERROR", "CON_ERROR"].includes(desc)) gen.error += t;
+      else if (["EN_CURSO", "PENDIENTE"].includes(desc)) gen.enCurso += t;
       gen.total += t;
     }
   }
@@ -46,16 +47,14 @@ async function obtenerEstadosDia(pool, fecha) {
   );
   const totalDia = Number(totRes.rows[0]?.total || 0);
 
+  // La ausencia de estados no demuestra éxito; solo conservamos el total conocido.
   if (sinc.total === 0 && totalDia > 0) {
-    sinc.sincronizado = totalDia;
     sinc.total = totalDia;
   }
   if (reg.total === 0 && totalDia > 0) {
-    reg.registrado = totalDia;
     reg.total = totalDia;
   }
   if (gen.total === 0 && totalDia > 0) {
-    gen.registrado = totalDia;
     gen.total = totalDia;
   }
 

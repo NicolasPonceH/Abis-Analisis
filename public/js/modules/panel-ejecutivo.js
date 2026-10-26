@@ -173,7 +173,7 @@ export function renderKPIs(data) {
   animateValue("kpi-total-enrolados", total);
 
   // Sincronización PDI
-  const sincObj = data.sincronizacion?.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO")) || { total: 0, porcentaje: 0 };
+  const sincObj = data.sincronizacion?.find((s) => s.descripcion.trim().toUpperCase() === "SINCRONIZADO") || { total: 0, porcentaje: 0 };
   
   animateValue("kpi-sincronizados", sincObj.total);
   const sincPct = document.getElementById("kpi-sinc-pct");
@@ -187,7 +187,7 @@ export function renderKPIs(data) {
   }
 
   // Registro Biométrico
-  const regObj = data.registro?.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO")) || { total: 0, porcentaje: 0 };
+  const regObj = data.registro?.find((r) => r.descripcion.trim().toUpperCase() === "REGISTRADO") || { total: 0, porcentaje: 0 };
   const regErrObj = data.registro?.find((r) => r.descripcion.toUpperCase().includes("ERROR")) || { total: 0, porcentaje: 0 };
   animateValue("kpi-registrados", regObj.total);
   const regPct = document.getElementById("kpi-reg-pct");
@@ -266,7 +266,7 @@ export function updateChartBadges(data) {
   const badgeSinc = document.getElementById("badge-chart-sincronizacion");
   if (badgeSinc) {
     const sincList = data.sincronizacion || [];
-    const sincOk = sincList.find(s => String(s.descripcion).toUpperCase().includes("SINCRONIZADO"))?.total || 0;
+    const sincOk = sincList.find(s => String(s.descripcion).trim().toUpperCase() === "SINCRONIZADO")?.total || 0;
     const errTotal = exec.totalErrores !== undefined ? exec.totalErrores : (sincList.find(s => String(s.descripcion).toUpperCase().includes("ERROR"))?.total || 0);
     const pct = total > 0 ? ((sincOk / total) * 100).toFixed(1) : "100";
     badgeSinc.innerHTML = `<strong style="color:#059669;">${Number(sincOk).toLocaleString("es-CL")} OK</strong> &bull; <strong style="color:#dc2626;">${Number(errTotal).toLocaleString("es-CL")} Error</strong> (${pct}% SLA)`;

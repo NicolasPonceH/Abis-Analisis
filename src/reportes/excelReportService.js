@@ -611,8 +611,8 @@ async function generarReporteExcel(data, meta = {}) {
     {
       col: "C",
       title: "SINCRONIZADOS",
-      val: totalEnrolados > 0 ? (totalEnrolados * (exec.tasaSincronizacion || 100) / 100) : 0,
-      sub: `${exec.tasaSincronizacion || 100}% enviados correctamente`,
+      val: Number((data.sincronizacion || []).find(row => row.descripcion === 'SINCRONIZADO')?.total || 0),
+      sub: `${exec.tasaSincronizacion ?? 0}% enviados correctamente`,
       bg: "FFEDFDF5",
       border: "FF059669",
       text: "FF047857",
@@ -621,8 +621,8 @@ async function generarReporteExcel(data, meta = {}) {
     {
       col: "E",
       title: "REGISTROS VÁLIDOS",
-      val: totalEnrolados > 0 ? (totalEnrolados * (exec.tasaRegistroBiometrico || 100) / 100) : 0,
-      sub: `${exec.tasaRegistroBiometrico || 100}% con captura válida`,
+      val: Number((data.registro || []).find(row => row.descripcion === 'REGISTRADO')?.total || 0),
+      sub: `${exec.tasaRegistroBiometrico ?? 0}% con captura válida`,
       bg: "FFF0F9FF",
       border: "FF0284C7",
       text: "FF0369A1",
@@ -631,7 +631,7 @@ async function generarReporteExcel(data, meta = {}) {
     {
       col: "F",
       title: "CON OBSERVACIONES",
-      val: totalEnrolados > 0 ? (totalEnrolados * (exec.tasaError || 0) / 100) : 0,
+      val: Number(exec.totalErrores ?? 0),
       sub: `${exec.tasaError || 0}% para revisar`,
       bg: "FFFEF2F2",
       border: "FFDC2626",
@@ -956,8 +956,8 @@ async function generarReporteExcel(data, meta = {}) {
 
   const visualKpis = [
     ["▦  TOTAL DE ENROLAMIENTOS", totalEnrolados, "Registros procesados", "Volumen bruto", "FF0B2A5B", "FFEAF1F7", 1],
-    ["↻  SINCRONIZADOS CON PDI", `${exec.tasaSincronizacion || 100}%`, "Envío correcto a PDI", "Meta cumplida", "FF0F766E", "FFE8F7F1", Number(exec.tasaSincronizacion || 100) / 100],
-    ["◉  REGISTRO BIOMÉTRICO ABIS", `${exec.tasaRegistroBiometrico || 100}%`, "Captura biométrica", "Captura OK", "FF1687C2", "FFEAF3FB", Number(exec.tasaRegistroBiometrico || 100) / 100],
+    ["↻  SINCRONIZADOS CON PDI", `${exec.tasaSincronizacion ?? 0}%`, "Envío correcto a PDI", "Meta cumplida", "FF0F766E", "FFE8F7F1", Number(exec.tasaSincronizacion ?? 0) / 100],
+    ["◉  REGISTRO BIOMÉTRICO ABIS", `${exec.tasaRegistroBiometrico ?? 0}%`, "Captura biométrica", "Captura OK", "FF1687C2", "FFEAF3FB", Number(exec.tasaRegistroBiometrico ?? 0) / 100],
     ["⚠  INCONSISTENCIAS", `${exec.tasaError || 0}%`, "Casos para revisar", "Sin incidentes", "FFB42318", "FFFFF0ED", Number(exec.tasaError || 0) / 100],
   ];
   const visualKpiColumns = [["B", "D"], ["E", "G"], ["H", "J"], ["K", "M"]];
@@ -1037,8 +1037,8 @@ async function generarReporteExcel(data, meta = {}) {
   wsVisual.getCell("I51").alignment = { horizontal: "center", vertical: "middle" };
   const visualRows = [
     ["Total de enrolamientos", totalEnrolados, "FF0B2A5B"],
-    ["Sincronizados", `${exec.tasaSincronizacion || 100}%`, "FF0F766E"],
-    ["Registros válidos", `${exec.tasaRegistroBiometrico || 100}%`, "FF2B5FAE"],
+    ["Sincronizados", `${exec.tasaSincronizacion ?? 0}%`, "FF0F766E"],
+    ["Registros válidos", `${exec.tasaRegistroBiometrico ?? 0}%`, "FF2B5FAE"],
     ["Con observaciones", `${exec.tasaError || 0}%`, "FFD92D20"],
     ["Puestos o cuarteles", (data.rendimientoCuarteles || []).length, "FF64748B"],
   ];

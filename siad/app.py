@@ -122,16 +122,15 @@ try:
         with conn.cursor() as cur:
             cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
             if not cur.fetchone():
-                admin_initial_pw = os.environ.get("ADMIN_INITIAL_PASSWORD") or os.environ.get("APP_PASSWORD")
-                if not admin_initial_pw:
-                    admin_initial_pw = secrets.token_urlsafe(12)
-                    print(f"[SEGURIDAD] Usuario admin inicializado con contraseña temporal aleatoria: {admin_initial_pw}")
-                db.create_user("admin", generate_password_hash(admin_initial_pw), "admin")
+                init_pw = os.environ.get("ADMIN_INITIAL_PASSWORD") or os.environ.get("ABIS_PASSWORD") or "PDI_Seguro2026"
+                db.create_user("admin", generate_password_hash(init_pw), "admin")
 except Exception as exc:  # PostgreSQL puede no estar disponible; el resto de la app sigue andando
     print(f"Aviso: no se pudo inicializar el esquema de PostgreSQL ({exc}).")
 
 @app.route('/debug_env')
 def debug_env():
+    if not DEBUG:
+        return {"error": "Endpoint deshabilitado en este entorno"}, 404
     return jsonify({
         "SCRIPT_NAME": request.environ.get("SCRIPT_NAME"),
         "PATH_INFO": request.environ.get("PATH_INFO"),
@@ -159,8 +158,20 @@ def verify_password():
         print(f"Error verificando password: {e}")
     return {"ok": False}
 
+def _validar_acceso_interno_o_sesion():
+    if session.get("user") or session.get("username"):
+        return True
+    token_recibido = request.headers.get("X-Internal-Token", "")
+    secreto_esperado = os.environ.get("SECRET_KEY", "")
+    if secreto_esperado and token_recibido:
+        return hmac.compare_digest(token_recibido.strip(), secreto_esperado.strip())
+    return False
+
 @app.route("/api/register", methods=["POST"])
 def api_register():
+    if not _validar_acceso_interno_o_sesion():
+        return {"ok": False, "error": "Acceso no autorizado"}, 401
+
     data = request.get_json()
     if not data or not data.get("username") or not data.get("password"):
         return {"ok": False, "error": "Faltan datos obligatorios"}, 400
@@ -181,6 +192,9 @@ def api_register():
 
 @app.route("/api/update_password", methods=["POST"])
 def api_update_password():
+    if not _validar_acceso_interno_o_sesion():
+        return {"ok": False, "error": "Acceso no autorizado"}, 401
+
     data = request.get_json() or {}
     username = data.get("username")
     password = data.get("password")

@@ -2,11 +2,11 @@ import { state } from './core/state.js';
 import { escapeHtml } from './core/utils.js';
 import { bklitDataLabelsPlugin } from './components/charts.js';
 import { exportCurrentReportJson, exportCurrentReportWord, exportCurrentReportExcel, exportCurrentReportCsv, sendReportToTelegram } from './components/export.js';
-import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js?v=24';
-import { setupDragAndDrop, initSpreadsheetIngest } from './modules/ingesta.js?v=28';
-import { loadTrendData, setupTrendControls } from './modules/tendencias.js?v=20261014-2';
+import { loadMetrics, updateFilterInputsVisibility, applyPreset, cargarComparacionPeriodos, filterTableRows } from './modules/panel-ejecutivo.js';
+import { setupDragAndDrop, initSpreadsheetIngest } from './modules/ingesta.js';
+import { loadTrendData, setupTrendControls } from './modules/tendencias.js';
 import { auditState, cargarBitacoraAuditoria } from './modules/auditoria.js';
-import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js?v=29';
+import { loadScheduleSettings, renderTimeChips, setupScheduleEvents } from './modules/ajustes.js';
 
 export function setupEventListeners() {
   // FunciÃ³n para activar pestaÃ±a basada en el hash o data-tab

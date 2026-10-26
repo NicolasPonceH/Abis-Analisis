@@ -368,6 +368,28 @@
     </div>
   </div>
 
+  <div id="ingesta-delete-modal" class="ingesta-delete-modal" role="presentation" hidden>
+    <section class="ingesta-delete-dialog" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="ingesta-delete-title" aria-describedby="ingesta-delete-description">
+      <div class="ingesta-delete-icon" aria-hidden="true">!</div>
+      <button type="button" class="ingesta-delete-close" aria-label="Cerrar" id="ingesta-delete-close">×</button>
+      <p class="ingesta-delete-eyebrow">Acción irreversible</p>
+      <h3 id="ingesta-delete-title">Eliminar ingesta</h3>
+      <p id="ingesta-delete-description" class="ingesta-delete-description">
+        ¿Está seguro de eliminar la ingesta del <strong id="ingesta-delete-date"></strong>?
+        Se quitarán sus registros de la base de datos y esta acción no se puede deshacer.
+      </p>
+      <div class="ingesta-delete-summary">
+        <span class="ingesta-delete-summary-icon" aria-hidden="true">▤</span>
+        <div><strong id="ingesta-delete-file"></strong><small><span id="ingesta-delete-count"></span> registros insertados · lote seleccionado</small></div>
+      </div>
+      <p id="ingesta-delete-error" class="ingesta-delete-error" role="alert" hidden></p>
+      <div class="ingesta-delete-actions">
+        <button type="button" class="ingesta-delete-cancel" id="ingesta-delete-cancel">Cancelar</button>
+        <button type="button" class="ingesta-delete-confirm" id="ingesta-delete-confirm">Eliminar ingesta</button>
+      </div>
+    </section>
+  </div>
+
 </section>
 
 <!-- ========================================== -->

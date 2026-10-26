@@ -116,8 +116,8 @@ function formatearReporte(reporte, opciones = {}) {
 
   const sincData = reporte.sincronizacion || [];
   const regData = reporte.registro || [];
-  const sincOK = sincData.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.total || 0;
-  const regOK = regData.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO"))?.total || 0;
+  const sincOK = sincData.find((s) => s.descripcion.trim().toUpperCase() === "SINCRONIZADO")?.total || 0;
+  const regOK = regData.find((r) => r.descripcion.trim().toUpperCase() === "REGISTRADO")?.total || 0;
   const errTotal = exec.totalErrores !== undefined
     ? exec.totalErrores
     : (sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0);
@@ -223,8 +223,8 @@ function formatearReporteExtenso(reporte, opciones = {}) {
 
   const sincData = reporte.sincronizacion || [];
   const regData = reporte.registro || [];
-  const sincOK = sincData.find((s) => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.total || 0;
-  const regOK = regData.find((r) => r.descripcion.toUpperCase().includes("REGISTRADO"))?.total || 0;
+  const sincOK = sincData.find((s) => s.descripcion.trim().toUpperCase() === "SINCRONIZADO")?.total || 0;
+  const regOK = regData.find((r) => r.descripcion.trim().toUpperCase() === "REGISTRADO")?.total || 0;
   const errSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("ERROR"))?.total || 0;
   const pendSinc = sincData.find((s) => s.descripcion.toUpperCase().includes("PENDIENTE"))?.total || 0;
 

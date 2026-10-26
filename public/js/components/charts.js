@@ -181,7 +181,7 @@ export function renderDoughnutChart(canvasId, items, colors) {
   const values = items.map((i) => i.total);
 
   const total = items.reduce((acc, i) => acc + (Number(i.total) || 0), 0);
-  const sincOk = items.find((i) => String(i.descripcion).toUpperCase().includes("SINCRONIZADO"))?.total || 0;
+  const sincOk = items.find((i) => String(i.descripcion).trim().toUpperCase() === "SINCRONIZADO")?.total || 0;
   const pctSinc = total > 0 ? ((sincOk / total) * 100).toFixed(1) : "100";
 
   // Colores visualmente amigables y balanceados

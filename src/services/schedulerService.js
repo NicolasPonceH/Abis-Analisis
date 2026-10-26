@@ -1,3 +1,4 @@
+const { mergeScheduleConfig, getScheduleTimes } = require("./scheduleConfig");
 const fs = require("fs");
 const path = require("path");
 const pool = require("../db");
@@ -12,7 +13,7 @@ const {
   generarCapturaAcumulado,
   generarCapturaDiaria,
 } = require("../reportes/imageReportService");
-const { formatearReporteExtenso, formatearReporte } = require("../telegram/formatearReporte");
+const { formatearReporteExtenso } = require("../telegram/formatearReporte");
 const { crearBotonesDescarga } = require("../telegram/botService");
 const { obtenerChatIdsActivos } = require("../telegram/recipientService");
 
@@ -39,7 +40,7 @@ function ensureConfigDir() {
   }
 }
 
-async function saveConfigToDB(config) {
+async function saveConfigToDB(config, { required = false } = {}) {
   try {
     await pool.query(
       `INSERT INTO scheduler_config (config_key, config_value) 
@@ -49,6 +50,7 @@ async function saveConfigToDB(config) {
       [JSON.stringify(config)]
     );
   } catch (err) {
+    if (required) throw err;
     console.error("[SCHEDULER] Error guardando config en DB:", err.message);
   }
 }
@@ -80,6 +82,7 @@ async function getConfig() {
     return {
       ...DEFAULT_CONFIG,
       ...dbConfig,
+      reportType: "extenso",
       times: Array.isArray(dbConfig.times) ? dbConfig.times : DEFAULT_CONFIG.times,
       days: Array.isArray(dbConfig.days) ? dbConfig.days : DEFAULT_CONFIG.days,
       automaticSentPeriods: Array.isArray(dbConfig.automaticSentPeriods)
@@ -101,6 +104,7 @@ async function getConfig() {
     const conf = {
       ...DEFAULT_CONFIG,
       ...parsed,
+      reportType: "extenso",
       times: Array.isArray(parsed.times) ? parsed.times : DEFAULT_CONFIG.times,
       days: Array.isArray(parsed.days) ? parsed.days : DEFAULT_CONFIG.days,
       automaticSentPeriods: Array.isArray(parsed.automaticSentPeriods)
@@ -120,35 +124,20 @@ async function getConfig() {
 async function saveConfig(newConfig) {
   const current = await getConfig();
 
-  const merged = {
-    ...current,
-    ...newConfig,
-    history: newConfig.history !== undefined ? newConfig.history : (current.history || []),
-  };
-
-  // Ordenar horarios cronológicamente
-  if (Array.isArray(merged.times)) {
-    merged.times = Array.from(new Set(merged.times))
-      .filter((t) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t))
-      .sort();
+  const merged = mergeScheduleConfig(current, newConfig);
+  // La DB es la fuente prioritaria: no confirmar un guardado que ella rechazó.
+  await saveConfigToDB(merged, { required: true });
+  try {
+    ensureConfigDir();
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), "utf8");
+  } catch (error) {
+    console.warn("[SCHEDULER] Configuración guardada en DB, copia local no disponible:", error.message);
   }
-
-  // Filtrar días válidos (0 a 6)
-  if (Array.isArray(merged.days)) {
-    merged.days = Array.from(new Set(merged.days))
-      .map(Number)
-      .filter((d) => d >= 0 && d <= 6)
-      .sort();
-  }
-
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), "utf8");
-  await saveConfigToDB(merged);
   return merged;
 }
 
 // Obtiene la hora actual en zona horaria oficial de Chile (America/Santiago)
-function obtenerHoraChile() {
-  const now = new Date();
+function obtenerHoraChile(now = new Date()) {
   const dtf = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Santiago",
     hour12: false,
@@ -179,19 +168,19 @@ function obtenerHoraChile() {
 }
 
 // Calcula la próxima ejecución programada según los horarios y días configurados
-function getNextExecution(config) {
-  if (!config.enabled || !config.times || config.times.length === 0 || !config.days || config.days.length === 0) {
+function getNextExecution(config, now = new Date()) {
+  if (!config.enabled || !config.days || config.days.length === 0) {
     return { text: "Envío programado deshabilitado", time: null, dayName: null };
   }
 
-  const { timeStr: currentHHMM, dateStr: todayDate, dayOfWeek: currentDay } = obtenerHoraChile();
+  const { timeStr: currentHHMM, dayOfWeek: currentDay } = obtenerHoraChile(now);
 
   // Buscar el próximo horario hoy o en los siguientes 7 días
-  for (let offset = 0; offset < 7; offset++) {
+  for (let offset = 0; offset <= 7; offset++) {
     const targetDayOfWeek = (currentDay + offset) % 7;
     if (!config.days.includes(targetDayOfWeek)) continue;
 
-    for (const scheduleTime of config.times) {
+    for (const scheduleTime of [...getScheduleTimes(config, targetDayOfWeek)].sort()) {
       // Si es hoy, el horario debe ser posterior al actual
       if (offset === 0 && scheduleTime <= currentHHMM) {
         continue;
@@ -388,7 +377,7 @@ async function calcularPeriodoOperativo(pool, { fechaReferencia = null, forzarMo
 }
 
 // Dispara el envío de reporte (tanto programado como de prueba manual)
-async function triggerScheduledReport({ pool, isTest = false, customChatId = null, fechaReferencia = null, forzarModo = null, incluirAdjuntos = true }) {
+async function triggerScheduledReport({ pool, isTest = false, actor = null, customChatId = null, fechaReferencia = null, forzarModo = null, incluirAdjuntos = true }) {
   const config = await getConfig();
   const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -464,9 +453,11 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
       hasta: periodo.fechas.domingo,
     }) : undefined;
 
-    const textoReporte = config.reportType === "resumen"
-      ? formatearReporte(reporteRango, { desde: periodo.fechas.viernes, hasta: periodo.fechas.domingo, origen })
-      : formatearReporteExtenso(reporteRango, { desde: periodo.fechas.viernes, hasta: periodo.fechas.domingo, origen });
+    const textoReporte = formatearReporteExtenso(reporteRango, {
+      desde: periodo.fechas.viernes,
+      hasta: periodo.fechas.domingo,
+      origen,
+    });
 
     const captionMatriz = [
       `📊 <b>REPORTE OFICIAL ABIS - CONSOLIDADO FIN DE SEMANA</b>`,
@@ -595,9 +586,7 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
 
     const replyMarkup = incluirAdjuntos ? crearBotonesDescarga({ fecha: periodo.fecha }) : undefined;
 
-    const textoReporte = config.reportType === "resumen"
-      ? formatearReporte(reporteDiario, { fecha: periodo.fecha, origen })
-      : formatearReporteExtenso(reporteDiario, { fecha: periodo.fecha, origen });
+    const textoReporte = formatearReporteExtenso(reporteDiario, { fecha: periodo.fecha, origen });
 
     let bufDiario = null;
     let bufDistribucionDiaria = null;
@@ -741,12 +730,13 @@ async function triggerScheduledReport({ pool, isTest = false, customChatId = nul
     await pool.query(
       `INSERT INTO registro_auditoria_cifrada 
        (fecha_evento, tipo_evento, archivo_procesado, hash_sha256, detalles_cifrados, usuario_o_proceso)
-       VALUES (NOW(), $1, $2, $3, $4, 'Servicio Programador ABIS')`,
+       VALUES (NOW(), $1, $2, $3, $4, $5)`,
       [
         isTest ? "TEST_CAPTURA_TELEGRAM" : "ENVIO_CAPTURA_TELEGRAM",
         `Captura_${labelFecha.replace(/\s+/g, "_")}.png`,
         `msg_id_${envio.message_id}`,
-        `Horario: ${horaChile.timeStr} | Total: ${totalReportado} | SLA: ${slaReportado}%`
+        `Horario: ${horaChile.timeStr} | Total: ${totalReportado} | SLA: ${slaReportado}%`,
+        isTest ? (actor || 'Prueba manual sin usuario registrado') : 'Servicio Programador ABIS',
       ]
     );
   } catch (auditErr) {
@@ -781,7 +771,7 @@ function iniciarScheduler({ pool, logger = console }) {
 
       // Verificar si el día y hora actual coinciden con la programación
       const esDiaHabilitado = config.days.includes(dayOfWeek);
-      const esHoraCoincidente = config.times.includes(timeStr);
+      const esHoraCoincidente = getScheduleTimes(config, dayOfWeek).includes(timeStr);
 
       if (esDiaHabilitado && esHoraCoincidente) {
         // Evitar duplicar si la tarea de flujo diario ETL ya envió un reporte exactamente en este mismo minuto

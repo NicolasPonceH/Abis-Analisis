@@ -75,6 +75,24 @@ body:has(.abis-access[open]) { overflow: hidden; }
 .abis-access[data-state="error"] .biometric-device__tablet { animation: none; opacity: 1; }
 .abis-access[data-state="error"] .biometric-device__scan, .abis-access[data-state="error"] .biometric-device__reading { display: none; }
 .abis-access[data-state="error"] .abis-access__track > span { animation: none; background: #f3b19a; width: 100%; }
+.abis-access[data-state="denied"] { --access-accent: #ff727e; background: radial-gradient(ellipse at 50% 38%, #451923 0, #1e101c 42%, #080b15 80%); }
+.abis-access[data-state="denied"] .abis-access__ambient { background-image: linear-gradient(#ff78800a 1px, transparent 1px), linear-gradient(90deg, #ff78800a 1px, transparent 1px); }
+.abis-access[data-state="denied"] .biometric-device__tablet { animation: none; filter: drop-shadow(0 12px 34px #ff35452b); }
+.abis-access[data-state="denied"] .biometric-device__screen { fill: #32131c; stroke: #a53d4a; }
+.abis-access[data-state="denied"] .biometric-device__screen-grid { opacity: .28; }
+.abis-access[data-state="denied"] .biometric-device__copy,
+.abis-access[data-state="denied"] .biometric-device__ridge,
+.abis-access[data-state="denied"] .biometric-device__scan,
+.abis-access[data-state="denied"] .biometric-device__reading,
+.abis-access[data-state="denied"] .biometric-device__matched,
+.abis-access[data-state="denied"] .biometric-device__points { display: none; }
+.abis-access .biometric-device__denied { display: none; }
+.abis-access[data-state="denied"] .biometric-device__denied { display: block; }
+.abis-access[data-state="denied"] .abis-access__seal { border-color: #ff879180; background: #511923; color: #ffe1e4; }
+.abis-access[data-state="denied"] .abis-access__check { display: none; }
+.abis-access[data-state="denied"] .abis-access__error-icon { display: block; }
+.abis-access[data-state="denied"] .abis-access__track > span { animation: none; background: #ff727e; width: 100%; }
+.abis-access[data-state="denied"] .abis-access__return { border-color: #ff889266; background: #8c2e3b; color: #fff; }
 .abis-access[data-state="leaving"] .abis-access__content { transform: translateY(-8px); opacity: .65; transition: opacity 300ms, transform 300ms; }
 @keyframes access-reveal { from { opacity: 0; } to { opacity: 1; } }
 @keyframes access-tablet-enter { from { opacity: 0; transform: translateY(20px) rotateX(12deg) rotateY(-14deg) rotateZ(-4deg); } to { opacity: 1; transform: rotateX(6deg) rotateY(-8deg) rotateZ(-2deg); } }

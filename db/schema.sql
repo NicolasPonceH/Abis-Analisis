@@ -82,6 +82,11 @@ CREATE TABLE IF NOT EXISTS registro_enrolamiento (
     id_lote_ingesta            BIGINT REFERENCES ingesta_lote(id_lote) ON DELETE SET NULL
 );
 
+-- La huella identifica el evento de origen sin persistir sus datos personales.
+ALTER TABLE registro_enrolamiento ADD COLUMN IF NOT EXISTS huella_origen VARCHAR(64);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_registro_huella_origen ON registro_enrolamiento (huella_origen);
+ALTER TABLE ingesta_lote ADD COLUMN IF NOT EXISTS filas_duplicadas INTEGER NOT NULL DEFAULT 0;
+
 CREATE INDEX IF NOT EXISTS idx_registro_fecha_enrolamiento ON registro_enrolamiento (fecha_enrolamiento);
 CREATE INDEX IF NOT EXISTS idx_registro_cuartel ON registro_enrolamiento (id_cuartel);
 CREATE INDEX IF NOT EXISTS idx_registro_nacionalidad ON registro_enrolamiento (id_nacionalidad);

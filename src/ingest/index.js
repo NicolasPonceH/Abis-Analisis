@@ -105,55 +105,22 @@ async function autoInsertNewProfessions(pool, rows, headers) {
 }
 
 // Orquesta el modulo de ingesta: lee el Excel, valida su estructura y mapea
-// cada fila en memoria contra los catalogos. No inserta en la base de datos.
+// cada fila en memoria contra los catálogos. readOnly impide agregar profesiones;
+// los registros de enrolamiento solo se insertan desde el orquestador ETL.
 async function processExcelFile(filePath, pool, options = {}) {
-  // Verificación de cabecera mágica (Office Open XML / ZIP)
-  let isValidExcel = false;
-  if (Buffer.isBuffer(filePath)) {
-    isValidExcel = filePath.length >= 2 && filePath[0] === 0x50 && filePath[1] === 0x4b;
-  } else if (typeof filePath === "string") {
-    const fs = require("fs");
-    if (fs.existsSync(filePath)) {
-      const fd = fs.openSync(filePath, "r");
-      const buffer = Buffer.alloc(2);
-      fs.readSync(fd, buffer, 0, 2, 0);
-      fs.closeSync(fd);
-      isValidExcel = buffer[0] === 0x50 && buffer[1] === 0x4b;
-    }
-  }
-
-  if (!isValidExcel) {
+  const fs = require("fs");
+  const { esBufferCifrado, descifrarBuffer } = require("../security/crypto");
+  let buffer = Buffer.isBuffer(filePath) ? filePath : fs.readFileSync(filePath);
+  if (esBufferCifrado(buffer)) buffer = descifrarBuffer(buffer, options.encryptionKey);
+  if (buffer.length < 2 || buffer[0] !== 0x50 || buffer[1] !== 0x4b) {
     return { headerValidation: { ok: false, error: "Archivo no es un Excel válido (Firma PK no encontrada)" }, rows: [], errors: [], sheetName: "invalid" };
   }
-
-  const { headers, rows, sheetName } = readExcelFile(filePath, options);
-
-  const headerValidation = validateHeaders(headers);
-  if (!headerValidation.ok) {
-    return { headerValidation, rows: [], errors: [], sheetName };
-  }
-
-  // Auto-descubrir e inyectar nuevas profesiones ANTES de cargar los catálogos
-  await autoInsertNewProfessions(pool, rows, headers);
-
-  const catalogs = await loadCatalogs(pool);
-
-  const mappedRows = [];
-  const rowErrors = [];
-  rows.forEach((rawRow, index) => {
-    const { mapped, errors } = mapRow(toFieldKeyedRow(rawRow, headers), catalogs);
-    if (errors.length > 0) {
-      rowErrors.push({ excelRow: index + 2, errors }); // +2: fila 1 es cabecera, index es 0-based
-    } else {
-      mappedRows.push(mapped);
-    }
-  });
-
-  return { headerValidation, rows: mappedRows, errors: rowErrors, sheetName };
+  const { headers, rows, sheetName } = readExcelFile(buffer, options);
+  return { ...await processSheetRows(headers, rows, pool, options), sheetName };
 }
 
 // Procesa filas provenientes directamente del portapapeles o de una cuadrícula de hoja de cálculo
-async function processSheetRows(headers, rows, pool) {
+async function processSheetRows(headers, rows, pool, options = {}) {
   ({ headers, rows } = normalizarEntradaHoja(headers, rows));
   const headerValidation = validateHeaders(headers);
   if (!headerValidation.ok) {
@@ -161,7 +128,7 @@ async function processSheetRows(headers, rows, pool) {
   }
 
   // Auto-descubrir e inyectar nuevas profesiones ANTES de cargar los catálogos
-  await autoInsertNewProfessions(pool, rows, headers);
+  if (!options.readOnly) await autoInsertNewProfessions(pool, rows, headers);
 
   const catalogs = await loadCatalogs(pool);
 

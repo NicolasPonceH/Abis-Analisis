@@ -27,123 +27,170 @@
       </div>
 
       <!-- Grid de Configuración de Horarios y Canal -->
-      <div class="settings-grid">
+      <div class="settings-grid schedule-config-grid">
 
-        <!-- Tarjeta 1: Gestión de Horas y Frecuencia de Envío -->
-        <div class="settings-card">
-          <div class="settings-card-header">
-            <div class="settings-card-title">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <span>Programación de Horarios de Reporte</span>
-            </div>
-            <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
-              <input type="checkbox" id="schedule-enabled-toggle" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
+        <!-- Carrusel de Programación: Horarios Generales <-> Fin de Semana -->
+        <div class="schedule-carousel-wrapper" id="schedule-carousel-wrapper" data-active-slide="general">
+          <div class="schedule-carousel-track" id="schedule-carousel-track">
 
-          <div class="settings-card-body">
+            <!-- SLIDE 1: Horarios Generales (Lunes a Jueves / Base) -->
+            <div class="schedule-carousel-slide" id="schedule-slide-general">
+              <div class="settings-card schedule-general-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">
+                    <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span>Programación de Horarios de Reporte</span>
+                  </div>
+                  <div class="schedule-header-actions">
+                    <button type="button" class="schedule-carousel-nav-btn schedule-weekend-toggle" id="schedule-weekend-toggle" title="Ver y configurar horarios de Fin de Semana">
+                      <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      <span id="schedule-weekend-toggle-label">Fin de semana</span>
+                      <svg class="svg-icon svg-icon-xs nav-arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <label class="toggle-switch" title="Habilitar o suspender temporalmente los envíos automáticos">
+                      <input type="checkbox" id="schedule-enabled-toggle" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
 
-            <!-- Estado del Switch -->
-            <div class="schedule-enabled-alert" id="schedule-enabled-alert">
-              <span id="schedule-enabled-text" style="display:inline-flex; align-items:center; gap:6px;">
-                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
-              </span>
-            </div>
+                <div class="settings-card-body">
 
-            <!-- Horarios Configurados Actualmente -->
-            <div class="form-group" style="margin-top: 16px;">
-              <label class="filter-label">Horarios Programados Activos (Formato 24 Horas):</label>
-              <div class="time-chips-container" id="time-chips-container">
-                <!-- Se poblará dinámicamente con chips: 08:30 hrs ×, 19:00 hrs × -->
-              </div>
-            </div>
+                  <!-- Estado del Switch -->
+                  <div class="schedule-enabled-alert" id="schedule-enabled-alert">
+                    <span id="schedule-enabled-text" style="display:inline-flex; align-items:center; gap:6px;">
+                      <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" style="stroke:#166534;">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>Los reportes se despacharán automáticamente según las horas fijadas a continuación.</span>
+                    </span>
+                  </div>
 
-            <!-- Agregar Nuevo Horario -->
-            <div class="add-time-box">
-              <label class="filter-label" for="input-new-time">Añadir nueva hora de envío:</label>
-              <div class="add-time-row">
-                <input type="time" id="input-new-time" class="form-control" value="12:00">
-                <button type="button" id="btn-add-time" class="btn btn-primary">
-                  <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  <span>Agregar Hora</span>
-                </button>
-              </div>
-            </div>
+                  <!-- Horarios Configurados Actualmente -->
+                  <div class="form-group" style="margin-top: 16px;">
+                    <label class="filter-label">Horarios Generales (para días sin personalización):</label>
+                    <div class="time-chips-container" id="time-chips-container">
+                      <!-- Se poblará dinámicamente con chips: 08:30 hrs ×, 19:00 hrs × -->
+                    </div>
+                  </div>
+
+                  <!-- Agregar Nuevo Horario -->
+                  <div class="add-time-box">
+                    <label class="filter-label" for="input-new-time">Añadir nueva hora de envío:</label>
+                    <div class="add-time-row">
+                      <input type="time" id="input-new-time" class="form-control" value="12:00">
+                      <button type="button" id="btn-add-time" class="btn btn-primary">
+                        <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
+                          <line x1="12" y1="5" x2="12" y2="19" />
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        <span>Agregar Hora</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Días de la Semana -->
+                  <div class="form-group" style="margin-top: 18px;">
+                    <div class="schedule-days-heading" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <label class="filter-label" style="margin-bottom:0;">Días de Envío Semanal:</label>
+                      <div style="display: flex; gap: 6px;">
+                        <button type="button" class="btn-link-action" id="btn-select-weekdays">Lunes a Viernes</button>
+                        <span style="color:var(--border-medium);">&bull;</span>
+                        <button type="button" class="btn-link-action" id="btn-select-all-days">Todos los Días</button>
+                      </div>
+                    </div>
+                    <div class="days-selector-grid">
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked>
+                        <span>Lun</span></label>
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked>
+                        <span>Mar</span></label>
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked>
+                        <span>Mié</span></label>
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked>
+                        <span>Jue</span></label>
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked>
+                        <span>Vie</span></label>
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked>
+                        <span>Sáb</span></label>
+                      <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked>
+                        <span>Dom</span></label>
+                    </div>
+                  </div>
 
 
-            <!-- Días de la Semana -->
-            <div class="form-group" style="margin-top: 18px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label class="filter-label" style="margin-bottom:0;">Días de Envío Semanal:</label>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" class="btn-link-action" id="btn-select-weekdays">Lunes a Viernes</button>
-                  <span style="color:var(--border-medium);">&bull;</span>
-                  <button type="button" class="btn-link-action" id="btn-select-all-days">Todos los Días</button>
+                </div>
+
+                <div class="schedule-card-footer">
+                  <!-- Input oculto para compatibilidad con el guardado institucional -->
+                  <input type="checkbox" id="schedule-four-photos-toggle" checked style="display:none;" aria-hidden="true">
+
+                  <div class="schedule-save-actions">
+                    <p>Guarda los horarios generales y de fin de semana en un solo paso.</p>
+                    <button type="button" id="btn-save-schedule" class="btn btn-primary btn-save-schedule-lg">
+                      <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
+                      </svg>
+                      <span>Guardar Ajustes de Programación</span>
+                    </button>
+                  </div>
+                  <div id="schedule-save-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
                 </div>
               </div>
-              <div class="days-selector-grid">
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="1" checked>
-                  <span>Lun</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="2" checked>
-                  <span>Mar</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="3" checked>
-                  <span>Mié</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="4" checked>
-                  <span>Jue</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="5" checked>
-                  <span>Vie</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="6" checked>
-                  <span>Sáb</span></label>
-                <label class="day-checkbox-label"><input type="checkbox" class="day-check" value="0" checked>
-                  <span>Dom</span></label>
+            </div>
+
+            <!-- SLIDE 2: Horarios Especiales de Fin de Semana -->
+            <div class="schedule-carousel-slide" id="schedule-slide-weekend">
+              <div class="settings-card schedule-weekend-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">
+                    <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>Horarios Especiales de Fin de Semana</span>
+                  </div>
+                  <div class="schedule-header-actions">
+                    <span class="schedule-slide-badge">Viernes · Sábado · Domingo</span>
+                    <button type="button" class="schedule-carousel-nav-btn schedule-weekend-toggle schedule-back-toggle" id="btn-back-to-general" title="Volver al horario general">
+                      <svg class="svg-icon svg-icon-xs nav-arrow-icon-back" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                      <span>Volver a General</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-card-body">
+                  <%- include('schedule-week') %>
+                </div>
+
+                <div class="schedule-card-footer">
+                  <div class="schedule-save-actions">
+                    <p>Los cambios en Viernes, Sábado y Domingo se aplicarán directamente a la programación oficial.</p>
+                    <button type="button" id="btn-save-schedule-weekend" class="btn btn-primary btn-save-schedule-lg">
+                      <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
+                      </svg>
+                      <span>Guardar Ajustes de Fin de Semana</span>
+                    </button>
+                  </div>
+                  <div id="schedule-save-feedback-weekend" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
+                </div>
               </div>
             </div>
-
-            <!-- Formato del Reporte -->
-            <div class="form-group" style="margin-top: 18px;">
-              <label class="filter-label" for="schedule-report-type">Estructura del Reporte a Despachar:</label>
-              <select id="schedule-report-type" class="form-control">
-                <option value="extenso">Reporte Extenso Oficial PDI (SLA, Cuarteles, Nacionalidades, Demografía y NNA)
-                </option>
-                <option value="resumen">Resumen Ejecutivo Compacto (KPIs Rápidos)</option>
-              </select>
-            </div>
-
-            <!-- Botón Guardar Cambios -->
-            <div class="form-group" style="margin-top: 18px; padding: 12px; border: 1px solid #bfdbfe; border-radius: 10px; background: #eff6ff;">
-              <label style="display:flex; align-items:center; gap:10px; cursor:pointer; color:var(--pdi-navy); font-weight:700;">
-                <input type="checkbox" id="schedule-four-photos-toggle" checked style="width:18px; height:18px; cursor:pointer;">
-                <span>Enviar 4 capturas institucionales en cada despacho diario</span>
-              </label>
-              <small style="display:block; margin:6px 0 0 28px; color:#475569;">Incluye estados, distribución diaria y los dos acumulados anuales.</small>
-            </div>
-
-            <button type="button" id="btn-save-schedule" class="btn btn-primary"
-              style="width: 100%; margin-top: 20px; padding: 12px;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                <polyline points="17 21 17 13 7 13 7 21" />
-                <polyline points="7 3 7 8 15 8" />
-              </svg>
-              <span>Guardar Ajustes de Programación</span>
-            </button>
-            <div id="schedule-save-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;"></div>
 
           </div>
         </div>
 
         <!-- Tarjeta 2: Canal de Notificaciones & Prueba Inmediata -->
-        <div class="settings-card">
+        <div class="settings-card schedule-channel-card">
           <div class="settings-card-header">
             <div class="settings-card-title">
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke: var(--pdi-gold);">
@@ -154,7 +201,7 @@
             </div>
           </div>
 
-          <div class="settings-card-body">
+          <div class="settings-card-body schedule-channel-body">
 
 
             <div class="channel-info-box">
@@ -205,8 +252,11 @@
               <div id="schedule-test-feedback" class="crypto-feedback-box" style="display: none; margin-top: 12px;">
               </div>
 
+
+            </div>
+
               <!-- Selector de Previsualización de las 4 Capturas Oficiales -->
-              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-light);">
+              <div class="schedule-preview-box">
                 <label
                   style="font-size: 0.78rem; font-weight: 700; color: var(--pdi-navy); box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
                   <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24">
@@ -239,12 +289,8 @@
                   </a>
                 </div>
               </div>
-            </div>
-
-
           </div>
         </div>
-
       </div>
 
       <!-- Tarjeta: Gestión de Destinatarios y Oficiales de Telegram (Almacenamiento Seguro PostgreSQL) -->
