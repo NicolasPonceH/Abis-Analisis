@@ -98,6 +98,7 @@ app.secret_key = raw_secret
 app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
 LOGIN_EXEMPT_ENDPOINTS = {
     "login", "static", "register", "forgot_password", "verify_password",
