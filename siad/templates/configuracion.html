@@ -369,7 +369,7 @@
                       </td>
                       <td class="py-4 px-6 text-right">
                         <div class="flex items-center justify-end gap-2.5">
-                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" data-rol="{{ u.rol_siad }}" onclick="abrirModalRolDesdeBoton(this)" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar rol SIAD">
+                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" data-rol="{{ u.rol_siad or 'operador' }}" onclick="abrirModalRolDesdeBoton(this)" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar rol SIAD">
                             <span class="material-symbols-outlined text-[18px]">edit</span> Rol
                           </button>
                           <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" onclick="abrirModalPasswordDesdeBoton(this)" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 shadow-sm hover:shadow" title="Restablecer contraseña">
@@ -611,9 +611,19 @@
   function abrirModalRol(id, username, currentRol) {
     document.getElementById('modal-rol-user-id').value = id;
     document.getElementById('modal-rol-user-label').textContent = '@' + username;
+    var normalizedRol = (currentRol || 'operador').toString().trim().toLowerCase();
     var radios = document.getElementsByName('modal-rol-radio');
+    var found = false;
     for (var r of radios) {
-      r.checked = (r.value === currentRol);
+      if (r.value === normalizedRol) {
+        r.checked = true;
+        found = true;
+      } else {
+        r.checked = false;
+      }
+    }
+    if (!found && radios.length > 0) {
+      radios[1].checked = true;
     }
     document.getElementById('modal-rol-siad').classList.remove('hidden');
   }
@@ -627,7 +637,10 @@
     var radios = document.getElementsByName('modal-rol-radio');
     var selectedRol = 'operador';
     for (var r of radios) {
-      if (r.checked) selectedRol = r.value;
+      if (r.checked) {
+        selectedRol = r.value;
+        break;
+      }
     }
     var btn = document.getElementById('btn-save-rol');
     btn.disabled = true;
@@ -636,17 +649,24 @@
       var res = await fetch('/api/admin/update-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, rol_siad: selectedRol })
+        body: JSON.stringify({ id: id, rol_siad: selectedRol, rol: selectedRol })
       });
-      var data = await res.json();
-      if (data.ok) {
+      var data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.warn("Respuesta no parseable como JSON:", e);
+      }
+      if (data && data.ok) {
         cerrarModalRol();
         mostrarToast('Rol actualizado correctamente a ' + selectedRol.toUpperCase());
-        setTimeout(function() { location.reload(); }, 900);
+        setTimeout(function() { location.reload(); }, 800);
       } else {
-        mostrarToast(data.error || 'Error al modificar rol', true);
+        var msg = (data && data.error) ? data.error : ('Error al modificar rol (código ' + res.status + ')');
+        mostrarToast(msg, true);
       }
     } catch (err) {
+      console.error("Error en update-role:", err);
       mostrarToast('Error de conexión con el servidor', true);
     } finally {
       btn.disabled = false;
