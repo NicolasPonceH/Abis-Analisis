@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06142a">
+  <title>{{ status }} · SIAD</title>
+  <style>
+    :root{color-scheme:dark;--navy:#06142a;--gold:#ffd43b;--muted:#a8b7cc;--white:#f7f9fc}
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 50% 38%,#173967 0%,#0b2345 31%,var(--navy) 74%);color:var(--white);overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,black,transparent 85%)}
+    .glow{position:fixed;width:440px;height:440px;left:50%;top:45%;transform:translate(-50%,-50%);border-radius:50%;background:rgba(25,92,166,.2);filter:blur(70px);pointer-events:none}
+    main{position:relative;z-index:1;min-height:100svh;display:grid;place-items:center;padding:36px 20px}.shell{width:min(100%,760px);text-align:center}.brand{display:inline-flex;align-items:center;gap:11px;margin-bottom:50px;color:#dce7f5;font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(255,212,59,.65);border-radius:12px;color:var(--gold);box-shadow:0 0 28px rgba(255,212,59,.12);font-size:16px;letter-spacing:0}
+    .visual{position:relative;width:190px;height:150px;margin:0 auto 28px;display:grid;place-items:center}.orbit{position:absolute;inset:5px 20px;border:1px solid rgba(255,255,255,.12);border-radius:50%;transform:rotate(-24deg)}.orbit:after{content:"";position:absolute;width:9px;height:9px;right:22px;top:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold)}.shield{width:96px;height:110px;color:var(--gold);filter:drop-shadow(0 12px 34px rgba(255,212,59,.2))}.code{position:absolute;right:0;bottom:0;padding:7px 11px;border:1px solid rgba(255,255,255,.14);border-radius:99px;background:rgba(4,17,37,.65);color:#dce7f5;font:700 11px ui-monospace,monospace;letter-spacing:.14em}
+    .eyebrow{margin:0 0 12px;color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.24em;text-transform:uppercase}.title{margin:0;font-size:clamp(34px,6vw,58px);line-height:1.04;letter-spacing:-.055em;font-weight:800}.message{max-width:510px;margin:18px auto 0;color:var(--muted);font-size:16px;line-height:1.75}
+    .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:34px}.button{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 19px;border:1px solid rgba(255,255,255,.17);border-radius:13px;color:var(--white);background:rgba(255,255,255,.055);text-decoration:none;font-size:13px;font-weight:750;transition:transform .18s ease,border-color .18s ease,background .18s ease}.button:hover{transform:translateY(-2px);border-color:rgba(255,212,59,.58);background:rgba(255,255,255,.1)}.button.primary{border-color:var(--gold);color:#14243c;background:var(--gold);box-shadow:0 8px 28px rgba(255,212,59,.18)}.button.primary:hover{background:#ffe27a}.foot{margin-top:58px;color:#6f829d;font-size:11px;letter-spacing:.08em}
+    @media(max-width:520px){.brand{margin-bottom:34px}.visual{transform:scale(.88);margin-bottom:12px}.message{font-size:14px}.actions{flex-direction:column;align-items:stretch;margin-inline:10px}.foot{margin-top:40px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <main>
+    <section class="shell" aria-labelledby="error-title">
+      <div class="brand"><span class="brand-mark">S</span><span>SIAD · Plataforma de análisis</span></div>
+      <div class="visual" aria-hidden="true">
+        <div class="orbit"></div>
+        <svg class="shield" viewBox="0 0 96 112" fill="none"><path d="M48 5 84 18v31c0 25-14 44-36 57C26 93 12 74 12 49V18L48 5Z" stroke="currentColor" stroke-width="2.5"/><path d="M48 17 73 26v23c0 18-9 32-25 42-16-10-25-24-25-42V26l25-9Z" stroke="currentColor" stroke-opacity=".42"/><path d="m36 55 8 8 17-19" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg>
+        <span class="code">{{ status }} / SISTEMA</span>
+      </div>
+      <p class="eyebrow">{% if status == 403 %}Acceso restringido{% elif status == 404 %}Ruta no encontrada{% elif status == 503 %}Servicio temporalmente indisponible{% elif status == 413 %}Archivo demasiado grande{% else %}Interrupción inesperada{% endif %}</p>
+      <h1 class="title" id="error-title">{% if status == 403 %}Esta zona está protegida.{% elif status == 404 %}No encontramos esa página.{% elif status == 503 %}Volvemos en un momento.{% elif status == 413 %}El archivo es muy grande.{% else %}Algo se salió del plan.{% endif %}</h1>
+      <p class="message">{{ message }}</p>
+      <div class="actions">
+        <a class="button primary" href="{{ url_for('index') if session.get('user_id') else url_for('login') }}">Ir a SIAD <span aria-hidden="true">↗</span></a>
+        <a class="button" href="{{ url_for('login') }}">Iniciar sesión</a>
+        <button class="button" type="button" onclick="history.length > 1 ? history.back() : location.assign('{{ url_for('index') if session.get('user_id') else url_for('login') }}')">Volver a la página anterior</button>
+      </div>
+      <p class="foot">SIAD · SISTEMA DE ANÁLISIS</p>
+    </section>
+  </main>
+</body>
+</html>
