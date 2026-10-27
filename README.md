@@ -2,6 +2,8 @@
 
 Aplicación Node.js/Express (ABIS) y Python/Flask (SIAD), con PostgreSQL.
 
+Para preparar Windows Server, revisar [DESPLIEGUE_WINDOWS.md](DESPLIEGUE_WINDOWS.md). Incluye el supervisor que reinicia SIAD cuando no responde.
+
 ## Código y recursos conservados
 
 - `src/`, `public/`: servidor, vistas, interfaz y recursos visuales de ABIS.

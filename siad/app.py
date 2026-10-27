@@ -138,6 +138,18 @@ def debug_env():
         "url_for_login": url_for("login")
     })
 
+@app.get("/health/live")
+def health_live():
+    """Respuesta ligera para comprobar que SIAD sigue atendiendo solicitudes."""
+    return {"status": "ok"}, 200
+
+@app.get("/health/ready")
+def health_ready():
+    """Comprueba PostgreSQL por separado; el watchdog no reinicia por una caída de DB."""
+    if db.is_connected():
+        return {"status": "ok", "db": "connected"}, 200
+    return {"status": "degraded", "db": "disconnected"}, 503
+
 @app.route("/redirect-abis")
 def redirect_abis():
     return redirect("/")

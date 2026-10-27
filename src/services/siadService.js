@@ -15,17 +15,16 @@ function iniciarSIAD(envVars = {}) {
   const fs = require('fs');
   const pythonToUse = fs.existsSync(venvPython) ? venvPython : pythonCmd;
   
+  const siadPort = envVars.SIAD_PORT || process.env.SIAD_PORT || '5001';
   const env = {
     ...process.env,
     DATABASE_URL: process.env.DATABASE_URL,
-
-    FLASK_RUN_PORT: envVars.SIAD_PORT || process.env.SIAD_PORT || '5001',
     APPLICATION_ROOT: '/analisis'
   };
   
-  console.log(`🚀 Iniciando módulo de Análisis Documental (SIAD) en puerto ${env.FLASK_RUN_PORT}...`);
+  console.log(`🚀 Iniciando módulo de Análisis Documental (SIAD) con Waitress en 127.0.0.1:${siadPort}...`);
   
-  siadProcess = spawn(pythonToUse, ['app.py'], { cwd: siadDir, env, stdio: 'pipe' });
+  siadProcess = spawn(pythonToUse, ['-m', 'waitress', '--listen=127.0.0.1:' + siadPort, 'app:app'], { cwd: siadDir, env, stdio: 'pipe' });
   
   siadProcess.stdout.on('data', (data) => {
     // Filtrar algo de ruido, mostrar lo importante

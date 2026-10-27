@@ -12,6 +12,7 @@ function createServerRuntime({
   logger = console,
 }) {
   function startServer() {
+    const managesSiadProcess = env.ENABLE_SIAD !== "false";
     const server = app.listen(port, () => {
       logger.log(`Sistema ABIS escuchando en http://localhost:${port}`);
 
@@ -26,7 +27,11 @@ function createServerRuntime({
         logger.warn("Advertencia al inicializar historial de ingestas:", err.message);
       });
       schedulerService.iniciarScheduler({ pool });
-      siad.iniciarSIAD({ SIAD_PORT: env.SIAD_PORT || "5001" });
+      if (managesSiadProcess) {
+        siad.iniciarSIAD({ SIAD_PORT: env.SIAD_PORT || "5001" });
+      } else {
+        logger.log("SIAD se administra como servicio externo; ABIS usará SIAD_URL.");
+      }
     });
 
     let closing = false;
@@ -34,7 +39,7 @@ function createServerRuntime({
       if (closing) return;
       closing = true;
       bot.detenerBot();
-      siad.detenerSIAD();
+      if (managesSiadProcess) siad.detenerSIAD();
       schedulerService.detenerScheduler();
       server.close(() => pool.end().finally(() => processRef.exit(0)));
     };
