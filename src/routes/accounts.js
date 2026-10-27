@@ -153,10 +153,6 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
       }
 
       const target = targetResult.rows[0];
-      if (target.rol_siad !== "ninguno") {
-        await client.query("ROLLBACK");
-        return res.status(403).json({ ok: false, error: "Esta cuenta también tiene acceso a SIAD. Un administrador de SIAD debe quitar ese acceso antes de eliminar la cuenta." });
-      }
       if (String(target.username).toLowerCase() === String(req.user.username).toLowerCase()) {
         await client.query("ROLLBACK");
         return res.status(400).json({ ok: false, error: "No puedes eliminar tu propia cuenta." });
@@ -172,6 +168,19 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
         }
       }
 
+      if (target.rol_siad === "admin") {
+        const siadAdminsResult = await client.query(
+          "SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_siad = 'admin'"
+        );
+        if (siadAdminsResult.rows[0].total <= 1) {
+          await client.query("ROLLBACK");
+          return res.status(400).json({ ok: false, error: "No se puede eliminar al último administrador de SIAD." });
+        }
+      }
+
+      // La cuenta es compartida por ambos módulos. Igual que al eliminar desde SIAD,
+      // conserva los documentos, pero los deja sin propietario asociado.
+      await client.query("UPDATE documentos SET usuario_username = NULL WHERE usuario_username = $1", [target.username]);
       await client.query("DELETE FROM usuarios WHERE id = $1", [userId]);
       await client.query("COMMIT");
 

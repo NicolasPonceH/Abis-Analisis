@@ -8,7 +8,7 @@
           <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
-        <span>Carga de Archivo (.xlsx / .enc)</span>
+        <span>Carga de Archivo (.xlsx)</span>
       </button>
 
       <button type="button" class="ingesta-mode-btn" id="btn-mode-sheet" data-ingest-mode="sheet">
@@ -232,7 +232,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- VISTA 2: CARGA TRADICIONAL DE ARCHIVO (.XLSX / .ENC) -->
+  <!-- VISTA 2: CARGA TRADICIONAL DE ARCHIVO (.XLSX) -->
   <!-- ========================================== -->
   <div id="ingesta-view-file" class="ingesta-view-pane" style="display: block;">
 
@@ -240,7 +240,7 @@
 
       <!-- Zona Dropzone -->
       <div class="dropzone" id="upload-dropzone">
-        <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls,.enc">
+        <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls">
         <div class="dropzone-icon">
           <svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24" style="stroke:var(--pdi-navy);">
             <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
@@ -259,7 +259,7 @@
           <span>Seleccionar Archivo desde el Equipo</span>
         </button>
         <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted);">
-          Formatos admitidos: <strong>.xlsx</strong> nativo o archivo protegido <strong>.enc</strong> (AES-256-GCM)
+          Formatos admitidos: planilla de cálculo <strong>.xlsx</strong> nativa o <strong>.xls</strong>
         </div>
       </div>
 
@@ -281,9 +281,8 @@
             </svg>
           </div>
           <div class="info-item-content">
-            <h4>Descifrado Exclusivo en Memoria RAM</h4>
-            <p>Si se suministra un archivo <code>.enc</code>, el motor lo autentica y descifra en la memoria volátil
-              del servidor sin escribir datos planos temporales en el disco.</p>
+            <h4>Procesamiento Exclusivo en Memoria RAM</h4>
+            <p>El motor analiza y valida las planillas directamente en la memoria volátil del servidor, sin persistir archivos temporales en el disco.</p>
           </div>
         </div>
 
