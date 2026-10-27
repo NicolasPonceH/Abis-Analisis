@@ -2304,6 +2304,34 @@ def api_admin_reset_password():
     except Exception as e:
         return {"ok": False, "error": str(e)}, 500
 
+
+@app.route("/api/admin/delete-user", methods=["POST"])
+def api_admin_delete_user():
+    if session.get("rol_siad", session.get("rol")) != "admin":
+        return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
+    data = request.get_json() or {}
+    user_id = data.get("id")
+    if not user_id:
+        return {"ok": False, "error": "Identificador de usuario no válido."}, 400
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        return {"ok": False, "error": "ID de usuario inválido."}, 400
+
+    current_username = session.get("username")
+    current_user = db.get_user_by_username(current_username) if current_username else None
+    if current_user and current_user.get("id") == user_id:
+        return {"ok": False, "error": "No puedes eliminar tu propia cuenta mientras estás en sesión activa."}, 400
+
+    try:
+        db.delete_user(user_id)
+        return {"ok": True}
+    except ValueError as ve:
+        return {"ok": False, "error": str(ve)}, 400
+    except Exception as e:
+        return {"ok": False, "error": f"Error al eliminar usuario: {str(e)}"}, 500
+
+
 @app.route("/perfil")
 def perfil():
     username = session.get("username", "")

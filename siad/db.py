@@ -644,6 +644,25 @@ def count_users():
             return cur.fetchone()[0]
 
 
+def delete_user(user_id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, username, rol_siad FROM usuarios WHERE id = %s", (user_id,))
+            user = cur.fetchone()
+            if not user:
+                raise ValueError("Usuario no encontrado.")
+            username = user[1]
+            rol_siad = user[2]
+            if rol_siad == "admin":
+                cur.execute("SELECT COUNT(*) FROM usuarios WHERE rol_siad = 'admin'")
+                if cur.fetchone()[0] <= 1:
+                    raise ValueError("No se puede eliminar al único administrador de SIAD.")
+            cur.execute("UPDATE documentos SET usuario_username = NULL WHERE usuario_username = %s", (username,))
+            cur.execute("DELETE FROM usuarios WHERE id = %s", (user_id,))
+        conn.commit()
+    return True
+
+
 def update_password(username, password_hash):
     with get_connection() as conn:
         with conn.cursor() as cur:

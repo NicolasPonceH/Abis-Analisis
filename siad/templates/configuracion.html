@@ -346,11 +346,14 @@
                       </td>
                       <td class="py-4 px-6 text-right">
                         <div class="flex items-center justify-end gap-2">
-                          <button onclick="cambiarRolSIAD({{ u.id }}, '{{ u.rol_siad }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                          <button onclick="abrirModalRol({{ u.id }}, '{{ u.username }}', '{{ u.rol_siad }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1" title="Modificar rol SIAD">
                             <span class="material-symbols-outlined text-[16px]">edit</span> Rol
                           </button>
-                          <button onclick="cambiarPasswordSIAD({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-red-200 dark:border-red-800 flex items-center gap-1">
+                          <button onclick="abrirModalPassword({{ u.id }}, '{{ u.username }}')" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1" title="Restablecer contraseña">
                             <span class="material-symbols-outlined text-[16px]">key</span> Clave
+                          </button>
+                          <button onclick="abrirModalEliminar({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-red-200 dark:border-red-800 flex items-center gap-1" title="Eliminar usuario del sistema">
+                            <span class="material-symbols-outlined text-[16px]">delete</span> Eliminar
                           </button>
                         </div>
                       </td>
@@ -445,35 +448,111 @@
     }
   }
 
-  async function cambiarRolSIAD(id, currentRol) {
-    var nuevoRol = prompt('Indique el nuevo rol SIAD: admin, operador o ninguno.', currentRol);
-    if (nuevoRol === null) return;
-    nuevoRol = nuevoRol.trim().toLowerCase();
-    if (!['admin', 'operador', 'ninguno'].includes(nuevoRol)) {
-      alert('Rol no válido. Use admin, operador o ninguno.');
-      return;
+  // ==================== GESTIÓN DE MODALES Y ACCIONES (SIN ALERTS NATIVOS) ====================
+  function mostrarToast(mensaje, esError = false) {
+    var toast = document.getElementById('toast-siad');
+    var inner = document.getElementById('toast-siad-inner');
+    var icon = document.getElementById('toast-siad-icon');
+    var msg = document.getElementById('toast-siad-msg');
+    
+    if (esError) {
+      inner.className = 'flex items-center gap-3 p-4 rounded-2xl shadow-2xl border text-sm font-black bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-200 dark:border-red-800';
+      icon.textContent = 'error';
+    } else {
+      inner.className = 'flex items-center gap-3 p-4 rounded-2xl shadow-2xl border text-sm font-black bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800';
+      icon.textContent = 'check_circle';
     }
-    if (!confirm('¿Cambiar el rol SIAD de este usuario a ' + nuevoRol.toUpperCase() + '?')) return;
+    msg.textContent = mensaje;
+    toast.classList.remove('translate-y-[-150%]', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(function() {
+      toast.classList.add('translate-y-[-150%]', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 3500);
+  }
+
+  function togglePasswordVisibility(inputId, btn) {
+    var inp = document.getElementById(inputId);
+    var icon = btn.querySelector('.material-symbols-outlined');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.textContent = 'visibility_off';
+    } else {
+      inp.type = 'password';
+      icon.textContent = 'visibility';
+    }
+  }
+
+  // --- Modal Rol ---
+  function abrirModalRol(id, username, currentRol) {
+    document.getElementById('modal-rol-user-id').value = id;
+    document.getElementById('modal-rol-user-label').textContent = 'Usuario: @' + username;
+    var radios = document.getElementsByName('modal-rol-radio');
+    for (var r of radios) {
+      r.checked = (r.value === currentRol);
+    }
+    document.getElementById('modal-rol-siad').classList.remove('hidden');
+  }
+
+  function cerrarModalRol() {
+    document.getElementById('modal-rol-siad').classList.add('hidden');
+  }
+
+  async function confirmarCambioRol() {
+    var id = document.getElementById('modal-rol-user-id').value;
+    var radios = document.getElementsByName('modal-rol-radio');
+    var selectedRol = 'operador';
+    for (var r of radios) {
+      if (r.checked) selectedRol = r.value;
+    }
+    var btn = document.getElementById('btn-save-rol');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Guardando...';
     try {
       var res = await fetch('/api/admin/update-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, rol_siad: nuevoRol })
+        body: JSON.stringify({ id: id, rol_siad: selectedRol })
       });
       var data = await res.json();
       if (data.ok) {
-        location.reload();
+        cerrarModalRol();
+        mostrarToast('Rol actualizado correctamente a ' + selectedRol.toUpperCase());
+        setTimeout(function() { location.reload(); }, 900);
       } else {
-        alert(data.error || 'Error al modificar rol');
+        mostrarToast(data.error || 'Error al modificar rol', true);
       }
     } catch (err) {
-      alert('Error de conexión');
+      mostrarToast('Error de conexión con el servidor', true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">save</span> Guardar Rol';
     }
   }
 
-  async function cambiarPasswordSIAD(id, username) {
-    var p = prompt('Ingrese la nueva contraseña para el usuario "' + username + '" (mínimo 6 caracteres):');
-    if (!p || p.length < 6) return;
+  // --- Modal Password ---
+  function abrirModalPassword(id, username) {
+    document.getElementById('modal-password-user-id').value = id;
+    document.getElementById('modal-password-user-label').textContent = 'Usuario: @' + username;
+    document.getElementById('modal-password-input').value = '';
+    document.getElementById('modal-password-siad').classList.remove('hidden');
+    setTimeout(function() { document.getElementById('modal-password-input').focus(); }, 100);
+  }
+
+  function cerrarModalPassword() {
+    document.getElementById('modal-password-siad').classList.add('hidden');
+  }
+
+  async function confirmarCambioPassword() {
+    var id = document.getElementById('modal-password-user-id').value;
+    var p = document.getElementById('modal-password-input').value;
+    if (!p || p.length < 6) {
+      mostrarToast('La contraseña debe tener al menos 6 caracteres.', true);
+      return;
+    }
+    var btn = document.getElementById('btn-save-password');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Guardando...';
     try {
       var res = await fetch('/api/admin/reset-password', {
         method: 'POST',
@@ -482,14 +561,206 @@
       });
       var data = await res.json();
       if (data.ok) {
-        alert('Contraseña actualizada correctamente.');
+        cerrarModalPassword();
+        mostrarToast('Contraseña actualizada con éxito');
       } else {
-        alert(data.error || 'Error al actualizar contraseña.');
+        mostrarToast(data.error || 'Error al actualizar contraseña', true);
       }
     } catch (err) {
-      alert('Error de conexión');
+      mostrarToast('Error de conexión con el servidor', true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">lock_reset</span> Actualizar Clave';
+    }
+  }
+
+  // --- Modal Eliminar ---
+  function abrirModalEliminar(id, username) {
+    document.getElementById('modal-eliminar-user-id').value = id;
+    document.getElementById('modal-eliminar-user-label').textContent = 'Usuario: @' + username;
+    document.getElementById('modal-eliminar-siad').classList.remove('hidden');
+  }
+
+  function cerrarModalEliminar() {
+    document.getElementById('modal-eliminar-siad').classList.add('hidden');
+  }
+
+  async function confirmarEliminarUsuario() {
+    var id = document.getElementById('modal-eliminar-user-id').value;
+    var btn = document.getElementById('btn-confirmar-eliminar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Eliminando...';
+    try {
+      var res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+      });
+      var data = await res.json();
+      if (data.ok) {
+        cerrarModalEliminar();
+        mostrarToast('Usuario eliminado correctamente del sistema');
+        setTimeout(function() { location.reload(); }, 900);
+      } else {
+        mostrarToast(data.error || 'No se pudo eliminar el usuario', true);
+      }
+    } catch (err) {
+      mostrarToast('Error de conexión con el servidor', true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">delete</span> Sí, Eliminar Usuario';
     }
   }
 </script>
+
+<!-- ==================== MODALES FLOTANTES POPUPS ==================== -->
+
+<!-- Toast Flotante -->
+<div id="toast-siad" class="fixed top-6 right-6 z-[9999] transform translate-y-[-150%] opacity-0 transition-all duration-300 pointer-events-none max-w-md w-full">
+  <div id="toast-siad-inner" class="flex items-center gap-3 p-4 rounded-2xl shadow-2xl border text-sm font-black">
+    <span id="toast-siad-icon" class="material-symbols-outlined text-[24px]"></span>
+    <span id="toast-siad-msg" class="flex-1"></span>
+  </div>
+</div>
+
+<!-- Modal 1: Cambiar Rol SIAD -->
+<div id="modal-rol-siad" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden transition-opacity duration-200">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full overflow-hidden p-6 flex flex-col gap-5">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-300">
+          <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+        </div>
+        <div>
+          <h3 class="font-black text-slate-900 dark:text-slate-100 text-lg">Modificar Rol SIAD</h3>
+          <p class="text-xs text-slate-500 font-bold" id="modal-rol-user-label">Usuario: -</p>
+        </div>
+      </div>
+      <button onclick="cerrarModalRol()" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <input type="hidden" id="modal-rol-user-id">
+
+    <div class="flex flex-col gap-3">
+      <label class="text-xs font-black text-slate-500 uppercase tracking-wider">Seleccione el nivel de acceso:</label>
+      
+      <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 cursor-pointer transition-all has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50/50 dark:has-[:checked]:bg-sky-950/20">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-sky-500 text-[22px]">shield_person</span>
+          <div>
+            <div class="font-black text-sm text-slate-900 dark:text-slate-100">Administrador</div>
+            <div class="text-xs text-slate-500 font-medium">Control total, gestión de cuentas y auditoría</div>
+          </div>
+        </div>
+        <input type="radio" name="modal-rol-radio" value="admin" class="w-4 h-4 text-sky-600">
+      </label>
+
+      <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 cursor-pointer transition-all has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50/50 dark:has-[:checked]:bg-sky-950/20">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-slate-500 text-[22px]">badge</span>
+          <div>
+            <div class="font-black text-sm text-slate-900 dark:text-slate-100">Operador</div>
+            <div class="text-xs text-slate-500 font-medium">Procesamiento OCR, análisis y exportación</div>
+          </div>
+        </div>
+        <input type="radio" name="modal-rol-radio" value="operador" class="w-4 h-4 text-sky-600">
+      </label>
+
+      <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-red-500 cursor-pointer transition-all has-[:checked]:border-red-500 has-[:checked]:bg-red-50/50 dark:has-[:checked]:bg-red-950/20">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-red-500 text-[22px]">block</span>
+          <div>
+            <div class="font-black text-sm text-slate-900 dark:text-slate-100">Sin Acceso</div>
+            <div class="text-xs text-slate-500 font-medium">Revoca el ingreso a la plataforma SIAD</div>
+          </div>
+        </div>
+        <input type="radio" name="modal-rol-radio" value="ninguno" class="w-4 h-4 text-red-600">
+      </label>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <button onclick="cerrarModalRol()" type="button" class="py-2.5 px-4 rounded-xl font-black text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        Cancelar
+      </button>
+      <button onclick="confirmarCambioRol()" id="btn-save-rol" type="button" class="py-2.5 px-5 rounded-xl font-black text-xs text-white bg-[#00234c] hover:bg-[#003875] border-b-2 border-[#ffd100] shadow-md transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">save</span> Guardar Rol
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Cambiar Contraseña SIAD -->
+<div id="modal-password-siad" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden transition-opacity duration-200">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full overflow-hidden p-6 flex flex-col gap-5">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-300">
+          <span class="material-symbols-outlined text-[22px]">key</span>
+        </div>
+        <div>
+          <h3 class="font-black text-slate-900 dark:text-slate-100 text-lg">Nueva Contraseña</h3>
+          <p class="text-xs text-slate-500 font-bold" id="modal-password-user-label">Usuario: -</p>
+        </div>
+      </div>
+      <button onclick="cerrarModalPassword()" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <input type="hidden" id="modal-password-user-id">
+
+    <div class="flex flex-col gap-2">
+      <label class="text-xs font-black text-slate-500 uppercase tracking-wider">Ingrese la nueva contraseña:</label>
+      <div class="relative">
+        <input type="password" id="modal-password-input" placeholder="Mínimo 6 caracteres" class="w-full py-3 px-4 pr-12 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold text-sm focus:border-amber-500 outline-none transition-all">
+        <button type="button" onclick="togglePasswordVisibility('modal-password-input', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+      </div>
+      <p class="text-[11px] text-slate-400 font-medium">Debe contener al menos 6 caracteres por seguridad pericial.</p>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <button onclick="cerrarModalPassword()" type="button" class="py-2.5 px-4 rounded-xl font-black text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        Cancelar
+      </button>
+      <button onclick="confirmarCambioPassword()" id="btn-save-password" type="button" class="py-2.5 px-5 rounded-xl font-black text-xs text-amber-900 bg-[#ffd100] hover:bg-amber-400 shadow-md transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">lock_reset</span> Actualizar Clave
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 3: Confirmar Eliminación de Usuario -->
+<div id="modal-eliminar-siad" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden transition-opacity duration-200">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-red-200 dark:border-red-900/60 shadow-2xl max-w-md w-full overflow-hidden p-6 flex flex-col gap-5">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center border border-red-300 shrink-0">
+        <span class="material-symbols-outlined text-[28px]">warning</span>
+      </div>
+      <div>
+        <h3 class="font-black text-slate-900 dark:text-slate-100 text-lg">¿Eliminar Usuario?</h3>
+        <p class="text-xs text-slate-500 font-bold" id="modal-eliminar-user-label">Usuario: -</p>
+      </div>
+    </div>
+
+    <input type="hidden" id="modal-eliminar-user-id">
+
+    <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-xs text-red-700 dark:text-red-300 font-bold leading-relaxed">
+      Esta acción es permanente e irreversible. Se revocarán todas las sesiones activas y credenciales de acceso policial para esta cuenta en SIAD.
+    </div>
+
+    <div class="flex items-center justify-end gap-3 pt-2">
+      <button onclick="cerrarModalEliminar()" type="button" class="py-2.5 px-4 rounded-xl font-black text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        Cancelar
+      </button>
+      <button onclick="confirmarEliminarUsuario()" id="btn-confirmar-eliminar" type="button" class="py-2.5 px-5 rounded-xl font-black text-xs text-white bg-red-600 hover:bg-red-700 shadow-md shadow-red-600/30 transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">delete</span> Sí, Eliminar Usuario
+      </button>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
