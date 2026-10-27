@@ -56,7 +56,10 @@
 
         <a href="{{ url_for('configuracion', section='administracion') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'administracion' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
           <span class="material-symbols-outlined text-[26px]">admin_panel_settings</span>
-          <span>Administración</span>
+          <span class="flex-1">Administración</span>
+          {% if not is_admin and session.get('rol_siad') != 'admin' %}
+          <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300/50">Admin</span>
+          {% endif %}
         </a>
 
         <div class="px-4 pt-5 pb-2 text-xs lg:text-sm font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider border-t-2 border-slate-100 dark:border-slate-800 mt-3">Plataformas</div>
@@ -251,6 +254,7 @@
 
       {% elif section == 'administracion' %}
       <!-- ==================== SECCIÓN 3: ADMINISTRACIÓN ==================== -->
+      {% if is_admin or session.get('rol_siad') == 'admin' %}
       <div class="flex flex-col gap-8">
 
         <!-- Banner Titulo de Administracion -->
@@ -408,6 +412,58 @@
         </div>
 
       </div>
+      {% else %}
+      <!-- ==================== MENSAJE AMIGABLE: ACCESO RESTINGIDO ==================== -->
+      <div class="flex flex-col gap-6">
+        <div class="bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/80 rounded-3xl border-2 border-amber-300/90 dark:border-amber-500/40 shadow-xl p-8 lg:p-12 relative overflow-hidden">
+          
+          <!-- Elemento decorativo de fondo -->
+          <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-amber-400/10 dark:bg-amber-400/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-amber-200/70 dark:border-slate-800">
+            <div class="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-amber-500/25 shrink-0 border-2 border-amber-300">
+              <span class="material-symbols-outlined text-[36px] lg:text-[44px]">shield_person</span>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <div class="flex flex-wrap items-center gap-3">
+                <h2 class="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Acceso Reservado a Administradores</h2>
+                <span class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-100 dark:bg-blue-950/80 text-[#002855] dark:text-blue-300 border border-blue-200 dark:border-blue-800">Rol Actual: Operador</span>
+              </div>
+              <p class="text-sm lg:text-base font-semibold text-slate-600 dark:text-slate-400">Esta sección de gestión de cuentas y privilegios requiere perfil de Administrador Policial.</p>
+            </div>
+          </div>
+
+          <div class="py-6 flex flex-col gap-4 text-slate-700 dark:text-slate-300 text-sm lg:text-base leading-relaxed font-medium">
+            <p>
+              Estimado(a) funcionario(a), su cuenta institucional se encuentra <strong>activa y con acceso operativo completo</strong> para todas las tareas de 
+              <strong>Análisis Documental, Procesamiento OCR, Historial Pericial y Estadísticas</strong>.
+            </p>
+            <div class="bg-amber-50/80 dark:bg-slate-800/80 border-l-4 border-amber-400 p-4 rounded-xl flex items-start gap-3 text-xs lg:text-sm text-slate-700 dark:text-slate-300">
+              <span class="material-symbols-outlined text-[24px] text-amber-500 shrink-0">info</span>
+              <div>
+                <strong>Información de Seguridad:</strong> La creación de nuevos usuarios, la modificación de roles y el restablecimiento de contraseñas de terceros están restringidos por políticas de seguridad institucional. Si requiere estas atribuciones, solicite la elevación de perfil a su Jefatura o al Administrador del Sistema.
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-slate-200/60 dark:border-slate-800 flex flex-wrap items-center gap-4">
+            <a href="{{ url_for('configuracion', section='general') }}" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-[#00234c] hover:bg-[#003875] text-white font-black text-sm lg:text-base shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+              <span class="material-symbols-outlined text-[20px]">tune</span>
+              <span>Ir a Ajustes Generales</span>
+            </a>
+            <a href="{{ url_for('index') }}" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#001733] font-black text-sm lg:text-base shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 border border-amber-500">
+              <span class="material-symbols-outlined text-[20px]">document_scanner</span>
+              <span>Procesamiento OCR</span>
+            </a>
+            <a href="/" class="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm lg:text-base transition-colors">
+              <span class="material-symbols-outlined text-[20px]">grid_view</span>
+              <span>Portal de Sistemas</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {% endif %}
       {% endif %}
 
     </div>

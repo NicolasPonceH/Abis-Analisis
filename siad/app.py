@@ -2232,10 +2232,9 @@ def configuracion():
     section = request.args.get("section", "general")
     if section not in ["general", "cuenta", "administracion"]:
         section = "general"
-    if section == "administracion" and session.get("rol_siad") != "admin":
-        return "No tienes permisos para administrar usuarios de SIAD.", 403
+    is_admin = (session.get("rol_siad") == "admin")
     db_users = []
-    if section == "administracion":
+    if section == "administracion" and is_admin:
         try:
             db_users = db.get_all_users()
         except Exception:
@@ -2245,7 +2244,15 @@ def configuracion():
         learned_count = db.get_summary_feedback_count(username)
     except Exception:
         learned_count = 0
-    return render_template("configuracion.html", user=user, active_page="configuracion", section=section, db_users=db_users, learned_count=learned_count)
+    return render_template(
+        "configuracion.html",
+        user=user,
+        active_page="configuracion",
+        section=section,
+        db_users=db_users,
+        learned_count=learned_count,
+        is_admin=is_admin
+    )
 
 
 @app.route("/api/admin/create-user", methods=["POST"])
