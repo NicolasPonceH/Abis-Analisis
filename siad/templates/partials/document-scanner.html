@@ -1,5 +1,10 @@
-<div class="doc-scanner" data-document-scanner aria-label="Demostración animada del escaneo de documentos">
+<section class="doc-scanner" data-document-scanner aria-label="Demostración animada del escaneo de documentos">
+  <div class="doc-scanner__heading">
+    <span><i></i> INTELIGENCIA DOCUMENTAL</span>
+    <span class="doc-scanner__demo">DEMO OCR</span>
+  </div>
   <div class="doc-scanner__viewport" aria-hidden="true">
+    <div class="doc-scanner__grid"></div>
     <div class="doc-scanner__scene">
       <div class="doc-scanner__base">
         <div class="doc-scanner__glass"></div>
@@ -23,5 +28,15 @@
       </div>
       <div class="doc-scanner__result"><span>✓</span><div>TEXTO RECONOCIDO<small>Documento digitalizado</small></div></div>
     </div>
+    <div class="doc-scanner__caption"><span></span> CAPTURA · LECTURA · ANÁLISIS</div>
   </div>
-</div>
+  <div class="doc-scanner__steps" aria-hidden="true">
+    <span class="doc-scanner__step doc-scanner__step--one"><b>01</b> Escaneo</span>
+    <span class="doc-scanner__step doc-scanner__step--two"><b>02</b> Lectura OCR</span>
+    <span class="doc-scanner__step doc-scanner__step--three"><b>03</b> Extracción</span>
+  </div>
+  <div class="doc-scanner__bottom">
+    <p>Del documento a la información.</p>
+    <button class="doc-scanner__toggle" type="button" aria-pressed="false" aria-label="Pausar animación del escáner">Pausar</button>
+  </div>
+</section>
