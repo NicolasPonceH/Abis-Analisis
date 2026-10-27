@@ -91,7 +91,7 @@
             <%= typeof user !== 'undefined' ? user.username.charAt(0) : 'U' %>
           </div>
           <div style="display: flex; flex-direction: column; line-height: 1.2;">
-            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;"><%= typeof user !== 'undefined' ? ((user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin')) ? 'Administrador' : 'Operador') : 'Operador' %></span>
+            <span style="color: rgba(255, 255, 255, 0.55); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;"><%= typeof user !== 'undefined' ? (user.rol === 'admin' ? 'Administrador' : (user.rol === 'ninguno' ? 'Sin acceso' : 'Operador')) : 'Operador' %></span>
             <span style="color: var(--bg-surface); font-weight: 600; font-size: 1rem; text-transform: capitalize; letter-spacing: 0.02em;">
               <%= typeof user !== 'undefined' ? user.username : 'Usuario' %>
             </span>
@@ -130,9 +130,11 @@
 
       <div class="ajustes-section-title">ADMINISTRACIÓN</div>
       <nav class="ajustes-nav">
-        <a href="/ajustes/administracion" title="Administración" class="ajustes-nav-item <%= activeSec === 'administracion' ? 'active' : '' %>">
-          <i class="fa-solid fa-users-gear"></i><span class="ajustes-nav-label">Administración</span>
-        </a>
+        <% if (typeof user !== 'undefined' && user.rol === 'admin') { %>
+          <a href="/ajustes/administracion" title="Administración" class="ajustes-nav-item <%= activeSec === 'administracion' ? 'active' : '' %>">
+            <i class="fa-solid fa-users-gear"></i><span class="ajustes-nav-label">Administración</span>
+          </a>
+        <% } %>
       </nav>
 
       <div class="ajustes-sidebar-actions">
@@ -162,7 +164,7 @@
   </div>
   <% if (typeof activeSec !== 'undefined' && activeSec === 'horarios') { %>
   <script type="module">
-    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js?v=9';
+    import { loadScheduleSettings, setupScheduleEvents } from '/js/modules/ajustes.js';
     const init = () => {
       setupScheduleEvents();
       loadScheduleSettings();
@@ -174,8 +176,8 @@
     }
   </script>
   <% } %>
-  <script type="module" src="/js/components/custom-selects.js?v=3"></script>
-  <script src="/js/session-guard.js?v=3"></script>
+  <script type="module" src="/js/components/custom-selects.js"></script>
+  <script src="/js/session-guard.js"></script>
   <script>
     (() => {
       const container = document.querySelector('.ajustes-container');

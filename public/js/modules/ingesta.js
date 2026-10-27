@@ -1,10 +1,11 @@
 import { state } from '../core/state.js';
 import { escapeHtml } from '../core/utils.js';
-import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js?v=28';
+import { promptAuthModal, closeAuthModal, setupAuthModalEvents } from './auth-modal.js';
 import { loadMetrics } from './panel-ejecutivo.js';
-import { loadTrendData } from './tendencias.js?v=20261014-2';
+import { loadTrendData } from './tendencias.js';
 import { cargarBitacoraAuditoria } from './auditoria.js';
-import { checkSystemHealth, loadAvailableDates } from '../app.js?v=23';
+import { checkSystemHealth, loadAvailableDates } from '../app.js';
+import { showIngestDuplicatesPopup } from '../components/ingest-duplicates-popup.js';
 
 export const sheetState = {
   headers: [],
@@ -12,6 +13,11 @@ export const sheetState = {
 };
 
 export const SHEET_SCHEMA = [
+  { field: 'idRegistroOrigen', label: 'ID de registro', required: false, aliases: ['id registro', 'id_registro', 'idregistroorigen'] },
+  { field: 'idOrigen', label: 'ID de origen', required: false, aliases: ['id origen', 'id_origen', 'idorigen'] },
+  { field: 'horaEnrolamiento', label: 'Hora', required: false, aliases: ['hora', 'hora_enrolamiento', 'hora enrolamiento'] },
+  { field: 'documento', label: 'Documento', required: false, aliases: ['documento', 'numero_documento', 'nro_documento'] },
+  { field: 'tipoDocumento', label: 'Tipo de documento', required: false, aliases: ['tipo de documento', 'tipo_documento'] },
   { field: "fechaEnrolamiento", label: "Fecha", required: true, aliases: ["fecha", "fecha_enrolamiento", "fecha enrolamiento"] },
   { field: "nacionalidad", label: "Nacionalidad", required: true, aliases: ["nacionalidad", "documento_emitido", "emitido en", "documento_emitido_1"] },
   { field: "region", label: "Región", required: false, aliases: ["region", "región", "region2"] },
@@ -26,6 +32,10 @@ export const SHEET_SCHEMA = [
   { field: "estadoGeneral", label: "Estado General", required: true, aliases: ["estado general", "estado_general"] },
   { field: "profesion", label: "Profesión / Ocupación", required: false, aliases: ["profesion", "cod_profesion", "profesión", "oficio", "ocupacion", "ocupación", "region 2", "región 2", "REGION2"] },
 ];
+
+let pendingIngestDelete = null;
+let ingestDeleteBusy = false;
+const INGEST_DELETE_TIMEOUT_MS = 30000;
 
 // Formato institucional que puede llegar pegado desde Oracle/Excel sin cabeceras.
 // Las columnas adicionales se conservan en la vista previa, pero solo las columnas
@@ -66,7 +76,7 @@ export async function cargarHistorialIngestas() {
     }
 
     body.innerHTML = data.lotes.map((lote) => {
-      const puedeEliminar = lote.estado !== "ELIMINADO" && lote.estado !== "PROCESANDO";
+      const puedeEliminar = lote.estado !== "ELIMINADO" && lote.estado !== "PROCESANDO" && Number(lote.filas_insertadas) > 0;
       const archivo = lote.nombre_archivo || lote.tipo_ingesta || "Sin nombre";
       return `
         <tr>
@@ -77,12 +87,12 @@ export async function cargarHistorialIngestas() {
             <span class="ingesta-lote-meta">${escapeHtml(lote.tipo_ingesta || "-")}</span>
           </td>
           <td>${escapeHtml(lote.usuario || "-")}</td>
-          <td>${Number(lote.filas_insertadas || 0).toLocaleString("es-CL")}</td>
-          <td><span class="ingesta-lote-status ${claseEstadoIngesta(lote.estado)}">${escapeHtml(lote.estado || "-")}</span></td>
+          <td>${Number(lote.filas_insertadas || 0).toLocaleString("es-CL")}${Number(lote.filas_duplicadas) > 0 ? `<span class="ingesta-lote-meta">${Number(lote.filas_duplicadas).toLocaleString('es-CL')} duplicados omitidos</span>` : ''}</td>
+          <td><span class="ingesta-lote-status ${claseEstadoIngesta(lote.estado)}">${escapeHtml((lote.estado || "-").replaceAll('_', ' '))}</span></td>
           <td>
             ${puedeEliminar
-              ? `<button type="button" class="btn-ingesta-eliminar" data-ingesta-delete="${escapeHtml(String(lote.id_lote))}" data-ingesta-file="${escapeHtml(archivo)}" data-ingesta-count="${Number(lote.filas_insertadas || 0)}">Eliminar</button>`
-              : `<span class="ingesta-lote-meta">${lote.estado === "ELIMINADO" ? "Ya eliminado" : "En proceso"}</span>`}
+              ? `<button type="button" class="btn-ingesta-eliminar" data-ingesta-delete="${escapeHtml(String(lote.id_lote))}" data-ingesta-file="${escapeHtml(archivo)}" data-ingesta-count="${Number(lote.filas_insertadas || 0)}" data-ingesta-date="${escapeHtml(formatoFechaIngesta(lote.iniciado_en))}">Eliminar</button>`
+              : `<span class="ingesta-lote-meta">${lote.estado === "ELIMINADO" ? "Ya eliminado" : lote.estado === 'PROCESANDO' ? 'En proceso' : 'Sin registros nuevos'}</span>`}
           </td>
         </tr>
       `;
@@ -90,11 +100,12 @@ export async function cargarHistorialIngestas() {
 
     body.querySelectorAll("[data-ingesta-delete]").forEach((button) => {
       button.addEventListener("click", () => {
-        promptAuthModal({
+        openIngestDeleteModal({
           idLote: Number(button.dataset.ingestaDelete),
           archivo: button.dataset.ingestaFile,
           cantidad: Number(button.dataset.ingestaCount || 0),
-        }, "ingesta_eliminar");
+          fecha: button.dataset.ingestaDate || "fecha desconocida",
+        }, button);
       });
     });
   } catch (err) {
@@ -107,49 +118,134 @@ export async function cargarHistorialIngestas() {
   }
 }
 
+function openIngestDeleteModal(payload, trigger) {
+  const modal = document.getElementById("ingesta-delete-modal");
+  if (!modal || ingestDeleteBusy) return;
+  setIngestDeleteBusy(false);
+  pendingIngestDelete = { ...payload, trigger };
+  document.getElementById("ingesta-delete-date").textContent = payload.fecha;
+  document.getElementById("ingesta-delete-file").textContent = payload.archivo || "Sin nombre";
+  document.getElementById("ingesta-delete-count").textContent = Number(payload.cantidad || 0).toLocaleString("es-CL");
+  const error = document.getElementById("ingesta-delete-error");
+  error.textContent = "";
+  error.hidden = true;
+  modal.hidden = false;
+  document.body.classList.add("ingesta-delete-open");
+  document.getElementById("ingesta-delete-cancel").focus();
+}
+
+function closeIngestDeleteModal() {
+  if (ingestDeleteBusy) return;
+  const modal = document.getElementById("ingesta-delete-modal");
+  if (modal) modal.hidden = true;
+  document.body.classList.remove("ingesta-delete-open");
+  const trigger = pendingIngestDelete?.trigger;
+  pendingIngestDelete = null;
+  if (trigger?.isConnected) trigger.focus();
+}
+
+function setIngestDeleteBusy(busy) {
+  ingestDeleteBusy = busy;
+  const modal = document.getElementById("ingesta-delete-modal");
+  if (!modal) return;
+  modal.querySelector('[role="dialog"]').setAttribute('aria-busy', String(busy));
+  modal.querySelectorAll('button').forEach(button => { button.disabled = busy; });
+  document.getElementById("ingesta-delete-confirm").textContent = busy ? "Eliminando…" : "Eliminar ingesta";
+}
+
+function setupIngestDeleteModal() {
+  const modal = document.getElementById("ingesta-delete-modal");
+  if (!modal || modal.dataset.bound === "true") return;
+  // Las pestañas animadas tienen transform: los elementos fixed dentro de ellas
+  // quedan limitados al panel. El popup debe cubrir el viewport, no la pestaña.
+  document.body.appendChild(modal);
+  modal.dataset.bound = "true";
+  document.getElementById("ingesta-delete-cancel").addEventListener("click", closeIngestDeleteModal);
+  document.getElementById("ingesta-delete-close").addEventListener("click", closeIngestDeleteModal);
+  document.getElementById("ingesta-delete-confirm").addEventListener("click", async () => {
+    if (!pendingIngestDelete || ingestDeleteBusy) return;
+    await executeDeleteIngestAuthorized(pendingIngestDelete, "");
+  });
+  modal.addEventListener("click", event => {
+    if (event.target === modal) closeIngestDeleteModal();
+  });
+  document.addEventListener("keydown", event => {
+    if (modal.hidden) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeIngestDeleteModal();
+    }
+    if (event.key === "Tab") {
+      const buttons = [...modal.querySelectorAll('button:not(:disabled)')];
+      const index = buttons.indexOf(document.activeElement);
+      event.preventDefault();
+      if (!buttons.length) modal.querySelector('[role="dialog"]').focus();
+      else buttons[(index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length].focus();
+    }
+  });
+}
+
 export async function executeDeleteIngestAuthorized(payload, clave) {
-  const modalDialog = document.querySelector("#modal-auth-ingesta .modal-dialog");
-  const errorMsg = document.getElementById("modal-auth-error");
-  const confirmBtn = document.getElementById("btn-modal-auth-confirm");
+  if (ingestDeleteBusy) return;
+  const modal = document.getElementById("ingesta-delete-modal");
+  const errorMsg = document.getElementById("ingesta-delete-error");
   const feedback = document.getElementById("ingesta-history-feedback");
+  setIngestDeleteBusy(true);
+  if (errorMsg) {
+    errorMsg.textContent = "";
+    errorMsg.hidden = true;
+  }
+  modal?.querySelector('[role="dialog"]').focus({ preventScroll: true });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), INGEST_DELETE_TIMEOUT_MS);
+  let data;
 
   try {
     const res = await fetch(`/api/ingest/lotes/${encodeURIComponent(payload.idLote)}`, {
       method: "DELETE",
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
         "X-Ingesta-Auth": clave,
       },
       body: JSON.stringify({ clave }),
     });
-    const data = await res.json();
+    data = await res.json();
 
     if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo eliminar el lote.");
-
-    closeAuthModal();
-    if (feedback) {
-      feedback.className = "ingesta-history-feedback success";
-      feedback.textContent = `Lote #${payload.idLote} eliminado. Registros eliminados: ${Number(data.eliminados || 0).toLocaleString("es-CL")}.`;
-      feedback.style.display = "block";
+  } catch (err) {
+    if (errorMsg) {
+      // Abortar la espera del navegador no garantiza cancelar la transacción.
+      errorMsg.textContent = controller.signal.aborted
+        ? "El servidor está tardando demasiado. No se pudo confirmar la eliminación. Cierre esta ventana y actualice el historial antes de intentarlo de nuevo."
+        : err instanceof TypeError || err instanceof SyntaxError
+          ? "No se pudo confirmar la eliminación. Revise su conexión y actualice el historial antes de intentarlo de nuevo."
+          : err.message;
+      errorMsg.hidden = false;
     }
+    return;
+  } finally {
+    clearTimeout(timeout);
+    setIngestDeleteBusy(false);
+    if (modal && !modal.hidden) document.getElementById("ingesta-delete-cancel").focus({ preventScroll: true });
+  }
+
+  closeIngestDeleteModal();
+  const successMessage = `Lote #${payload.idLote} eliminado. Registros eliminados: ${Number(data.eliminados || 0).toLocaleString("es-CL")}.`;
+  if (feedback) {
+    feedback.className = "ingesta-history-feedback success";
+    feedback.textContent = successMessage;
+    feedback.style.display = "block";
+  }
+  // La eliminación ya fue confirmada. Un fallo de actualización del panel no
+  // debe presentarse como un fallo del DELETE ni mantener el popup bloqueado.
+  try {
     await cargarHistorialIngestas();
     await loadAvailableDates();
-    await loadMetrics();
-    await loadTrendData();
-    await checkSystemHealth();
-  } catch (err) {
-    if (modalDialog) {
-      modalDialog.classList.remove("modal-shake");
-      void modalDialog.offsetWidth;
-      modalDialog.classList.add("modal-shake");
-    }
-    if (errorMsg) {
-      errorMsg.textContent = err.message;
-      errorMsg.style.display = "flex";
-    }
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.innerHTML = "<span>Autorizar y Eliminar Registros</span>";
+    await Promise.all([loadMetrics(), loadTrendData(), checkSystemHealth()]);
+  } catch {
+    if (feedback?.textContent === successMessage) {
+      feedback.textContent += " No se pudo actualizar todo el panel; vuelva a actualizar la vista.";
     }
   }
 }
@@ -193,6 +289,7 @@ export function setupDragAndDrop() {
   setupAuthModalEvents();
   const refreshHistory = document.getElementById("btn-refresh-ingesta-history");
   if (refreshHistory) refreshHistory.addEventListener("click", cargarHistorialIngestas);
+  setupIngestDeleteModal();
   cargarHistorialIngestas();
 }
 
@@ -254,10 +351,9 @@ export async function handleFileUpload(file, clave) {
       return;
     }
 
-    if (progressOverlay) finishIngestProgress(progressOverlay);
-    
     // Autorización exitosa: cerrar modal
     closeAuthModal();
+    finishIngestResponse(progressOverlay, res, data, file.name, document.getElementById('btn-select-file'));
 
     if (resultsDiv) resultsDiv.style.display = "block";
 
@@ -268,12 +364,13 @@ export async function handleFileUpload(file, clave) {
             <div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--status-success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                <strong style="font-size:1rem;">Ingesta Autorizada y Auditada Exitosamente</strong>
+                <strong style="font-size:1rem;">${data.totalInsertadas === 0 && data.totalDuplicadas > 0 ? 'Registros ya cargados' : 'Ingesta procesada'}</strong>
               </div>
               <div style="margin-top:8px; line-height:1.6;">
-                &bull; <strong>Archivo:</strong> ${data.nombreOriginal}<br>
+                &bull; <strong>Archivo:</strong> ${escapeHtml(data.nombreOriginal || file.name)}<br>
                 &bull; <strong>Formato Criptográfico:</strong> ${data.estaCifrado ? '<span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px;"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> AES-256-GCM Descifrado en RAM</span>' : '<span class="badge badge-info" style="display:inline-flex; align-items:center; gap:4px;"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Archivo Estándar .xlsx</span>'}<br>
                 &bull; <strong>Registros Insertados en BD:</strong> <strong>${data.totalInsertadas.toLocaleString()}</strong> filas<br>
+                &bull; <strong>Duplicados omitidos:</strong> ${Number(data.totalDuplicadas || 0).toLocaleString('es-CL')}<br>
                 &bull; <strong>Inconsistencias Registradas:</strong> ${data.erroresFilas}<br>
                 &bull; <strong>Tiempo de Inserción:</strong> ${(data.duracionMs / 1000).toFixed(2)} segundos<br>
                 &bull; <strong>Huella de Integridad SHA-256:</strong> <code>${data.hashSHA256}</code><br>
@@ -297,7 +394,7 @@ export async function handleFileUpload(file, clave) {
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:#ef4444;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
               <strong>Error en la Ingesta:</strong>
             </div>
-            ${data.error || "Ocurrió un error al procesar el archivo."}
+            ${escapeHtml(data.error || "Ocurrió un error al procesar el archivo.")}
           </div>
         `;
       }
@@ -730,11 +827,11 @@ export function renderSpreadsheetGrid() {
   }
 }
 
-export function clearSpreadsheetData() {
+export function clearSpreadsheetData({ preserveFeedback = false } = {}) {
   sheetState.headers = [];
   sheetState.rows = [];
   const feedback = document.getElementById("sheet-ingest-feedback");
-  if (feedback) feedback.style.display = "none";
+  if (feedback && !preserveFeedback) feedback.style.display = "none";
   renderSpreadsheetGrid();
 }
 
@@ -823,8 +920,8 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
       return;
     }
 
-    if (progressOverlay) finishIngestProgress(progressOverlay);
     closeAuthModal();
+    finishIngestResponse(progressOverlay, res, data, 'Portapapeles / Hoja de cálculo', document.getElementById('btn-mode-sheet'));
 
     if (feedbackDiv) feedbackDiv.style.display = "block";
 
@@ -845,11 +942,12 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
             <div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:var(--status-success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                <strong style="font-size:1.02rem;">Ingesta desde Hoja de Cálculo Auditada e Insertada Exitosamente</strong>
+                <strong style="font-size:1.02rem;">${data.totalInsertadas === 0 && data.totalDuplicadas > 0 ? 'Registros ya cargados' : 'Ingesta procesada'}</strong>
               </div>
               <div style="margin-top:8px; line-height:1.65;">
                 &bull; <strong>Modo de Carga:</strong> <span class="badge badge-success">Portapapeles Directo Oracle DB / Excel</span><br>
-                &bull; <strong>Filas Procesadas:</strong> <strong>${(data.totalMapeadas || sheetData.rows.length).toLocaleString()}</strong> recibidas &bull; <strong>${(data.totalInsertadas || 0).toLocaleString()}</strong> insertadas en PostgreSQL<br>
+                &bull; <strong>Filas Procesadas:</strong> <strong>${(data.totalRecibidas ?? sheetData.rows.length).toLocaleString()}</strong> recibidas &bull; <strong>${(data.totalInsertadas || 0).toLocaleString()}</strong> insertadas en PostgreSQL<br>
+                &bull; <strong>Duplicados omitidos:</strong> ${Number(data.totalDuplicadas || 0).toLocaleString('es-CL')}<br>
                 &bull; <strong>Inconsistencias Registradas:</strong> ${data.erroresFilas || 0}<br>
                 ${detalleErrores.length > 0 ? `&bull; <strong>Detalle:</strong> ${escapeHtml(detalleErrores.join(" | "))}<br>` : ""}
                 &bull; <strong>Tiempo de Inserción:</strong> ${((data.duracionMs || 0) / 1000).toFixed(2)} segundos<br>
@@ -861,7 +959,7 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
         `;
       }
 
-      clearSpreadsheetData();
+      clearSpreadsheetData({ preserveFeedback: true });
 
       await loadAvailableDates();
       await loadMetrics();
@@ -879,7 +977,7 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
               <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" style="stroke:#ef4444;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
               <strong>Error en la Ingesta de Hoja de Cálculo:</strong>
             </div>
-            ${data.error || "Ocurrió un error al procesar las filas."}
+            ${escapeHtml(data.error || "Ocurrió un error al procesar las filas.")}
           </div>
         `;
       }
@@ -901,6 +999,19 @@ export async function executeSheetIngestAuthorized(sheetData, clave) {
         </div>
       `;
     }
+  }
+}
+
+function finishIngestResponse(overlay, response, data, source, trigger) {
+  const hasDuplicates = response.ok && data.ok && Number(data.totalDuplicadas) > 0;
+  const possibleReplay = response.status === 409 && data.codigo === 'POSIBLE_LOTE_REPETIDO';
+  if (hasDuplicates || possibleReplay) {
+    // No superponer el progreso con el resultado: el aviso debe ser legible
+    // aunque la actualización del dashboard todavía esté pendiente.
+    overlay?.remove();
+    showIngestDuplicatesPopup(data, { source, trigger });
+  } else if (overlay) {
+    finishIngestProgress(overlay);
   }
 }
 

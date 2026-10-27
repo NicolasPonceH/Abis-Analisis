@@ -15,6 +15,8 @@
   let timeoutTimer;
   let attempt = 0;
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const minimumScanMs = 1300;
+  const deniedDisplayMs = 2400;
 
   function reset() {
     attempt += 1;
@@ -79,6 +81,23 @@
       clearTimeout(timeoutTimer);
       if (currentAttempt !== attempt) return;
       if (!response.ok || result.ok !== true) {
+        if (response.status === 401) {
+          // Deja que la lectura biométrica simulada se vea antes de presentar el rechazo.
+          if (!reducedMotion.matches) await delay(Math.max(0, minimumScanMs - (performance.now() - startedAt)));
+          if (currentAttempt !== attempt) return;
+          eyebrow.textContent = 'CREDENCIALES RECHAZADAS';
+          stage('denied', 'Acceso no autorizado', 'Usuario o contraseña incorrectos. Volviendo al inicio de sesión…');
+          busy = false;
+          button.disabled = false;
+          form.removeAttribute('aria-busy');
+          back.hidden = true;
+          await delay(reducedMotion.matches ? 0 : deniedDisplayMs);
+          if (currentAttempt !== attempt) return;
+          form.querySelector('[name="password"]').value = '';
+          reset();
+          form.querySelector('[name="username"]').focus();
+          return;
+        }
         throw new Error(result.error || 'No se pudo iniciar sesión. Revisa tus credenciales e inténtalo nuevamente.');
       }
       const destination = new URL(result.redirect || '/abis', window.location.origin);

@@ -1,4 +1,5 @@
-const ESTADOS = ["PROCESANDO", "COMPLETADO", "ERROR", "ELIMINADO"];
+const { ensureIngestDeduplication } = require('./deduplication');
+const ESTADOS = ["PROCESANDO", "COMPLETADO", "SIN_NOVEDADES", "ERROR", "ELIMINADO"];
 
 async function ensureIngestHistory(pool) {
   await pool.query(`
@@ -31,6 +32,7 @@ async function ensureIngestHistory(pool) {
     ["filas_validas", "INTEGER NOT NULL DEFAULT 0"],
     ["filas_insertadas", "INTEGER NOT NULL DEFAULT 0"],
     ["filas_error", "INTEGER NOT NULL DEFAULT 0"],
+    ["filas_duplicadas", "INTEGER NOT NULL DEFAULT 0"],
     ["filas_eliminadas", "INTEGER NOT NULL DEFAULT 0"],
     ["estado", "VARCHAR(20) NOT NULL DEFAULT 'PROCESANDO'"],
     ["detalle", "TEXT"],
@@ -48,6 +50,7 @@ async function ensureIngestHistory(pool) {
     CREATE INDEX IF NOT EXISTS idx_registro_lote_ingesta
       ON registro_enrolamiento (id_lote_ingesta)
   `);
+  await ensureIngestDeduplication(pool);
 
   // Los registros existentes antes de esta funcionalidad quedan agrupados como
   // un lote histórico para que también puedan administrarse desde la interfaz.
@@ -107,6 +110,7 @@ async function actualizarLote(pool, idLote, {
   filasError = null,
   filasEliminadas = null,
   detalle = null,
+  filasDuplicadas = null,
 }) {
   if (estado !== null && !ESTADOS.includes(estado)) {
     throw new Error(`Estado de lote no valido: ${estado}`);
@@ -121,9 +125,10 @@ async function actualizarLote(pool, idLote, {
        filas_insertadas = COALESCE($6, filas_insertadas),
        filas_error = COALESCE($7, filas_error),
        filas_eliminadas = COALESCE($8, filas_eliminadas),
-       detalle = COALESCE($9, detalle)
+       detalle = COALESCE($9, detalle),
+       filas_duplicadas = COALESCE($10, filas_duplicadas)
      WHERE id_lote = $1`,
-    [idLote, estado, finalizado, filasRecibidas, filasValidas, filasInsertadas, filasError, filasEliminadas, detalle]
+    [idLote, estado, finalizado, filasRecibidas, filasValidas, filasInsertadas, filasError, filasEliminadas, detalle, filasDuplicadas]
   );
 }
 
@@ -131,7 +136,7 @@ async function listarLotes(pool) {
   const { rows } = await pool.query(`
     SELECT id_lote, tipo_ingesta, nombre_archivo, usuario,
            iniciado_en, finalizado_en, filas_recibidas, filas_validas,
-           filas_insertadas, filas_error, filas_eliminadas, estado, detalle
+           filas_insertadas, filas_error, filas_duplicadas, filas_eliminadas, estado, detalle
     FROM ingesta_lote
     ORDER BY iniciado_en DESC, id_lote DESC
     LIMIT 100

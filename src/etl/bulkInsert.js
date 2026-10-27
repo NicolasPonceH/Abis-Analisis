@@ -1,3 +1,4 @@
+const { ensureIngestDeduplication, fingerprintRows } = require('../ingest/deduplication');
 const COLUMNS = [
   "fecha_enrolamiento",
   "id_nacionalidad",
@@ -12,23 +13,21 @@ const COLUMNS = [
   "id_estado_general",
 ];
 
-// PostgreSQL limita una consulta a 65535 parametros. Con 10 columnas eso son ~6553 filas
-// por INSERT; dejamos margen y particionamos en lotes de 5000 (Sprint 4: antes de esto,
-// bulkInsertRegistros hacia un solo INSERT y fallaba directamente con cargas grandes,
-// como la historica de 95k+ registros).
+// 11 campos + huella + lote: 5000 × 13 = 65000, debajo del límite de PostgreSQL.
 const BATCH_SIZE = 5000;
 
 function buildInsertQuery(rows, paramOffset = 0, idLote = null) {
-  const columns = idLote ? [...COLUMNS, "id_lote_ingesta"] : COLUMNS;
+  const columns = [...COLUMNS, 'huella_origen', ...(idLote ? ['id_lote_ingesta'] : [])];
   const values = [];
   const placeholders = rows.map((row, i) => {
     const base = paramOffset + i * columns.length;
     COLUMNS.forEach((col) => values.push(row[col]));
+    values.push(row.huella_origen);
     if (idLote) values.push(idLote);
     const rowPlaceholders = columns.map((_, j) => `$${base + j + 1}`).join(", ");
     return `(${rowPlaceholders})`;
   });
-  const sql = `INSERT INTO registro_enrolamiento (${columns.join(", ")}) VALUES ${placeholders.join(", ")}`;
+  const sql = `INSERT INTO registro_enrolamiento (${columns.join(", ")}) VALUES ${placeholders.join(", ")} ON CONFLICT (huella_origen) DO NOTHING`;
   return { sql, values };
 }
 
@@ -38,7 +37,9 @@ function buildInsertQuery(rows, paramOffset = 0, idLote = null) {
 // todo (ningun registro parcial queda insertado), no solo del lote que fallo.
 async function bulkInsertRegistros(pool, rows, options = {}) {
   const { onBatchInserted, idLote = null } = options;
-  if (rows.length === 0) return { inserted: 0, batches: 0 };
+  if (rows.length === 0) return { inserted: 0, duplicates: 0, batches: 0 };
+  const identifiedRows = fingerprintRows(rows, COLUMNS);
+  await ensureIngestDeduplication(pool);
 
   const client = await pool.connect();
   try {
@@ -47,16 +48,16 @@ async function bulkInsertRegistros(pool, rows, options = {}) {
     let inserted = 0;
     let batches = 0;
     for (let start = 0; start < rows.length; start += BATCH_SIZE) {
-      const batch = rows.slice(start, start + BATCH_SIZE);
+      const batch = identifiedRows.slice(start, start + BATCH_SIZE);
       const { sql, values } = buildInsertQuery(batch, 0, idLote);
-      await client.query(sql, values);
-      inserted += batch.length;
+      const result = await client.query(sql, values);
+      inserted += result.rowCount;
       batches += 1;
       if (onBatchInserted) onBatchInserted({ batches, inserted, total: rows.length });
     }
 
     await client.query("COMMIT");
-    return { inserted, batches };
+    return { inserted, duplicates: rows.length - inserted, batches };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;

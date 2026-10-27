@@ -207,6 +207,7 @@
 }
 
 .ingesta-lote-status.completado { background: #dcfce7; color: #166534; }
+.ingesta-lote-status.sinnovedades { background: #fef3c7; color: #92400e; }
 .ingesta-lote-status.procesando { background: #e0f2fe; color: #0369a1; }
 .ingesta-lote-status.error { background: #fee2e2; color: #991b1b; }
 .ingesta-lote-status.eliminado { background: #f1f5f9; color: #475569; }
@@ -227,6 +228,164 @@
 
 .btn-ingesta-eliminar:hover { background: #ffe4e6; }
 .btn-ingesta-eliminar:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.ingesta-delete-modal[hidden] { display: none; }
+.ingesta-delete-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(7, 20, 38, .66);
+  animation: ingesta-delete-fade .18s ease-out;
+}
+.ingesta-delete-dialog {
+  position: relative;
+  width: min(100%, 500px);
+  min-width: 0;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  box-sizing: border-box;
+  padding: 28px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(255,255,255,.8);
+  border-top: 4px solid #b42318;
+  border-radius: 18px;
+  background: #fff;
+  color: #14243a;
+  box-shadow: 0 24px 80px rgba(0,0,0,.3);
+  animation: ingesta-delete-rise .22s ease-out;
+}
+.ingesta-delete-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  background: #fff1f2;
+  color: #b42318;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+.ingesta-delete-close {
+  position: absolute;
+  top: 19px;
+  right: 20px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1.7rem;
+}
+.ingesta-delete-eyebrow { margin: 18px 0 5px; color: #b42318; font-size: .7rem; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+.ingesta-delete-dialog h3 { margin: 0; color: #10233f; font-size: 1.45rem; }
+.ingesta-delete-description { margin: 12px 0 18px; color: #53647a; line-height: 1.55; }
+.ingesta-delete-description strong { color: #10233f; }
+.ingesta-delete-summary { display: flex; align-items: center; gap: 12px; padding: 13px; border: 1px solid #dbe4ee; border-radius: 12px; background: #f7f9fc; }
+.ingesta-delete-summary-icon { display: grid; width: 38px; height: 38px; place-items: center; flex: 0 0 auto; border-radius: 10px; background: #e8eff8; color: #174878; font-size: 1.2rem; }
+.ingesta-delete-summary strong, .ingesta-delete-summary small { display: block; overflow-wrap: anywhere; }
+.ingesta-delete-summary small { margin-top: 4px; color: #64748b; font-size: .76rem; }
+.ingesta-delete-error { margin: 12px 0 0; padding: 10px 12px; border: 1px solid #fecaca; border-radius: 9px; background: #fff1f2; color: #b42318; font-size: .84rem; }
+.ingesta-delete-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.ingesta-delete-actions button { min-height: 42px; padding: 0 16px; border-radius: 9px; cursor: pointer; font: inherit; font-size: .88rem; font-weight: 750; }
+.ingesta-delete-cancel { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+.ingesta-delete-confirm { border: 1px solid #a61b16; background: #b42318; color: #fff; box-shadow: 0 5px 14px rgba(180,35,24,.2); }
+.ingesta-delete-confirm:hover { background: #991b1b; }
+.ingesta-delete-modal button:disabled { cursor: wait; opacity: .65; }
+body.ingesta-delete-open { overflow: hidden; }
+@keyframes ingesta-delete-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ingesta-delete-rise { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 520px) {
+  .ingesta-delete-dialog { padding: 22px; }
+  .ingesta-delete-actions { flex-direction: column-reverse; }
+  .ingesta-delete-actions button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ingesta-delete-modal, .ingesta-delete-dialog { animation: none; }
+}
+
+/* Aviso de duplicados: misma entrada 3D y botón institucional que Telegram. */
+.ingest-duplicates-overlay {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  backdrop-filter: none;
+  animation: ingesta-delete-fade .2s ease-out;
+}
+.ingest-duplicates-content {
+  width: 100%;
+  max-width: 480px;
+  min-width: 0;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  border-color: var(--border-subtle);
+  border-top: 4px solid var(--pdi-gold);
+  color: var(--text-secondary);
+}
+.ingest-duplicates-content .telegram-icon-wrapper {
+  background: var(--status-warning-bg);
+  border: 1px solid var(--status-warning-border);
+}
+.ingest-duplicates-content .telegram-icon-wrapper svg { stroke: var(--status-warning); }
+.ingest-duplicates-content .telegram-popup-title { color: var(--text-primary); }
+.ingest-duplicates-content .telegram-popup-msg { color: var(--text-secondary); margin-bottom: 14px; }
+.ingest-duplicates-eyebrow {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: .66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+.ingest-duplicates-source {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: .78rem;
+  overflow-wrap: anywhere;
+}
+.ingest-duplicates-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+}
+.ingest-duplicates-counts[hidden] { display: none; }
+.ingest-duplicates-counts > div {
+  padding: 14px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-surface-subtle);
+}
+.ingest-duplicates-counts > div:first-child {
+  background: var(--status-warning-bg);
+  border-color: var(--status-warning-border);
+  color: var(--status-warning);
+}
+.ingest-duplicates-counts dt { font-size: .73rem; font-weight: 700; }
+.ingest-duplicates-counts dd { margin: 5px 0 0; font-size: 1.8rem; line-height: 1.2; font-weight: 850; }
+.ingest-duplicates-rejected { margin-bottom: 12px; color: var(--status-danger); font-size: .8rem; }
+.ingest-duplicates-note { margin: 0 0 20px; color: var(--text-muted); font-size: .8rem; line-height: 1.5; }
+body.ingest-duplicates-open { overflow: hidden; }
+@media (max-width: 520px) {
+  .ingest-duplicates-content { padding: 22px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ingest-duplicates-overlay, .ingest-duplicates-content,
+  .ingest-duplicates-content .telegram-icon-wrapper,
+  .ingest-duplicates-content .telegram-icon-wrapper svg { animation: none; }
+  .ingest-duplicates-content .telegram-popup-close { transition: none; }
+}
 
 @media (max-width: 700px) {
   .ingesta-history-header { flex-direction: column; }

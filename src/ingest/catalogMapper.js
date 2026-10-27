@@ -1,4 +1,5 @@
 const { resolve } = require("../etl/catalogResolver");
+const { recordIdentity, identityErrors } = require('./recordIdentity');
 
 const norm = (value) =>
   String(value ?? "")
@@ -124,7 +125,7 @@ function resolveField(map, matchKey, displayText, label, unknownPhrase, errors, 
 
 // Mapea una fila cruda del Excel a los campos de registro_enrolamiento.
 function mapRow(row, catalogs) {
-  const errors = [];
+  const errors = identityErrors(row);
   const correcciones = [];
 
   const rawNac = norm(row.nacionalidad);
@@ -281,10 +282,12 @@ function mapRow(row, catalogs) {
   }
 
   if (errors.length > 0) return { mapped: null, errors };
+  const identity = recordIdentity(row, fechaEnrolamiento);
 
   return {
     mapped: {
       fecha_enrolamiento: fechaEnrolamiento,
+      ...(identity ? { identidadOrigen: identity } : {}),
       id_nacionalidad: idNacionalidad,
       id_cuartel: idCuartel,
       id_equipo: idEquipo,

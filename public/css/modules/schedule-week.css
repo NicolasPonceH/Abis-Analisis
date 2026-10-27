@@ -1,0 +1,623 @@
+/* ==========================================================================
+   PROGRAMACIÓN ESPECIAL DE FIN DE SEMANA (VIERNES, SÁBADO Y DOMINGO)
+   Estética institucional unificada con Sistema ABIS - PDI Chile
+   ========================================================================== */
+
+.schedule-week-container,
+.schedule-week-section {
+  margin: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+/* Ocultar la cabecera anidada redundante (ya existe la cabecera de la tarjeta) */
+.schedule-week-header-bar {
+  display: none !important;
+}
+
+.schedule-week-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.schedule-week-badge-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 9px;
+  background: var(--pdi-navy, #00234c);
+  color: var(--pdi-gold, #ffd100);
+  box-shadow: 0 2px 6px rgba(0, 35, 76, 0.15);
+}
+
+.schedule-week-badge-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--pdi-gold, #ffd100);
+  stroke-width: 2;
+  fill: none;
+}
+
+.schedule-week-header-title h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 750;
+  color: var(--pdi-navy, #00234c);
+  line-height: 1.3;
+}
+
+.schedule-week-header-title p {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.4;
+}
+
+.schedule-week-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(0, 35, 76, 0.08);
+  border: 1px solid rgba(0, 35, 76, 0.12);
+  color: var(--pdi-navy, #00234c);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Tabs de Días (Viernes, Sábado, Domingo) */
+#schedule-week-editor {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.schedule-day-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 0 14px 0;
+  background: transparent !important;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+.schedule-day-tab-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 9px;
+  background: var(--bg-surface, #ffffff);
+  color: var(--pdi-navy, #00234c);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: all 0.18s cubic-bezier(0.2, 0.7, 0.3, 1);
+  min-height: 52px;
+  min-width: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.schedule-day-tab-btn:hover {
+  background: var(--bg-surface-hover, #f1f5f9);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.schedule-day-tab-btn .day-tab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+}
+
+.schedule-day-tab-btn strong {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--pdi-navy, #00234c);
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-day-tab-btn .day-tab-summary {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+/* Indicadores de estado de cada día */
+.day-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 7px;
+}
+
+.day-status-dot.is-custom {
+  background: #f59e0b;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.6);
+}
+
+.day-status-dot.is-default {
+  background: #0284c7;
+}
+
+.day-status-dot.is-paused {
+  background: #94a3b8;
+}
+
+/* Tab seleccionado */
+.schedule-day-tab-btn[aria-selected="true"] {
+  background: linear-gradient(135deg, #00234c 0%, #004085 100%);
+  border-color: #00234c;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 35, 76, 0.22);
+  position: relative;
+}
+
+.schedule-day-tab-btn[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--pdi-gold, #ffd100);
+}
+
+.schedule-day-tab-btn[aria-selected="true"] strong {
+  color: #ffffff;
+}
+
+.schedule-day-tab-btn[aria-selected="true"] .day-tab-summary {
+  color: #dbeafe;
+}
+
+/* Panel del Día Seleccionado */
+.schedule-day-panel {
+  padding: 0;
+  background: transparent !important;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.schedule-day-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.day-heading-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.schedule-day-kicker {
+  font-size: 0.62rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #64748b);
+}
+
+.day-heading-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.day-heading-title-row h4 {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--pdi-navy, #00234c);
+}
+
+.day-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.day-badge-custom {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.day-badge-default {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+/* Acciones en la cabecera del día */
+.schedule-day-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.schedule-day-reset-link {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--pdi-navy, #00234c);
+  background: rgba(0, 35, 76, 0.05);
+  border: 1px dashed rgba(0, 35, 76, 0.25);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.schedule-day-reset-link:hover {
+  background: rgba(0, 35, 76, 0.12);
+  border-color: var(--pdi-navy, #00234c);
+}
+
+.schedule-day-direct-hint {
+  font-size: 0.68rem;
+  font-weight: 750;
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  letter-spacing: 0.01em;
+}
+
+:root.dark-theme .schedule-day-reset-link {
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:root.dark-theme .schedule-day-reset-link:hover {
+  color: #f1f5f9;
+  border-color: var(--pdi-gold, #ffd100);
+}
+
+:root.dark-theme .schedule-day-direct-hint {
+  background: rgba(22, 101, 52, 0.3);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+
+/* Fallback para test y compatibilidad */
+.schedule-custom-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.schedule-custom-toggle input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 24px;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.schedule-toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  background-color: #cbd5e1;
+  transition: 0.25s ease;
+  border-radius: 24px;
+  flex: 0 0 44px;
+}
+
+.schedule-toggle-track::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.schedule-custom-toggle input:checked + .schedule-toggle-track {
+  background-color: #10b981;
+}
+
+.schedule-custom-toggle input:checked + .schedule-toggle-track::before {
+  transform: translateX(20px);
+}
+
+.schedule-custom-toggle .toggle-text {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--pdi-navy, #00234c);
+}
+
+/* Contenedor de horas del día dimensionado */
+.schedule-day-times {
+  margin: 8px 0 14px;
+  min-height: 52px;
+  padding: 10px 14px;
+  background: var(--bg-surface-subtle, #f8fafc);
+  border: 1px dashed var(--border-medium, #cbd5e1);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.schedule-day-times .time-chip {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 750;
+  border-radius: 8px;
+}
+
+.time-chip-custom {
+  border-color: #fde68a !important;
+  background: #fffbeb !important;
+  color: #92400e !important;
+}
+
+.time-chip-general {
+  border-color: #bae6fd !important;
+  background: #f0f9ff !important;
+  color: #0369a1 !important;
+}
+
+.time-chip-badge-general {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(3, 105, 161, 0.1);
+  color: #0369a1;
+  font-size: 0.65rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.schedule-empty-times {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  color: var(--text-muted, #64748b);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+/* Fila de Añadir Hora para el día dimensionada */
+.schedule-day-add {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 10px;
+  background: var(--bg-surface-subtle, #f8fafc);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.schedule-day-add .filter-label {
+  font-size: 0.80rem;
+  font-weight: 750;
+  color: var(--pdi-navy, #00234c);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.schedule-day-add .add-time-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.schedule-day-add .form-control {
+  max-width: 180px;
+  height: 42px;
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.schedule-day-add-button {
+  height: 42px;
+  min-height: 42px;
+  padding: 0 20px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  border-radius: 8px;
+}
+
+/* Nota explicativa inferior */
+.schedule-day-note {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.45;
+}
+
+.schedule-day-note.is-paused {
+  color: #b45309;
+  font-weight: 600;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+/* Nota de días de semana legacy */
+.schedule-legacy-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 18px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border-subtle, #e2e8f0);
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+  flex-wrap: wrap;
+}
+
+/* Línea de estado de fin de semana */
+.schedule-week-status-line,
+.schedule-week-status-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+}
+
+.schedule-week-status-line .status-indicator-dot,
+.schedule-week-status-footer .status-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  flex: 0 0 6px;
+}
+
+/* Tema oscuro */
+:root.dark-theme .schedule-week-container,
+:root.dark-theme .schedule-week-section {
+  background: transparent !important;
+  border: none !important;
+}
+
+:root.dark-theme .schedule-day-tabs {
+  background: transparent !important;
+  border-color: #334155;
+}
+
+:root.dark-theme .schedule-day-tab-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+:root.dark-theme .schedule-day-tab-btn strong {
+  color: #f1f5f9;
+}
+
+:root.dark-theme .schedule-day-tab-btn[aria-selected="true"] {
+  background: linear-gradient(135deg, #1e3a8a 0%, #00234c 100%);
+  border-color: var(--pdi-gold, #ffd100);
+}
+
+:root.dark-theme .schedule-day-panel {
+  background: transparent !important;
+}
+
+:root.dark-theme .day-heading-title-row h4 {
+  color: #f1f5f9;
+}
+
+:root.dark-theme .schedule-custom-toggle .toggle-text {
+  color: #f1f5f9;
+}
+
+:root.dark-theme .schedule-day-add {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+:root.dark-theme .schedule-week-status-line,
+:root.dark-theme .schedule-week-status-footer {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .schedule-week-header-bar {
+    padding: 8px 12px;
+  }
+  .schedule-day-tabs {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  .schedule-day-tab-btn {
+    padding: 5px 6px;
+    min-height: 40px;
+  }
+  .schedule-day-tab-btn strong {
+    font-size: 0.72rem;
+  }
+  .schedule-day-tab-btn .day-tab-summary {
+    font-size: 0.60rem;
+  }
+  .schedule-day-panel {
+    padding: 8px 12px;
+  }
+  .schedule-day-add .add-time-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .schedule-day-add .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 140px;
+  }
+  .schedule-day-add-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+  }
+}

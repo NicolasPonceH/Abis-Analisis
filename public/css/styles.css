@@ -11,6 +11,8 @@
 @import url('./modules/tendencias.css');
 @import url('./modules/auditoria.css');
 @import url('./modules/ajustes.css');
+@import url('./modules/schedule-week.css');
+@import url('./modules/schedule-layout.css');
 
 
 /* Dropdowns personalizados compartidos por todos los apartados de ABIS. */

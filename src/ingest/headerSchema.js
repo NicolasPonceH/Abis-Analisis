@@ -2,6 +2,12 @@
 // con el archivo institucional real (New_Enrolados Abis.xlsx - hoja ENROLADOS).
 
 const EXPECTED_COLUMNS = [
+  { header: 'ID Registro', aliases: ['ID_REGISTRO', 'idRegistroOrigen'], field: 'idRegistroOrigen', required: false },
+  { header: 'ID Origen', aliases: ['ID_ORIGEN', 'idOrigen'], field: 'idOrigen', required: false },
+  { header: 'Hora', aliases: ['HORA_ENROLAMIENTO', 'Hora Enrolamiento', 'horaEnrolamiento'], field: 'horaEnrolamiento', required: false },
+  { header: 'Documento', aliases: ['NUMERO_DOCUMENTO', 'NRO_DOCUMENTO'], field: 'documento', required: false },
+  { header: 'Tipo de Documento', aliases: ['TIPO_DOCUMENTO'], field: 'tipoDocumento', required: false },
+  { header: 'Emitido En', aliases: ['DOCUMENTO_EMITIDO'], field: 'emitidoEn', required: false },
   {
     header: "Fecha Enrolamiento",
     aliases: ["Fecha", "FECHA_ENROLAMIENTO", "FECHA ENROLAMIENTO", "fecha_enrolamiento", "Fecha Enrolamiento"],

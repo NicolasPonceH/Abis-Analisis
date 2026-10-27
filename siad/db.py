@@ -579,7 +579,7 @@ def get_user_by_username(username):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, username, password_hash, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios WHERE LOWER(username) = LOWER(%s)",
+                "SELECT id, username, password_hash, rol_siad AS rol, rol_abis, rol_siad, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios WHERE LOWER(username) = LOWER(%s)",
                 (username,)
             )
             row = cur.fetchone()
@@ -593,16 +593,24 @@ def get_all_users():
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, username, rol, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios ORDER BY id ASC"
+                "SELECT id, username, rol_siad AS rol, rol_abis, rol_siad, nombre_completo, creado_en as created_at, ultimo_ingreso as last_login FROM usuarios ORDER BY id ASC"
             )
             columns = [desc.name for desc in cur.description]
             return [dict(zip(columns, row)) for row in cur.fetchall()]
 
 
-def update_user_role(user_id, rol):
+def update_user_role(user_id, rol, modulo="siad"):
+    if rol not in {"admin", "operador", "ninguno"}:
+        raise ValueError("Rol no válido")
+    if modulo not in {"abis", "siad"}:
+        raise ValueError("Módulo no válido")
+    column = "rol_abis" if modulo == "abis" else "rol_siad"
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("UPDATE usuarios SET rol = %s WHERE id = %s", (rol, user_id))
+            if modulo == "siad":
+                cur.execute(f"UPDATE usuarios SET {column} = %s, rol = %s WHERE id = %s", (rol, rol, user_id))
+            else:
+                cur.execute(f"UPDATE usuarios SET {column} = %s WHERE id = %s", (rol, user_id))
         conn.commit()
 
 
@@ -613,12 +621,16 @@ def update_user_password_by_id(user_id, password_hash):
         conn.commit()
 
 
-def create_user(username, password_hash, rol='operador', nombre_completo=None):
+def create_user(username, password_hash, rol='operador', nombre_completo=None, rol_abis=None, rol_siad=None):
+    rol_abis = rol if rol_abis is None else rol_abis
+    rol_siad = rol if rol_siad is None else rol_siad
+    if rol_abis not in {"admin", "operador", "ninguno"} or rol_siad not in {"admin", "operador", "ninguno"}:
+        raise ValueError("Rol no válido")
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO usuarios (username, password_hash, rol, nombre_completo) VALUES (%s, %s, %s, %s) RETURNING id",
-                (username, password_hash, rol, nombre_completo)
+                "INSERT INTO usuarios (username, password_hash, rol, rol_abis, rol_siad, nombre_completo) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+                (username, password_hash, rol_siad, rol_abis, rol_siad, nombre_completo)
             )
             user_id = cur.fetchone()[0]
         conn.commit()

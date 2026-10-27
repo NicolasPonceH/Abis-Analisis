@@ -1,19 +1,8 @@
-const NACIONALIDADES_PRINCIPALES = 10;
-
-function conPorcentaje(filas, total) {
-  return filas.map((f) => ({
-    ...f,
-    total: Number(f.total),
-    porcentaje: total > 0 ? Math.round((Number(f.total) / total) * 1000) / 10 : 0,
-  }));
-}
-
-const VACIO_RANGO = {
-  desde: null, hasta: null, total: 0,
-  sincronizacion: [], registro: [], general: [],
-  nacionalidadesPrincipales: [], cuartelesActivos: [], unidadesActivas: [],
-  genero: [], edad: [], diasConDatos: 0,
-};
+const { construirReporte, obtenerErroresIngesta, NACIONALIDADES_PRINCIPALES } = require("./metricasComunes");
+const { estadosSql } = require("./estadosSql");
+const { validarPeriodo } = require("./reportDates");
+const estados = estadosSql();
+const estadosR = estadosSql("r");
 
 /**
  * Obtiene métricas agregadas entre dos fechas (desde y hasta inclusive)
@@ -22,6 +11,7 @@ const VACIO_RANGO = {
  * @param {string} hasta Formato YYYY-MM-DD
  */
 async function obtenerReporteRango(pool, desde, hasta) {
+  validarPeriodo(desde, hasta);
   const { rows: totalRows } = await pool.query(
     `SELECT count(*) AS total, count(DISTINCT fecha_enrolamiento) AS dias
      FROM registro_enrolamiento
@@ -31,10 +21,6 @@ async function obtenerReporteRango(pool, desde, hasta) {
 
   const total = totalRows.length > 0 ? Number(totalRows[0].total) : 0;
   const diasConDatos = totalRows.length > 0 ? Number(totalRows[0].dias) : 0;
-
-  if (total === 0) {
-    return { ...VACIO_RANGO, desde, hasta };
-  }
 
   const [
     sincronizacion,
@@ -136,9 +122,9 @@ async function obtenerReporteRango(pool, desde, hasta) {
       `SELECT c.nombre_cuartel AS cuartel,
               u.nombre_unidad AS unidad,
               count(*) AS total,
-              count(*) FILTER (WHERE r.id_estado_sincronizacion = 1) AS sincronizados,
-              count(*) FILTER (WHERE r.id_estado_registro = 6 OR r.id_estado_general IN (9, 10) OR r.id_estado_sincronizacion = 3) AS con_error,
-              count(*) FILTER (WHERE r.id_estado_registro = 5 OR r.id_estado_sincronizacion = 2) AS pendientes
+              count(*) FILTER (WHERE ${estadosR.sincronizado}) AS sincronizados,
+              count(*) FILTER (WHERE ${estadosR.error}) AS con_error,
+              count(*) FILTER (WHERE ${estadosR.pendiente}) AS pendientes
        FROM registro_enrolamiento r
        JOIN cuartel c ON c.id_cuartel = r.id_cuartel
        JOIN unidad u ON u.id_unidad = c.id_unidad
@@ -187,117 +173,21 @@ async function obtenerReporteRango(pool, desde, hasta) {
     ),
     pool.query(
       `SELECT 
-         count(*) FILTER (WHERE id_estado_registro = 6)::int AS errores_registro,
-         count(*) FILTER (WHERE id_estado_sincronizacion = 3)::int AS errores_sincronizacion,
-         count(*) FILTER (WHERE id_estado_general IN (9,10))::int AS errores_general,
-         count(*) FILTER (WHERE id_estado_registro = 6 OR id_estado_sincronizacion = 3 OR id_estado_general IN (9,10))::int AS total_inconsistencias
+         count(*) FILTER (WHERE ${estados.errorRegistro})::int AS errores_registro,
+         count(*) FILTER (WHERE ${estados.errorSincronizacion})::int AS errores_sincronizacion,
+         count(*) FILTER (WHERE ${estados.errorGeneral})::int AS errores_general,
+         count(*) FILTER (WHERE ${estados.error})::int AS total_inconsistencias
        FROM registro_enrolamiento
        WHERE fecha_enrolamiento >= $1 AND fecha_enrolamiento <= $2`,
       [desde, hasta]
     ),
   ]);
 
-  // Consultar errores de ingesta (filas rechazadas al importar) en el rango
-  let filasErrorIngesta = 0;
-  try {
-    const { rows: loteRows } = await pool.query(
-      `SELECT COALESCE(SUM(filas_error), 0)::int AS total_errores
-       FROM ingesta_lote
-       WHERE iniciado_en::date >= $1::date AND iniciado_en::date <= $2::date AND estado = 'COMPLETADO'`,
-      [desde, hasta]
-    );
-    filasErrorIngesta = loteRows[0]?.total_errores || 0;
-  } catch (_) { /* tabla puede no existir en entornos legacy */ }
-
-  const sincData = conPorcentaje(sincronizacion.rows, total);
-  const regData = conPorcentaje(registro.rows, total);
-
-  const errStats = errorSummary.rows[0] || {
-    errores_registro: 0,
-    errores_sincronizacion: 0,
-    errores_general: 0,
-    total_inconsistencias: 0,
-  };
-
-  const totalErrores = Number(errStats.total_inconsistencias || 0) + filasErrorIngesta;
-  const totalConIngesta = total + filasErrorIngesta;
-  const tasaError = totalConIngesta > 0 ? Math.round((totalErrores / totalConIngesta) * 1000) / 10 : 0;
-
-  // Si hay errores de ingesta que no están reflejados en sincData, agregar entrada sintética
-  if (filasErrorIngesta > 0) {
-    const existeError = sincData.find(s => s.descripcion.toUpperCase().includes("ERROR"));
-    if (existeError) {
-      existeError.total += filasErrorIngesta;
-      existeError.porcentaje = totalConIngesta > 0 ? Math.round((existeError.total / totalConIngesta) * 1000) / 10 : 0;
-    } else {
-      sincData.push({
-        descripcion: "ERROR",
-        total: filasErrorIngesta,
-        porcentaje: totalConIngesta > 0 ? Math.round((filasErrorIngesta / totalConIngesta) * 1000) / 10 : 0,
-      });
-    }
-  }
-
-  const sincOK = sincData.find(s => s.descripcion.toUpperCase().includes("SINCRONIZADO"))?.porcentaje || 0;
-  const regOK = regData.find(r => r.descripcion.toUpperCase().includes("REGISTRADO"))?.porcentaje || 0;
-  const menoresCount = Number(edad.rows.find(e => e.categoria.toUpperCase().includes("MENOR"))?.total || 0);
-
-  const resumenEjecutivo = {
-    tasaSincronizacion: sincOK,
-    tasaRegistroBiometrico: regOK,
-    tasaError,
-    totalErrores,
-    erroresRegistro: Number(errStats.errores_registro || 0),
-    erroresSincronizacion: Number(errStats.errores_sincronizacion || 0),
-    erroresGeneral: Number(errStats.errores_general || 0),
-    erroresIngesta: filasErrorIngesta,
-    tasaMenoresNNA: total > 0 ? Math.round((menoresCount / total) * 1000) / 10 : 0,
-    estadoSLA: sincOK >= 95 && tasaError < 5 ? "Óptimo" : sincOK >= 85 ? "Atención" : "Crítico",
-    cuartelLider: rendimientoCuarteles.rows[0] ? {
-      nombre: rendimientoCuarteles.rows[0].cuartel,
-      total: Number(rendimientoCuarteles.rows[0].total),
-      porcentaje: Math.round((Number(rendimientoCuarteles.rows[0].total) / total) * 1000) / 10
-    } : null,
-    nacionalidadLider: nacionalidades.rows[0] ? {
-      nombre: nacionalidades.rows[0].nacionalidad,
-      codigoIso: nacionalidades.rows[0].codigo_iso,
-      total: Number(nacionalidades.rows[0].total),
-      porcentaje: Math.round((Number(nacionalidades.rows[0].total) / total) * 1000) / 10
-    } : null,
-  };
-
-  return {
-    desde,
-    hasta,
-    total,
-    diasConDatos,
-    resumenEjecutivo,
-    sincronizacion: sincData,
-    registro: regData,
-    general: conPorcentaje(general.rows, total),
-    nacionalidadesPrincipales: conPorcentaje(nacionalidades.rows, total),
-    cuartelesActivos: conPorcentaje(cuarteles.rows, total),
-    unidadesActivas: conPorcentaje(unidades.rows, total),
-    genero: conPorcentaje(genero.rows, total),
-    edad: conPorcentaje(edad.rows, total),
-    dispositivos: conPorcentaje(dispositivos.rows, total),
-    regiones: conPorcentaje(regiones.rows, total),
-    tramosEtarios: conPorcentaje(tramosEtarios.rows, total),
-    demografiaCruzada: demografiaCruzada.rows.map(d => ({
-      genero: d.genero,
-      esMayorEdad: d.es_mayor_edad,
-      total: Number(d.total)
-    })),
-    rendimientoCuarteles: rendimientoCuarteles.rows.map(c => ({
-      cuartel: c.cuartel,
-      unidad: c.unidad,
-      total: Number(c.total),
-      sincronizados: Number(c.sincronizados),
-      conError: Number(c.con_error),
-      pendientes: Number(c.pendientes),
-      tasaExito: Number(c.total) > 0 ? Math.max(0, Math.round(((Number(c.total) - Number(c.con_error)) / Number(c.total)) * 1000) / 10) : 0
-    })),
-  };
+  const filasErrorIngesta = await obtenerErroresIngesta(pool, desde, hasta);
+  return construirReporte({ desde, hasta, diasConDatos }, total, {
+    sincronizacion, registro, general, nacionalidades, cuarteles, unidades, genero, edad,
+    demografiaCruzada, rendimientoCuarteles, dispositivos, regiones, tramosEtarios, errorSummary,
+  }, filasErrorIngesta);
 }
 
 /**
@@ -308,9 +198,9 @@ async function obtenerTendenciaHistorica(pool) {
   const { rows } = await pool.query(
     `SELECT to_char(fecha_enrolamiento, 'YYYY-MM-DD') AS fecha,
             count(*) AS total,
-            count(*) FILTER (WHERE id_estado_sincronizacion = 1) AS sincronizados,
-            count(*) FILTER (WHERE id_estado_registro = 6 OR id_estado_general IN (9, 10) OR id_estado_sincronizacion = 3) AS con_error,
-            count(*) FILTER (WHERE id_estado_registro = 5 OR id_estado_sincronizacion = 2) AS pendientes
+            count(*) FILTER (WHERE ${estados.sincronizado}) AS sincronizados,
+            count(*) FILTER (WHERE ${estados.error}) AS con_error,
+            count(*) FILTER (WHERE ${estados.pendiente}) AS pendientes
      FROM registro_enrolamiento
      GROUP BY fecha_enrolamiento
      ORDER BY fecha_enrolamiento ASC`
@@ -361,20 +251,16 @@ async function obtenerComparacionPeriodos(pool, tipo) {
   const queryStats = `
     SELECT 
       count(*)::int AS total,
-      count(*) FILTER (WHERE id_estado_sincronizacion = 1)::int AS sincronizados,
-      count(*) FILTER (WHERE id_estado_sincronizacion = 3
-                         OR ep_reg.descripcion IN ('ERROR', 'CON_ERROR')
-                         OR ep_gen.descripcion IN ('ERROR', 'CON_ERROR'))::int AS errores,
+      count(*) FILTER (WHERE ${estados.sincronizado})::int AS sincronizados,
+      count(*) FILTER (WHERE ${estados.error})::int AS errores,
       min(fecha_enrolamiento) AS desde,
       max(fecha_enrolamiento) AS hasta
     FROM registro_enrolamiento r
-    JOIN estado_proceso ep_reg ON ep_reg.id_estado = r.id_estado_registro
-    JOIN estado_proceso ep_gen ON ep_gen.id_estado = r.id_estado_general
     WHERE fecha_enrolamiento >= ($1::date - $2::interval) AND fecha_enrolamiento <= $1::date
   `;
 
-  const pivoteDate = new Date(`${fechaPivote}T00:00:00`);
-  pivoteDate.setDate(pivoteDate.getDate() - dias);
+  const pivoteDate = new Date(`${fechaPivote}T00:00:00Z`);
+  pivoteDate.setUTCDate(pivoteDate.getUTCDate() - dias);
   const fechaAnterior = pivoteDate.toISOString().split('T')[0];
 
   const [actualRes, anteriorRes] = await Promise.all([

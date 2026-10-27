@@ -1014,7 +1014,7 @@ body {
   .ajustes-nav { flex-direction: row; flex-wrap: wrap; padding: 0; width: 100%; gap: 12px; }
   .ajustes-nav-item { padding: 10px 16px; }
   .ajustes-section-title { width: 100%; padding: 0; margin: 16px 0 8px 0; }
-  .ajustes-content { padding: 24px; overflow: visible; }
+  .ajustes-content { padding: 24px; overflow: visible; margin-left: 0 !important; width: 100% !important; box-sizing: border-box !important; }
   .account-grid, .settings-form-row, .new-user-fields { grid-template-columns: 1fr; }
   .account-session { grid-column: auto; }
   .account-profile, .account-session-body { align-items: flex-start; flex-direction: column; gap: 20px; }
@@ -1473,6 +1473,28 @@ body {
 :root.dark-theme .accent-picker-option.selected {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
+}
+
+@media (max-width: 900px) {
+  .ajustes-container {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  .ajustes-sidebar {
+    display: none !important;
+    transition: none !important;
+  }
+
+  .ajustes-content {
+    padding: 14px 10px !important;
+    margin-left: 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    transition: none !important;
+  }
 }
 
 @media (max-width: 760px) {

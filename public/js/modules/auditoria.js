@@ -1,3 +1,5 @@
+import { escapeHtml } from '../core/utils.js';
+
 export let auditState = {
   offset: 0,
   limit: 25,
@@ -45,10 +47,10 @@ export async function cargarBitacoraAuditoria(reset = false) {
         return `
           <tr>
             <td style="font-size: 0.82rem;">${fecha}</td>
-            <td><span class="audit-badge ${badgeClass}">${r.tipo_evento}</span></td>
-            <td style="font-family: monospace; font-size: 0.8rem; color: var(--pdi-navy);">${r.archivo_procesado || '-'}</td>
-            <td>${r.usuario_o_proceso || '-'}</td>
-            <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px; white-space: normal;">${r.detalles_cifrados || '-'}</td>
+            <td><span class="audit-badge ${badgeClass}">${escapeHtml(r.tipo_evento)}</span></td>
+            <td style="font-family: monospace; font-size: 0.8rem; color: var(--pdi-navy);">${escapeHtml(r.archivo_procesado || '-')}</td>
+            <td>${escapeHtml(r.responsable || r.usuario_o_proceso || '-')}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px; white-space: normal;">${escapeHtml(r.detalles_cifrados || '-')}</td>
           </tr>
         `;
       }).join("");
