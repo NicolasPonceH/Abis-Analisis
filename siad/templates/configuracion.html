@@ -410,6 +410,7 @@
   input[type="password"]::-ms-clear {
     display: none;
   }
+
 </style>
 
 <script>
@@ -532,7 +533,7 @@
     }
 
     try {
-      var res = await fetch('/api/admin/create-user', {
+      var res = await fetch("{{ url_for('api_admin_create_user') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p1, rol_siad: r, rol: r })
@@ -646,10 +647,10 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Guardando...';
     try {
-      var res = await fetch('/api/admin/update-role', {
+      var res = await fetch("{{ url_for('api_admin_update_role') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, rol_siad: selectedRol, rol: selectedRol })
+        body: JSON.stringify({ id: id, rol_siad: selectedRol })
       });
       var data = null;
       try {
@@ -698,7 +699,7 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Guardando...';
     try {
-      var res = await fetch('/api/admin/reset-password', {
+      var res = await fetch("{{ url_for('api_admin_reset_password') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id, password: p })
@@ -735,7 +736,7 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Eliminando...';
     try {
-      var res = await fetch('/api/admin/delete-user', {
+      var res = await fetch("{{ url_for('api_admin_delete_user') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id })

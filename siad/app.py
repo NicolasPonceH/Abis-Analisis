@@ -2275,9 +2275,8 @@ def api_admin_create_user():
 
 @app.route("/api/admin/update-role", methods=["POST"])
 def api_admin_update_role():
-    is_internal = _es_solicitud_interna()
     is_siad_admin = session.get("rol_siad", session.get("rol")) == "admin"
-    if not is_internal and not is_siad_admin:
+    if not is_siad_admin:
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")

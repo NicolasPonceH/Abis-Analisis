@@ -24,12 +24,28 @@
             <input type="text" id="nuevo-usuario" minlength="3" maxlength="80" autocomplete="off" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
           </div>
           <div>
-            <label for="nuevo-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Rol de ABIS</label>
-            <select id="nuevo-rol" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; cursor: pointer; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
-              <option value="operador">Operador (Estándar)</option>
-              <option value="admin">Administrador (Total)</option>
-              <option value="ninguno">Sin acceso a ABIS</option>
-            </select>
+            <label style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;">Rol de ABIS</label>
+            <input type="hidden" id="nuevo-rol" value="operador">
+            <div class="admin-role-choices" role="radiogroup" aria-label="Rol inicial de ABIS">
+              <label class="admin-role-choice" data-role="operador">
+                <input type="radio" name="nuevo-rol-opcion" value="operador" checked>
+                <span class="admin-role-choice-icon"><i class="fa-solid fa-user-gear" aria-hidden="true"></i></span>
+                <span class="admin-role-choice-copy"><strong>Operador</strong><span>Acceso a las herramientas de trabajo de ABIS.</span></span>
+                <span class="admin-role-choice-check"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+              </label>
+              <label class="admin-role-choice" data-role="admin">
+                <input type="radio" name="nuevo-rol-opcion" value="admin">
+                <span class="admin-role-choice-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                <span class="admin-role-choice-copy"><strong>Administrador</strong><span>Gestiona usuarios y configuración de ABIS.</span></span>
+                <span class="admin-role-choice-check"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+              </label>
+              <label class="admin-role-choice" data-role="ninguno">
+                <input type="radio" name="nuevo-rol-opcion" value="ninguno">
+                <span class="admin-role-choice-icon"><i class="fa-solid fa-user-lock" aria-hidden="true"></i></span>
+                <span class="admin-role-choice-copy"><strong>Sin acceso</strong><span>La cuenta se crea sin permiso para entrar a ABIS.</span></span>
+                <span class="admin-role-choice-check"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+              </label>
+            </div>
           </div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
@@ -173,36 +189,116 @@
       #admin-action-modal.admin-modal-closing > div {
         animation: adminModalCardOut 180ms ease-in both !important;
       }
+
+      #admin-action-modal { padding: 18px; background: radial-gradient(ellipse at 50% 25%, rgba(18,47,82,.72), rgba(2,10,23,.84)) !important; backdrop-filter: blur(14px) saturate(135%) !important; overflow-y: auto; }
+      #admin-action-modal > .admin-modal-card { --modal-accent: #ffd100; position: relative; width: min(100%, 560px) !important; max-height: min(92vh, 760px); overflow: auto !important; border: 1px solid rgba(255,255,255,.18); border-radius: 26px !important; background: linear-gradient(145deg, #fff 0%, #f4f7fb 100%) !important; box-shadow: 0 34px 100px rgba(0,0,0,.48), 0 0 0 1px rgba(255,255,255,.2) inset; color: #0f172a; }
+      .dark #admin-action-modal > .admin-modal-card { background: linear-gradient(145deg,#13233a,#091525) !important; border-color: rgba(148,163,184,.25); color: #e2e8f0; }
+      #admin-action-modal[data-mode="role"] > .admin-modal-card { --modal-accent: #ffd100; }
+      #admin-action-modal[data-mode="password"] > .admin-modal-card { --modal-accent: #f59e0b; }
+      #admin-action-modal[data-mode="delete"] > .admin-modal-card { --modal-accent: #f43f5e; }
+      #admin-action-modal > .admin-modal-card:before { content: ""; position: absolute; z-index: 0; inset: 0 0 auto; height: 170px; pointer-events: none; background: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--modal-accent) 24%, transparent), transparent 70%); }
+      .admin-modal-header { position: relative; z-index: 1; padding: 24px 28px !important; border-bottom: 1px solid rgba(148,163,184,.22) !important; background: linear-gradient(120deg, rgba(255,255,255,.82), rgba(255,255,255,.28)); }
+      .dark .admin-modal-header { background: linear-gradient(120deg,rgba(30,48,72,.88),rgba(12,25,43,.45)); }
+      .admin-modal-heading { display: flex; align-items: center; gap: 16px; }
+      .admin-modal-kicker { display: block; margin-bottom: 5px; color: #64748b; font-size: 9px; font-weight: 900; letter-spacing: .18em; }
+      .dark .admin-modal-kicker { color: #94a3b8; }
+      .admin-modal-emblem { display: grid; place-items: center; width: 54px; height: 54px; flex: 0 0 54px; border: 1px solid color-mix(in srgb, var(--modal-accent) 48%, white); border-radius: 18px; background: color-mix(in srgb, var(--modal-accent) 16%, white); color: #17345b; box-shadow: 0 10px 24px color-mix(in srgb, var(--modal-accent) 16%, transparent), inset 0 1px rgba(255,255,255,.7); }
+      .admin-modal-emblem i { font-size: 21px; }
+      #admin-modal-title { font-size: 21px !important; letter-spacing: -.035em; }
+      #admin-modal-subtitle { margin-top: 4px !important; line-height: 1.5; }
+      .admin-modal-close { background: rgba(255,255,255,.72) !important; border: 1px solid rgba(148,163,184,.2) !important; }
+      .admin-modal-close:hover { transform: rotate(90deg); }
+      .admin-modal-body { position: relative; z-index: 1; padding: 25px 28px !important; }
+      .admin-modal-form { display: flex; flex-direction: column; gap: 17px; }
+      .admin-modal-form[hidden] { display: none !important; }
+      .admin-modal-form > div { margin-bottom: 0 !important; }
+      .admin-modal-form label { color: #334155 !important; font-size: .75rem !important; letter-spacing: .09em !important; }
+      .dark .admin-modal-form label { color: #cbd5e1 !important; }
+      .admin-modal-form input, .admin-modal-form select { border: 1px solid #cbd5e1 !important; border-radius: 13px !important; background: rgba(255,255,255,.84) !important; box-shadow: 0 2px 7px rgba(15,23,42,.035); }
+      .dark .admin-modal-form input, .dark .admin-modal-form select { border-color: #334155 !important; background: rgba(2,10,23,.58) !important; color: #f1f5f9 !important; }
+      .admin-modal-form input:focus, .admin-modal-form select:focus { border-color: var(--modal-accent) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--modal-accent) 20%, transparent) !important; }
+      .admin-role-choices { display: grid; gap: 10px; }
+      .admin-role-choice { position: relative; display: flex !important; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #dbe3ed; border-radius: 15px; background: rgba(255,255,255,.72); cursor: pointer; transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease; }
+      .dark .admin-role-choice { border-color: #334155; background: rgba(15,23,42,.55); }
+      .admin-role-choice:hover { transform: translateY(-1px); border-color: #94a3b8; box-shadow: 0 8px 22px rgba(15,23,42,.07); }
+      .admin-role-choice:has(input:checked) { border-color: #d29c00; background: linear-gradient(110deg,rgba(255,209,0,.17),rgba(255,255,255,.8)); box-shadow: 0 0 0 3px rgba(255,209,0,.14),0 9px 24px rgba(15,23,42,.06); }
+      .dark .admin-role-choice:has(input:checked) { background: linear-gradient(110deg,rgba(255,209,0,.15),rgba(15,23,42,.8)); }
+      .admin-role-choice:has(input:focus-visible) { outline: 3px solid rgba(14,116,199,.42); outline-offset: 3px; }
+      .admin-role-choice input[type="radio"] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+      .admin-role-choice-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px; background: #eaf2fb; color: #174b7d; font-size: 16px; }
+      .admin-role-choice[data-role="ninguno"] .admin-role-choice-icon { background: #fff1f2; color: #be123c; }
+      .dark .admin-role-choice-icon { background: #1e3a5f; color: #bfdbfe; }
+      .dark .admin-role-choice[data-role="ninguno"] .admin-role-choice-icon { background: #4c1d2b; color: #fda4af; }
+      .admin-role-choice-copy { flex: 1; min-width: 0; }
+      .admin-role-choice-copy strong { display: block; color: #0f172a; font-size: 14px; font-weight: 850; letter-spacing: -.01em; }
+      .admin-role-choice-copy span { display: block; margin-top: 3px; color: #64748b; font-size: 12px; font-weight: 550; line-height: 1.45; }
+      .dark .admin-role-choice-copy strong { color: #f1f5f9; }
+      .dark .admin-role-choice-copy span { color: #94a3b8; }
+      .admin-role-choice-check { display: grid; place-items: center; width: 21px; height: 21px; flex: 0 0 21px; border: 1.5px solid #cbd5e1; border-radius: 50%; color: transparent; font-size: 10px; }
+      .admin-role-choice:has(input:checked) .admin-role-choice-check { border-color: #b88600; background: #ffd100; color: #17263a; }
+      .admin-modal-form .password-wrapper { margin-top: 8px; }
+      .admin-modal-note { padding: 13px 15px !important; border-radius: 14px !important; border: 1px solid color-mix(in srgb, var(--modal-accent) 28%, white) !important; border-left: 3px solid var(--modal-accent) !important; background: color-mix(in srgb, var(--modal-accent) 9%, white) !important; color: #475569 !important; }
+      .admin-modal-actions { display: flex; justify-content: flex-end; gap: 10px !important; margin-top: 3px; padding-top: 18px; border-top: 1px solid rgba(148,163,184,.2); }
+      .admin-modal-actions button { min-height: 44px; padding: 0 17px !important; border-radius: 12px !important; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+      .admin-modal-actions button:hover { transform: translateY(-2px); filter: brightness(1.035); }
+      .admin-modal-actions button:active { transform: scale(.98); }
+      .admin-modal-cancel { border: 1px solid #dbe2ec !important; background: rgba(255,255,255,.75) !important; color: #475569 !important; }
+      .admin-modal-primary { border: 1px solid #12345a !important; background: linear-gradient(135deg,#12345a,#07508a) !important; color: #fff !important; box-shadow: 0 8px 18px rgba(18,52,90,.2); }
+      .admin-modal-primary--gold { border-color: #d29c00 !important; background: linear-gradient(135deg,#ffe36e,#ffd100) !important; color: #17263a !important; box-shadow: 0 8px 18px rgba(234,179,8,.22); }
+      .admin-modal-primary--danger { border-color: #be123c !important; background: linear-gradient(135deg,#fb7185,#e11d48) !important; color: #fff !important; box-shadow: 0 8px 18px rgba(225,29,72,.2); }
+      @media(max-width:560px) { #admin-action-modal { padding: 12px; align-items: flex-end !important; } #admin-action-modal > .admin-modal-card { max-height: 92vh; border-radius: 23px !important; } .admin-modal-header { padding: 20px !important; } .admin-modal-body { padding: 20px !important; } .admin-modal-emblem { width: 46px; height: 46px; flex-basis: 46px; border-radius: 15px; } #admin-modal-title { font-size: 18px !important; } .admin-modal-actions { flex-direction: column-reverse; } .admin-modal-actions button { width: 100%; justify-content: center; } }
+      @media(prefers-reduced-motion: reduce) { #admin-action-modal.admin-modal-opening, #admin-action-modal.admin-modal-opening > div, #admin-action-modal.admin-modal-closing, #admin-action-modal.admin-modal-closing > div { animation: none !important; } }
     </style>
-    <div id="admin-action-modal" style="position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0;">
-      <div style="background: var(--bg-surface); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden;">
-        <div style="padding: 24px 32px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-          <div>
+    <div id="admin-action-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="admin-modal-title" style="position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0;">
+      <div class="admin-modal-card" style="width: 100%; max-width: 480px; overflow: hidden;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="admin-modal-heading">
+            <div class="admin-modal-emblem"><i id="admin-modal-icon" class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
+            <div>
+              <span class="admin-modal-kicker">ABIS · CONTROL DE ACCESO</span>
             <h2 id="admin-modal-title" style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: var(--text-primary);">Administrar</h2>
             <p id="admin-modal-subtitle" style="margin: 0; color: var(--text-muted); font-size: 0.92rem;"></p>
+            </div>
           </div>
-          <button type="button" onclick="closeAdminModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.2s; width: 32px; height: 32px; box-shadow: 0 4px 12px rgba(0, 15, 33, 0.1); display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--bg-surface-hover)'; this.style.color='var(--text-primary)'" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8'">&times;</button>
+          <button type="button" class="admin-modal-close" onclick="closeAdminModal()" aria-label="Cerrar" style="color: #64748b; font-size: 22px; cursor: pointer; padding: 4px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">&times;</button>
         </div>
 
-        <div style="padding: 32px;">
+        <div class="admin-modal-body" style="padding: 32px;">
           <!-- Form Role -->
-          <form id="form-editar-rol" hidden>
+          <form id="form-editar-rol" class="admin-modal-form" hidden>
             <div style="margin-bottom: 24px;">
-              <label for="editar-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Asignar Privilegios</label>
-              <select id="editar-rol" style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; cursor: pointer; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
-                <option value="operador">Operador</option>
-                <option value="admin">Administrador</option>
-              </select>
+              <label style="display: block; color: #1e293b; font-weight: 700; font-size: 0.75rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.09em;">Elige el nivel de acceso de ABIS</label>
+              <input type="hidden" id="editar-rol" value="operador">
+              <div class="admin-role-choices" role="radiogroup" aria-label="Rol de acceso en ABIS">
+                <label class="admin-role-choice" data-role="admin">
+                  <input type="radio" name="editar-rol-opcion" value="admin">
+                  <span class="admin-role-choice-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                  <span class="admin-role-choice-copy"><strong>Administrador</strong><span>Gestiona usuarios, permisos y configuración de ABIS.</span></span>
+                  <span class="admin-role-choice-check"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                </label>
+                <label class="admin-role-choice" data-role="operador">
+                  <input type="radio" name="editar-rol-opcion" value="operador">
+                  <span class="admin-role-choice-icon"><i class="fa-solid fa-user-gear" aria-hidden="true"></i></span>
+                  <span class="admin-role-choice-copy"><strong>Operador</strong><span>Usa las herramientas de trabajo de ABIS sin administrar cuentas.</span></span>
+                  <span class="admin-role-choice-check"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                </label>
+                <label class="admin-role-choice" data-role="ninguno">
+                  <input type="radio" name="editar-rol-opcion" value="ninguno">
+                  <span class="admin-role-choice-icon"><i class="fa-solid fa-user-lock" aria-hidden="true"></i></span>
+                  <span class="admin-role-choice-copy"><strong>Sin acceso</strong><span>La cuenta se conserva, pero no puede entrar a ABIS.</span></span>
+                  <span class="admin-role-choice-check"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                </label>
+              </div>
             </div>
             <p id="editar-rol-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-              <button type="button" onclick="closeAdminModal()" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">Cancelar</button>
-              <button type="submit" style="background: var(--text-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,31,68,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(0,31,68,0.2)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,31,68,0.15)'">Actualizar Rol</button>
+            <div class="admin-modal-actions" style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button type="button" class="admin-modal-cancel" onclick="closeAdminModal()" style="font-weight: 700; font-size: 0.92rem; cursor: pointer;">Cancelar</button>
+              <button type="submit" class="admin-modal-primary" style="font-weight: 700; font-size: 0.92rem; cursor: pointer;"><i class="fa-solid fa-check"></i> Aceptar cambio</button>
             </div>
           </form>
 
           <!-- Form Password -->
-          <form id="form-cambiar-password-admin" hidden novalidate>
+          <form id="form-cambiar-password-admin" class="admin-modal-form" hidden novalidate>
             <div style="margin-bottom: 16px;">
               <label for="admin-nueva-password" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Nueva Contraseña Fuerte</label>
               <div class="password-wrapper" style="position:relative; width:100%;">
@@ -222,15 +318,15 @@
 </div>
             </div>
             <p id="admin-password-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-              <button type="button" onclick="closeAdminModal()" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--border-subtle)'" onmouseout="this.style.background='var(--bg-surface-hover)'">Cancelar</button>
-              <button type="submit" style="background: #DC2626; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(220,38,38,0.15); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(220,38,38,0.25)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(220,38,38,0.15)'">Forzar Cambio</button>
+            <div class="admin-modal-actions" style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button type="button" class="admin-modal-cancel" onclick="closeAdminModal()" style="font-weight: 700; font-size: 0.92rem; cursor: pointer;">Cancelar</button>
+              <button type="submit" class="admin-modal-primary admin-modal-primary--gold" style="font-weight: 700; font-size: 0.92rem; cursor: pointer;"><i class="fa-solid fa-key"></i> Guardar nueva clave</button>
             </div>
           </form>
 
           <!-- Form de validación para eliminar usuario -->
-          <form id="form-eliminar-usuario-admin" hidden novalidate>
-            <div style="background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316; padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; color: #9a3412; font-size: 0.92rem; line-height: 1.45;">
+          <form id="form-eliminar-usuario-admin" class="admin-modal-form" hidden novalidate>
+            <div class="admin-modal-note" style="font-size: 0.92rem; line-height: 1.55;">
               <strong>Acción sensible.</strong> Vas a eliminar definitivamente a <strong id="admin-delete-username"></strong>. Introduce tu contraseña para validar esta acción.
             </div>
             <div style="margin-bottom: 24px;">
@@ -243,9 +339,9 @@
               </div>
             </div>
             <p id="admin-delete-feedback" style="margin: 0 0 16px 0; font-size: 0.92rem; font-weight: 600;"></p>
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-              <button type="button" onclick="closeAdminModal()" style="background: var(--bg-surface-hover); color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer;">Cancelar</button>
-              <button type="submit" style="background: #e11d48; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 6px rgba(225,29,72,0.2);"><i class="fa-solid fa-trash"></i> Validar y eliminar</button>
+            <div class="admin-modal-actions" style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button type="button" class="admin-modal-cancel" onclick="closeAdminModal()" style="font-weight: 700; font-size: 0.92rem; cursor: pointer;">Cancelar</button>
+              <button type="submit" class="admin-modal-primary admin-modal-primary--danger" style="font-weight: 700; font-size: 0.92rem; cursor: pointer;"><i class="fa-solid fa-trash-can"></i> Confirmar eliminación</button>
             </div>
           </form>
         </div>
@@ -262,6 +358,7 @@
       const formDelete = document.getElementById('form-eliminar-usuario-admin');
       const modalTitle = document.getElementById('admin-modal-title');
       const modalSubtitle = document.getElementById('admin-modal-subtitle');
+      const modalIcon = document.getElementById('admin-modal-icon');
 
       function setFeedback(elementId, message, type) {
         const el = document.getElementById(elementId);
@@ -289,7 +386,10 @@
       function openModal() {
         modalEl.classList.remove('admin-modal-closing');
         modalEl.classList.add('admin-modal-opening');
+        modalEl.setAttribute('aria-hidden', 'false');
         modalEl.style.display = 'flex';
+        modalEl.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
         void modalEl.offsetWidth;
       }
 
@@ -298,7 +398,10 @@
         modalEl.classList.add('admin-modal-closing');
         setTimeout(() => {
           modalEl.style.display = 'none';
+          modalEl.style.opacity = '0';
           modalEl.classList.remove('admin-modal-closing');
+          modalEl.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
           formRole.hidden = true;
           formPwd.hidden = true;
           formDelete.hidden = true;
@@ -313,16 +416,31 @@
 
       window.openRoleModal = function(id, currentRole) {
         currentAdminTargetId = id;
-        document.getElementById('editar-rol').value = currentRole;
+        modalEl.dataset.mode = 'role';
+        modalIcon.className = 'fa-solid fa-shield-halved';
+        const roleSelect = document.getElementById('editar-rol');
+        const roleRadios = document.querySelectorAll('input[name="editar-rol-opcion"]');
+        const normalizedRole = ["admin", "operador", "ninguno"].includes(currentRole) ? currentRole : "operador";
+        roleSelect.value = normalizedRole;
+        roleRadios.forEach((radio) => { radio.checked = radio.value === normalizedRole; });
         modalTitle.textContent = 'Editar Nivel de Acceso';
         modalSubtitle.textContent = 'Asigna privilegios de sistema a este usuario.';
         formRole.hidden = false;
         openModal();
       };
 
+      document.querySelectorAll('input[name="editar-rol-opcion"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+          if (radio.checked) document.getElementById('editar-rol').value = radio.value;
+        });
+      });
+
       window.openPasswordModal = function(id, btn) {
         currentAdminTargetId = id;
+        modalEl.dataset.mode = 'password';
+        modalIcon.className = 'fa-solid fa-key';
         const username = btn.getAttribute('data-username');
+        formPwd.reset();
         modalTitle.textContent = 'Restablecer Credenciales';
         modalSubtitle.textContent = `Cambio forzado para: ${username}`;
         formPwd.hidden = false;
@@ -331,6 +449,8 @@
 
       window.openDeleteModal = function(id, btn) {
         currentAdminTargetId = id;
+        modalEl.dataset.mode = 'delete';
+        modalIcon.className = 'fa-solid fa-user-slash';
         currentAdminTargetUsername = btn.getAttribute('data-username') || '';
         document.getElementById('admin-delete-username').textContent = currentAdminTargetUsername;
         document.getElementById('admin-delete-password').value = '';
@@ -341,8 +461,20 @@
         setTimeout(() => document.getElementById('admin-delete-password')?.focus(), 200);
       };
 
+      modalEl.addEventListener('click', (event) => {
+        if (event.target === modalEl) window.closeAdminModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modalEl.style.display !== 'none') window.closeAdminModal();
+      });
+
       // El formulario de alta se muestra únicamente dentro de un popup.
       const formNuevo = document.getElementById('form-nuevo-usuario');
+      document.querySelectorAll('input[name="nuevo-rol-opcion"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+          if (radio.checked) document.getElementById('nuevo-rol').value = radio.value;
+        });
+      });
       const newUserModal = document.createElement('div');
       newUserModal.id = 'new-user-modal';
       newUserModal.className = 'settings-modal new-user-modal';
@@ -439,7 +571,7 @@
           const res = await fetch('/api/admin/update-role', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: currentAdminTargetId, rol })
+            body: JSON.stringify({ id: currentAdminTargetId, rol_abis: rol })
           });
           const data = await res.json();
           if (!res.ok || !data.ok) throw new Error(data.error || 'Error al actualizar.');
