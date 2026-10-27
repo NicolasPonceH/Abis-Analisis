@@ -614,6 +614,31 @@ def update_user_role(user_id, rol, modulo="siad"):
         conn.commit()
 
 
+def update_user_roles(user_id, rol_siad=None, rol_abis=None):
+    """Actualiza de forma atómica uno o ambos roles (SIAD y ABIS) para un usuario."""
+    updates = []
+    params = []
+    if rol_siad is not None:
+        if rol_siad not in {"admin", "operador", "ninguno"}:
+            raise ValueError("Rol SIAD no válido")
+        updates.append("rol_siad = %s")
+        updates.append("rol = %s")
+        params.extend([rol_siad, rol_siad])
+    if rol_abis is not None:
+        if rol_abis not in {"admin", "operador", "ninguno"}:
+            raise ValueError("Rol ABIS no válido")
+        updates.append("rol_abis = %s")
+        params.append(rol_abis)
+    if not updates:
+        return
+    params.append(user_id)
+    query = f"UPDATE usuarios SET {', '.join(updates)} WHERE id = %s"
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, tuple(params))
+        conn.commit()
+
+
 def update_user_password_by_id(user_id, password_hash):
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -647,17 +672,25 @@ def count_users():
 def delete_user(user_id):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, username, rol_siad FROM usuarios WHERE id = %s", (user_id,))
+            cur.execute("SELECT id, username, rol_siad, rol_abis FROM usuarios WHERE id = %s", (user_id,))
             user = cur.fetchone()
             if not user:
                 raise ValueError("Usuario no encontrado.")
             username = user[1]
             rol_siad = user[2]
+            rol_abis = user[3] if len(user) > 3 else None
+
+            # Validar que no se elimine al último administrador de SIAD ni de ABIS
             if rol_siad == "admin":
                 cur.execute("SELECT COUNT(*) FROM usuarios WHERE rol_siad = 'admin'")
                 if cur.fetchone()[0] <= 1:
                     raise ValueError("No se puede eliminar al único administrador de SIAD.")
-            cur.execute("UPDATE documentos SET usuario_username = NULL WHERE usuario_username = %s", (username,))
+            if rol_abis == "admin":
+                cur.execute("SELECT COUNT(*) FROM usuarios WHERE rol_abis = 'admin'")
+                if cur.fetchone()[0] <= 1:
+                    raise ValueError("No se puede eliminar al único administrador de ABIS.")
+
+            # Eliminar el usuario directamente (la tabla documentos es inmutable según RF-06 y no posee FK)
             cur.execute("DELETE FROM usuarios WHERE id = %s", (user_id,))
         conn.commit()
     return True

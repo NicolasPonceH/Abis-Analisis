@@ -231,7 +231,10 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
           const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_siad = 'admin'");
           if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede eliminar al último administrador de SIAD." });
         }
-        await pool.query("UPDATE documentos SET usuario_username = NULL WHERE usuario_username = $1", [target.username]);
+        if (target.rol_abis === "admin") {
+          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'");
+          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede eliminar al último administrador de ABIS." });
+        }
         await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
         return res.json({ ok: true });
       } catch (dbErr) {
@@ -262,7 +265,12 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
           "Content-Type": "application/json",
           "X-Internal-Token": process.env.SECRET_KEY || "",
         },
-        body: JSON.stringify({ id, rol_siad: req.body.rol_siad || rol, rol: req.body.rol_siad || rol }),
+        body: JSON.stringify({
+          id,
+          rol_siad: req.body.rol_siad,
+          rol_abis: req.body.rol_abis,
+          rol: req.body.rol_siad || req.body.rol || rol
+        }),
       });
       let data = null;
       try {

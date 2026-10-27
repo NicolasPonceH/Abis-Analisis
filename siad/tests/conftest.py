@@ -31,6 +31,15 @@ def reset_test_database():
             cur.execute("DROP TABLE IF EXISTS documentos CASCADE")
         conn.commit()
     db.init_schema()
+    from werkzeug.security import generate_password_hash
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
+            if not cur.fetchone():
+                db.create_user("admin", generate_password_hash("test-only-password"), rol_abis="admin", rol_siad="admin")
+            else:
+                cur.execute("UPDATE usuarios SET password_hash = %s, rol_siad = 'admin', rol_abis = 'admin' WHERE username = 'admin'", (generate_password_hash("test-only-password"),))
+        conn.commit()
     yield
 
 
@@ -44,6 +53,8 @@ def client():
             sess["user_id"] = 1
             sess["username"] = "admin"
             sess["rol"] = "admin"
+            sess["rol_siad"] = "admin"
+            sess["rol_abis"] = "admin"
             sess["autenticado"] = True
         yield test_client
 

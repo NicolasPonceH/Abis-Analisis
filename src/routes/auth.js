@@ -101,7 +101,7 @@ function registerAuthRoutes(app, { pool, jwt, secret, env = process.env, localRe
           "Content-Type": "application/json",
           "X-Internal-Token": secret,
         },
-        body: JSON.stringify({ username, password, nombre_completo }),
+        body: JSON.stringify({ username, password, nombre_completo, rol_abis: "operador", rol_siad: "operador" }),
       });
       if (authRes.ok) {
         const data = await authRes.json();
@@ -121,7 +121,11 @@ function registerAuthRoutes(app, { pool, jwt, secret, env = process.env, localRe
       sameSite: "lax",
       path: "/",
     });
+    res.clearCookie("abis_auth", { path: "/analisis" });
     res.clearCookie("siad_session", { path: "/" });
+    res.clearCookie("siad_session", { path: "/analisis" });
+    res.clearCookie("session", { path: "/" });
+    res.clearCookie("session", { path: "/analisis" });
   };
   app.get("/logout", (req, res) => {
     clearAuthCookies(res);
