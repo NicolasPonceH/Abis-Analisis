@@ -56,7 +56,22 @@
 
         <a href="{{ url_for('configuracion', section='administracion') }}" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 {% if section == 'administracion' %}bg-[#00234c] text-white shadow-lg shadow-blue-900/30 scale-[1.02] border-l-4 border-[#ffd100]{% else %}text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
           <span class="material-symbols-outlined text-[26px]">admin_panel_settings</span>
-          <span>Administración</span>
+          <span class="flex-1">Administración</span>
+          {% if not is_admin and session.get('rol_siad') != 'admin' %}
+          <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300/50">Admin</span>
+          {% endif %}
+        </a>
+
+        <div class="px-4 pt-5 pb-2 text-xs lg:text-sm font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider border-t-2 border-slate-100 dark:border-slate-800 mt-3">Plataformas</div>
+
+        <a href="/" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 text-slate-700 dark:text-slate-300 hover:bg-amber-50 hover:text-amber-900 dark:hover:bg-slate-800/80">
+          <span class="material-symbols-outlined text-[26px] text-amber-500">grid_view</span>
+          <span>Portal Central</span>
+        </a>
+
+        <a href="/abis" class="flex items-center gap-4 px-5 py-4 rounded-2xl font-extrabold text-base lg:text-lg transition-all duration-200 text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-900 dark:hover:bg-slate-800/80">
+          <span class="material-symbols-outlined text-[26px] text-[#002855] dark:text-blue-400">fingerprint</span>
+          <span>Sistema ABIS</span>
         </a>
 
       </div>
@@ -239,12 +254,13 @@
 
       {% elif section == 'administracion' %}
       <!-- ==================== SECCIÓN 3: ADMINISTRACIÓN ==================== -->
+      {% if is_admin or session.get('rol_siad') == 'admin' %}
       <div class="flex flex-col gap-8">
 
         <!-- Banner Titulo de Administracion -->
         <div class="mb-2">
           <h2 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Panel de Administración</h2>
-          <p class="text-sm lg:text-base text-slate-500 dark:text-slate-400 mt-1">Gestiona cuentas y el acceso al módulo SIAD. El rol ABIS se administra por separado desde ABIS.</p>
+          <p class="text-sm lg:text-base text-slate-500 dark:text-slate-400 mt-1">Gestiona cuentas de usuario y niveles de acceso tanto para SIAD (Análisis Documental) como para ABIS (Biometría Facial y Dactilar).</p>
         </div>
 
         <!-- Tarjeta 1: Añadir usuarios -->
@@ -264,11 +280,27 @@
               </div>
 
               <div>
-                <label for="siad-nuevo-rol" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Rol de SIAD</label>
+                <label for="siad-nuevo-nombre" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Nombre Completo (Opcional)</label>
+                <input type="text" id="siad-nuevo-nombre" placeholder="ej: Juan González" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="siad-nuevo-rol" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Rol SIAD (Análisis Documental)</label>
                 <select id="siad-nuevo-rol" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100">
-                  <option value="operador">Operador</option>
-                  <option value="admin">Administrador</option>
+                  <option value="operador">Operador (Análisis Documental)</option>
+                  <option value="admin">Administrador (Control Total SIAD)</option>
                   <option value="ninguno">Sin acceso a SIAD</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="siad-nuevo-rol-abis" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Rol ABIS (Biometría)</label>
+                <select id="siad-nuevo-rol-abis" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <option value="operador">Operador (Biometría Facial / Dactilar)</option>
+                  <option value="admin">Administrador (Control Total ABIS)</option>
+                  <option value="ninguno">Sin acceso a ABIS</option>
                 </select>
               </div>
             </div>
@@ -339,6 +371,7 @@
                 <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black uppercase tracking-wider">
                   <th class="py-4 px-6">Usuario</th>
                   <th class="py-4 px-6">Rol SIAD</th>
+                  <th class="py-4 px-6">Rol ABIS</th>
                   <th class="py-4 px-6">Estado</th>
                   <th class="py-4 px-6">Último Acceso</th>
                   <th class="py-4 px-6 text-right">Acciones</th>
@@ -349,14 +382,24 @@
                   {% for u in db_users %}
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                       <td class="py-4 px-6 font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
-                        <span class="material-symbols-outlined text-[24px] {% if u.rol_siad == 'admin' %}text-sky-500{% else %}text-slate-400{% endif %}">
-                          {% if u.rol_siad == 'admin' %}admin_panel_settings{% else %}person{% endif %}
+                        <span class="material-symbols-outlined text-[24px] {% if u.rol_siad == 'admin' or u.rol_abis == 'admin' %}text-sky-500{% else %}text-slate-400{% endif %}">
+                          {% if u.rol_siad == 'admin' or u.rol_abis == 'admin' %}admin_panel_settings{% else %}person{% endif %}
                         </span>
-                        {{ u.username }}
+                        <div>
+                          <div>{{ u.username }}</div>
+                          {% if u.nombre_completo and u.nombre_completo != u.username %}
+                          <div class="text-xs font-semibold text-slate-400 dark:text-slate-500">{{ u.nombre_completo }}</div>
+                          {% endif %}
+                        </div>
                       </td>
                       <td class="py-4 px-6">
                         <span class="{% if u.rol_siad == 'admin' %}bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300 border-sky-300{% elif u.rol_siad == 'operador' %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300{% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-red-300{% endif %} font-black px-3.5 py-1 rounded-xl text-xs uppercase tracking-wider border">
                           {{ 'Admin' if u.rol_siad == 'admin' else ('Operador' if u.rol_siad == 'operador' else 'Sin acceso') }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-6">
+                        <span class="{% if u.rol_abis == 'admin' %}bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border-purple-300{% elif u.rol_abis == 'operador' %}bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border-blue-300{% else %}bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-300{% endif %} font-black px-3.5 py-1 rounded-xl text-xs uppercase tracking-wider border">
+                          {{ 'Admin' if u.rol_abis == 'admin' else ('Operador' if u.rol_abis == 'operador' else 'Sin acceso') }}
                         </span>
                       </td>
                       <td class="py-4 px-6">
@@ -369,8 +412,8 @@
                       </td>
                       <td class="py-4 px-6 text-right">
                         <div class="flex items-center justify-end gap-2.5">
-                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" data-rol="{{ u.rol_siad or 'operador' }}" onclick="abrirModalRolDesdeBoton(this)" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar rol SIAD">
-                            <span class="material-symbols-outlined text-[18px]">edit</span> Rol
+                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" data-rol-siad="{{ u.rol_siad or 'operador' }}" data-rol-abis="{{ u.rol_abis or 'ninguno' }}" data-rol="{{ u.rol_siad or 'operador' }}" onclick="abrirModalRolDesdeBoton(this)" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar roles SIAD y ABIS">
+                            <span class="material-symbols-outlined text-[18px]">edit</span> Roles
                           </button>
                           <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" onclick="abrirModalPasswordDesdeBoton(this)" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 shadow-sm hover:shadow" title="Restablecer contraseña">
                             <span class="material-symbols-outlined text-[18px]">key</span> Clave
@@ -384,7 +427,7 @@
                   {% endfor %}
                 {% else %}
                   <tr>
-                    <td colspan="5" class="py-12 text-center text-slate-400 font-bold">
+                    <td colspan="6" class="py-12 text-center text-slate-400 font-bold">
                       <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">folder_open</span>
                       No hay usuarios registrados
                     </td>
@@ -396,6 +439,58 @@
         </div>
 
       </div>
+      {% else %}
+      <!-- ==================== MENSAJE AMIGABLE: ACCESO RESTINGIDO ==================== -->
+      <div class="flex flex-col gap-6">
+        <div class="bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/80 rounded-3xl border-2 border-amber-300/90 dark:border-amber-500/40 shadow-xl p-8 lg:p-12 relative overflow-hidden">
+          
+          <!-- Elemento decorativo de fondo -->
+          <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-amber-400/10 dark:bg-amber-400/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-amber-200/70 dark:border-slate-800">
+            <div class="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-amber-500/25 shrink-0 border-2 border-amber-300">
+              <span class="material-symbols-outlined text-[36px] lg:text-[44px]">shield_person</span>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <div class="flex flex-wrap items-center gap-3">
+                <h2 class="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Acceso Reservado a Administradores</h2>
+                <span class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-100 dark:bg-blue-950/80 text-[#002855] dark:text-blue-300 border border-blue-200 dark:border-blue-800">Rol Actual: Operador</span>
+              </div>
+              <p class="text-sm lg:text-base font-semibold text-slate-600 dark:text-slate-400">Esta sección de gestión de cuentas y privilegios requiere perfil de Administrador Policial.</p>
+            </div>
+          </div>
+
+          <div class="py-6 flex flex-col gap-4 text-slate-700 dark:text-slate-300 text-sm lg:text-base leading-relaxed font-medium">
+            <p>
+              Estimado(a) funcionario(a), su cuenta institucional se encuentra <strong>activa y con acceso operativo completo</strong> para todas las tareas de 
+              <strong>Análisis Documental, Procesamiento OCR, Historial Pericial y Estadísticas</strong>.
+            </p>
+            <div class="bg-amber-50/80 dark:bg-slate-800/80 border-l-4 border-amber-400 p-4 rounded-xl flex items-start gap-3 text-xs lg:text-sm text-slate-700 dark:text-slate-300">
+              <span class="material-symbols-outlined text-[24px] text-amber-500 shrink-0">info</span>
+              <div>
+                <strong>Información de Seguridad:</strong> La creación de nuevos usuarios, la modificación de roles y el restablecimiento de contraseñas de terceros están restringidos por políticas de seguridad institucional. Si requiere estas atribuciones, solicite la elevación de perfil a su Jefatura o al Administrador del Sistema.
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-slate-200/60 dark:border-slate-800 flex flex-wrap items-center gap-4">
+            <a href="{{ url_for('configuracion', section='general') }}" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-[#00234c] hover:bg-[#003875] text-white font-black text-sm lg:text-base shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+              <span class="material-symbols-outlined text-[20px]">tune</span>
+              <span>Ir a Ajustes Generales</span>
+            </a>
+            <a href="{{ url_for('index') }}" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#001733] font-black text-sm lg:text-base shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 border border-amber-500">
+              <span class="material-symbols-outlined text-[20px]">document_scanner</span>
+              <span>Procesamiento OCR</span>
+            </a>
+            <a href="/" class="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm lg:text-base transition-colors">
+              <span class="material-symbols-outlined text-[20px]">grid_view</span>
+              <span>Portal de Sistemas</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {% endif %}
       {% endif %}
 
     </div>
@@ -513,7 +608,9 @@
   async function crearUsuarioAdminSIAD(e) {
     e.preventDefault();
     var u = document.getElementById('siad-nuevo-usuario').value;
-    var r = document.getElementById('siad-nuevo-rol').value;
+    var nc = document.getElementById('siad-nuevo-nombre') ? document.getElementById('siad-nuevo-nombre').value : u;
+    var r_siad = document.getElementById('siad-nuevo-rol').value;
+    var r_abis = document.getElementById('siad-nuevo-rol-abis').value;
     var p1 = document.getElementById('siad-nuevo-password').value;
     var p2 = document.getElementById('siad-nuevo-password-confirm').value;
     var fb = document.getElementById('siad-feedback-usuario');
@@ -536,12 +633,19 @@
       var res = await fetch("{{ url_for('api_admin_create_user') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p1, rol_siad: r, rol: r })
+        body: JSON.stringify({
+          username: u,
+          nombre_completo: nc || u,
+          password: p1,
+          rol_siad: r_siad,
+          rol_abis: r_abis,
+          rol: r_siad
+        })
       });
       var data = await res.json();
       if (data.ok) {
         fb.className = 'text-sm font-bold p-4 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300';
-        fb.textContent = 'Usuario registrado exitosamente en el sistema.';
+        fb.textContent = 'Usuario registrado exitosamente en el sistema con sus roles asignados.';
         fb.classList.remove('hidden');
         setTimeout(function() { location.reload(); }, 1000);
       } else {
@@ -595,7 +699,12 @@
   // --- Funciones adaptadoras desde atributos data-* ---
   function abrirModalRolDesdeBoton(btn) {
     if (!btn) return;
-    abrirModalRol(btn.getAttribute('data-user-id'), btn.getAttribute('data-username'), btn.getAttribute('data-rol'));
+    abrirModalRol(
+      btn.getAttribute('data-user-id'),
+      btn.getAttribute('data-username'),
+      btn.getAttribute('data-rol-siad') || btn.getAttribute('data-rol'),
+      btn.getAttribute('data-rol-abis') || 'ninguno'
+    );
   }
 
   function abrirModalPasswordDesdeBoton(btn) {
@@ -609,23 +718,41 @@
   }
 
   // --- Modal Rol ---
-  function abrirModalRol(id, username, currentRol) {
+  function abrirModalRol(id, username, currentRolSiad, currentRolAbis) {
     document.getElementById('modal-rol-user-id').value = id;
     document.getElementById('modal-rol-user-label').textContent = '@' + username;
-    var normalizedRol = (currentRol || 'operador').toString().trim().toLowerCase();
-    var radios = document.getElementsByName('modal-rol-radio');
-    var found = false;
-    for (var r of radios) {
-      if (r.value === normalizedRol) {
+    
+    var normSiad = (currentRolSiad || 'operador').toString().trim().toLowerCase();
+    var normAbis = (currentRolAbis || 'ninguno').toString().trim().toLowerCase();
+
+    var radiosSiad = document.getElementsByName('modal-rol-siad-radio');
+    var foundSiad = false;
+    for (var r of radiosSiad) {
+      if (r.value === normSiad) {
         r.checked = true;
-        found = true;
+        foundSiad = true;
       } else {
         r.checked = false;
       }
     }
-    if (!found && radios.length > 0) {
-      radios[1].checked = true;
+    if (!foundSiad && radiosSiad.length > 0) {
+      radiosSiad[1].checked = true;
     }
+
+    var radiosAbis = document.getElementsByName('modal-rol-abis-radio');
+    var foundAbis = false;
+    for (var ra of radiosAbis) {
+      if (ra.value === normAbis) {
+        ra.checked = true;
+        foundAbis = true;
+      } else {
+        ra.checked = false;
+      }
+    }
+    if (!foundAbis && radiosAbis.length > 0) {
+      radiosAbis[2].checked = true;
+    }
+
     document.getElementById('modal-rol-siad').classList.remove('hidden');
   }
 
@@ -635,14 +762,24 @@
 
   async function confirmarCambioRol() {
     var id = document.getElementById('modal-rol-user-id').value;
-    var radios = document.getElementsByName('modal-rol-radio');
-    var selectedRol = 'operador';
-    for (var r of radios) {
+    var radiosSiad = document.getElementsByName('modal-rol-siad-radio');
+    var selectedRolSiad = 'operador';
+    for (var r of radiosSiad) {
       if (r.checked) {
-        selectedRol = r.value;
+        selectedRolSiad = r.value;
         break;
       }
     }
+
+    var radiosAbis = document.getElementsByName('modal-rol-abis-radio');
+    var selectedRolAbis = 'ninguno';
+    for (var ra of radiosAbis) {
+      if (ra.checked) {
+        selectedRolAbis = ra.value;
+        break;
+      }
+    }
+
     var btn = document.getElementById('btn-save-rol');
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Guardando...';
@@ -650,7 +787,12 @@
       var res = await fetch("{{ url_for('api_admin_update_role') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, rol_siad: selectedRol })
+        body: JSON.stringify({
+          id: id,
+          rol_siad: selectedRolSiad,
+          rol_abis: selectedRolAbis,
+          rol: selectedRolSiad
+        })
       });
       var data = null;
       try {
@@ -660,7 +802,7 @@
       }
       if (data && data.ok) {
         cerrarModalRol();
-        mostrarToast('Rol actualizado correctamente a ' + selectedRol.toUpperCase());
+        mostrarToast('Roles actualizados: SIAD (' + selectedRolSiad.toUpperCase() + ') | ABIS (' + selectedRolAbis.toUpperCase() + ')');
         setTimeout(function() { location.reload(); }, 800);
       } else {
         var msg = (data && data.error) ? data.error : ('Error al modificar rol (código ' + res.status + ')');
@@ -671,7 +813,7 @@
       mostrarToast('Error de conexión con el servidor', true);
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">save</span> Guardar Rol';
+      btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">save</span> Guardar Roles';
     }
   }
 
@@ -775,16 +917,16 @@
   </div>
 </div>
 
-<!-- Modal 1: Cambiar Rol SIAD -->
+<!-- Modal 1: Cambiar Roles SIAD y ABIS -->
 <div id="modal-rol-siad" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden transition-opacity duration-200">
-  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-2xl max-w-xl w-full overflow-hidden p-8 flex flex-col gap-6">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full overflow-hidden p-8 flex flex-col gap-6">
     <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-5">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border-2 border-sky-300 dark:border-sky-800 shrink-0 shadow-sm">
           <span class="material-symbols-outlined text-[32px]">admin_panel_settings</span>
         </div>
         <div>
-          <h3 class="font-black text-slate-900 dark:text-slate-100 text-2xl tracking-tight">Modificar Rol SIAD</h3>
+          <h3 class="font-black text-slate-900 dark:text-slate-100 text-2xl tracking-tight">Modificar Privilegios</h3>
           <div class="mt-1 flex items-center gap-2">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Usuario:</span>
             <span class="font-black text-sm px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700" id="modal-rol-user-label">@usuario</span>
@@ -798,47 +940,88 @@
 
     <input type="hidden" id="modal-rol-user-id">
 
-    <div class="flex flex-col gap-3.5">
-      <label class="text-xs lg:text-sm font-black text-slate-500 uppercase tracking-wider">Seleccione el nivel de acceso:</label>
-      
-      <label class="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 cursor-pointer transition-all has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50/70 dark:has-[:checked]:bg-sky-950/30 has-[:checked]:shadow-md">
-        <div class="flex items-center gap-4">
-          <div class="w-11 h-11 rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[26px]">shield_person</span>
-          </div>
-          <div>
-            <div class="font-black text-base text-slate-900 dark:text-slate-100">Administrador</div>
-            <div class="text-xs lg:text-sm text-slate-500 font-medium">Control total, gestión de cuentas y auditoría</div>
-          </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Columna 1: Rol en SIAD -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-2 text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          <span class="material-symbols-outlined text-[18px] text-sky-500">description</span>
+          Rol SIAD (Análisis Documental)
         </div>
-        <input type="radio" name="modal-rol-radio" value="admin" class="w-5 h-5 text-sky-600 cursor-pointer">
-      </label>
+        
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 cursor-pointer transition-all has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50/70 dark:has-[:checked]:bg-sky-950/30">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-sky-600 dark:text-sky-400 text-[22px]">shield_person</span>
+            <div>
+              <div class="font-black text-sm text-slate-900 dark:text-slate-100">Administrador</div>
+              <div class="text-[11px] text-slate-500 font-medium">Control total SIAD</div>
+            </div>
+          </div>
+          <input type="radio" name="modal-rol-siad-radio" value="admin" class="w-4 h-4 text-sky-600 cursor-pointer">
+        </label>
 
-      <label class="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 cursor-pointer transition-all has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50/70 dark:has-[:checked]:bg-sky-950/30 has-[:checked]:shadow-md">
-        <div class="flex items-center gap-4">
-          <div class="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[26px]">badge</span>
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 cursor-pointer transition-all has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50/70 dark:has-[:checked]:bg-sky-950/30">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-slate-600 dark:text-slate-300 text-[22px]">badge</span>
+            <div>
+              <div class="font-black text-sm text-slate-900 dark:text-slate-100">Operador</div>
+              <div class="text-[11px] text-slate-500 font-medium">OCR y análisis documental</div>
+            </div>
           </div>
-          <div>
-            <div class="font-black text-base text-slate-900 dark:text-slate-100">Operador</div>
-            <div class="text-xs lg:text-sm text-slate-500 font-medium">Procesamiento OCR, análisis y exportación</div>
-          </div>
-        </div>
-        <input type="radio" name="modal-rol-radio" value="operador" class="w-5 h-5 text-sky-600 cursor-pointer">
-      </label>
+          <input type="radio" name="modal-rol-siad-radio" value="operador" class="w-4 h-4 text-sky-600 cursor-pointer">
+        </label>
 
-      <label class="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-red-500 cursor-pointer transition-all has-[:checked]:border-red-500 has-[:checked]:bg-red-50/70 dark:has-[:checked]:bg-red-950/30 has-[:checked]:shadow-md">
-        <div class="flex items-center gap-4">
-          <div class="w-11 h-11 rounded-xl bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[26px]">block</span>
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-red-500 cursor-pointer transition-all has-[:checked]:border-red-500 has-[:checked]:bg-red-50/70 dark:has-[:checked]:bg-red-950/30">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-[22px]">block</span>
+            <div>
+              <div class="font-black text-sm text-slate-900 dark:text-slate-100">Sin Acceso</div>
+              <div class="text-[11px] text-slate-500 font-medium">Bloquear módulo SIAD</div>
+            </div>
           </div>
-          <div>
-            <div class="font-black text-base text-slate-900 dark:text-slate-100">Sin Acceso</div>
-            <div class="text-xs lg:text-sm text-slate-500 font-medium">Revoca el ingreso a la plataforma SIAD</div>
-          </div>
+          <input type="radio" name="modal-rol-siad-radio" value="ninguno" class="w-4 h-4 text-red-600 cursor-pointer">
+        </label>
+      </div>
+
+      <!-- Columna 2: Rol en ABIS -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-2 text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          <span class="material-symbols-outlined text-[18px] text-purple-500">fingerprint</span>
+          Rol ABIS (Biometría)
         </div>
-        <input type="radio" name="modal-rol-radio" value="ninguno" class="w-5 h-5 text-red-600 cursor-pointer">
-      </label>
+        
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-purple-500 cursor-pointer transition-all has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50/70 dark:has-[:checked]:bg-purple-950/30">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-[22px]">manage_accounts</span>
+            <div>
+              <div class="font-black text-sm text-slate-900 dark:text-slate-100">Administrador</div>
+              <div class="text-[11px] text-slate-500 font-medium">Control total ABIS</div>
+            </div>
+          </div>
+          <input type="radio" name="modal-rol-abis-radio" value="admin" class="w-4 h-4 text-purple-600 cursor-pointer">
+        </label>
+
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-purple-500 cursor-pointer transition-all has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50/70 dark:has-[:checked]:bg-purple-950/30">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-slate-600 dark:text-slate-300 text-[22px]">fingerprint</span>
+            <div>
+              <div class="font-black text-sm text-slate-900 dark:text-slate-100">Operador</div>
+              <div class="text-[11px] text-slate-500 font-medium">Búsqueda 1:N y cotejo</div>
+            </div>
+          </div>
+          <input type="radio" name="modal-rol-abis-radio" value="operador" class="w-4 h-4 text-purple-600 cursor-pointer">
+        </label>
+
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-red-500 cursor-pointer transition-all has-[:checked]:border-red-500 has-[:checked]:bg-red-50/70 dark:has-[:checked]:bg-red-950/30">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-[22px]">block</span>
+            <div>
+              <div class="font-black text-sm text-slate-900 dark:text-slate-100">Sin Acceso</div>
+              <div class="text-[11px] text-slate-500 font-medium">Bloquear módulo ABIS</div>
+            </div>
+          </div>
+          <input type="radio" name="modal-rol-abis-radio" value="ninguno" class="w-4 h-4 text-red-600 cursor-pointer">
+        </label>
+      </div>
     </div>
 
     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -846,7 +1029,7 @@
         Cancelar
       </button>
       <button onclick="confirmarCambioRol()" id="btn-save-rol" type="button" class="py-3.5 px-7 rounded-2xl font-black text-sm lg:text-base text-white bg-[#00234c] hover:bg-[#003875] border-b-4 border-[#ffd100] shadow-lg shadow-blue-900/20 active:scale-95 transition-all flex items-center gap-2.5 cursor-pointer">
-        <span class="material-symbols-outlined text-[20px]">save</span> Guardar Rol
+        <span class="material-symbols-outlined text-[20px]">save</span> Guardar Roles
       </button>
     </div>
   </div>

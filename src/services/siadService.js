@@ -82,16 +82,22 @@ function iniciarSIAD(envVars = {}) {
   });
   
   siadProcess.on('exit', (code) => {
-    if (code !== null && code !== 0) {
-      console.warn(`[SIAD] Proceso terminó inesperadamente con código ${code}`);
-    } else {
-      console.log(`[SIAD] Proceso detenido limpiamente.`);
-    }
     siadProcess = null;
+    if (!isShuttingDown) {
+      console.warn(`[SIAD] Proceso terminó (${code}). Reiniciando módulo automáticamente...`);
+      setTimeout(() => {
+        if (!isShuttingDown) iniciarSIAD(envVars);
+      }, 800);
+    } else {
+      console.log(`[SIAD] Proceso detenido.`);
+    }
   });
 }
 
+let isShuttingDown = false;
+
 function detenerSIAD() {
+  isShuttingDown = true;
   if (siadProcess) {
     console.log('🛑 Deteniendo módulo de Análisis Documental (SIAD)...');
     if (process.platform === 'win32') {
