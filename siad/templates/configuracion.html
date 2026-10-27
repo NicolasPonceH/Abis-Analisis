@@ -276,12 +276,35 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="siad-nuevo-password" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Contraseña Inicial</label>
-                <input type="password" id="siad-nuevo-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+                <div class="relative">
+                  <input type="password" id="siad-nuevo-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 pr-12 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+                  <button type="button" onclick="togglePasswordVisibility('siad-nuevo-password', this)" title="Ver / Ocultar contraseña" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[22px]">visibility</span>
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label for="siad-nuevo-password-confirm" class="block text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Confirmar Contraseña</label>
-                <input type="password" id="siad-nuevo-password-confirm" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+                <div class="relative">
+                  <input type="password" id="siad-nuevo-password-confirm" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 pr-12 text-sm lg:text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+                  <button type="button" onclick="togglePasswordVisibility('siad-nuevo-password-confirm', this)" title="Ver / Ocultar contraseña" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[22px]">visibility</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indicador dinámico de caracteres y coincidencia en tiempo real -->
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold transition-all">
+              <div class="flex items-center gap-2" id="siad-pwd-req-container">
+                <span id="siad-pwd-req-icon" class="material-symbols-outlined text-[18px] text-slate-400">info</span>
+                <span id="siad-pwd-req-label" class="text-slate-600 dark:text-slate-300">Mínimo 6 caracteres requeridos</span>
+                <span id="siad-pwd-count-badge" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">0/6</span>
+              </div>
+              <div id="siad-pwd-match-container" class="hidden items-center gap-2">
+                <span id="siad-pwd-match-icon" class="material-symbols-outlined text-[18px]"></span>
+                <span id="siad-pwd-match-text"></span>
               </div>
             </div>
 
@@ -381,6 +404,14 @@
 
 </div>
 
+<style>
+  /* Ocultar iconos nativos de contraseña del navegador (Edge / Chromium) para usar exclusivamente los controles personalizados */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+</style>
+
 <script>
   (function () {
     var root = document.documentElement;
@@ -407,7 +438,76 @@
         localStorage.setItem('fontSize', slider.value);
       });
     }
+
+    // Inicializar listeners para validación en tiempo real de contraseñas
+    var p1Input = document.getElementById('siad-nuevo-password');
+    var p2Input = document.getElementById('siad-nuevo-password-confirm');
+    if (p1Input && p2Input) {
+      p1Input.addEventListener('input', actualizarValidacionPasswordSIAD);
+      p2Input.addEventListener('input', actualizarValidacionPasswordSIAD);
+    }
   })();
+
+  function actualizarValidacionPasswordSIAD() {
+    var p1El = document.getElementById('siad-nuevo-password');
+    var p2El = document.getElementById('siad-nuevo-password-confirm');
+    if (!p1El || !p2El) return;
+
+    var p1 = p1El.value;
+    var p2 = p2El.value;
+
+    var reqIcon = document.getElementById('siad-pwd-req-icon');
+    var reqLabel = document.getElementById('siad-pwd-req-label');
+    var countBadge = document.getElementById('siad-pwd-count-badge');
+    var matchContainer = document.getElementById('siad-pwd-match-container');
+    var matchIcon = document.getElementById('siad-pwd-match-icon');
+    var matchText = document.getElementById('siad-pwd-match-text');
+
+    if (!reqIcon || !reqLabel || !countBadge || !matchContainer) return;
+
+    // Validación de longitud
+    countBadge.textContent = p1.length + '/6';
+    if (p1.length === 0) {
+      reqIcon.textContent = 'info';
+      reqIcon.className = 'material-symbols-outlined text-[18px] text-slate-400';
+      reqLabel.textContent = 'Mínimo 6 caracteres requeridos';
+      reqLabel.className = 'text-slate-600 dark:text-slate-300 font-bold';
+      countBadge.className = 'px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
+    } else if (p1.length >= 6) {
+      reqIcon.textContent = 'check_circle';
+      reqIcon.className = 'material-symbols-outlined text-[18px] text-emerald-500';
+      reqLabel.textContent = 'Longitud válida (mínimo cumplido)';
+      reqLabel.className = 'text-emerald-700 dark:text-emerald-400 font-black';
+      countBadge.className = 'px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700';
+    } else {
+      reqIcon.textContent = 'warning';
+      reqIcon.className = 'material-symbols-outlined text-[18px] text-amber-500';
+      var faltan = 6 - p1.length;
+      reqLabel.textContent = 'Faltan ' + faltan + ' caracter' + (faltan > 1 ? 'es' : '');
+      reqLabel.className = 'text-amber-700 dark:text-amber-400 font-black';
+      countBadge.className = 'px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+    }
+
+    // Validación de coincidencia
+    if (p2.length > 0) {
+      matchContainer.classList.remove('hidden');
+      matchContainer.classList.add('flex');
+      if (p1 === p2) {
+        matchIcon.textContent = 'check_circle';
+        matchIcon.className = 'material-symbols-outlined text-[18px] text-emerald-500';
+        matchText.textContent = 'Las contraseñas coinciden';
+        matchText.className = 'text-emerald-700 dark:text-emerald-400 font-black';
+      } else {
+        matchIcon.textContent = 'cancel';
+        matchIcon.className = 'material-symbols-outlined text-[18px] text-rose-500';
+        matchText.textContent = 'Las contraseñas no coinciden';
+        matchText.className = 'text-rose-600 dark:text-rose-400 font-black';
+      }
+    } else {
+      matchContainer.classList.add('hidden');
+      matchContainer.classList.remove('flex');
+    }
+  }
 
   async function crearUsuarioAdminSIAD(e) {
     e.preventDefault();
@@ -416,6 +516,13 @@
     var p1 = document.getElementById('siad-nuevo-password').value;
     var p2 = document.getElementById('siad-nuevo-password-confirm').value;
     var fb = document.getElementById('siad-feedback-usuario');
+
+    if (p1.length < 6) {
+      fb.className = 'text-sm font-bold p-4 rounded-xl bg-amber-100 text-amber-800 border border-amber-300';
+      fb.textContent = 'La contraseña debe tener un mínimo de 6 caracteres.';
+      fb.classList.remove('hidden');
+      return;
+    }
 
     if (p1 !== p2) {
       fb.className = 'text-sm font-bold p-4 rounded-xl bg-red-100 text-red-800 border border-red-300';
@@ -473,13 +580,14 @@
 
   function togglePasswordVisibility(inputId, btn) {
     var inp = document.getElementById(inputId);
-    var icon = btn.querySelector('.material-symbols-outlined');
+    if (!inp) return;
+    var icon = btn ? btn.querySelector('.material-symbols-outlined') : null;
     if (inp.type === 'password') {
       inp.type = 'text';
-      icon.textContent = 'visibility_off';
+      if (icon) icon.textContent = 'visibility_off';
     } else {
       inp.type = 'password';
-      icon.textContent = 'visibility';
+      if (icon) icon.textContent = 'visibility';
     }
   }
 
