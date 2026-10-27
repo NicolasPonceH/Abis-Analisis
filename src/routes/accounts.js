@@ -69,8 +69,13 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
   });
 
   app.post("/api/admin/create-user", requireAuth, express.json(), async (req, res) => {
-    if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
-    const { username, password, rol } = req.body;
+    if (req.user.rol !== "admin" && req.user.rol_abis !== "admin" && req.user.rol_siad !== "admin") {
+      return res.status(403).json({ error: "No tienes permisos de administrador." });
+    }
+    const { username, password } = req.body;
+    const rol = req.body.rol || req.body.rol_siad || req.body.rol_abis;
+    const rol_siad = req.body.rol_siad || req.body.rol || "operador";
+    const rol_abis = req.body.rol_abis || (req.body.rol_siad ? "ninguno" : req.body.rol || "operador");
     const normalizedUsername = typeof username === "string" ? username.trim() : "";
     if (normalizedUsername.length < 3 || typeof password !== "string" || password.length < 6 || !["admin", "operador", "ninguno"].includes(rol)) {
       return res.status(400).json({ error: "Usuario, contraseña o rol no válidos." });
@@ -89,8 +94,8 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
           username: normalizedUsername,
           password,
           nombre_completo: normalizedUsername,
-          rol_abis: rol,
-          rol_siad: "ninguno",
+          rol_abis: rol_abis,
+          rol_siad: rol_siad,
         })
       });
       const data = await createRes.json();
@@ -184,29 +189,122 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
     }
   });
 
-  app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res) => {
-    if (req.user.rol !== "admin") {
+  app.post("/api/admin/delete-user", requireAuth, express.json(), async (req, res) => {
+    if (req.user.rol !== "admin" && req.user.rol_abis !== "admin" && req.user.rol_siad !== "admin") {
       return res.status(403).json({ error: "No tienes permisos de administrador." });
     }
-    const { id, rol } = req.body;
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: "Identificador de usuario no válido." });
+    }
+    if (Number(id) === Number(req.user.id) || String(req.user.id) === String(id)) {
+      return res.status(400).json({ error: "No puedes eliminar tu propia cuenta mientras estás en sesión activa." });
+    }
+
+    try {
+      const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+      const delRes = await fetch(`${siadUrl}/api/admin/delete-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Token": process.env.SECRET_KEY || "",
+        },
+        body: JSON.stringify({ id }),
+      });
+      let data = null;
+      try {
+        data = await delRes.json();
+      } catch (_) {
+        console.warn("SIAD delete-user no devolvió JSON:", delRes.status);
+      }
+      if (data && data.ok) return res.json({ ok: true });
+      if (data && data.error) return res.status(400).json({ error: data.error });
+      return res.status(delRes.ok ? 200 : 400).json({ error: "Error al eliminar usuario en el sistema." });
+    } catch (err) {
+      console.error("Error in delete-user forwarding:", err);
+      // Fallback directo a PostgreSQL si SIAD estuviera reiniciándose
+      try {
+        const targetRes = await pool.query("SELECT username, rol_siad, rol_abis FROM usuarios WHERE id = $1", [id]);
+        if (targetRes.rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado." });
+        const target = targetRes.rows[0];
+        if (target.rol_siad === "admin") {
+          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_siad = 'admin'");
+          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede eliminar al último administrador de SIAD." });
+        }
+        await pool.query("UPDATE documentos SET usuario_username = NULL WHERE usuario_username = $1", [target.username]);
+        await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
+        return res.json({ ok: true });
+      } catch (dbErr) {
+        console.error("Error fallback delete user:", dbErr);
+        return res.status(500).json({ error: "Error de servidor al eliminar el usuario." });
+      }
+    }
+  });
+
+  app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res) => {
+    if (req.user.rol !== "admin" && req.user.rol_abis !== "admin" && req.user.rol_siad !== "admin") {
+      return res.status(403).json({ error: "No tienes permisos de administrador." });
+    }
+    const { id } = req.body;
+    const rol = req.body.rol_siad || req.body.rol || req.body.rol_abis;
     if (!id || !rol) {
-      return res.status(400).json({ error: "Faltan datos." });
+      return res.status(400).json({ error: "Faltan datos de rol o identificador." });
     }
     if (!["admin", "operador", "ninguno"].includes(rol)) {
       return res.status(400).json({ error: "Rol no válido." });
     }
+
     try {
-      const target = await pool.query("SELECT rol_abis FROM usuarios WHERE id = $1", [id]);
-      if (!target.rows.length) return res.status(404).json({ error: "Usuario no encontrado." });
-      if (target.rows[0].rol_abis === "admin" && rol !== "admin") {
-        const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'");
-        if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede quitar el rol al último administrador de ABIS." });
+      const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+      const siadRes = await fetch(`${siadUrl}/api/admin/update-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Token": process.env.SECRET_KEY || "",
+        },
+        body: JSON.stringify({ id, rol_siad: req.body.rol_siad || rol, rol: req.body.rol_siad || rol }),
+      });
+      let data = null;
+      try {
+        data = await siadRes.json();
+      } catch (_) {
+        console.warn("SIAD update-role no devolvió JSON:", siadRes.status);
       }
-      await pool.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
-      res.json({ ok: true });
+      if (data && data.ok) return res.json({ ok: true });
+      if (data && data.error) return res.status(400).json({ error: data.error });
+
+      // Fallback a PostgreSQL directo
+      const target = await pool.query("SELECT rol_siad, rol_abis FROM usuarios WHERE id = $1", [id]);
+      if (!target.rows.length) return res.status(404).json({ error: "Usuario no encontrado." });
+      
+      const isSiadTarget = Boolean(req.body.rol_siad);
+      if (isSiadTarget) {
+        if (target.rows[0].rol_siad === "admin" && rol !== "admin") {
+          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_siad = 'admin'");
+          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede quitar el rol al último administrador de SIAD." });
+        }
+        await pool.query("UPDATE usuarios SET rol_siad = $1, rol = $1 WHERE id = $2", [rol, id]);
+      } else {
+        if (target.rows[0].rol_abis === "admin" && rol !== "admin") {
+          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'");
+          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede quitar el rol al último administrador de ABIS." });
+        }
+        await pool.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
+      }
+      return res.json({ ok: true });
     } catch (err) {
       console.error("Error updating user role:", err);
-      res.status(500).json({ error: "Error de base de datos." });
+      try {
+        const isSiad = Boolean(req.body.rol_siad);
+        if (isSiad) {
+          await pool.query("UPDATE usuarios SET rol_siad = $1, rol = $1 WHERE id = $2", [rol, id]);
+        } else {
+          await pool.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
+        }
+        return res.json({ ok: true });
+      } catch (dbErr) {
+        return res.status(500).json({ error: "Error de base de datos al actualizar el rol." });
+      }
     }
   });
 }
