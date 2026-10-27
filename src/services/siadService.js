@@ -1,7 +1,31 @@
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 let siadProcess = null;
+
+function liberarPuerto(port) {
+  if (process.platform === 'win32') {
+    try {
+      const output = execSync(`netstat -ano -p tcp | findstr :${port}`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString();
+      const lines = output.trim().split(/\r?\n/);
+      for (const line of lines) {
+        if (line.includes('LISTENING')) {
+          const parts = line.trim().split(/\s+/);
+          const pid = parts[parts.length - 1];
+          if (pid && pid !== '0' && pid !== String(process.pid)) {
+            console.log(`[SIAD] Liberando puerto ${port} ocupado por PID ${pid}...`);
+            try {
+              execSync(`taskkill /F /T /PID ${pid}`, { stdio: 'ignore' });
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (_) {
+      // Puerto libre o findstr no encontró coincidencias
+    }
+  }
+}
 
 function iniciarSIAD(envVars = {}) {
   const siadDir = path.join(__dirname, '..', '..', 'siad');
@@ -12,10 +36,13 @@ function iniciarSIAD(envVars = {}) {
     ? path.join(siadDir, '.venv', 'Scripts', 'python.exe')
     : path.join(siadDir, '.venv', 'bin', 'python');
     
-  const fs = require('fs');
   const pythonToUse = fs.existsSync(venvPython) ? venvPython : pythonCmd;
   
   const siadPort = envVars.SIAD_PORT || process.env.SIAD_PORT || '5001';
+
+  // Asegurar que no haya procesos zombies en el puerto antes de iniciar
+  liberarPuerto(siadPort);
+
   const env = {
     ...process.env,
     DATABASE_URL: process.env.DATABASE_URL,
@@ -27,7 +54,6 @@ function iniciarSIAD(envVars = {}) {
   siadProcess = spawn(pythonToUse, ['-m', 'waitress', '--listen=127.0.0.1:' + siadPort, 'app:app'], { cwd: siadDir, env, stdio: 'pipe' });
   
   siadProcess.stdout.on('data', (data) => {
-    // Filtrar algo de ruido, mostrar lo importante
     const msg = data.toString().trim();
     if (msg) console.log(`[SIAD] ${msg}`);
   });
@@ -38,7 +64,7 @@ function iniciarSIAD(envVars = {}) {
       const msg = rawLine.trim();
       if (!msg || msg.includes('WARNING: This is a development server')) continue;
 
-      // Werkzeug envía los logs de peticiones HTTP a stderr por defecto:
+      // Werkzeug/Waitress logs HTTP
       const httpMatch = msg.match(/"\s+(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+.*?\s+HTTP\/\d\.\d"\s+(\d{3})/i);
       if (httpMatch) {
         const statusCode = parseInt(httpMatch[1], 10);
@@ -68,9 +94,17 @@ function iniciarSIAD(envVars = {}) {
 function detenerSIAD() {
   if (siadProcess) {
     console.log('🛑 Deteniendo módulo de Análisis Documental (SIAD)...');
-    siadProcess.kill('SIGTERM');
+    if (process.platform === 'win32') {
+      try {
+        execSync(`taskkill /F /T /PID ${siadProcess.pid}`, { stdio: 'ignore' });
+      } catch (_) {}
+    } else {
+      siadProcess.kill('SIGTERM');
+    }
     siadProcess = null;
   }
 }
+
+process.on('exit', () => detenerSIAD());
 
 module.exports = { iniciarSIAD, detenerSIAD };
