@@ -368,15 +368,15 @@
                         {{ u.last_login or 'Nunca' }}
                       </td>
                       <td class="py-4 px-6 text-right">
-                        <div class="flex items-center justify-end gap-2">
-                          <button onclick="abrirModalRol({{ u.id }}, '{{ u.username }}', '{{ u.rol_siad }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1" title="Modificar rol SIAD">
-                            <span class="material-symbols-outlined text-[16px]">edit</span> Rol
+                        <div class="flex items-center justify-end gap-2.5">
+                          <button onclick="abrirModalRol({{ u.id }}, '{{ u.username }}', '{{ u.rol_siad }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar rol SIAD">
+                            <span class="material-symbols-outlined text-[18px]">edit</span> Rol
                           </button>
-                          <button onclick="abrirModalPassword({{ u.id }}, '{{ u.username }}')" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1" title="Restablecer contraseña">
-                            <span class="material-symbols-outlined text-[16px]">key</span> Clave
+                          <button onclick="abrirModalPassword({{ u.id }}, '{{ u.username }}')" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 shadow-sm hover:shadow" title="Restablecer contraseña">
+                            <span class="material-symbols-outlined text-[18px]">key</span> Clave
                           </button>
-                          <button onclick="abrirModalEliminar({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-extrabold text-xs py-2 px-3 rounded-xl transition-all border border-red-200 dark:border-red-800 flex items-center gap-1" title="Eliminar usuario del sistema">
-                            <span class="material-symbols-outlined text-[16px]">delete</span> Eliminar
+                          <button onclick="abrirModalEliminar({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white dark:bg-red-950/50 dark:hover:bg-red-600 dark:text-red-300 dark:hover:text-white font-black text-xs lg:text-sm py-2.5 px-4 rounded-xl transition-all border-2 border-red-200 dark:border-red-800 hover:border-red-600 shadow-sm hover:shadow-md flex items-center gap-1.5 cursor-pointer" title="Eliminar usuario del sistema">
+                            <span class="material-symbols-outlined text-[18px]">delete</span> Eliminar
                           </button>
                         </div>
                       </td>
@@ -685,7 +685,7 @@
   // --- Modal Eliminar ---
   function abrirModalEliminar(id, username) {
     document.getElementById('modal-eliminar-user-id').value = id;
-    document.getElementById('modal-eliminar-user-label').textContent = 'Usuario: @' + username;
+    document.getElementById('modal-eliminar-user-label').textContent = '@' + username;
     document.getElementById('modal-eliminar-siad').classList.remove('hidden');
   }
 
@@ -697,26 +697,33 @@
     var id = document.getElementById('modal-eliminar-user-id').value;
     var btn = document.getElementById('btn-confirmar-eliminar');
     btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Eliminando...';
+    btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Eliminando...';
     try {
       var res = await fetch('/api/admin/delete-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id })
       });
-      var data = await res.json();
-      if (data.ok) {
+      var data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.warn("Respuesta no parseable como JSON:", e);
+      }
+      if (data && data.ok) {
         cerrarModalEliminar();
         mostrarToast('Usuario eliminado correctamente del sistema');
-        setTimeout(function() { location.reload(); }, 900);
+        setTimeout(function() { location.reload(); }, 800);
       } else {
-        mostrarToast(data.error || 'No se pudo eliminar el usuario', true);
+        var msg = (data && data.error) ? data.error : ('Error al eliminar usuario (código ' + res.status + ')');
+        mostrarToast(msg, true);
       }
     } catch (err) {
-      mostrarToast('Error de conexión con el servidor', true);
+      console.error("Error en fetch delete-user:", err);
+      mostrarToast('Error de comunicación con el servidor', true);
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">delete</span> Sí, Eliminar Usuario';
+      btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">delete</span> Sí, Eliminar Usuario';
     }
   }
 </script>
@@ -843,29 +850,36 @@
 
 <!-- Modal 3: Confirmar Eliminación de Usuario -->
 <div id="modal-eliminar-siad" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden transition-opacity duration-200">
-  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-red-200 dark:border-red-900/60 shadow-2xl max-w-md w-full overflow-hidden p-6 flex flex-col gap-5">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center border border-red-300 shrink-0">
-        <span class="material-symbols-outlined text-[28px]">warning</span>
+  <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-red-300 dark:border-red-800 shadow-2xl max-w-xl w-full overflow-hidden p-8 flex flex-col gap-6">
+    <div class="flex items-center gap-5">
+      <div class="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-950/70 text-red-600 dark:text-red-400 flex items-center justify-center border-2 border-red-300 dark:border-red-800 shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[34px]">delete_forever</span>
       </div>
-      <div>
-        <h3 class="font-black text-slate-900 dark:text-slate-100 text-lg">¿Eliminar Usuario?</h3>
-        <p class="text-xs text-slate-500 font-bold" id="modal-eliminar-user-label">Usuario: -</p>
+      <div class="flex-1">
+        <h3 class="font-black text-slate-900 dark:text-slate-100 text-2xl tracking-tight">¿Eliminar Usuario?</h3>
+        <div class="mt-1 flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cuenta objetivo:</span>
+          <span class="font-black text-sm px-3 py-1 rounded-xl bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800/80" id="modal-eliminar-user-label">@usuario</span>
+        </div>
       </div>
+      <button onclick="cerrarModalEliminar()" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <span class="material-symbols-outlined text-[24px]">close</span>
+      </button>
     </div>
 
     <input type="hidden" id="modal-eliminar-user-id">
 
-    <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-xs text-red-700 dark:text-red-300 font-bold leading-relaxed">
-      Esta acción es permanente e irreversible. Se revocarán todas las sesiones activas y credenciales de acceso policial para esta cuenta en SIAD.
+    <div class="p-5 rounded-2xl bg-red-50 dark:bg-red-950/40 border-2 border-red-200 dark:border-red-900/60 text-sm font-bold text-red-800 dark:text-red-200 leading-relaxed flex items-start gap-3">
+      <span class="material-symbols-outlined text-[24px] text-red-600 shrink-0 mt-0.5">warning</span>
+      <span>Esta acción es <strong>permanente e irreversible</strong>. Se revocarán todas las sesiones activas, permisos de peritaje y credenciales de acceso institucional para esta cuenta en SIAD.</span>
     </div>
 
-    <div class="flex items-center justify-end gap-3 pt-2">
-      <button onclick="cerrarModalEliminar()" type="button" class="py-2.5 px-4 rounded-xl font-black text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <button onclick="cerrarModalEliminar()" type="button" class="py-3 px-6 rounded-2xl font-black text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 transition-all cursor-pointer">
         Cancelar
       </button>
-      <button onclick="confirmarEliminarUsuario()" id="btn-confirmar-eliminar" type="button" class="py-2.5 px-5 rounded-xl font-black text-xs text-white bg-red-600 hover:bg-red-700 shadow-md shadow-red-600/30 transition-all flex items-center gap-2">
-        <span class="material-symbols-outlined text-[16px]">delete</span> Sí, Eliminar Usuario
+      <button onclick="confirmarEliminarUsuario()" id="btn-confirmar-eliminar" type="button" class="py-3.5 px-7 rounded-2xl font-black text-sm lg:text-base text-white bg-red-600 hover:bg-red-700 active:scale-95 shadow-lg shadow-red-600/30 border-b-4 border-red-800 transition-all flex items-center gap-2.5 cursor-pointer">
+        <span class="material-symbols-outlined text-[22px]">delete</span> Sí, Eliminar Usuario
       </button>
     </div>
   </div>

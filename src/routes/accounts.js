@@ -189,6 +189,58 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
     }
   });
 
+  app.post("/api/admin/delete-user", requireAuth, express.json(), async (req, res) => {
+    if (req.user.rol !== "admin" && req.user.rol_abis !== "admin" && req.user.rol_siad !== "admin") {
+      return res.status(403).json({ error: "No tienes permisos de administrador." });
+    }
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: "Identificador de usuario no válido." });
+    }
+    if (Number(id) === Number(req.user.id) || String(req.user.id) === String(id)) {
+      return res.status(400).json({ error: "No puedes eliminar tu propia cuenta mientras estás en sesión activa." });
+    }
+
+    try {
+      const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
+      const delRes = await fetch(`${siadUrl}/api/admin/delete-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Token": process.env.SECRET_KEY || "",
+        },
+        body: JSON.stringify({ id }),
+      });
+      let data = null;
+      try {
+        data = await delRes.json();
+      } catch (_) {
+        console.warn("SIAD delete-user no devolvió JSON:", delRes.status);
+      }
+      if (data && data.ok) return res.json({ ok: true });
+      if (data && data.error) return res.status(400).json({ error: data.error });
+      return res.status(delRes.ok ? 200 : 400).json({ error: "Error al eliminar usuario en el sistema." });
+    } catch (err) {
+      console.error("Error in delete-user forwarding:", err);
+      // Fallback directo a PostgreSQL si SIAD estuviera reiniciándose
+      try {
+        const targetRes = await pool.query("SELECT username, rol_siad, rol_abis FROM usuarios WHERE id = $1", [id]);
+        if (targetRes.rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado." });
+        const target = targetRes.rows[0];
+        if (target.rol_siad === "admin") {
+          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_siad = 'admin'");
+          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede eliminar al último administrador de SIAD." });
+        }
+        await pool.query("UPDATE documentos SET usuario_username = NULL WHERE usuario_username = $1", [target.username]);
+        await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
+        return res.json({ ok: true });
+      } catch (dbErr) {
+        console.error("Error fallback delete user:", dbErr);
+        return res.status(500).json({ error: "Error de servidor al eliminar el usuario." });
+      }
+    }
+  });
+
   app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res) => {
     if (req.user.rol !== "admin") {
       return res.status(403).json({ error: "No tienes permisos de administrador." });

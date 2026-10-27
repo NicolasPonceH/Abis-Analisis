@@ -99,7 +99,11 @@ app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password", "logout", "health_live", "health_ready"}
+LOGIN_EXEMPT_ENDPOINTS = {
+    "login", "static", "register", "forgot_password", "verify_password",
+    "api_register", "api_update_password", "logout", "health_live", "health_ready",
+    "api_admin_delete_user", "api_admin_reset_password", "api_admin_update_role"
+}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
@@ -1108,6 +1112,10 @@ def summarize_text(raw_text, limit_sentences=3):
 
 @app.before_request
 def require_login():
+    # Permitir peticiones internas firmadas con X-Internal-Token desde el backend de Node
+    if _es_solicitud_interna():
+        return None
+
     # Autenticación automática mediante el token JWT compartido con ABIS (SSO).
     if not session.get("user_id"):
         auth_token = request.cookies.get("abis_auth")
@@ -2266,7 +2274,9 @@ def api_admin_create_user():
 
 @app.route("/api/admin/update-role", methods=["POST"])
 def api_admin_update_role():
-    if session.get("rol_siad", session.get("rol")) != "admin":
+    is_internal = _es_solicitud_interna()
+    is_siad_admin = session.get("rol_siad", session.get("rol")) == "admin"
+    if not is_internal and not is_siad_admin:
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
@@ -2292,7 +2302,9 @@ def api_admin_update_role():
 
 @app.route("/api/admin/reset-password", methods=["POST"])
 def api_admin_reset_password():
-    if session.get("rol_siad", session.get("rol")) != "admin":
+    is_internal = _es_solicitud_interna()
+    is_siad_admin = session.get("rol_siad", session.get("rol")) == "admin"
+    if not is_internal and not is_siad_admin:
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
@@ -2308,7 +2320,9 @@ def api_admin_reset_password():
 
 @app.route("/api/admin/delete-user", methods=["POST"])
 def api_admin_delete_user():
-    if session.get("rol_siad", session.get("rol")) != "admin":
+    is_internal = _es_solicitud_interna()
+    is_siad_admin = session.get("rol_siad", session.get("rol")) == "admin"
+    if not is_internal and not is_siad_admin:
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
