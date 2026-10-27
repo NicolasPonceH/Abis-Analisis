@@ -428,7 +428,7 @@
       var res = await fetch('/api/admin/create-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p1, rol_siad: r })
+        body: JSON.stringify({ username: u, password: p1, rol_siad: r, rol: r })
       });
       var data = await res.json();
       if (data.ok) {

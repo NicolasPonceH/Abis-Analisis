@@ -69,8 +69,13 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
   });
 
   app.post("/api/admin/create-user", requireAuth, express.json(), async (req, res) => {
-    if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
-    const { username, password, rol } = req.body;
+    if (req.user.rol !== "admin" && req.user.rol_abis !== "admin" && req.user.rol_siad !== "admin") {
+      return res.status(403).json({ error: "No tienes permisos de administrador." });
+    }
+    const { username, password } = req.body;
+    const rol = req.body.rol || req.body.rol_siad || req.body.rol_abis;
+    const rol_siad = req.body.rol_siad || req.body.rol || "operador";
+    const rol_abis = req.body.rol_abis || (req.body.rol_siad ? "ninguno" : req.body.rol || "operador");
     const normalizedUsername = typeof username === "string" ? username.trim() : "";
     if (normalizedUsername.length < 3 || typeof password !== "string" || password.length < 6 || !["admin", "operador", "ninguno"].includes(rol)) {
       return res.status(400).json({ error: "Usuario, contraseña o rol no válidos." });
@@ -89,8 +94,8 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
           username: normalizedUsername,
           password,
           nombre_completo: normalizedUsername,
-          rol_abis: rol,
-          rol_siad: "ninguno",
+          rol_abis: rol_abis,
+          rol_siad: rol_siad,
         })
       });
       const data = await createRes.json();

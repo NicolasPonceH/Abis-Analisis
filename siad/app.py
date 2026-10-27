@@ -2247,7 +2247,8 @@ def api_admin_create_user():
     data = request.get_json() or {}
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
-    rol = data.get("rol_siad", data.get("rol")) or "operador"
+    rol = data.get("rol_siad") or data.get("rol") or "operador"
+    rol_abis = data.get("rol_abis", "ninguno")
     
     if len(username) < 3 or len(password) < 6 or rol not in ["admin", "operador", "ninguno"]:
         return {"ok": False, "error": "Datos inválidos (mínimo 3 caracteres usuario y 6 en contraseña)"}, 400
