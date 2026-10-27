@@ -138,8 +138,9 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
       return res.status(503).json({ ok: false, error: "No se pudo validar la contraseña en este momento." });
     }
 
-    const client = await pool.connect();
+    let client;
     try {
+      client = await pool.connect();
       await client.query("BEGIN");
 
       const targetResult = await client.query(
@@ -245,74 +246,50 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
   });
 
   app.post("/api/admin/update-role", requireAuth, express.json(), async (req, res) => {
-    if (req.user.rol !== "admin" && req.user.rol_abis !== "admin" && req.user.rol_siad !== "admin") {
-      return res.status(403).json({ error: "No tienes permisos de administrador." });
+    if (req.user.rol_abis !== "admin") {
+      return res.status(403).json({ error: "Solo un administrador de ABIS puede cambiar roles de ABIS." });
     }
     const { id } = req.body;
-    const rol = req.body.rol_siad || req.body.rol || req.body.rol_abis;
+    // `rol` se conserva como alias temporal para formularios ABIS antiguos.
+    // Esta ruta siempre modifica exclusivamente rol_abis.
+    const rol = req.body.rol_abis || req.body.rol;
     if (!id || !rol) {
-      return res.status(400).json({ error: "Faltan datos de rol o identificador." });
+      return res.status(400).json({ error: "Faltan el identificador o el rol de ABIS." });
     }
     if (!["admin", "operador", "ninguno"].includes(rol)) {
       return res.status(400).json({ error: "Rol no válido." });
     }
 
+    const client = await pool.connect();
     try {
-      const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
-      const siadRes = await fetch(`${siadUrl}/api/admin/update-role`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Token": process.env.SECRET_KEY || "",
-        },
-        body: JSON.stringify({
-          id,
-          rol_siad: req.body.rol_siad,
-          rol_abis: req.body.rol_abis,
-          rol: req.body.rol_siad || req.body.rol || rol
-        }),
-      });
-      let data = null;
-      try {
-        data = await siadRes.json();
-      } catch (_) {
-        console.warn("SIAD update-role no devolvió JSON:", siadRes.status);
+      await client.query("BEGIN");
+      const target = await client.query("SELECT rol_abis FROM usuarios WHERE id = $1 FOR UPDATE", [id]);
+      if (!target.rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Usuario no encontrado." });
       }
-      if (data && data.ok) return res.json({ ok: true });
-      if (data && data.error) return res.status(400).json({ error: data.error });
-
-      // Fallback a PostgreSQL directo
-      const target = await pool.query("SELECT rol_siad, rol_abis FROM usuarios WHERE id = $1", [id]);
-      if (!target.rows.length) return res.status(404).json({ error: "Usuario no encontrado." });
-      
-      const isSiadTarget = Boolean(req.body.rol_siad);
-      if (isSiadTarget) {
-        if (target.rows[0].rol_siad === "admin" && rol !== "admin") {
-          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_siad = 'admin'");
-          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede quitar el rol al último administrador de SIAD." });
+      if (target.rows[0].rol_abis === "admin" && rol !== "admin") {
+        const admins = await client.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'");
+        if (admins.rows[0].total <= 1) {
+          await client.query("ROLLBACK");
+          return res.status(400).json({ error: "No se puede quitar el rol al último administrador de ABIS." });
         }
-        await pool.query("UPDATE usuarios SET rol_siad = $1, rol = $1 WHERE id = $2", [rol, id]);
-      } else {
-        if (target.rows[0].rol_abis === "admin" && rol !== "admin") {
-          const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'");
-          if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede quitar el rol al último administrador de ABIS." });
-        }
-        await pool.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
       }
+      await client.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
+      await client.query("COMMIT");
       return res.json({ ok: true });
     } catch (err) {
       console.error("Error updating user role:", err);
-      try {
-        const isSiad = Boolean(req.body.rol_siad);
-        if (isSiad) {
-          await pool.query("UPDATE usuarios SET rol_siad = $1, rol = $1 WHERE id = $2", [rol, id]);
-        } else {
-          await pool.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
+      if (client) {
+        try {
+          await client.query("ROLLBACK");
+        } catch (_) {
+          // La transacción puede haberse cerrado; conserva el error original.
         }
-        return res.json({ ok: true });
-      } catch (dbErr) {
-        return res.status(500).json({ error: "Error de base de datos al actualizar el rol." });
       }
+      return res.status(500).json({ error: "Error de base de datos al actualizar el rol de ABIS." });
+    } finally {
+      if (client) client.release();
     }
   });
 }

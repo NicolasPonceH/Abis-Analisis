@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const { createAuthMiddleware } = require("./middleware/auth");
 const { createSiadProxy } = require("./middleware/siadProxy");
-const { apiErrorHandler } = require("./middleware/errorHandler");
+const { apiErrorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { upload, uploadEncrypted } = require("./middleware/uploads");
 const { requireSessionUser } = require("./middleware/session");
 const { createRecipientRouter } = require("./routes/telegramRecipients");
@@ -121,6 +121,7 @@ function createApp({ db = pool, env = process.env, jwtLib = jwt, expressLib = ex
     getBotToken: () => env.TELEGRAM_BOT_TOKEN,
   }));
   registerPreviewRoutes(app, { pool: db, schedulerService });
+  app.use(notFoundHandler);
   app.use(apiErrorHandler);
 
   return app;

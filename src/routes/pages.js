@@ -20,7 +20,10 @@ function registerPageRoutes(app, { pool, jwt, secret, requireAuth }) {
     if (!validSections.includes(seccion)) return res.redirect("/ajustes/general");
 
     let dbUsers = [];
-    if (seccion === "administracion" && req.user.rol_abis === "admin") {
+    if (seccion === "administracion" && req.user.rol_abis !== "admin") {
+      return res.status(403).render("error", { status: 403, message: "No tienes permisos para administrar usuarios de ABIS." });
+    }
+    if (seccion === "administracion") {
       try {
         const usersRes = await pool.query("SELECT id, username, rol_abis AS rol, rol_siad, ultimo_ingreso FROM usuarios ORDER BY id ASC");
         dbUsers = usersRes.rows;

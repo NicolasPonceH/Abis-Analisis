@@ -40,18 +40,18 @@ function createAuthMiddleware({ secret = process.env.SECRET_KEY, env = process.e
       const payload = jwtLib.verify(token, secret);
       if (!pool) {
         const user = setCurrentRoles(payload);
-        if (user.rol_abis === "ninguno") return res.status(403).send("Tu cuenta no tiene acceso al módulo ABIS.");
+        if (user.rol_abis === "ninguno") return res.status(403).render("error", { status: 403, message: "Tu cuenta no tiene acceso al módulo ABIS." });
         req.user = user;
         return next();
       }
       return setCurrentRoles(payload).then(user => {
         if (!user) return res.status(401).clearCookie("abis_auth", { path: "/" }).redirect("/login");
-        if (user.rol_abis === "ninguno") return res.status(403).send("Tu cuenta no tiene acceso al módulo ABIS.");
+        if (user.rol_abis === "ninguno") return res.status(403).render("error", { status: 403, message: "Tu cuenta no tiene acceso al módulo ABIS." });
         req.user = user;
         return next();
       }).catch(err => {
         console.error("Error validando los roles ABIS:", err.message);
-        return res.status(503).send("No se pudo validar el acceso en este momento.");
+        return res.status(503).render("error", { status: 503, message: "No se pudo validar tu acceso en este momento." });
       });
     } catch (_) {
       return res.redirect("/login?next=" + encodeURIComponent(nextTarget));

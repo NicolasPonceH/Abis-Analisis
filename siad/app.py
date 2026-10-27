@@ -24,6 +24,7 @@ from flask import (
     Flask, Response, flash, redirect, render_template, request, send_from_directory, session,
     url_for, send_file, abort, jsonify
 )
+from werkzeug.exceptions import HTTPException
 import secrets
 import tempfile
 from docx import Document
@@ -1156,10 +1157,10 @@ def require_login():
     try:
         user = db.get_user_by_username(session.get("username", ""))
     except Exception:
-        return {"error": "No se pudo validar el acceso en este momento."}, 503
+        abort(503, description="No se pudo validar tu acceso en este momento.")
     if not user or user.get("rol_siad") == "ninguno":
         session.clear()
-        return {"error": "Tu cuenta no tiene acceso al módulo SIAD."}, 403
+        abort(403, description="Tu cuenta no tiene acceso al módulo SIAD.")
     session["rol"] = user.get("rol_siad") or "ninguno"
     session["rol_siad"] = user.get("rol_siad") or "ninguno"
     session["rol_abis"] = user.get("rol_abis") or "ninguno"
@@ -2289,9 +2290,8 @@ def api_admin_create_user():
 
 @app.route("/api/admin/update-role", methods=["POST"])
 def api_admin_update_role():
-    is_internal = _es_solicitud_interna()
     is_siad_admin = session.get("rol_siad", session.get("rol")) == "admin"
-    if not is_internal and not is_siad_admin:
+    if not is_siad_admin:
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
@@ -2597,13 +2597,36 @@ def estadisticas_excel():
     )
 
 
+def _request_wants_json():
+    return (
+        request.path.startswith("/api/")
+        or request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+    )
+
+
+@app.errorhandler(HTTPException)
+def handle_http_error(exc):
+    status = exc.code or 500
+    message = exc.description or "No se pudo completar la solicitud."
+    if _request_wants_json():
+        return jsonify({"ok": False, "error": message}), status
+    return render_template("error.html", status=status, message=message), status
+
+
 @app.errorhandler(500)
 def handle_internal_error(exc):
-    import traceback
-    tb = traceback.format_exc()
-    if tb == "NoneType: None\n":
-        tb = str(exc)
-    return f"<h1>Error 500</h1><pre>{tb}</pre>", 500
+    original = getattr(exc, "original_exception", None)
+    logged_exception = original or exc
+    app.logger.error(
+        "Error interno SIAD en %s",
+        request.path,
+        exc_info=(type(logged_exception), logged_exception, logged_exception.__traceback__),
+    )
+    message = "Ocurrió un problema inesperado. El equipo técnico puede revisar el registro del servidor."
+    if _request_wants_json():
+        return jsonify({"ok": False, "error": "Error interno del servidor."}), 500
+    return render_template("error.html", status=500, message=message), 500
 
 
 @app.route("/exportar_masivo", methods=["POST"])
