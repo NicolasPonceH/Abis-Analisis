@@ -369,13 +369,13 @@
                       </td>
                       <td class="py-4 px-6 text-right">
                         <div class="flex items-center justify-end gap-2.5">
-                          <button onclick="abrirModalRol({{ u.id }}, '{{ u.username }}', '{{ u.rol_siad }}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar rol SIAD">
+                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" data-rol="{{ u.rol_siad }}" onclick="abrirModalRolDesdeBoton(this)" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 shadow-sm hover:shadow" title="Modificar rol SIAD">
                             <span class="material-symbols-outlined text-[18px]">edit</span> Rol
                           </button>
-                          <button onclick="abrirModalPassword({{ u.id }}, '{{ u.username }}')" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 shadow-sm hover:shadow" title="Restablecer contraseña">
+                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" onclick="abrirModalPasswordDesdeBoton(this)" class="bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-black text-xs lg:text-sm py-2.5 px-3.5 rounded-xl transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 shadow-sm hover:shadow" title="Restablecer contraseña">
                             <span class="material-symbols-outlined text-[18px]">key</span> Clave
                           </button>
-                          <button onclick="abrirModalEliminar({{ u.id }}, '{{ u.username }}')" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white dark:bg-red-950/50 dark:hover:bg-red-600 dark:text-red-300 dark:hover:text-white font-black text-xs lg:text-sm py-2.5 px-4 rounded-xl transition-all border-2 border-red-200 dark:border-red-800 hover:border-red-600 shadow-sm hover:shadow-md flex items-center gap-1.5 cursor-pointer" title="Eliminar usuario del sistema">
+                          <button type="button" data-user-id="{{ u.id }}" data-username="{{ u.username }}" onclick="abrirModalEliminarDesdeBoton(this)" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white dark:bg-red-950/50 dark:hover:bg-red-600 dark:text-red-300 dark:hover:text-white font-black text-xs lg:text-sm py-2.5 px-4 rounded-xl transition-all border-2 border-red-200 dark:border-red-800 hover:border-red-600 shadow-sm hover:shadow-md flex items-center gap-1.5 cursor-pointer" title="Eliminar usuario del sistema">
                             <span class="material-symbols-outlined text-[18px]">delete</span> Eliminar
                           </button>
                         </div>
@@ -589,6 +589,22 @@
       inp.type = 'password';
       if (icon) icon.textContent = 'visibility';
     }
+  }
+
+  // --- Funciones adaptadoras desde atributos data-* ---
+  function abrirModalRolDesdeBoton(btn) {
+    if (!btn) return;
+    abrirModalRol(btn.getAttribute('data-user-id'), btn.getAttribute('data-username'), btn.getAttribute('data-rol'));
+  }
+
+  function abrirModalPasswordDesdeBoton(btn) {
+    if (!btn) return;
+    abrirModalPassword(btn.getAttribute('data-user-id'), btn.getAttribute('data-username'));
+  }
+
+  function abrirModalEliminarDesdeBoton(btn) {
+    if (!btn) return;
+    abrirModalEliminar(btn.getAttribute('data-user-id'), btn.getAttribute('data-username'));
   }
 
   // --- Modal Rol ---
