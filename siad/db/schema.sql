@@ -94,9 +94,25 @@ CREATE TABLE IF NOT EXISTS usuarios (
     password_hash TEXT NOT NULL,
     nombre_completo TEXT,
     rol TEXT NOT NULL DEFAULT 'operador',
+    rol_abis TEXT,
+    rol_siad TEXT,
     creado_en TIMESTAMPTZ DEFAULT now(),
     ultimo_ingreso TIMESTAMPTZ
 );
+
+-- Separar los permisos por módulo y conservar los roles previos durante la migración.
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rol_abis TEXT;
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rol_siad TEXT;
+UPDATE usuarios
+SET rol_abis = CASE WHEN rol IN ('admin', 'operador') THEN rol ELSE 'ninguno' END
+WHERE rol_abis IS NULL;
+UPDATE usuarios
+SET rol_siad = CASE WHEN rol IN ('admin', 'operador') THEN rol ELSE 'ninguno' END
+WHERE rol_siad IS NULL;
+ALTER TABLE usuarios ALTER COLUMN rol_abis SET DEFAULT 'ninguno';
+ALTER TABLE usuarios ALTER COLUMN rol_siad SET DEFAULT 'ninguno';
+ALTER TABLE usuarios ALTER COLUMN rol_abis SET NOT NULL;
+ALTER TABLE usuarios ALTER COLUMN rol_siad SET NOT NULL;
 
 CREATE TABLE IF NOT EXISTS resumenes_feedback (
     id BIGSERIAL PRIMARY KEY,

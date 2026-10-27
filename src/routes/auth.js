@@ -44,16 +44,30 @@ function registerAuthRoutes(app, { pool, jwt, secret, env = process.env, localRe
       if (authRes.ok) {
         const data = await authRes.json();
         if (data.ok) {
-          let userRole = "operador";
+          let roles;
           try {
-            const userRes = await pool.query("SELECT rol FROM usuarios WHERE LOWER(username) = LOWER($1)", [username]);
-            if (userRes.rows.length > 0 && userRes.rows[0].rol) {
-              userRole = userRes.rows[0].rol;
-            }
+            const userRes = await pool.query(
+              "SELECT rol_abis, rol_siad, rol FROM usuarios WHERE LOWER(username) = LOWER($1)",
+              [username]
+            );
+            roles = userRes.rows[0];
           } catch (dbErr) {
             console.error("Error al obtener rol:", dbErr);
+            return loginError(503, "No se pudieron validar los permisos de la cuenta.");
           }
-          const token = jwt.sign({ username, rol: userRole }, secret, { expiresIn: "8h" });
+          if (!roles) return loginError(401, "La cuenta no está registrada.");
+          const rolAbis = roles.rol_abis || roles.rol || "operador";
+          const rolSiad = roles.rol_siad || (roles.rol === "admin" ? "admin" : "ninguno");
+          const requiredRole = target === "siad" ? rolSiad : rolAbis;
+          if (!requiredRole || requiredRole === "ninguno") {
+            return loginError(403, `Tu cuenta no tiene acceso al módulo ${target === "siad" ? "SIAD" : "ABIS"}.`);
+          }
+          const token = jwt.sign({
+            username,
+            rol: rolAbis,
+            rol_abis: rolAbis,
+            rol_siad: rolSiad,
+          }, secret, { expiresIn: "8h" });
           const isSecure = env.NODE_ENV === "production" || req.secure || req.headers["x-forwarded-proto"] === "https";
           res.cookie("abis_auth", token, {
             httpOnly: true,

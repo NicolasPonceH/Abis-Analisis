@@ -99,7 +99,7 @@ app.config["SESSION_COOKIE_NAME"] = "siad_session"
 app.config["SESSION_COOKIE_PATH"] = "/"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
-LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password", "logout"}
+LOGIN_EXEMPT_ENDPOINTS = {"login", "static", "register", "forgot_password", "verify_password", "api_register", "api_update_password", "logout", "health_live", "health_ready"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACTED_FOLDER, exist_ok=True)
@@ -179,10 +179,17 @@ def _validar_acceso_interno_o_sesion():
         return hmac.compare_digest(token_recibido.strip(), secreto_esperado.strip())
     return False
 
+def _es_solicitud_interna():
+    token_recibido = request.headers.get("X-Internal-Token", "")
+    secreto_esperado = os.environ.get("SECRET_KEY", "")
+    return bool(secreto_esperado and token_recibido and hmac.compare_digest(token_recibido.strip(), secreto_esperado.strip()))
+
 @app.route("/api/register", methods=["POST"])
 def api_register():
-    if not _validar_acceso_interno_o_sesion():
-        return {"ok": False, "error": "Acceso no autorizado"}, 401
+    is_internal = _es_solicitud_interna()
+    is_siad_admin = session.get("rol_siad", session.get("rol")) == "admin"
+    if not is_internal and not is_siad_admin:
+        return {"ok": False, "error": "Solo un administrador puede crear usuarios."}, 403
 
     data = request.get_json()
     if not data or not data.get("username") or not data.get("password"):
@@ -196,7 +203,21 @@ def api_register():
         if db.get_user_by_username(username):
             return {"ok": False, "error": "El usuario ya existe"}
             
-        db.create_user(username, generate_password_hash(password), nombre_completo=nombre_completo)
+        if is_internal:
+            rol_abis = data.get("rol_abis", "ninguno")
+            rol_siad = data.get("rol_siad", "operador")
+        else:
+            rol_abis = "ninguno"
+            rol_siad = data.get("rol_siad", "operador")
+        if rol_abis not in {"admin", "operador", "ninguno"} or rol_siad not in {"admin", "operador", "ninguno"}:
+            return {"ok": False, "error": "Rol no válido."}, 400
+        db.create_user(
+            username,
+            generate_password_hash(password),
+            nombre_completo=nombre_completo,
+            rol_abis=rol_abis,
+            rol_siad=rol_siad,
+        )
         return {"ok": True}
     except Exception as e:
         print(f"Error registrando usuario: {e}")
@@ -1097,11 +1118,13 @@ def require_login():
                 username = payload.get("username")
                 if username:
                     user = db.get_user_by_username(username)
-                    if user:
+                    if user and user.get("rol_siad") != "ninguno":
                         session.permanent = True
                         session["user_id"] = user["id"]
                         session["username"] = user["username"]
-                        session["rol"] = user.get("rol") or payload.get("rol", "operador")
+                        session["rol"] = user.get("rol_siad") or "ninguno"
+                        session["rol_siad"] = user.get("rol_siad") or "ninguno"
+                        session["rol_abis"] = user.get("rol_abis") or "ninguno"
                         session["nombre_completo"] = user.get("nombre_completo")
             except Exception:
                 pass
@@ -1117,6 +1140,19 @@ def require_login():
     # Si no hay sesión válida, redirigir a login.
     if not session.get("user_id"):
         return redirect(url_for("login", next=request.path))
+
+    # Refrescar el rol desde la base en cada solicitud protegida para que los
+    # cambios administrativos surtan efecto sin esperar a que venza la sesión.
+    try:
+        user = db.get_user_by_username(session.get("username", ""))
+    except Exception:
+        return {"error": "No se pudo validar el acceso en este momento."}, 503
+    if not user or user.get("rol_siad") == "ninguno":
+        session.clear()
+        return {"error": "Tu cuenta no tiene acceso al módulo SIAD."}, 403
+    session["rol"] = user.get("rol_siad") or "ninguno"
+    session["rol_siad"] = user.get("rol_siad") or "ninguno"
+    session["rol_abis"] = user.get("rol_abis") or "ninguno"
     return None
 
 
@@ -1139,10 +1175,15 @@ def login():
         try:
             user = db.get_user_by_username(username)
             if user and check_password_hash(user["password_hash"], password):
+                if user.get("rol_siad") == "ninguno":
+                    flash("Tu cuenta no tiene acceso asignado al módulo SIAD.")
+                    return render_template("login.html", next=next_url)
                 session.permanent = True
                 session["user_id"] = user["id"]
                 session["username"] = user["username"]
-                session["rol"] = user["rol"]
+                session["rol"] = user["rol_siad"]
+                session["rol_siad"] = user["rol_siad"]
+                session["rol_abis"] = user["rol_abis"]
                 session["nombre_completo"] = user.get("nombre_completo")
                 db.update_last_login(username)
                 if not next_url or next_url == "/":
@@ -1153,7 +1194,9 @@ def login():
                 token_payload = {
                     "userId": user["id"],
                     "username": user["username"],
-                    "rol": user.get("rol", "usuario"),
+                    "rol": user.get("rol_abis", "ninguno"),
+                    "rol_abis": user.get("rol_abis", "ninguno"),
+                    "rol_siad": user.get("rol_siad", "ninguno"),
                     "exp": datetime.utcnow() + timedelta(days=7)
                 }
                 abis_jwt = jwt.encode(token_payload, secret_key, algorithm="HS256")
@@ -1188,7 +1231,13 @@ def register():
                 flash("El nombre de usuario ya existe.")
                 return render_template("register.html")
                 
-            db.create_user(username, generate_password_hash(password), nombre_completo=nombre_completo)
+            db.create_user(
+                username,
+                generate_password_hash(password),
+                nombre_completo=nombre_completo,
+                rol_abis="ninguno",
+                rol_siad="operador",
+            )
             flash("Usuario registrado exitosamente. Ahora puedes iniciar sesión.", "success")
             return redirect(url_for("login"))
         except Exception as e:
@@ -2175,6 +2224,8 @@ def configuracion():
     section = request.args.get("section", "general")
     if section not in ["general", "cuenta", "administracion"]:
         section = "general"
+    if section == "administracion" and session.get("rol_siad") != "admin":
+        return "No tienes permisos para administrar usuarios de SIAD.", 403
     db_users = []
     if section == "administracion":
         try:
@@ -2191,14 +2242,14 @@ def configuracion():
 
 @app.route("/api/admin/create-user", methods=["POST"])
 def api_admin_create_user():
-    if session.get("rol") != "admin":
+    if session.get("rol_siad", session.get("rol")) != "admin":
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
-    rol = data.get("rol") or "operador"
+    rol = data.get("rol_siad", data.get("rol")) or "operador"
     
-    if len(username) < 3 or len(password) < 6 or rol not in ["admin", "operador"]:
+    if len(username) < 3 or len(password) < 6 or rol not in ["admin", "operador", "ninguno"]:
         return {"ok": False, "error": "Datos inválidos (mínimo 3 caracteres usuario y 6 en contraseña)"}, 400
         
     existing = db.get_user_by_username(username)
@@ -2206,7 +2257,7 @@ def api_admin_create_user():
         return {"ok": False, "error": "El usuario ya existe en el registro policial"}, 400
         
     try:
-        user_id = db.create_user(username, generate_password_hash(password), rol=rol, nombre_completo=username)
+        user_id = db.create_user(username, generate_password_hash(password), nombre_completo=username, rol_abis="ninguno", rol_siad=rol)
         return {"ok": True, "user_id": user_id}
     except Exception as e:
         return {"ok": False, "error": str(e)}, 500
@@ -2214,15 +2265,25 @@ def api_admin_create_user():
 
 @app.route("/api/admin/update-role", methods=["POST"])
 def api_admin_update_role():
-    if session.get("rol") != "admin":
+    if session.get("rol_siad", session.get("rol")) != "admin":
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")
-    rol = data.get("rol")
-    if not user_id or rol not in ["admin", "operador"]:
+    rol = data.get("rol_siad", data.get("rol"))
+    if not user_id or rol not in ["admin", "operador", "ninguno"]:
         return {"ok": False, "error": "Datos inválidos"}, 400
     try:
-        db.update_user_role(user_id, rol)
+        with db.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT rol_siad FROM usuarios WHERE id = %s", (user_id,))
+                row = cur.fetchone()
+                if not row:
+                    return {"ok": False, "error": "Usuario no encontrado."}, 404
+                if row[0] == "admin" and rol != "admin":
+                    cur.execute("SELECT COUNT(*) FROM usuarios WHERE rol_siad = 'admin'")
+                    if cur.fetchone()[0] <= 1:
+                        return {"ok": False, "error": "No se puede quitar el rol al último administrador de SIAD."}, 400
+        db.update_user_role(user_id, rol, modulo="siad")
         return {"ok": True}
     except Exception as e:
         return {"ok": False, "error": str(e)}, 500
@@ -2230,7 +2291,7 @@ def api_admin_update_role():
 
 @app.route("/api/admin/reset-password", methods=["POST"])
 def api_admin_reset_password():
-    if session.get("rol") != "admin":
+    if session.get("rol_siad", session.get("rol")) != "admin":
         return {"ok": False, "error": "Acceso denegado: se requieren privilegios de administrador policial."}, 403
     data = request.get_json() or {}
     user_id = data.get("id")

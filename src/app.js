@@ -45,7 +45,7 @@ const recipientService = require("./telegram/recipientService");
 function createApp({ db = pool, env = process.env, jwtLib = jwt, expressLib = express } = {}) {
   const app = expressLib();
   const secret = env.SECRET_KEY;
-  const auth = createAuthMiddleware({ secret, env, jwtLib });
+  const auth = createAuthMiddleware({ secret, env, jwtLib, pool: db });
   const FECHA_VALIDA = { test: esFecha };
 
   app.set("view engine", "ejs");

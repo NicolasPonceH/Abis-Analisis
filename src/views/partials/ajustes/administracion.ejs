@@ -1,10 +1,10 @@
 <div style="width: 100%; padding-bottom: 40px;">
   <div style="margin-bottom: 32px;">
     <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; letter-spacing: -0.02em;">Panel de Administración</h1>
-    <p style="color: var(--text-muted); font-size: 1.07rem; margin: 0;">Gestiona usuarios, roles y credenciales del Sistema ABIS de forma segura.</p>
+    <p style="color: var(--text-muted); font-size: 1.07rem; margin: 0;">Gestiona usuarios y permisos de ABIS. Los permisos de SIAD se administran dentro de SIAD.</p>
   </div>
 
-  <% if (typeof user !== 'undefined' && (user.rol === 'admin' || (user.username && user.username.toLowerCase() === 'admin'))) { %>
+  <% if (typeof user !== 'undefined' && user.rol === 'admin') { %>
     
     <!-- Nuevo Usuario (Colapsable) -->
     <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px;">
@@ -24,10 +24,11 @@
             <input type="text" id="nuevo-usuario" minlength="3" maxlength="80" autocomplete="off" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
           </div>
           <div>
-            <label for="nuevo-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nivel de Acceso</label>
+            <label for="nuevo-rol" style="display: block; color: #1e293b; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Rol de ABIS</label>
             <select id="nuevo-rol" required style="width: 100%; border: 2px solid var(--border-subtle); padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--text-primary); outline: none; cursor: pointer; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='var(--border-subtle)'">
               <option value="operador">Operador (Estándar)</option>
               <option value="admin">Administrador (Total)</option>
+              <option value="ninguno">Sin acceso a ABIS</option>
             </select>
           </div>
         </div>
@@ -76,7 +77,7 @@
           <thead>
             <tr style="background: var(--bg-surface-subtle); border-bottom: 2px solid var(--border-subtle);">
               <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Usuario</th>
-              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Rol</th>
+              <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Rol ABIS</th>
               <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Estado</th>
               <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Último acceso</th>
               <th style="padding: 16px 24px; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; text-align: right;">Acciones</th>
@@ -92,7 +93,7 @@
                   </td>
                   <td style="padding: 16px 24px;" id="td-rol-<%= u.id %>">
                     <span class="<%= u.rol === 'admin' ? 'admin-role-badge-admin' : 'admin-role-badge-operador' %>" style="padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
-                      <%= u.rol === 'operador' ? 'Operador' : 'Admin' %>
+                      <%= u.rol === 'operador' ? 'Operador' : (u.rol === 'admin' ? 'Admin' : 'Sin acceso') %>
                     </span>
                   </td>
                   <td style="padding: 16px 24px;">

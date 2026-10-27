@@ -72,7 +72,7 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
     if (req.user.rol !== "admin") return res.status(403).json({ error: "No tienes permisos." });
     const { username, password, rol } = req.body;
     const normalizedUsername = typeof username === "string" ? username.trim() : "";
-    if (normalizedUsername.length < 3 || typeof password !== "string" || password.length < 6 || !["admin", "operador"].includes(rol)) {
+    if (normalizedUsername.length < 3 || typeof password !== "string" || password.length < 6 || !["admin", "operador", "ninguno"].includes(rol)) {
       return res.status(400).json({ error: "Usuario, contraseña o rol no válidos." });
     }
     if (!username || !password || !rol) return res.status(400).json({ error: "Faltan datos." });
@@ -81,15 +81,20 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
       const siadUrl = process.env.SIAD_URL || "http://127.0.0.1:5001";
       const createRes = await fetch(`${siadUrl}/api/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: normalizedUsername, password, nombre_completo: normalizedUsername })
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Token": process.env.SECRET_KEY || "",
+        },
+        body: JSON.stringify({
+          username: normalizedUsername,
+          password,
+          nombre_completo: normalizedUsername,
+          rol_abis: rol,
+          rol_siad: "ninguno",
+        })
       });
       const data = await createRes.json();
-      
-      if (data.ok) {
-        await pool.query("UPDATE usuarios SET rol = $1 WHERE LOWER(username) = LOWER($2)", [rol, normalizedUsername]);
-        return res.json({ ok: true });
-      }
+      if (data.ok) return res.json({ ok: true });
       return res.status(400).json({ error: data.error || "Error al crear usuario." });
     } catch (err) {
       console.error("Error in create-user:", err);
@@ -133,7 +138,7 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
       await client.query("BEGIN");
 
       const targetResult = await client.query(
-        "SELECT id, username, rol FROM usuarios WHERE id = $1 FOR UPDATE",
+        "SELECT id, username, rol_abis, rol_siad FROM usuarios WHERE id = $1 FOR UPDATE",
         [userId]
       );
       if (targetResult.rows.length === 0) {
@@ -142,14 +147,18 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
       }
 
       const target = targetResult.rows[0];
+      if (target.rol_siad !== "ninguno") {
+        await client.query("ROLLBACK");
+        return res.status(403).json({ ok: false, error: "Esta cuenta también tiene acceso a SIAD. Un administrador de SIAD debe quitar ese acceso antes de eliminar la cuenta." });
+      }
       if (String(target.username).toLowerCase() === String(req.user.username).toLowerCase()) {
         await client.query("ROLLBACK");
         return res.status(400).json({ ok: false, error: "No puedes eliminar tu propia cuenta." });
       }
 
-      if (target.rol === "admin") {
+      if (target.rol_abis === "admin") {
         const adminsResult = await client.query(
-          "SELECT COUNT(*)::int AS total FROM usuarios WHERE rol = 'admin'"
+          "SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'"
         );
         if (adminsResult.rows[0].total <= 1) {
           await client.query("ROLLBACK");
@@ -183,11 +192,17 @@ function registerAccountRoutes(app, { pool, requireAuth, express }) {
     if (!id || !rol) {
       return res.status(400).json({ error: "Faltan datos." });
     }
-    if (!["admin", "operador"].includes(rol)) {
+    if (!["admin", "operador", "ninguno"].includes(rol)) {
       return res.status(400).json({ error: "Rol no válido." });
     }
     try {
-      await pool.query("UPDATE usuarios SET rol = $1 WHERE id = $2", [rol, id]);
+      const target = await pool.query("SELECT rol_abis FROM usuarios WHERE id = $1", [id]);
+      if (!target.rows.length) return res.status(404).json({ error: "Usuario no encontrado." });
+      if (target.rows[0].rol_abis === "admin" && rol !== "admin") {
+        const admins = await pool.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE rol_abis = 'admin'");
+        if (admins.rows[0].total <= 1) return res.status(400).json({ error: "No se puede quitar el rol al último administrador de ABIS." });
+      }
+      await pool.query("UPDATE usuarios SET rol_abis = $1 WHERE id = $2", [rol, id]);
       res.json({ ok: true });
     } catch (err) {
       console.error("Error updating user role:", err);
