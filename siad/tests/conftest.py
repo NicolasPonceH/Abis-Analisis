@@ -36,9 +36,9 @@ def reset_test_database():
         with conn.cursor() as cur:
             cur.execute("SELECT 1 FROM usuarios WHERE username = 'admin'")
             if not cur.fetchone():
-                db.create_user("admin", generate_password_hash("test-only-password"), rol_abis="admin", rol_siad="admin")
+                db.create_user("admin", generate_password_hash("admin123"), rol_abis="admin", rol_siad="admin")
             else:
-                cur.execute("UPDATE usuarios SET password_hash = %s, rol_siad = 'admin', rol_abis = 'admin' WHERE username = 'admin'", (generate_password_hash("test-only-password"),))
+                cur.execute("UPDATE usuarios SET rol_siad = 'admin', rol_abis = 'admin' WHERE username = 'admin'")
         conn.commit()
     yield
 
