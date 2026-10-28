@@ -13,8 +13,9 @@ function createServerRuntime({
 }) {
   function startServer() {
     const managesSiadProcess = env.ENABLE_SIAD !== "false";
-    const server = app.listen(port, () => {
-      logger.log(`Sistema ABIS escuchando en http://localhost:${port}`);
+    const host = env.HOST || null;
+    const onListening = () => {
+      logger.log(`Sistema ABIS escuchando en http://${host || "localhost"}:${port}`);
 
       if (env.ENABLE_TELEGRAM_BOT !== "false" && env.TELEGRAM_BOT_TOKEN) {
         bot.iniciarBot({ token: env.TELEGRAM_BOT_TOKEN, chatId: env.TELEGRAM_CHAT_ID, pool })
@@ -32,7 +33,8 @@ function createServerRuntime({
       } else {
         logger.log("SIAD se administra como servicio externo; ABIS usará SIAD_URL.");
       }
-    });
+    };
+    const server = host ? app.listen(port, host, onListening) : app.listen(port, onListening);
 
     let closing = false;
     const closeServer = () => {

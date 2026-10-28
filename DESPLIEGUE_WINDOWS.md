@@ -18,6 +18,7 @@ Definir las variables de entorno en el contexto de los servicios de Windows, con
 ABIS necesita al menos:
 
 - `NODE_ENV=production`
+- `HOST=127.0.0.1`: si se publica mediante Reverse Proxy (IIS). O la IP estática institucional `172.X.Y.Z` si no hay proxy.
 - `PORT=3000`
 - `SECRET_KEY`: secreto largo, aleatorio y exclusivo de producción.
 - `DATABASE_URL`: conexión a PostgreSQL con un rol de aplicación de privilegios limitados.
@@ -25,6 +26,62 @@ ABIS necesita al menos:
 - `ENABLE_SIAD=false`
 - `SIAD_URL=http://127.0.0.1:5001`
 - `ENABLE_TELEGRAM_BOT=false`, salvo que se haya configurado y aprobado su uso.
+
+## Configuración de Red Institucional (IP Estática 172.x vs 192.x y DB Host)
+
+### 1. ¿Por qué el segmento `172.X.Y.Z` y no `192.X` ni IP pública?
+- **Red Institucional (`172.16.0.0/12`)**: Es la red privada corporativa de la institución (intranet policial). Cuenta con aislamiento perimetral, routers dedicados y políticas de seguridad estrictas. El servidor debe estar conectado por cable Ethernet a esta red con una **IP Estática asignada por TI**.
+- **Redes `192.168.x.x`**: Suelen corresponder a redes Wi-Fi comerciales o segmentos de gestión no controlados donde otros equipos o atacantes pueden realizar escaneos de puertos (`nmap`) para identificar el software (Node, Waitress, PostgreSQL) y explotar vulnerabilidades.
+- **IP Pública**: **Nunca** se debe asignar una IP pública directa al servidor ni a la base de datos. Solo el firewall institucional o proxy perimetral maneja el acceso si correspondiera.
+
+### 2. Configurar la interfaz Ethernet en Windows Server
+1. Abrir `ncpa.cpl` (Conexiones de red).
+2. Clic derecho en el adaptador Ethernet institucional -> **Propiedades**.
+3. Seleccionar **Protocolo de Internet versión 4 (TCP/IPv4)** -> **Propiedades**.
+4. Seleccionar **Usar la siguiente dirección IP**:
+   - **Dirección IP**: `172.X.Y.Z` (la IP estática provista por el área de redes).
+   - **Máscara de subred**: la indicada por TI (ej. `255.255.255.0` o `255.255.0.0`).
+   - **Puerta de enlace predeterminada**: IP del router institucional.
+   - **Servidores DNS**: IPs de los DNS internos institucionales.
+5. Deshabilitar adaptadores Wi-Fi o interfaces secundarias no autorizadas.
+
+### 3. Configuración de PostgreSQL (Base de Datos)
+- **Si PostgreSQL corre en el mismo servidor**:
+  - En `postgresql.conf`:
+    ```ini
+    listen_addresses = 'localhost' # O '127.0.0.1'
+    ```
+  - En `DATABASE_URL`:
+    ```env
+    DATABASE_URL=postgresql://usuario:password@127.0.0.1:5432/abis_db
+    ```
+  - De esta forma, el puerto `5432` no es visible en la red externa.
+
+- **Si PostgreSQL está en otro servidor de la red institucional (172.x)**:
+  - En el servidor de base de datos (`postgresql.conf`):
+    ```ini
+    listen_addresses = '172.X.Y.DB_IP, localhost'
+    ```
+  - En `pg_hba.conf` del servidor de base de datos (permitir solo la IP estática del servidor de aplicación):
+    ```text
+    host  abis_db  abis_app  172.X.Y.APP_IP/32  scram-sha-256
+    ```
+  - En `DATABASE_URL` del servidor de aplicación:
+    ```env
+    DATABASE_URL=postgresql://abis_app:password@172.X.Y.DB_IP:5432/abis_db
+    ```
+
+### 4. Reglas del Firewall de Windows (`wf.msc`)
+Ejecutar en PowerShell como Administrador para bloquear puertos sensibles desde la red y abrir solo HTTPS:
+
+```powershell
+# Bloquear acceso externo directo a PostgreSQL y SIAD
+New-NetFirewallRule -DisplayName "Bloquear PostgreSQL Externo" -Direction Inbound -LocalPort 5432,5433 -Protocol TCP -Action Block -Profile Any
+New-NetFirewallRule -DisplayName "Bloquear SIAD Interno" -Direction Inbound -LocalPort 5001 -Protocol TCP -Action Block -Profile Any
+
+# Si se usa IIS (Proxy HTTPS), abrir solo el puerto 443 desde la red institucional
+New-NetFirewallRule -DisplayName "ABIS HTTPS Institucional" -Direction Inbound -LocalPort 443 -Protocol TCP -Action Allow -RemoteAddress 172.16.0.0/12 -Profile Domain,Private
+```
 
 Con `ENABLE_SIAD=false`, ABIS no crea ni detiene un proceso SIAD: Windows administra SIAD por separado. Esto permite que SIAD se reinicie sin bajar ABIS.
 
