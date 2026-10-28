@@ -94,6 +94,15 @@
     .text-brand-blue { color: #00234c !important; }
     .text-brand-blue-dark { color: #001835 !important; }
     .border-brand-blue { border-color: #00234c !important; }
+    .header-institutional {
+      background: linear-gradient(90deg, #002855 0%, #0047AB 100%) !important;
+      color: #ffffff !important;
+    }
+    .card-header-institutional,
+    .bg-gradient-to-r.from-\[\#00234c\] {
+      background: linear-gradient(90deg, #00234c 0%, #002d62 50%, #003875 100%) !important;
+      color: #ffffff !important;
+    }
     .badge-brand-blue {
       background-color: rgba(0, 35, 76, 0.1) !important;
       color: #00234c !important;
@@ -960,7 +969,7 @@ html.siad-splash-active .pdi-bar-fill {
   </div>
 </div>
     <!-- 1. Header de Navegación Institucional PDI -->
-<header id="page-header" class="header-institutional fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100] h-[67.33px] flex items-center">
+<header id="page-header" class="header-institutional fixed top-0 w-full z-50 bg-gradient-to-r from-[#002855] to-[#0047AB] text-white shadow-xl border-b-[3px] border-[#ffd100] h-[67.33px] flex items-center" style="background: linear-gradient(90deg, #002855 0%, #0047AB 100%) !important;">
 <div class="h-full w-full px-3 lg:px-6 flex items-center justify-between">
 <div class="flex items-center gap-2 -ml-1">
 <a href="{{ url_for('index') }}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
