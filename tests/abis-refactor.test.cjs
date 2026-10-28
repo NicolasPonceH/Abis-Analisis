@@ -12,7 +12,7 @@ const { destinatarioPublico, maskSensitiveId } = require("../src/telegram/recipi
 const { transformOracleToPostgre, importarOracleLegacy } = require("../src/ingest/oracleLegacy");
 const { registerAuthRoutes } = require("../src/routes/auth");
 const { createAuthMiddleware } = require("../src/middleware/auth");
-const { createServerRuntime } = require("../src/services/serverRuntime");
+const { createServerRuntime, resolveTargetHost, DEFAULT_SERVER_IP } = require("../src/services/serverRuntime");
 
 // No conexiones reales, escrituras en bases de datos, bot ni scheduler.
 function reportFixture(total = 10, rejected = 2) {
@@ -247,10 +247,42 @@ test("el runtime inicia servicios al escuchar y el apagado es idempotente", asyn
   signals.SIGINT();
   signals.SIGTERM();
   await new Promise(resolve => setImmediate(resolve));
-  for (const service of ["bot.stop", "scheduler.stop", "siad.stop", "http.close", "db.close", "exit:0"]) {
+    for (const service of ["bot.stop", "scheduler.stop", "siad.stop", "http.close", "db.close", "exit:0"]) {
     assert.equal(calls.filter(call => call === service).length, 1, service);
   }
 });
+
+test("red y puertos: detecta 172.25.7.79, fallback a localhost y reintenta ante puerto ocupado", async () => {
+  assert.equal(DEFAULT_SERVER_IP, "172.25.7.79");
+
+  // 1. Si la IP 172.25.7.79 está en las interfaces, la selecciona prioritariamente
+  const ifacesConTarget = [
+    { name: "eth0", ip: "172.25.7.79" },
+    { name: "wlan0", ip: "192.168.1.100" }
+  ];
+  assert.equal(resolveTargetHost("auto", ifacesConTarget), "172.25.7.79");
+  assert.equal(resolveTargetHost(undefined, ifacesConTarget), "172.25.7.79");
+
+  // 2. Si no está 172.25.7.79 pero hay otra 172.x, la usa
+  const ifacesOtra172 = [
+    { name: "eth0", ip: "172.16.50.10" },
+    { name: "wlan0", ip: "192.168.1.100" }
+  ];
+  assert.equal(resolveTargetHost("auto", ifacesOtra172), "172.16.50.10");
+
+  // 3. De no haber IP institucional 172.x, hace fallback inmediato a localhost (127.0.0.1)
+  const ifacesSin172 = [
+    { name: "wlan0", ip: "192.168.1.100" },
+    { name: "docker0", ip: "10.0.0.5" }
+  ];
+  assert.equal(resolveTargetHost("auto", ifacesSin172), "127.0.0.1");
+  assert.equal(resolveTargetHost("172.25.7.79", ifacesSin172), "127.0.0.1");
+
+  // 4. Respeta enlaces explícitos
+  assert.equal(resolveTargetHost("127.0.0.1", ifacesConTarget), "127.0.0.1");
+  assert.equal(resolveTargetHost("0.0.0.0", ifacesConTarget), "0.0.0.0");
+});
+
 
 function oracleRow() {
   return {

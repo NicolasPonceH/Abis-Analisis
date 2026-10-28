@@ -1,6 +1,8 @@
 const http = require("http");
 const os = require("os");
 
+const DEFAULT_SERVER_IP = "172.25.7.79";
+
 function getAvailableHostAddresses() {
   try {
     const interfaces = os.networkInterfaces();
@@ -16,6 +18,26 @@ function getAvailableHostAddresses() {
   } catch (_) {
     return [];
   }
+}
+
+function resolveTargetHost(configuredHost, availableIps) {
+  if (configuredHost === "0.0.0.0" || configuredHost === "127.0.0.1" || configuredHost === "localhost") {
+    return configuredHost;
+  }
+
+  if (configuredHost && configuredHost !== "auto") {
+    const exists = availableIps.some(i => i.ip === configuredHost);
+    return exists ? configuredHost : "127.0.0.1";
+  }
+
+  // Modo auto: priorizar IP institucional 172.25.7.79 o cualquier 172.x activa
+  const targetExact = availableIps.find(i => i.ip === DEFAULT_SERVER_IP);
+  if (targetExact) return targetExact.ip;
+
+  const institutionalIps = availableIps.filter(i => i.ip.startsWith("172."));
+  if (institutionalIps.length > 0) return institutionalIps[0].ip;
+
+  return "127.0.0.1";
 }
 
 function createServerRuntime({
@@ -34,36 +56,47 @@ function createServerRuntime({
   function startServer() {
     const managesSiadProcess = env.ENABLE_SIAD !== "false";
     const available = getAvailableHostAddresses();
-    const institutionalIps = available.filter(i => i.ip.startsWith("172."));
+    let targetHost = resolveTargetHost(env.HOST, available);
 
-    let host = env.HOST || null;
-    if (host === "auto" || !host) {
-      // Si existe una IP 172 institucional activa, la usamos; de lo contrario funcionamos en localhost
-      host = institutionalIps.length > 0 ? institutionalIps[0].ip : "127.0.0.1";
-    } else if (host !== "0.0.0.0" && host !== "127.0.0.1" && host !== "localhost") {
-      const exists = available.some(i => i.ip === host);
-      if (!exists) {
-        logger.warn(`[RED] La IP configurada (${host}) no está activa en las interfaces de este servidor. Se utilizará localhost (127.0.0.1)...`);
-        host = "127.0.0.1";
-      }
-    }
+    let currentPort = Number(port) || 3000;
+    const initialPort = currentPort;
+    let retriesRemaining = 50;
 
-    const onListening = () => {
+    let activeServer = null;
+    let activeLocalServer = null;
+    let servicesStarted = false;
+
+    function onListeningSuccess(boundPort, boundHost) {
+      if (servicesStarted) return;
+      servicesStarted = true;
+
       logger.log(`====================================================`);
-      logger.log(` Sistema ABIS iniciado en puerto ${port}:`);
-      if (host === "0.0.0.0") {
-        logger.log(`  > Modo Abierto (0.0.0.0): http://localhost:${port}`);
-      } else if (host === "127.0.0.1" || host === "localhost") {
-        logger.log(`  > Estación 1 y 2 (Modo Local): http://localhost:${port}`);
-        if (institutionalIps.length === 0) {
-          logger.log(`  ℹ Sin interfaz 172.x activa. Operando de forma segura en loopback local.`);
+      const portNote = boundPort !== initialPort ? ` (auto-asignado tras puerto ${initialPort} ocupado)` : "";
+      logger.log(` Sistema ABIS iniciado en puerto ${boundPort}${portNote}:`);
+      if (boundHost === "0.0.0.0") {
+        logger.log(`  > Modo Abierto (0.0.0.0): http://localhost:${boundPort}`);
+      } else if (boundHost === "127.0.0.1" || boundHost === "localhost") {
+        logger.log(`  > Estación 1 y 2 (Modo Local): http://localhost:${boundPort}`);
+        if (!available.some(i => i.ip.startsWith("172."))) {
+          logger.log(`  ℹ IP ${DEFAULT_SERVER_IP} no detectada en interfaces. Operando de forma segura en loopback local.`);
         }
       } else {
-        logger.log(`  > Estación 1 (Localhost / Loopback): http://localhost:${port}`);
-        logger.log(`  > Estación 2 (Red Institucional): http://${host}:${port}`);
+        logger.log(`  > Estación 1 (Localhost / Servidor): http://localhost:${boundPort}`);
+        logger.log(`  > Estación 2 (Red Institucional): http://${boundHost}:${boundPort}`);
         logger.log(`  🔒 Aislamiento: Redes 192.168.x.x y públicas no tienen acceso.`);
       }
       logger.log(`====================================================`);
+
+      // Enlace secundario local (localhost) para la Estación 1 si el host es la IP externa institucional
+      if (boundHost !== "127.0.0.1" && boundHost !== "localhost" && boundHost !== "0.0.0.0" && typeof app === "function") {
+        try {
+          activeLocalServer = http.createServer(app);
+          activeLocalServer.listen(boundPort, "127.0.0.1");
+          activeLocalServer.on("error", (err) => {
+            logger.warn(`[RED] Listener secundario 127.0.0.1 omitido: ${err.message}`);
+          });
+        } catch (_) {}
+      }
 
       if (env.ENABLE_TELEGRAM_BOT !== "false" && env.TELEGRAM_BOT_TOKEN) {
         bot.iniciarBot({ token: env.TELEGRAM_BOT_TOKEN, chatId: env.TELEGRAM_CHAT_ID, pool })
@@ -81,25 +114,41 @@ function createServerRuntime({
       } else {
         logger.log("SIAD se administra como servicio externo; ABIS usará SIAD_URL.");
       }
-    };
-
-    // Servidor principal
-    const server = (host && app.listen.length !== 2)
-      ? app.listen(port, host, onListening)
-      : app.listen(port, onListening);
-
-    // Si el host principal es una IP externa (ej. 172.x.x.x), vinculamos también 127.0.0.1
-    // para que la Estación 1 (el propio servidor local) pueda acceder por localhost sin salir al switch
-    let localServer = null;
-    if (host && host !== "127.0.0.1" && host !== "localhost" && host !== "0.0.0.0" && typeof app === "function") {
-      try {
-        localServer = http.createServer(app);
-        localServer.listen(port, "127.0.0.1");
-        localServer.on("error", (err) => {
-          logger.warn(`[RED] Listener secundario 127.0.0.1 omitido: ${err.message}`);
-        });
-      } catch (_) {}
     }
+
+    function bind(candidatePort, candidateHost) {
+      const isMockListen = typeof app?.listen === "function" && app.listen.length === 2;
+      const s = isMockListen
+        ? app.listen(candidatePort, () => onListeningSuccess(candidatePort, candidateHost))
+        : app.listen(candidatePort, candidateHost, () => onListeningSuccess(candidatePort, candidateHost));
+
+      activeServer = s;
+
+      if (s && typeof s.on === "function") {
+        s.once("error", (err) => {
+          if (err.code === "EADDRINUSE") {
+            if (retriesRemaining > 0) {
+              retriesRemaining--;
+              logger.warn(`[PUERTO] Puerto ${candidatePort} ocupado. Buscando puerto libre automático...`);
+              currentPort = candidatePort + 1;
+              bind(currentPort, candidateHost);
+            } else {
+              logger.error(`[PUERTO] No se encontró puerto libre después de múltiples intentos.`);
+            }
+          } else if (err.code === "EADDRNOTAVAIL") {
+            logger.warn(`[RED] La IP ${candidateHost} no está activa en el host. Ejecutando en localhost (127.0.0.1)...`);
+            targetHost = "127.0.0.1";
+            bind(candidatePort, "127.0.0.1");
+          } else {
+            logger.error(`[SERVIDOR] Error en socket del servidor:`, err.message);
+          }
+        });
+      }
+
+      return s;
+    }
+
+    const server = bind(currentPort, targetHost);
 
     let closing = false;
     const closeServer = () => {
@@ -108,10 +157,15 @@ function createServerRuntime({
       bot.detenerBot();
       if (managesSiadProcess) siad.detenerSIAD();
       schedulerService.detenerScheduler();
-      if (localServer) {
-        try { localServer.close(); } catch (_) {}
+      if (activeLocalServer) {
+        try { activeLocalServer.close(); } catch (_) {}
       }
-      server.close(() => pool.end().finally(() => processRef.exit(0)));
+      const sToClose = activeServer || server;
+      if (sToClose && typeof sToClose.close === "function") {
+        sToClose.close(() => pool.end().finally(() => processRef.exit(0)));
+      } else {
+        pool.end().finally(() => processRef.exit(0));
+      }
     };
     processRef.on("SIGINT", closeServer);
     processRef.on("SIGTERM", closeServer);
@@ -121,5 +175,5 @@ function createServerRuntime({
   return { startServer };
 }
 
-module.exports = { createServerRuntime };
+module.exports = { createServerRuntime, resolveTargetHost, DEFAULT_SERVER_IP };
 

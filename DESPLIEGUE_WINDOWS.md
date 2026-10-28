@@ -18,8 +18,8 @@ Definir las variables de entorno en el contexto de los servicios de Windows, con
 ABIS necesita al menos:
 
 - `NODE_ENV=production`
-- `HOST=127.0.0.1`: si se publica mediante Reverse Proxy (IIS). O la IP estática institucional `172.X.Y.Z` si no hay proxy.
-- `PORT=3000`
+- `HOST=auto`: Detecta automáticamente la IP institucional del servidor (`172.25.7.79`) y habilita modo dual (Localhost + Red Institucional). Si la interfaz no está activa, opera automáticamente en `127.0.0.1` (localhost).
+- `PORT=3000`: Puerto base. Si está ocupado, el sistema busca y asigna automáticamente el siguiente puerto libre (3001, 3002...).
 - `SECRET_KEY`: secreto largo, aleatorio y exclusivo de producción.
 - `DATABASE_URL`: conexión a PostgreSQL con un rol de aplicación de privilegios limitados.
 - `ENCRYPTION_KEY`: clave de 64 caracteres hexadecimales. Mantenerla respaldada de forma segura; cambiarla puede impedir descifrar datos existentes.
@@ -27,21 +27,25 @@ ABIS necesita al menos:
 - `SIAD_URL=http://127.0.0.1:5001`
 - `ENABLE_TELEGRAM_BOT=false`, salvo que se haya configurado y aprobado su uso.
 
-## Configuración de Red Institucional (IP Estática 172.x vs 192.x y DB Host)
+## Configuración de Red Institucional (IP Estática 172.25.7.79 y Puerto Dinámico)
 
-### 1. ¿Por qué el segmento `172.X.Y.Z` y no `192.X` ni IP pública?
-- **Red Institucional (`172.16.0.0/12`)**: Es la red privada corporativa de la institución (intranet policial). Cuenta con aislamiento perimetral, routers dedicados y políticas de seguridad estrictas. El servidor debe estar conectado por cable Ethernet a esta red con una **IP Estática asignada por TI**.
-- **Redes `192.168.x.x`**: Suelen corresponder a redes Wi-Fi comerciales o segmentos de gestión no controlados donde otros equipos o atacantes pueden realizar escaneos de puertos (`nmap`) para identificar el software (Node, Waitress, PostgreSQL) y explotar vulnerabilidades.
-- **IP Pública**: **Nunca** se debe asignar una IP pública directa al servidor ni a la base de datos. Solo el firewall institucional o proxy perimetral maneja el acceso si correspondiera.
+### 1. Servidor Asignado: IP `172.25.7.79` y Aislamiento de Red
+- **IP Institucional del Servidor**: `172.25.7.79` (Segmento institucional privado `172.16.0.0/12`).
+- **Enlace Dual Automático**:
+  - **Estación 1 (Servidor Local)**: Acceso por `http://localhost:3000` (o el puerto auto-asignado).
+  - **Estación 2 (Estación remota en red institucional)**: Acceso por `http://172.25.7.79:3000`.
+- **Fallback a Localhost**: Si el sistema se arranca antes de conectar el cable Ethernet o en entorno de pruebas donde `172.25.7.79` no esté activa, Node.js cae limpiamente a `localhost` (`127.0.0.1`) sin fallos de `EADDRNOTAVAIL`.
+- **Búsqueda Automática de Puerto Libre**: Si el puerto `3000` está ocupado por otro proceso o servicio, el sistema no se detiene; explora y toma el siguiente puerto libre disponible (`3001`, `3002`, etc.) e informa en consola la URL exacta de acceso.
+- **Protección contra escaneos en `192.168.x.x`**: El servidor **no** escucha en `0.0.0.0`. Cualquier escaneo desde redes Wi-Fi, no autorizadas o comerciales (`192.168.x.x`) verá los puertos cerrados.
 
 ### 2. Configurar la interfaz Ethernet en Windows Server
 1. Abrir `ncpa.cpl` (Conexiones de red).
 2. Clic derecho en el adaptador Ethernet institucional -> **Propiedades**.
 3. Seleccionar **Protocolo de Internet versión 4 (TCP/IPv4)** -> **Propiedades**.
 4. Seleccionar **Usar la siguiente dirección IP**:
-   - **Dirección IP**: `172.X.Y.Z` (la IP estática provista por el área de redes).
-   - **Máscara de subred**: la indicada por TI (ej. `255.255.255.0` o `255.255.0.0`).
-   - **Puerta de enlace predeterminada**: IP del router institucional.
+   - **Dirección IP**: `172.25.7.79`
+   - **Máscara de subred**: provista por TI (típicamente `255.255.255.0` o `255.255.0.0`).
+   - **Puerta de enlace predeterminada**: IP del router institucional del segmento `172.25.7.x`.
    - **Servidores DNS**: IPs de los DNS internos institucionales.
 5. Deshabilitar adaptadores Wi-Fi o interfaces secundarias no autorizadas.
 
