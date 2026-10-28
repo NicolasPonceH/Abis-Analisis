@@ -60,7 +60,9 @@ function createServerRuntime({
 
     let currentPort = Number(port) || 3000;
     const initialPort = currentPort;
-    let retriesRemaining = 50;
+    const portSearchLimit = Number.isInteger(Number(env.PORT_SEARCH_LIMIT)) && Number(env.PORT_SEARCH_LIMIT) >= 0
+      ? Number(env.PORT_SEARCH_LIMIT)
+      : 50;
 
     let activeServer = null;
     let activeLocalServer = null;
@@ -74,16 +76,16 @@ function createServerRuntime({
       const portNote = boundPort !== initialPort ? ` (auto-asignado tras puerto ${initialPort} ocupado)` : "";
       logger.log(` Sistema ABIS iniciado en puerto ${boundPort}${portNote}:`);
       if (boundHost === "0.0.0.0") {
-        logger.log(`  > Modo Abierto (0.0.0.0): http://localhost:${boundPort}`);
+        logger.log(`  > Escuchando en todas las interfaces: http://localhost:${boundPort}`);
       } else if (boundHost === "127.0.0.1" || boundHost === "localhost") {
-        logger.log(`  > Estación 1 y 2 (Modo Local): http://localhost:${boundPort}`);
-        if (!available.some(i => i.ip.startsWith("172."))) {
-          logger.log(`  ℹ IP ${DEFAULT_SERVER_IP} no detectada en interfaces. Operando de forma segura en loopback local.`);
+        logger.log(`  > Solo disponible desde el propio servidor: http://localhost:${boundPort}`);
+        if (!available.some(i => i.ip === DEFAULT_SERVER_IP)) {
+          logger.log(`  ℹ IP institucional ${DEFAULT_SERVER_IP} no detectada; las otras estaciones no podrán conectarse hasta reiniciar ABIS con la red activa.`);
         }
       } else {
         logger.log(`  > Estación 1 (Localhost / Servidor): http://localhost:${boundPort}`);
         logger.log(`  > Estación 2 (Red Institucional): http://${boundHost}:${boundPort}`);
-        logger.log(`  🔒 Aislamiento: Redes 192.168.x.x y públicas no tienen acceso.`);
+        logger.log(`  > Restringir el acceso a esta IP y puerto mediante las reglas del firewall institucional.`);
       }
       logger.log(`====================================================`);
 
@@ -116,7 +118,7 @@ function createServerRuntime({
       }
     }
 
-    function bind(candidatePort, candidateHost) {
+    function bind(candidatePort, candidateHost, retriesRemaining = portSearchLimit) {
       const isMockListen = typeof app?.listen === "function" && app.listen.length === 2;
       const s = isMockListen
         ? app.listen(candidatePort, () => onListeningSuccess(candidatePort, candidateHost))
@@ -131,9 +133,14 @@ function createServerRuntime({
               retriesRemaining--;
               logger.warn(`[PUERTO] Puerto ${candidatePort} ocupado. Buscando puerto libre automático...`);
               currentPort = candidatePort + 1;
-              bind(currentPort, candidateHost);
+              bind(currentPort, candidateHost, retriesRemaining);
+            } else if (candidateHost !== "127.0.0.1" && candidateHost !== "localhost") {
+              logger.warn(`[PUERTO] No se encontró un puerto libre en la interfaz ${candidateHost}. Reintentando en localhost...`);
+              currentPort = initialPort;
+              bind(initialPort, "127.0.0.1", portSearchLimit);
             } else {
-              logger.error(`[PUERTO] No se encontró puerto libre después de múltiples intentos.`);
+              logger.error(`[PUERTO] No se encontró un puerto libre en ${candidateHost} después de ${portSearchLimit + 1} intentos. Cerrando para permitir la recuperación del servicio.`);
+              processRef.exit(1);
             }
           } else if (err.code === "EADDRNOTAVAIL") {
             logger.warn(`[RED] La IP ${candidateHost} no está activa en el host. Ejecutando en localhost (127.0.0.1)...`);

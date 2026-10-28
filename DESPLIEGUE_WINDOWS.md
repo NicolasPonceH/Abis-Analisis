@@ -5,10 +5,10 @@ Esta guía prepara la operación de ambos módulos en un servidor Windows. No re
 ## Arquitectura recomendada
 
 - PostgreSQL, SIAD y ABIS se ejecutan en el servidor o en servidores privados accesibles desde él.
-- ABIS corre como un único servicio Node.js y atiende en el puerto interno `3000`.
+- ABIS corre como un único servicio Node.js. Prueba `PORT` y los siguientes `PORT_SEARCH_LIMIT` puertos si el primero está ocupado.
 - SIAD corre como un servicio de Windows independiente, con Waitress en `127.0.0.1:5001`.
 - Una tarea supervisora comprueba periódicamente SIAD y reinicia solo ese servicio tras tres fallos consecutivos.
-- Un proxy HTTPS institucional (por ejemplo, IIS) publica el sitio. Los puertos `3000`, `5001` y el puerto PostgreSQL no se publican a Internet.
+- Un proxy HTTPS institucional (por ejemplo, IIS) publica el sitio. Los puertos de aplicación y PostgreSQL no se publican a Internet.
 - El programador de reportes se inicia dentro de ABIS. Por eso se mantiene una sola instancia ABIS.
 
 ## Configuración
@@ -18,8 +18,8 @@ Definir las variables de entorno en el contexto de los servicios de Windows, con
 ABIS necesita al menos:
 
 - `NODE_ENV=production`
-- `HOST=auto`: Detecta automáticamente la IP institucional del servidor (`172.25.7.79`) y habilita modo dual (Localhost + Red Institucional). Si la interfaz no está activa, opera automáticamente en `127.0.0.1` (localhost).
-- `PORT=3000`: Puerto base. Si está ocupado, el sistema busca y asigna automáticamente el siguiente puerto libre (3001, 3002...).
+- `HOST=172.25.7.79`: IP institucional asignada por TI. Si no está activa al arrancar, ABIS opera en `127.0.0.1` (localhost), accesible solo desde el servidor.
+- `PORT=3000` y `PORT_SEARCH_LIMIT=50`: Puerto base y cantidad de puertos siguientes a probar si está ocupado. Si no encuentra ninguno en la IP institucional, intenta el mismo rango en localhost. Si tampoco encuentra uno, termina con error para que el administrador de servicios pueda recuperarlo.
 - `SECRET_KEY`: secreto largo, aleatorio y exclusivo de producción.
 - `DATABASE_URL`: conexión a PostgreSQL con un rol de aplicación de privilegios limitados.
 - `ENCRYPTION_KEY`: clave de 64 caracteres hexadecimales. Mantenerla respaldada de forma segura; cambiarla puede impedir descifrar datos existentes.
@@ -27,44 +27,35 @@ ABIS necesita al menos:
 - `SIAD_URL=http://127.0.0.1:5001`
 - `ENABLE_TELEGRAM_BOT=false`, salvo que se haya configurado y aprobado su uso.
 
-## Configuración de Red Institucional (IP Estática 172.25.7.79 y Puerto Dinámico)
+## Configuración de Red Institucional (IP asignada por TI y puerto web)
 
 ### 1. Servidor Asignado: IP `172.25.7.79` y Aislamiento de Red
-- **IP Institucional del Servidor**: `172.25.7.79` (Segmento institucional privado `172.16.0.0/12`).
-- **Enlace Dual Automático**:
-  - **Estación 1 (Servidor Local)**: Acceso por `http://localhost:3000` (o el puerto auto-asignado).
-  - **Estación 2 (Estación remota en red institucional)**: Acceso por `http://172.25.7.79:3000`.
-- **Fallback a Localhost**: Si el sistema se arranca antes de conectar el cable Ethernet o en entorno de pruebas donde `172.25.7.79` no esté activa, Node.js cae limpiamente a `localhost` (`127.0.0.1`) sin fallos de `EADDRNOTAVAIL`.
-- **Búsqueda Automática de Puerto Libre**: Si el puerto `3000` está ocupado por otro proceso o servicio, el sistema no se detiene; explora y toma el siguiente puerto libre disponible (`3001`, `3002`, etc.) e informa en consola la URL exacta de acceso.
-- **Protección contra escaneos en `192.168.x.x`**: El servidor **no** escucha en `0.0.0.0`. Cualquier escaneo desde redes Wi-Fi, no autorizadas o comerciales (`192.168.x.x`) verá los puertos cerrados.
+- TI asignó `172.25.7.79`. Confirma que la IP, máscara, gateway, VLAN y DNS estén configurados por TI en la interfaz Ethernet antes de iniciar los servicios.
+- Al iniciar, ABIS muestra en consola la IP y puerto elegidos. La URL remota queda como `http://172.25.7.79:<puerto_elegido>` mientras no se configure HTTPS/DNS.
+- Si la IP no está disponible, ABIS cae a `127.0.0.1`; eso sirve para diagnóstico local, pero ninguna otra estación podrá entrar.
+- Si el puerto base está ocupado, ABIS prueba puertos siguientes. El firewall institucional y el de Windows deben autorizar el puerto o rango acordado desde las redes de usuarios.
+- Enlazar a una IP concreta reduce interfaces expuestas, pero **no** reemplaza el firewall. La posibilidad de llegar desde otra VLAN o segmento depende del enrutamiento y de las ACL/reglas institucionales.
+- Si se utiliza IIS como proxy HTTPS, acuerda con TI un puerto backend fijo. Un proxy configurado con un puerto estático no seguirá automáticamente a ABIS si este cambia a otro puerto.
 
-### 2. Configurar la interfaz Ethernet en Windows Server
-1. Abrir `ncpa.cpl` (Conexiones de red).
-2. Clic derecho en el adaptador Ethernet institucional -> **Propiedades**.
-3. Seleccionar **Protocolo de Internet versión 4 (TCP/IPv4)** -> **Propiedades**.
-4. Seleccionar **Usar la siguiente dirección IP**:
-   - **Dirección IP**: `172.25.7.79`
-   - **Máscara de subred**: provista por TI (típicamente `255.255.255.0` o `255.255.0.0`).
-   - **Puerta de enlace predeterminada**: IP del router institucional del segmento `172.25.7.x`.
-   - **Servidores DNS**: IPs de los DNS internos institucionales.
-5. Deshabilitar adaptadores Wi-Fi o interfaces secundarias no autorizadas.
+### 2. Configurar la interfaz Ethernet
+TI debe aplicar o reservar `172.25.7.79` y entregar máscara, gateway, DNS y VLAN. No configures esos valores a mano suponiendo una máscara o router: una IP duplicada o gateway incorrecto puede dejar el servidor fuera de la red. No deshabilites otras interfaces sin autorización de TI.
 
 ### 3. Configuración de PostgreSQL (Base de Datos)
 > [!IMPORTANT]
-> **Norma de Seguridad de Red:** El puerto de PostgreSQL debe estar configurado **estrictamente por encima de 6000** (estándar recomendado: `6432` de PgBouncer / PostgreSQL reforzado).
-> **PROHIBICIÓN:** NUNCA usar el puerto por defecto `5432`, ni puertos web como `8080` u `8000` (ya que colisionan con servicios HTTP, activan alertas de proxy y facilitan escaneos).
+> **Norma informada por TI:** El puerto de PostgreSQL debe estar por encima de 6000. El número exacto lo debe asignar/confirmar TI; `6432` que aparece abajo es solo un ejemplo y suele usarse también para PgBouncer, no presupone que exista ese servicio.
+> **No elegir el número por su cuenta:** confirmar con TI el puerto real configurado en PostgreSQL. Los puertos de la base y de la web son independientes.
 
 - **Si PostgreSQL corre en el mismo Windows Server**:
   - En `postgresql.conf` (`C:\Program Files\PostgreSQL\<version>\data\postgresql.conf`):
     ```ini
     listen_addresses = 'localhost' # O '127.0.0.1' (nunca '*' ni 0.0.0.0)
-    port = 6432                   # Puerto arriba de 6000 (no 5432, 8080 ni 8000)
+    port = 6432                   # SOLO ejemplo: reemplazar por el puerto confirmado por TI
     ```
   - En `DATABASE_URL` (`.env`):
     ```env
     DATABASE_URL=postgresql://abis_app:password@127.0.0.1:6432/sistema_abis
     ```
-  - De esta forma, el motor de base de datos solo acepta conexiones internas loopback y el puerto `6432` es completamente invisible para la red externa.
+  - Reemplazar `6432` por el puerto confirmado y la base por el nombre que se vaya a usar. Así PostgreSQL escucha solo en loopback y las estaciones de usuario no necesitan llegar a su puerto.
 
 - **Si PostgreSQL está en otro servidor de la red institucional (172.x)**:
   - En el servidor de base de datos (`postgresql.conf`):
@@ -82,23 +73,19 @@ ABIS necesita al menos:
     ```
 
 ### 4. Reglas del Firewall de Windows (`wf.msc`)
-Ejecutar en PowerShell como Administrador para bloquear puertos sensibles desde redes no autorizadas y abrir solo los necesarios:
-
-```powershell
-# Bloquear puertos por defecto y puertos web de escaneo (5432, 5433, 8000, 8080)
-New-NetFirewallRule -DisplayName "Bloquear Puertos Inseguros y Default" -Direction Inbound -LocalPort 5432,5433,8000,8080 -Protocol TCP -Action Block -Profile Any
-New-NetFirewallRule -DisplayName "Bloquear SIAD Interno" -Direction Inbound -LocalPort 5001 -Protocol TCP -Action Block -Profile Any
-
-# Si la DB está en este servidor y debe atender a otra estación en red 172.x:
-# New-NetFirewallRule -DisplayName "PostgreSQL Institucional 6432" -Direction Inbound -LocalPort 6432 -Protocol TCP -Action Allow -RemoteAddress 172.16.0.0/12 -Profile Domain,Private
-
-# Si se usa IIS (Proxy HTTPS), abrir solo el puerto 443 desde la red institucional
-New-NetFirewallRule -DisplayName "ABIS HTTPS Institucional" -Direction Inbound -LocalPort 443 -Protocol TCP -Action Allow -RemoteAddress 172.16.0.0/12 -Profile Domain,Private
-```
+TI debe permitir desde la **subred de usuarios que indique la institución**, no desde todo el rango privado `172.16.0.0/12` por defecto. Si el acceso es directo a ABIS, permitir solo el rango web acordado (`PORT` hasta `PORT + PORT_SEARCH_LIMIT`). Si IIS publica HTTPS, permitir `443` desde los usuarios y dejar el puerto backend accesible solo desde el servidor/proxy. SIAD (`5001`) y PostgreSQL deben quedar en loopback; no crear reglas de entrada para ellos.
 
 Con `ENABLE_SIAD=false`, ABIS no crea ni detiene un proceso SIAD: Windows administra SIAD por separado. Esto permite que SIAD se reinicie sin bajar ABIS.
 
 SIAD también necesita `SECRET_KEY` y `DATABASE_URL`. Antes de inicializar una base nueva, establecer `ADMIN_INITIAL_PASSWORD` con una contraseña temporal segura y cambiarla al primer ingreso. No desplegar con las credenciales de desarrollo.
+
+Para generar secretos aleatorios en el servidor (ejecutar dos veces y guardar cada valor en su variable correspondiente):
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+No regenerar `ENCRYPTION_KEY` al migrar información cifrada: se necesita la clave original para poder descifrarla.
 
 ## Comandos de inicio
 
@@ -116,7 +103,7 @@ node src/server.js
 
 Configurar ambos servicios para iniciar automáticamente con Windows. PostgreSQL debe iniciar primero; SIAD y luego ABIS. Usar la recuperación automática del administrador de servicios si cualquiera de los procesos termina inesperadamente. Confirmar que cada cuenta de servicio tenga solo los permisos de escritura que necesita.
 
-El archivo `siad/scripts/run_production.bat` existente escucha en `0.0.0.0:5000`; no usarlo sin ajustarlo. ABIS espera SIAD en loopback, puerto `5001`.
+`siad/scripts/run_production.bat` inicia Waitress en `127.0.0.1:5001`, igual que la URL que usa ABIS. El servicio independiente debe arrancar desde el directorio `siad` y recibir las variables de entorno de producción.
 
 ## Reinicio automático si SIAD deja de responder
 
@@ -143,7 +130,7 @@ El script espera 120 segundos al iniciar para permitir que SIAD cargue spaCy, re
 
 - Configurar el proxy HTTPS para enviar las solicitudes de usuarios a ABIS. ABIS deriva `/analisis` a SIAD.
 - Habilitar el reenvío de protocolo HTTPS para que las cookies de sesión queden protegidas.
-- Abrir desde la red de usuarios solo HTTPS. Restringir `3000`, `5001` y PostgreSQL al propio servidor o a la red privada necesaria.
+- Abrir desde la red de usuarios solo HTTPS. Restringir el puerto backend de ABIS, `5001` y PostgreSQL al propio servidor o a la red estrictamente necesaria.
 - Supervisar `https://<dominio>/health` para ABIS y `http://127.0.0.1:5001/health/ready` para SIAD/PostgreSQL.
 - Hacer respaldos periódicos de PostgreSQL y de `siad/static/uploads`, `siad/static/extracted`, `siad/static/summaries`, `siad/static/entities` y `siad/static/exports`. Proteger los respaldos con controles equivalentes a los datos originales.
 - Revisar registros de ABIS, SIAD, PostgreSQL y del proxy. Probar primero restauración y acceso en un entorno de prueba.
