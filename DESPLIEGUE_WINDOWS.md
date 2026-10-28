@@ -46,38 +46,47 @@ ABIS necesita al menos:
 5. Deshabilitar adaptadores Wi-Fi o interfaces secundarias no autorizadas.
 
 ### 3. Configuración de PostgreSQL (Base de Datos)
-- **Si PostgreSQL corre en el mismo servidor**:
-  - En `postgresql.conf`:
+> [!IMPORTANT]
+> **Norma de Seguridad de Red:** El puerto de PostgreSQL debe estar configurado **estrictamente por encima de 6000** (estándar recomendado: `6432` de PgBouncer / PostgreSQL reforzado).
+> **PROHIBICIÓN:** NUNCA usar el puerto por defecto `5432`, ni puertos web como `8080` u `8000` (ya que colisionan con servicios HTTP, activan alertas de proxy y facilitan escaneos).
+
+- **Si PostgreSQL corre en el mismo Windows Server**:
+  - En `postgresql.conf` (`C:\Program Files\PostgreSQL\<version>\data\postgresql.conf`):
     ```ini
-    listen_addresses = 'localhost' # O '127.0.0.1'
+    listen_addresses = 'localhost' # O '127.0.0.1' (nunca '*' ni 0.0.0.0)
+    port = 6432                   # Puerto arriba de 6000 (no 5432, 8080 ni 8000)
     ```
-  - En `DATABASE_URL`:
+  - En `DATABASE_URL` (`.env`):
     ```env
-    DATABASE_URL=postgresql://usuario:password@127.0.0.1:5432/abis_db
+    DATABASE_URL=postgresql://abis_app:password@127.0.0.1:6432/sistema_abis
     ```
-  - De esta forma, el puerto `5432` no es visible en la red externa.
+  - De esta forma, el motor de base de datos solo acepta conexiones internas loopback y el puerto `6432` es completamente invisible para la red externa.
 
 - **Si PostgreSQL está en otro servidor de la red institucional (172.x)**:
   - En el servidor de base de datos (`postgresql.conf`):
     ```ini
     listen_addresses = '172.X.Y.DB_IP, localhost'
+    port = 6432
     ```
-  - En `pg_hba.conf` del servidor de base de datos (permitir solo la IP estática del servidor de aplicación):
+  - En `pg_hba.conf` del servidor de base de datos (permitir únicamente la IP estática del servidor de aplicación):
     ```text
-    host  abis_db  abis_app  172.X.Y.APP_IP/32  scram-sha-256
+    host  sistema_abis  abis_app  172.X.Y.APP_IP/32  scram-sha-256
     ```
   - En `DATABASE_URL` del servidor de aplicación:
     ```env
-    DATABASE_URL=postgresql://abis_app:password@172.X.Y.DB_IP:5432/abis_db
+    DATABASE_URL=postgresql://abis_app:password@172.X.Y.DB_IP:6432/sistema_abis
     ```
 
 ### 4. Reglas del Firewall de Windows (`wf.msc`)
-Ejecutar en PowerShell como Administrador para bloquear puertos sensibles desde la red y abrir solo HTTPS:
+Ejecutar en PowerShell como Administrador para bloquear puertos sensibles desde redes no autorizadas y abrir solo los necesarios:
 
 ```powershell
-# Bloquear acceso externo directo a PostgreSQL y SIAD
-New-NetFirewallRule -DisplayName "Bloquear PostgreSQL Externo" -Direction Inbound -LocalPort 5432,5433 -Protocol TCP -Action Block -Profile Any
+# Bloquear puertos por defecto y puertos web de escaneo (5432, 5433, 8000, 8080)
+New-NetFirewallRule -DisplayName "Bloquear Puertos Inseguros y Default" -Direction Inbound -LocalPort 5432,5433,8000,8080 -Protocol TCP -Action Block -Profile Any
 New-NetFirewallRule -DisplayName "Bloquear SIAD Interno" -Direction Inbound -LocalPort 5001 -Protocol TCP -Action Block -Profile Any
+
+# Si la DB está en este servidor y debe atender a otra estación en red 172.x:
+# New-NetFirewallRule -DisplayName "PostgreSQL Institucional 6432" -Direction Inbound -LocalPort 6432 -Protocol TCP -Action Allow -RemoteAddress 172.16.0.0/12 -Profile Domain,Private
 
 # Si se usa IIS (Proxy HTTPS), abrir solo el puerto 443 desde la red institucional
 New-NetFirewallRule -DisplayName "ABIS HTTPS Institucional" -Direction Inbound -LocalPort 443 -Protocol TCP -Action Allow -RemoteAddress 172.16.0.0/12 -Profile Domain,Private
